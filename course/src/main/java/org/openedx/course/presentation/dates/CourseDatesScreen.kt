@@ -64,6 +64,7 @@ import org.openedx.core.NoContentScreenType
 import org.openedx.core.domain.model.CourseDateBlock
 import org.openedx.core.domain.model.DatesSection
 import org.openedx.core.presentation.CoreAnalyticsScreen
+import org.openedx.core.presentation.dates.CourseDateBlockSection
 import org.openedx.core.presentation.dialog.alert.ActionDialogFragment
 import org.openedx.core.presentation.settings.calendarsync.CalendarSyncState
 import org.openedx.core.ui.CircularProgress

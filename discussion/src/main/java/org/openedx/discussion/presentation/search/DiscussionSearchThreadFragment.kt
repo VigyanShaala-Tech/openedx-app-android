@@ -9,6 +9,7 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -19,17 +20,17 @@ import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
-import androidx.compose.material.CircularProgressIndicator
-import androidx.compose.material.Divider
-import androidx.compose.material.ExperimentalMaterialApi
-import androidx.compose.material.MaterialTheme
-import androidx.compose.material.Scaffold
-import androidx.compose.material.Surface
-import androidx.compose.material.Text
-import androidx.compose.material.pullrefresh.PullRefreshIndicator
-import androidx.compose.material.pullrefresh.pullRefresh
-import androidx.compose.material.pullrefresh.rememberPullRefreshState
-import androidx.compose.material.rememberScaffoldState
+import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.HorizontalDivider
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Scaffold
+import androidx.compose.material3.SnackbarHost
+import androidx.compose.material3.SnackbarHostState
+import androidx.compose.material3.Surface
+import androidx.compose.material3.Text
+import androidx.compose.material3.pulltorefresh.PullToRefreshBox
+import androidx.compose.material3.pulltorefresh.rememberPullToRefreshState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
@@ -151,7 +152,7 @@ class DiscussionSearchThreadFragment : Fragment() {
     }
 }
 
-@OptIn(ExperimentalMaterialApi::class)
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 private fun DiscussionSearchThreadScreen(
     windowSize: WindowSize,
@@ -165,13 +166,12 @@ private fun DiscussionSearchThreadScreen(
     paginationCallback: () -> Unit,
     onBackClick: () -> Unit
 ) {
-    val scaffoldState = rememberScaffoldState()
     val scrollState = rememberLazyListState()
     val firstVisibleIndex = remember {
         mutableStateOf(scrollState.firstVisibleItemIndex)
     }
-    val pullRefreshState =
-        rememberPullRefreshState(refreshing = refreshing, onRefresh = { onSwipeRefresh() })
+    val pullToRefreshState = rememberPullToRefreshState()
+    val snackbarHostState = remember { SnackbarHostState() }
 
     var textFieldValue by rememberSaveable(stateSaver = TextFieldValue.Saver) {
         mutableStateOf(TextFieldValue(""))
@@ -184,11 +184,12 @@ private fun DiscussionSearchThreadScreen(
         focusManager.clearFocus()
     }
     Scaffold(
-        scaffoldState = scaffoldState,
         modifier = Modifier
             .fillMaxSize()
             .navigationBarsPadding(),
-        backgroundColor = MaterialTheme.appColors.background
+        containerColor = MaterialTheme.appColors.background,
+        snackbarHost = { SnackbarHost(snackbarHostState) },
+        contentWindowInsets = WindowInsets()
     ) {
         val screenWidth by remember(key1 = windowSize) {
             mutableStateOf(
@@ -220,7 +221,7 @@ private fun DiscussionSearchThreadScreen(
             )
         }
 
-        HandleUIMessage(uiMessage = uiMessage, scaffoldState = scaffoldState)
+        HandleUIMessage(uiMessage = uiMessage, snackbarHostState = snackbarHostState)
 
         Box(
             modifier = Modifier
@@ -282,10 +283,12 @@ private fun DiscussionSearchThreadScreen(
                 Surface(
                     color = MaterialTheme.appColors.background
                 ) {
-                    Box(
+                    PullToRefreshBox(
                         modifier = Modifier
-                            .fillMaxWidth()
-                            .pullRefresh(pullRefreshState)
+                            .fillMaxWidth(),
+                        isRefreshing = refreshing,
+                        onRefresh = { onSwipeRefresh() },
+                        state = pullToRefreshState
                     ) {
                         val typingText =
                             if (textFieldValue.text.isEmpty()) {
@@ -335,7 +338,7 @@ private fun DiscussionSearchThreadScreen(
                                 is DiscussionSearchThreadUIState.Threads -> {
                                     items(uiState.data) { thread ->
                                         ThreadItem(thread = thread, onClick = onItemClick)
-                                        Divider()
+                                        HorizontalDivider()
                                     }
                                     item {
                                         if (canLoadMore) {
@@ -359,11 +362,6 @@ private fun DiscussionSearchThreadScreen(
                                 }
                             }
                         }
-                        PullRefreshIndicator(
-                            refreshing,
-                            pullRefreshState,
-                            Modifier.align(Alignment.TopCenter)
-                        )
                     }
                 }
             }

@@ -164,13 +164,18 @@ class CourseContainerViewModel(
 
         _showProgress.value = true
 
+        interactor.startCourseSession(courseId)
+
         viewModelScope.launch {
             val courseStructureFlow = interactor.getCourseStructureFlow(courseId)
                 .catch { e ->
                     handleFetchError(e)
                     emit(null)
                 }
-            val courseDetailsFlow = interactor.getEnrollmentDetailsFlow(courseId)
+            val courseDetailsFlow = interactor.getEnrollmentDetailsFlow(
+                courseId,
+                forceRefresh = true
+            )
                 .catch { emit(null) }
             courseStructureFlow.combine(courseDetailsFlow) { courseStructure, courseEnrollmentDetails ->
                 courseStructure to courseEnrollmentDetails
@@ -407,6 +412,11 @@ class CourseContainerViewModel(
             CourseAnalyticsEvent.DATES_CALENDAR_SYNC_DIALOG_ACTION,
             CalendarSyncDialog.PERMISSION.getBuildMap(isAllowed)
         )
+    }
+
+    override fun onCleared() {
+        super.onCleared()
+        interactor.endCourseSession()
     }
 
     private fun logCalendarSyncEvent(

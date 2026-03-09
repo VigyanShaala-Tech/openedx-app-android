@@ -1,17 +1,17 @@
-API_HOST_URL: 'http://localhost:8000'
-APPLICATION_ID: 'org.openedx.app'
-ENVIRONMENT_DISPLAY_NAME: 'Localhost'
-URI_SCHEME: ''
-FEEDBACK_EMAIL_ADDRESS: 'support@example.com'
+API_HOST_URL: 'https://uat.vigyanshaala.com'
+APPLICATION_ID: 'org.app.vigyanshaala'
+ENVIRONMENT_DISPLAY_NAME: 'VigyanShaala'
+URI_SCHEME: 'uat.vigyanshaala.com'
+FEEDBACK_EMAIL_ADDRESS: 'sales@titaned.com'
 FAQ_URL: ''
-OAUTH_CLIENT_ID: 'OAUTH_CLIENT_ID'
+OAUTH_CLIENT_ID: 'cFd8Le3wxWJU7uRppAx1UggW99BQXzVIibQuB5Wq'
 
 # Keep empty to hide setting
 AGREEMENT_URLS:
-  PRIVACY_POLICY_URL: ''
-  COOKIE_POLICY_URL: ''
-  DATA_SELL_CONSENT_URL: ''
-  TOS_URL: ''
+  PRIVACY_POLICY_URL: 'https://uat.vigyanshaala.com/privacy-policy'
+  COOKIE_POLICY_URL: 'https://uat.vigyanshaala.com/cookie-policy'
+  DATA_SELL_CONSENT_URL: 'https://uat.vigyanshaala.com/complaints-policy'
+  TOS_URL: 'https://uat.vigyanshaala.com/terms-and-conditions'
   EULA_URL: ''
   SUPPORTED_LANGUAGES: [ ] #en is default language
 
@@ -64,21 +64,16 @@ BRANCH:
   HOST: ''
   ALTERNATE_HOST: ''
 
-EXPERIMENTAL_FEATURES:
-  APP_LEVEL_DOWNLOADS:
-    ENABLED: false
-  APP_LEVEL_DATES:
-    ENABLED: false
-
 #Platform names
-PLATFORM_NAME: "OpenEdX"
-PLATFORM_FULL_NAME: "OpenEdX"
+PLATFORM_NAME: "VigyanShaala"
+PLATFORM_FULL_NAME: "VigyanShaala"
 #App sourceSets dir
-THEME_DIRECTORY: "openedx"
+THEME_DIRECTORY: "VigyanShaala"
 #tokenType enum accepts JWT and BEARER only
 TOKEN_TYPE: "JWT"
 #feature flag for activating What’s New feature
 WHATS_NEW_ENABLED: false
+PRE_LOGIN_EXPERIENCE_ENABLED: true
 #feature flag enable Social Login buttons
 SOCIAL_AUTH_ENABLED: false
 #feature flag to enable registration from app
@@ -89,6 +84,6 @@ BROWSER_LOGIN: false
 BROWSER_REGISTRATION: false
 #Course navigation feature flags
 UI_COMPONENTS:
-  COURSE_DROPDOWN_NAVIGATION_ENABLED: false
-  COURSE_UNIT_PROGRESS_ENABLED: false
-  COURSE_DOWNLOAD_QUEUE_SCREEN: false
+  COURSE_DROPDOWN_NAVIGATION_ENABLED: true
+  COURSE_UNIT_PROGRESS_ENABLED: true
+  COURSE_DOWNLOAD_QUEUE_SCREEN: true

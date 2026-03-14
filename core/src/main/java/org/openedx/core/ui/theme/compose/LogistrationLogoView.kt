@@ -1,7 +1,9 @@
 package org.openedx.core.ui.theme.compose
 
 import androidx.compose.foundation.Image
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.wrapContentWidth
 import androidx.compose.material.MaterialTheme
 import androidx.compose.runtime.Composable
@@ -19,10 +21,10 @@ fun LogistrationLogoView() {
     Image(
         modifier = Modifier
             .padding(top = 64.dp, bottom = 20.dp)
-            .wrapContentWidth(),
-        painter = painterResource(id = R.drawable.core_ic_logo),
-        contentDescription = null,
-        colorFilter = ColorFilter.tint(MaterialTheme.appColors.primary)
+            .width(120.dp)
+            .height(80.dp),
+        painter = painterResource(id = R.drawable.logo_white_bg),
+        contentDescription = null
     )
 }
 

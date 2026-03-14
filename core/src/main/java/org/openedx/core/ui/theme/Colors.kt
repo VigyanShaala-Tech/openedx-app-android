@@ -2,7 +2,7 @@ package org.openedx.core.ui.theme
 
 import androidx.compose.ui.graphics.Color
 
-val light_primary = Color(0xFF3C68FF)
+val light_primary = Color(0xFF69ab4a)
 val light_primary_variant = Color(0x9ADEFAFF)
 val light_secondary = Color(0xFF94D3DD)
 val light_secondary_variant = Color(0xFF94D3DD)
@@ -78,7 +78,7 @@ val light_grade_progress_bar_color = Color.Black
 val light_grade_progress_bar_background = Color(0xFFCCD4E0)
 val light_assignment_card_border = Color(0xFFCCD4E0)
 
-val dark_primary = Color(0xFF3F68F8)
+val dark_primary = Color(0xFF69ab4a)
 val dark_primary_variant = Color(0xFF3700B3)
 val dark_secondary = Color(0xFF03DAC6)
 val dark_secondary_variant = Color(0xFF373E4F)

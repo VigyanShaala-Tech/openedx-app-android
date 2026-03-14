@@ -1194,6 +1194,7 @@ fun AuthButtonsPanel(
                 modifier = Modifier
                     .testTag("btn_register")
                     .width(0.dp)
+                    .height(42.dp)
                     .weight(1f),
                 text = stringResource(id = R.string.core_register),
                 textColor = MaterialTheme.appColors.primaryButtonText,

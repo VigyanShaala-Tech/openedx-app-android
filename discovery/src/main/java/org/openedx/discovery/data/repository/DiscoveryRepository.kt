@@ -42,7 +42,7 @@ class DiscoveryRepository(
     ): CourseList {
         val pageResponse = api.getCourseList(
             page = pageNumber,
-            mobile = true,
+            mobile = false,
             mobileSearch = false,
             username = username,
             org = organization

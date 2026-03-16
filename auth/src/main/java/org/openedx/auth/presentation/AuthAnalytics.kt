@@ -4,6 +4,7 @@ interface AuthAnalytics {
     fun setUserIdForSession(userId: Long)
     fun logEvent(event: String, params: Map<String, Any?>)
     fun logScreenEvent(screenName: String, params: Map<String, Any?>)
+    fun discoveryCourseClickedEvent(courseId: String, courseName: String)
 }
 
 enum class AuthAnalyticsEvent(val eventName: String, val biValue: String) {

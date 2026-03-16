@@ -28,4 +28,6 @@ interface AuthRouter {
     fun navigateToWebContent(fm: FragmentManager, title: String, url: String)
 
     fun clearBackStack(fm: FragmentManager)
+
+    fun navigateToCourseDetail(fm: FragmentManager, courseId: String)
 }

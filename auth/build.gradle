@@ -55,6 +55,7 @@ android {
 
 dependencies {
     implementation project(path: ':core')
+    implementation project(path: ':discovery')
 
     // AndroidX
     implementation "androidx.browser:browser:$browser_version"

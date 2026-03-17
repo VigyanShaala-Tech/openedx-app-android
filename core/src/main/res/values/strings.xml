@@ -111,7 +111,7 @@
     <string name="core_dates_shift_dates_unsuccessful_msg" tools:ignore="MissingTranslation">Your dates could not be shifted. Please try again.</string>
     <string name="core_dates_view_all_dates" tools:ignore="MissingTranslation"><u>View All Dates</u></string>
 
-    <string name="core_register">Register</string>
+    <string name="core_register">Sign Up</string>
     <string name="core_sign_in">Sign in</string>
 
     <!--    Accessibility-->

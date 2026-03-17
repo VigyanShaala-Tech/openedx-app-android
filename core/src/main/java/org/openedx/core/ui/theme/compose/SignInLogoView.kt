@@ -23,7 +23,7 @@ fun SignInLogoView() {
         contentAlignment = Alignment.Center
     ) {
         Image(
-            painter = painterResource(id = R.drawable.core_ic_logo),
+            painter = painterResource(id = R.drawable.core_logo_white),
             contentDescription = null,
             modifier = Modifier.padding(top = 20.dp)
         )

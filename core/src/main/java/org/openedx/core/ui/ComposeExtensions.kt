@@ -174,7 +174,7 @@ fun PagerState.calculateCurrentOffsetForPage(page: Int): Float {
 fun Modifier.settingsHeaderBackground(): Modifier = composed {
     return@composed this
         .paint(
-            painter = painterResource(id = R.drawable.core_top_header),
+            painter = painterResource(id = R.drawable.core_green_gradient_rect),
             contentScale = ContentScale.FillWidth,
             alignment = Alignment.TopCenter
         )

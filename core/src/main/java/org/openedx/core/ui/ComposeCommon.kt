@@ -1177,8 +1177,9 @@ fun AuthButtonsPanel(
                 .then(
                     if (showRegisterButton) {
                         Modifier
-                            .width(100.dp)
+                            .width(0.dp)
                             .padding(end = 16.dp)
+                            .weight(0.5f)
                     } else {
                         Modifier.weight(1f)
                     }
@@ -1195,7 +1196,7 @@ fun AuthButtonsPanel(
                     .testTag("btn_register")
                     .width(0.dp)
                     .height(42.dp)
-                    .weight(1f),
+                    .weight(0.5f),
                 text = stringResource(id = R.string.core_register),
                 textColor = MaterialTheme.appColors.primaryButtonText,
                 backgroundColor = MaterialTheme.appColors.secondaryButtonBackground,

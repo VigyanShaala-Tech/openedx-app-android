@@ -129,7 +129,7 @@ internal fun LoginScreen(
             modifier = Modifier
                 .fillMaxWidth()
                 .fillMaxHeight(fraction = 0.3f),
-            painter = painterResource(id = coreR.drawable.core_top_header),
+            painter = painterResource(id = coreR.drawable.core_green_gradient_rect),
             contentScale = ContentScale.FillBounds,
             contentDescription = null
         )

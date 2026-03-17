@@ -186,7 +186,7 @@ private fun RestorePasswordScreen(
             modifier = Modifier
                 .fillMaxWidth()
                 .height(200.dp),
-            painter = painterResource(id = R.drawable.core_top_header),
+            painter = painterResource(id = R.drawable.core_green_gradient_rect),
             contentScale = ContentScale.FillBounds,
             contentDescription = null
         )

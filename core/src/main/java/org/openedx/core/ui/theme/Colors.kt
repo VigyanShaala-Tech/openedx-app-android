@@ -24,7 +24,7 @@ val light_text_secondary = Color(0xFFB3B3B3)
 val light_text_dark = Color(0xFF19212F)
 val light_text_accent = light_primary
 val light_text_warning = Color(0xFF19212F)
-val light_text_field_background = Color(0xFFF7F7F8)
+val light_text_field_background = Color(0xFFF3F5F7)
 val light_text_field_background_variant = Color.White
 val light_text_field_border = Color(0xFF97A5BB)
 val light_text_field_text = Color(0xFF3D4964)
@@ -42,6 +42,7 @@ val light_secondary_button_border = light_primary_button_border
 val light_secondary_button_bordered_background = Color.White
 val light_secondary_button_bordered_text = light_primary_button_bordered_text
 
+val light_tab_bg_color = Color(0xFFFFFFFF)
 val light_card_view_background = Color(0xFFF9FAFB)
 val light_card_view_border = Color(0xFFCCD4E0)
 val light_divider = Color(0xFFCCD4E0)
@@ -85,6 +86,8 @@ val dark_secondary_variant = Color(0xFF373E4F)
 val dark_background = Color(0xFF19212F)
 val dark_surface = Color(0xFF273346)
 val dark_error = Color(0xFFFF3D71)
+
+val dark_tab_bg_color = Color(0xFFFAFAFA)
 val dark_onPrimary = Color.Black
 val dark_onSecondary = Color.White
 val dark_onBackground = Color.White

@@ -53,6 +53,8 @@ data class AppColors(
     val successGreen: Color,
     val successBackground: Color,
 
+    val lightTab:Color,
+
     val datesSectionBarPastDue: Color,
     val datesSectionBarToday: Color,
     val datesSectionBarThisWeek: Color,

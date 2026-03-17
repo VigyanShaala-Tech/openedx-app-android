@@ -71,6 +71,8 @@ private val DarkColorPalette = AppColors(
     successGreen = dark_success_green,
     successBackground = dark_success_background,
 
+    lightTab = dark_tab_bg_color,
+
     datesSectionBarPastDue = dark_dates_section_bar_past_due,
     datesSectionBarToday = dark_dates_section_bar_today,
     datesSectionBarThisWeek = dark_dates_section_bar_this_week,
@@ -162,6 +164,8 @@ private val LightColorPalette = AppColors(
 
     successGreen = light_success_green,
     successBackground = light_success_background,
+
+    lightTab = light_tab_bg_color,
 
     datesSectionBarPastDue = light_dates_section_bar_past_due,
     datesSectionBarToday = light_dates_section_bar_today,

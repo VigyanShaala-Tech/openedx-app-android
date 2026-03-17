@@ -6,6 +6,7 @@ import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.IntrinsicSize
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxHeight
@@ -16,6 +17,7 @@ import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.layout.widthIn
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
@@ -42,6 +44,9 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.platform.testTag
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Email
+import androidx.compose.material.icons.filled.PhoneAndroid
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.semantics
@@ -56,6 +61,7 @@ import androidx.compose.ui.tooling.preview.Devices
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import org.openedx.auth.R
 import org.openedx.auth.presentation.signin.AuthEvent
 import org.openedx.auth.presentation.signin.SignInUIState
@@ -67,6 +73,7 @@ import org.openedx.core.ui.BackBtn
 import org.openedx.core.ui.HandleUIMessage
 import org.openedx.core.ui.HyperlinkText
 import org.openedx.core.ui.OpenEdXButton
+import org.openedx.core.ui.OpenEdXOutlinedButton
 import org.openedx.core.ui.displayCutoutForLandscape
 import org.openedx.core.ui.noRippleClickable
 import org.openedx.core.ui.theme.OpenEdXTheme
@@ -185,7 +192,21 @@ internal fun LoginScreen(
                             color = MaterialTheme.appColors.textPrimary,
                             style = MaterialTheme.appTypography.titleSmall
                         )
-                        Spacer(modifier = Modifier.height(24.dp))
+                        Spacer(modifier = Modifier.height(16.dp))
+                        if (state.isSocialAuthEnabled) {
+                            SocialAuthView(
+                                modifier = buttonWidth,
+                                isGoogleAuthEnabled = state.isGoogleAuthEnabled,
+                                isFacebookAuthEnabled = state.isFacebookAuthEnabled,
+                                isMicrosoftAuthEnabled = state.isMicrosoftAuthEnabled,
+                                isSignIn = false,
+                            ) {
+                                onEvent(AuthEvent.SocialSignIn(it))
+                            }
+                            Spacer(modifier = Modifier.height(16.dp))
+                            DividerWithOrLabel()
+                        }
+                        Spacer(modifier = Modifier.height(16.dp))
                         AuthForm(
                             buttonWidth,
                             state,
@@ -221,12 +242,25 @@ private fun AuthForm(
 ) {
     var login by rememberSaveable { mutableStateOf("") }
     var password by rememberSaveable { mutableStateOf("") }
+    var mobile by rememberSaveable { mutableStateOf("") }
+    var otp by rememberSaveable { mutableStateOf("") }
+    var isOtpSent by rememberSaveable { mutableStateOf(false) }
+    var isEmailTab by rememberSaveable { mutableStateOf(true) }
     val keyboardController = LocalSoftwareKeyboardController.current
     var isEmailError by rememberSaveable { mutableStateOf(false) }
     var isPasswordError by rememberSaveable { mutableStateOf(false) }
+    var isMobileError by rememberSaveable { mutableStateOf(false) }
+    var isOtpError by rememberSaveable { mutableStateOf(false) }
 
     Column(horizontalAlignment = Alignment.CenterHorizontally) {
         if (!state.isBrowserLoginEnabled) {
+            AuthMethodTabs(
+                isEmailSelected = isEmailTab,
+                onSelectEmail = { isEmailTab = true },
+                onSelectOtp = { isEmailTab = false }
+            )
+            Spacer(modifier = Modifier.height(16.dp))
+            if (isEmailTab) {
             LoginTextField(
                 modifier = Modifier
                     .fillMaxWidth(),
@@ -259,6 +293,27 @@ private fun AuthForm(
                 },
                 isError = isPasswordError,
             )
+            } else {
+                MobileOtpSection(
+                    isOtpSent = isOtpSent,
+                    mobile = mobile,
+                    otp = otp,
+                    onMobileChanged = {
+                        mobile = it
+                        isMobileError = false
+                    },
+                    onOtpChanged = {
+                        otp = it
+                        isOtpError = false
+                    },
+                    onChangeNumber = {
+                        isOtpSent = false
+                        otp = ""
+                    },
+                    isMobileError = isMobileError,
+                    isOtpError = isOtpError,
+                )
+            }
         } else {
             Spacer(modifier = Modifier.height(40.dp))
         }
@@ -282,54 +337,297 @@ private fun AuthForm(
                     )
                 }
                 Spacer(modifier = Modifier.weight(1f))
-                Text(
-                    modifier = Modifier
-                        .testTag("txt_forgot_password")
-                        .noRippleClickable {
-                            onEvent(AuthEvent.ForgotPasswordClick)
-                        },
-                    text = stringResource(id = R.string.auth_forgot_password),
-                    color = MaterialTheme.appColors.infoVariant,
-                    style = MaterialTheme.appTypography.labelLarge
-                )
+                if (isEmailTab) {
+                    Text(
+                        modifier = Modifier
+                            .testTag("txt_forgot_password")
+                            .noRippleClickable {
+                                onEvent(AuthEvent.ForgotPasswordClick)
+                            },
+                        text = stringResource(id = R.string.auth_forgot_password),
+                        color = MaterialTheme.appColors.infoVariant,
+                        style = MaterialTheme.appTypography.labelLarge
+                    )
+                }
             }
         }
 
         if (state.showProgress) {
             CircularProgressIndicator(color = MaterialTheme.appColors.primary)
         } else {
-            OpenEdXButton(
-                modifier = buttonWidth.testTag("btn_sign_in"),
-                text = stringResource(id = coreR.string.core_sign_in),
-                textColor = MaterialTheme.appColors.primaryButtonText,
-                backgroundColor = MaterialTheme.appColors.secondaryButtonBackground,
-                onClick = {
-                    if (state.isBrowserLoginEnabled) {
-                        onEvent(AuthEvent.SignInBrowser)
-                    } else {
-                        keyboardController?.hide()
-                        if (login.isNotEmpty() && password.isNotEmpty()) {
-                            onEvent(AuthEvent.SignIn(login = login, password = password))
-                        } else {
-                            isEmailError = login.isEmpty()
-                            isPasswordError = password.isEmpty()
+            if (state.isBrowserLoginEnabled) {
+                OpenEdXButton(
+                    modifier = buttonWidth.testTag("btn_sign_in"),
+                    text = stringResource(id = coreR.string.core_sign_in),
+                    textColor = MaterialTheme.appColors.primaryButtonText,
+                    backgroundColor = MaterialTheme.appColors.secondaryButtonBackground,
+                    onClick = { onEvent(AuthEvent.SignInBrowser) }
+                )
+            } else {
+                if (isEmailTab) {
+                    OpenEdXButton(
+                        modifier = buttonWidth.testTag("btn_sign_in"),
+                        text = stringResource(id = coreR.string.core_sign_in),
+                        textColor = MaterialTheme.appColors.primaryButtonText,
+                        backgroundColor = MaterialTheme.appColors.secondaryButtonBackground,
+                        onClick = {
+                            keyboardController?.hide()
+                            if (login.isNotEmpty() && password.isNotEmpty()) {
+                                onEvent(AuthEvent.SignIn(login = login, password = password))
+                            } else {
+                                isEmailError = login.isEmpty()
+                                isPasswordError = password.isEmpty()
+                            }
                         }
+                    )
+                } else {
+                    if (!isOtpSent) {
+                        OpenEdXButton(
+                            modifier = buttonWidth.testTag("btn_send_otp"),
+                            text = stringResource(id = R.string.auth_send_otp),
+                            textColor = MaterialTheme.appColors.primaryButtonText,
+                            backgroundColor = MaterialTheme.appColors.secondaryButtonBackground,
+                            onClick = {
+                                keyboardController?.hide()
+                                if (mobile.isNotEmpty()) {
+                                    onEvent(AuthEvent.SendOtp(mobile))
+                                    isOtpSent = true
+                                } else {
+                                    isMobileError = true
+                                }
+                            }
+                        )
+                    } else {
+                        OpenEdXButton(
+                            modifier = buttonWidth.testTag("btn_verify_otp"),
+                            text = stringResource(id = R.string.auth_verify_and_sign_in),
+                            textColor = MaterialTheme.appColors.primaryButtonText,
+                            backgroundColor = MaterialTheme.appColors.secondaryButtonBackground,
+                            onClick = {
+                                keyboardController?.hide()
+                                if (otp.isNotEmpty()) {
+                                    onEvent(AuthEvent.VerifyOtp(mobile, otp))
+                                } else {
+                                    isOtpError = true
+                                }
+                            }
+                        )
                     }
                 }
-            )
-        }
-        if (state.isSocialAuthEnabled) {
-            SocialAuthView(
-                modifier = buttonWidth,
-                isGoogleAuthEnabled = state.isGoogleAuthEnabled,
-                isFacebookAuthEnabled = state.isFacebookAuthEnabled,
-                isMicrosoftAuthEnabled = state.isMicrosoftAuthEnabled,
-                isSignIn = true,
-            ) {
-                keyboardController?.hide()
-                onEvent(AuthEvent.SocialSignIn(it))
             }
         }
+    }
+}
+
+@Composable
+private fun AuthMethodTabs(
+    isEmailSelected: Boolean,
+    onSelectEmail: () -> Unit,
+    onSelectOtp: () -> Unit,
+) {
+    val containerColor = MaterialTheme.appColors.textFieldBackground
+    val selectedBg = MaterialTheme.appColors.lightTab
+    val selectedText = MaterialTheme.appColors.textPrimary
+    val unselectedText = MaterialTheme.appColors.textFieldHint
+
+    Box(
+        modifier = Modifier
+            .fillMaxWidth()
+            .background(containerColor, shape = MaterialTheme.appShapes.buttonShape)
+            .padding(6.dp)
+    ) {
+        Row(modifier = Modifier.fillMaxWidth().height(IntrinsicSize.Min)) {
+            ToggleItem(
+                modifier = Modifier.weight(1f).fillMaxHeight(),
+                text = stringResource(id = R.string.auth_email_username),
+                icon = Icons.Filled.Email,
+                isSelected = isEmailSelected,
+                selectedBg = selectedBg,
+                selectedText = selectedText,
+                unselectedText = unselectedText,
+                onClick = onSelectEmail
+            )
+            Spacer(modifier = Modifier.width(8.dp))
+            ToggleItem(
+                modifier = Modifier.weight(1f).fillMaxHeight(),
+                text = stringResource(id = R.string.auth_mobile_otp),
+                icon = Icons.Filled.PhoneAndroid,
+                isSelected = !isEmailSelected,
+                selectedBg = selectedBg,
+                selectedText = selectedText,
+                unselectedText = unselectedText,
+                onClick = onSelectOtp
+            )
+        }
+    }
+}
+
+@Composable
+private fun MobileOtpSection(
+    isOtpSent: Boolean,
+    mobile: String,
+    otp: String,
+    onMobileChanged: (String) -> Unit,
+    onOtpChanged: (String) -> Unit,
+    onChangeNumber: () -> Unit,
+    isMobileError: Boolean,
+    isOtpError: Boolean,
+) {
+    Column(modifier = Modifier.fillMaxWidth()) {
+        var mobileTextFieldValue by rememberSaveable(stateSaver = TextFieldValue.Saver) {
+            mutableStateOf(TextFieldValue(mobile))
+        }
+        var otpTextFieldValue by rememberSaveable(stateSaver = TextFieldValue.Saver) {
+            mutableStateOf(TextFieldValue(otp))
+        }
+        Text(
+            text = stringResource(id = R.string.auth_mobile_number),
+            color = MaterialTheme.appColors.textPrimary,
+            style = MaterialTheme.appTypography.labelLarge
+        )
+        Spacer(modifier = Modifier.height(8.dp))
+        OutlinedTextField(
+            value = mobileTextFieldValue,
+            onValueChange = {
+                mobileTextFieldValue = it
+                onMobileChanged(it.text.trim())
+            },
+            colors = TextFieldDefaults.outlinedTextFieldColors(
+                textColor = MaterialTheme.appColors.textFieldText,
+                backgroundColor = MaterialTheme.appColors.textFieldBackground,
+                unfocusedBorderColor = MaterialTheme.appColors.textFieldBorder,
+                cursorColor = MaterialTheme.appColors.textFieldText,
+            ),
+            shape = MaterialTheme.appShapes.textFieldShape,
+            placeholder = {
+                Text(
+                    text = stringResource(id = R.string.auth_enter_mobile_placeholder),
+                    color = MaterialTheme.appColors.textFieldHint,
+                    style = MaterialTheme.appTypography.bodyMedium
+                )
+            },
+            keyboardOptions = KeyboardOptions.Default.copy(
+                keyboardType = KeyboardType.Phone,
+                imeAction = ImeAction.Next
+            ),
+            singleLine = true,
+            isError = isMobileError,
+            modifier = Modifier.fillMaxWidth()
+        )
+        if (isOtpSent) {
+            Spacer(modifier = Modifier.height(18.dp))
+            Text(
+                text = stringResource(id = R.string.auth_enter_otp),
+                color = MaterialTheme.appColors.textPrimary,
+                style = MaterialTheme.appTypography.labelLarge
+            )
+            Spacer(modifier = Modifier.height(8.dp))
+            OutlinedTextField(
+                value = otpTextFieldValue,
+                onValueChange = {
+                    otpTextFieldValue = it
+                    onOtpChanged(it.text.trim())
+                },
+                colors = TextFieldDefaults.outlinedTextFieldColors(
+                    textColor = MaterialTheme.appColors.textFieldText,
+                    backgroundColor = MaterialTheme.appColors.textFieldBackground,
+                    unfocusedBorderColor = MaterialTheme.appColors.textFieldBorder,
+                    cursorColor = MaterialTheme.appColors.textFieldText,
+                ),
+                shape = MaterialTheme.appShapes.textFieldShape,
+                placeholder = {
+                    Text(
+                        text = stringResource(id = R.string.auth_enter_otp_placeholder),
+                        color = MaterialTheme.appColors.textFieldHint,
+                        style = MaterialTheme.appTypography.bodyMedium
+                    )
+                },
+                keyboardOptions = KeyboardOptions.Default.copy(
+                    keyboardType = KeyboardType.NumberPassword,
+                    imeAction = ImeAction.Done
+                ),
+                singleLine = true,
+                isError = isOtpError,
+                modifier = Modifier.fillMaxWidth()
+            )
+            Spacer(modifier = Modifier.height(8.dp))
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Text(
+                    text = stringResource(id = R.string.auth_otp_sent_to),
+                    color = MaterialTheme.appColors.textSecondary,
+                    style = MaterialTheme.appTypography.bodySmall
+                )
+                Spacer(modifier = Modifier.weight(1f))
+                Text(
+                    text = stringResource(id = R.string.auth_change_number),
+                    color = MaterialTheme.appColors.primary,
+                    style = MaterialTheme.appTypography.bodySmall,
+                    modifier = Modifier.noRippleClickable { onChangeNumber() }
+                )
+            }
+        }
+    }
+}
+
+@Composable
+private fun DividerWithOrLabel() {
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(horizontal = 4.dp),
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        androidx.compose.material.Divider(
+            color = MaterialTheme.appColors.textFieldBorder,
+            modifier = Modifier.weight(1f)
+        )
+        Text(
+            text = stringResource(id = R.string.auth_or),
+            color = MaterialTheme.appColors.textSecondary,
+            modifier = Modifier.padding(horizontal = 12.dp)
+        )
+        androidx.compose.material.Divider(
+            color = MaterialTheme.appColors.textFieldBorder,
+            modifier = Modifier.weight(1f)
+        )
+    }
+}
+
+@Composable
+private fun ToggleItem(
+    text: String,
+    icon: androidx.compose.ui.graphics.vector.ImageVector,
+    isSelected: Boolean,
+    selectedBg: Color,
+    selectedText: Color,
+    unselectedText: Color,
+    modifier: Modifier = Modifier,
+    onClick: () -> Unit,
+) {
+    val bg = if (isSelected) selectedBg else Color.Transparent
+    val tint = if (isSelected) selectedText else unselectedText
+    Row(
+        modifier = modifier
+            .background(bg, shape = MaterialTheme.appShapes.buttonShape)
+            .noRippleClickable { onClick() }
+            .padding(vertical = 8.dp, horizontal = 8.dp),
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        androidx.compose.material.Icon(
+            imageVector = icon,
+            contentDescription = null,
+            tint = tint
+        )
+        Spacer(modifier = Modifier.width(8.dp))
+        Text(
+            text = text,
+            color = tint,
+            fontSize = 14.sp,
+            style = MaterialTheme.appTypography.bodyMedium
+        )
     }
 }
 

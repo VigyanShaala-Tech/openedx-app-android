@@ -164,6 +164,18 @@ class SignInViewModel(
         }
     }
 
+    fun sendOtp(mobile: String) {
+        _uiMessage.value =
+            UIMessage.SnackBarMessage(resourceManager.getString(R.string.auth_send_otp))
+        logEvent(AuthAnalyticsEvent.SIGN_IN_CLICKED)
+    }
+
+    fun verifyOtp(mobile: String, otp: String) {
+        _uiMessage.value =
+            UIMessage.SnackBarMessage(resourceManager.getString(R.string.auth_verify_and_sign_in))
+        logEvent(AuthAnalyticsEvent.USER_SIGN_IN_CLICKED)
+    }
+
     fun signInBrowser(activityContext: Activity) {
         _uiState.update { it.copy(showProgress = true) }
         viewModelScope.launch {

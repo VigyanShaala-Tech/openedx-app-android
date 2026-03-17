@@ -7,7 +7,7 @@
     <string name="auth_forgot_password">Forgot password?</string>
     <string name="auth_email">Email</string>
     <string name="auth_invalid_email">Invalid email</string>
-    <string name="auth_email_username" tools:ignore="MissingTranslation">Email or Username</string>
+    <string name="auth_email_username" tools:ignore="MissingTranslation">Email/Username</string>
     <string name="auth_invalid_email_username" tools:ignore="MissingTranslation">Invalid email or username</string>
     <string name="auth_invalid_password">Password is too short</string>
     <string name="auth_welcome_back">Welcome back! Sign in to access your courses.</string>
@@ -43,4 +43,14 @@
     <string name="auth_cdata_template" translatable="false"><![CDATA[<a href="%1$s">%2$s</a>]]></string>
     <string name="auth_accessibility_show_password">Show password</string>
     <string name="auth_accessibility_hide_password">Hide password</string>
+    <string name="auth_mobile_otp">Mobile OTP</string>
+    <string name="auth_mobile_number">Mobile Number</string>
+    <string name="auth_enter_mobile_placeholder">+91 Enter mobile number</string>
+    <string name="auth_enter_otp">Enter OTP</string>
+    <string name="auth_enter_otp_placeholder">Enter 6-digit OTP</string>
+    <string name="auth_otp_sent_to">OTP sent to</string>
+    <string name="auth_change_number">Change number</string>
+    <string name="auth_send_otp">Send OTP</string>
+    <string name="auth_verify_and_sign_in">Verify &amp; Sign in</string>
+    <string name="auth_or">or</string>
 </resources>

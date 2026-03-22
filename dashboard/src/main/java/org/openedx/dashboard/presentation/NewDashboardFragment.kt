@@ -23,7 +23,7 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
-import androidx.compose.foundation.lazy.grid.items
+import androidx.compose.foundation.lazy.items
  
 import androidx.compose.material.Card
 import androidx.compose.material.Icon
@@ -39,6 +39,7 @@ import androidx.compose.material.icons.filled.EmojiEvents
 import androidx.compose.material.icons.filled.Star
 import androidx.compose.material.LinearProgressIndicator
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
@@ -63,6 +64,8 @@ import org.openedx.core.ui.theme.OpenEdXTheme
 import org.openedx.core.ui.theme.appColors
 import org.openedx.core.ui.theme.appShapes
 import org.openedx.core.ui.theme.appTypography
+import org.koin.androidx.compose.koinViewModel
+import org.koin.core.parameter.parametersOf
 import org.openedx.foundation.presentation.rememberWindowSize
 import org.openedx.foundation.presentation.windowSizeValue
 import org.openedx.core.R as CoreR
@@ -76,7 +79,9 @@ class NewDashboardFragment : Fragment() {
         setViewCompositionStrategy(ViewCompositionStrategy.DisposeOnViewTreeLifecycleDestroyed)
         setContent {
             OpenEdXTheme {
-                NewDashboardScreen()
+                val windowSize = rememberWindowSize()
+                val viewModel: NewDashboardViewModel = koinViewModel { parametersOf(windowSize) }
+                NewDashboardScreen(viewModel)
             }
         }
     }
@@ -90,7 +95,7 @@ private data class RecommendationData(val title: String, val category: String, v
 
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
-private fun NewDashboardScreen() {
+private fun NewDashboardScreen(viewModel: NewDashboardViewModel) {
     val windowSize = rememberWindowSize()
     val contentPadding by remember(key1 = windowSize) {
         mutableStateOf(
@@ -101,42 +106,46 @@ private fun NewDashboardScreen() {
         )
     }
 
-    val statCards = listOf(
-        StatCardData(Icons.Filled.Book, "10", "Enrolled Courses"),
-        StatCardData(Icons.Filled.CheckCircle, "3", "Completed Courses"),
-        StatCardData(Icons.Filled.Alarm, "7", "In Progress Courses"),
-        StatCardData(Icons.Filled.EmojiEvents, "3", "Badges Earned"),
-    )
+    val uiState by viewModel.state.collectAsState(NewDashboardState())
+    val statCards = uiState.summary.map {
+        val icon = when (it.icon) {
+            "faBookOpen" -> Icons.Filled.Book
+            "faCheckCircle" -> Icons.Filled.CheckCircle
+            "faChartLine" -> Icons.Filled.Alarm
+            "faAward" -> Icons.Filled.EmojiEvents
+            else -> Icons.Filled.Book
+        }
+        StatCardData(icon, it.number.toString(), it.label)
+    }
 
-    val continueCourses = listOf(
-        CourseCardData("STEM Research & Project Lab", "Research", SAMPLE_IMAGE_1, 45),
-        CourseCardData("Data Science for Beginners", "Data", SAMPLE_IMAGE_2, 30),
-        CourseCardData("Web Design Fundamentals", "Design", SAMPLE_IMAGE_3, 55),
-        CourseCardData("Machine Learning Foundations", "AI/ML", SAMPLE_IMAGE_4, 30),
-    )
-    val completedCourses = listOf(
-        CourseCardData("Robotics Foundation", "Robotics", SAMPLE_IMAGE_5, 100),
-        CourseCardData("Mobile App Dev", "Dev", SAMPLE_IMAGE_6, 100),
-        CourseCardData("Python Learning Journey", "Python", SAMPLE_IMAGE_7, 100),
-        CourseCardData("Career Skills & Portfolio", "Career", SAMPLE_IMAGE_8, 100),
-    )
-    val wishlistItems = listOf(
-        WishlistItemData("Quantum Computing Basics", "18 hours · Advanced", "4.5", "450 reviews", "Dr. Raj Patel", SAMPLE_IMAGE_9),
-        WishlistItemData("Electromagnetic Wonders", "12 hours · Intermediate", "4.3", "320 reviews", "Prof. Meera Gupta", SAMPLE_IMAGE_10),
-        WishlistItemData("Space Studies & Astronomy", "24 hours · Beginner", "4.8", "680 reviews", "Dr. Ananya Sharma", SAMPLE_IMAGE_11),
-        WishlistItemData("Advanced Renewable Energy", "20 hours · Advanced", "4.6", "510 reviews", "Prof. Vikram Singh", SAMPLE_IMAGE_1),
-    )
-    val achievements = listOf(
-        AchievementData("First Course", Icons.Filled.Book),
-        AchievementData("7 Day Streak", Icons.Filled.CheckCircle),
-        AchievementData("Quiz Master", Icons.Filled.EmojiEvents),
-        AchievementData("Top Learner", Icons.Filled.Star),
-    )
-    val recommendations = listOf(
-        RecommendationData("Advanced Renewable Energy", "Energy", "4.7", "Deep dive into solar, wind, and sustainable energy...", SAMPLE_IMAGE_1),
-        RecommendationData("DNA Healthcare", "Health", "4.5", "Learn how DNA analysis is transforming modern...", SAMPLE_IMAGE_12),
-        RecommendationData("Environmental Data Patterns", "Environment", "4.7", "Analyze environmental data for climate change...", SAMPLE_IMAGE_13),
-    )
+    val continueCourses = uiState.continueLearning.map { course ->
+        CourseCardData(course.title, course.category ?: "", sanitizeUrl(course.course_image), course.progress)
+    }
+    val completedCourses = uiState.completed?.results?.map { course ->
+        CourseCardData(course.title, course.category ?: "", sanitizeUrl(course.course_image), course.progress)
+    } ?: emptyList()
+    val wishlistItems = uiState.wishlist?.results?.map { course ->
+        WishlistItemData(
+            course.title,
+            (course.level ?: "").trim(),
+            "0",
+            "0 reviews",
+            "",
+            sanitizeUrl(course.course_image)
+        )
+    } ?: emptyList()
+    val achievements = uiState.achievements.map { a ->
+        AchievementData(a.title, Icons.Filled.EmojiEvents)
+    }
+    val recommendations = uiState.recommended.map { rec ->
+        RecommendationData(
+            rec.title,
+            rec.category ?: "",
+            (rec.rating ?: 0).toString(),
+            rec.description ?: "",
+            sanitizeUrl(rec.image)
+        )
+    }
 
     Scaffold(
         modifier = Modifier
@@ -185,8 +194,7 @@ private fun NewDashboardScreen() {
                 LazyRow(
                     horizontalArrangement = Arrangement.spacedBy(12.dp)
                 ) {
-                    items(statCards.size) { index ->
-                        val item = statCards[index]
+                    items(statCards) { item ->
                         Card(
                             backgroundColor = MaterialTheme.appColors.surface,
                             elevation = 0.dp,
@@ -236,8 +244,7 @@ private fun NewDashboardScreen() {
                 LazyRow(
                     horizontalArrangement = Arrangement.spacedBy(12.dp)
                 ) {
-                    items(achievements.size) { index ->
-                        val a = achievements[index]
+                    items(achievements) { a ->
                         Card(
                             backgroundColor = MaterialTheme.appColors.surface,
                             elevation = 0.dp,
@@ -636,3 +643,7 @@ private const val SAMPLE_IMAGE_10 = "https://images.unsplash.com/photo-150053085
 private const val SAMPLE_IMAGE_11 = "https://images.unsplash.com/photo-1526401485004-2ca616c53df9?q=80&w=1080&auto=format&fit=crop"
 private const val SAMPLE_IMAGE_12 = "https://images.unsplash.com/photo-1581093588401-9cf9f3ebd57a?q=80&w=1080&auto=format&fit=crop"
 private const val SAMPLE_IMAGE_13 = "https://images.unsplash.com/photo-1469474968028-56623f02e42e?q=80&w=1080&auto=format&fit=crop"
+
+private fun sanitizeUrl(url: String?): String {
+    return url?.replace("`", "")?.trim() ?: ""
+}

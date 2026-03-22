@@ -15,6 +15,7 @@ import org.openedx.core.data.api.CookiesApi
 import org.openedx.core.data.api.CourseApi
 import org.openedx.discovery.data.api.DiscoveryApi
 import org.openedx.discussion.data.api.DiscussionApi
+import org.openedx.dashboard.data.api.DashboardApi
 import org.openedx.profile.data.api.ProfileApi
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
@@ -55,6 +56,7 @@ val networkingModule = module {
     single { provideApi<DiscussionApi>(get()) }
     single { provideApi<DiscoveryApi>(get()) }
     single { provideApi<NotificationsApi>(get()) }
+    single { provideApi<DashboardApi>(get()) }
 }
 
 inline fun <reified T> provideApi(retrofit: Retrofit): T {

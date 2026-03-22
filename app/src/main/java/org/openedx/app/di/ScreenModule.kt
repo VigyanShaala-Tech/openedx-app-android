@@ -42,6 +42,7 @@ import org.openedx.courses.presentation.DashboardGalleryViewModel
 import org.openedx.dashboard.data.repository.DashboardRepository
 import org.openedx.dashboard.domain.interactor.DashboardInteractor
 import org.openedx.dashboard.presentation.DashboardListViewModel
+import org.openedx.dashboard.presentation.NewDashboardViewModel
 import org.openedx.discovery.data.repository.DiscoveryRepository
 import org.openedx.discovery.domain.interactor.DiscoveryInteractor
 import org.openedx.discovery.presentation.NativeDiscoveryViewModel
@@ -154,7 +155,7 @@ val screenModule = module {
     }
     viewModel { RestorePasswordViewModel(get(), get(), get(), get()) }
 
-    factory { DashboardRepository(get(), get(), get(), get()) }
+    factory { DashboardRepository(get(), get(), get(), get(), get()) }
     factory { DashboardInteractor(get()) }
     viewModel { DashboardListViewModel(get(), get(), get(), get(), get(), get()) }
     viewModel { (windowSize: WindowSize) ->
@@ -163,6 +164,15 @@ val screenModule = module {
             get(),
             get(),
             get(),
+            get(),
+            get(),
+            get(),
+            get(),
+            windowSize
+        )
+    }
+    viewModel { (windowSize: WindowSize) ->
+        NewDashboardViewModel(
             get(),
             get(),
             get(),

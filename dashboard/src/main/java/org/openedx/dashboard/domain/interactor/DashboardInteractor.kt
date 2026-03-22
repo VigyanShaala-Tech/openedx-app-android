@@ -1,6 +1,11 @@
 package org.openedx.dashboard.domain.interactor
 
 import org.openedx.core.domain.model.DashboardCourseList
+import org.openedx.dashboard.data.model.AchievementDto
+import org.openedx.dashboard.data.model.CourseItemDto
+import org.openedx.dashboard.data.model.PaginatedDto
+import org.openedx.dashboard.data.model.RecommendationDto
+import org.openedx.dashboard.data.model.SummaryCardDto
 import org.openedx.dashboard.data.repository.DashboardRepository
 import org.openedx.dashboard.domain.CourseStatusFilter
 
@@ -25,4 +30,12 @@ class DashboardInteractor(
             status
         )
     }
+
+    suspend fun getSummaryCards(): List<SummaryCardDto> = repository.getSummaryCards()
+    suspend fun getContinueLearning(): List<CourseItemDto> = repository.getContinueLearning()
+    suspend fun getAchievements(): List<AchievementDto> = repository.getAchievements()
+    suspend fun getRecommended(): List<RecommendationDto> = repository.getRecommended()
+    suspend fun getWishlist(): PaginatedDto<CourseItemDto> = repository.getWishlist()
+    suspend fun getInProgress(): PaginatedDto<CourseItemDto> = repository.getInProgress()
+    suspend fun getCompleted(): PaginatedDto<CourseItemDto> = repository.getCompleted()
 }

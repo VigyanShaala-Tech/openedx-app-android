@@ -21,10 +21,7 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyRow
-import androidx.compose.foundation.lazy.grid.GridCells
-import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.items
- 
 import androidx.compose.material.Card
 import androidx.compose.material.Icon
 import androidx.compose.material.MaterialTheme
@@ -38,6 +35,7 @@ import androidx.compose.material.icons.filled.CheckCircle
 import androidx.compose.material.icons.filled.EmojiEvents
 import androidx.compose.material.icons.filled.Star
 import androidx.compose.material.LinearProgressIndicator
+import androidx.compose.material.CircularProgressIndicator
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.mutableStateOf
@@ -48,15 +46,13 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.ComposeView
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.ViewCompositionStrategy
-import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.LayoutDirection
 import androidx.fragment.app.Fragment
 import coil.compose.AsyncImage
 import coil.request.ImageRequest
@@ -66,6 +62,12 @@ import org.openedx.core.ui.theme.appShapes
 import org.openedx.core.ui.theme.appTypography
 import org.koin.androidx.compose.koinViewModel
 import org.koin.core.parameter.parametersOf
+import org.openedx.dashboard.data.model.AchievementDto
+import org.openedx.dashboard.data.model.CourseItemDto
+import org.openedx.dashboard.data.model.PaginatedDto
+import org.openedx.dashboard.data.model.PaginationDto
+import org.openedx.dashboard.data.model.RecommendationDto
+import org.openedx.dashboard.data.model.SummaryCardDto
 import org.openedx.foundation.presentation.rememberWindowSize
 import org.openedx.foundation.presentation.windowSizeValue
 import org.openedx.core.R as CoreR
@@ -93,9 +95,15 @@ private data class WishlistItemData(val title: String, val meta: String, val rat
 private data class AchievementData(val title: String, val icon: androidx.compose.ui.graphics.vector.ImageVector)
 private data class RecommendationData(val title: String, val category: String, val rating: String, val description: String, val imageUrl: String)
 
-@OptIn(ExperimentalFoundationApi::class)
 @Composable
 private fun NewDashboardScreen(viewModel: NewDashboardViewModel) {
+    val uiState by viewModel.state.collectAsState(NewDashboardState())
+    NewDashboardScreenContent(uiState)
+}
+
+@OptIn(ExperimentalFoundationApi::class)
+@Composable
+private fun NewDashboardScreenContent(uiState: NewDashboardState) {
     val windowSize = rememberWindowSize()
     val contentPadding by remember(key1 = windowSize) {
         mutableStateOf(
@@ -106,7 +114,13 @@ private fun NewDashboardScreen(viewModel: NewDashboardViewModel) {
         )
     }
 
-    val uiState by viewModel.state.collectAsState(NewDashboardState())
+    if (uiState.loading) {
+        Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+            CircularProgressIndicator(color = MaterialTheme.appColors.primary)
+        }
+        return
+    }
+
     val statCards = uiState.summary.map {
         val icon = when (it.icon) {
             "faBookOpen" -> Icons.Filled.Book
@@ -190,39 +204,56 @@ private fun NewDashboardScreen(viewModel: NewDashboardViewModel) {
                 }
             }
 
-            item {
-                LazyRow(
-                    horizontalArrangement = Arrangement.spacedBy(12.dp)
-                ) {
-                    items(statCards) { item ->
-                        Card(
-                            backgroundColor = MaterialTheme.appColors.surface,
-                            elevation = 0.dp,
-                            shape = MaterialTheme.appShapes.cardShape
-                        ) {
-                            Column(
+            if (statCards.isNotEmpty()) {
+                item {
+                    val cards = statCards.take(4)
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.spacedBy(12.dp)
+                    ) {
+                        cards.forEach { item ->
+                            Card(
+                                backgroundColor = MaterialTheme.appColors.surface,
+                                elevation = 0.dp,
+                                shape = MaterialTheme.appShapes.cardShape,
                                 modifier = Modifier
-                                    .width(140.dp)
-                                    .padding(16.dp),
-                                horizontalAlignment = Alignment.CenterHorizontally
+                                    .weight(1f)
+                                    .height(110.dp)
                             ) {
-                                Icon(
-                                    imageVector = item.icon,
-                                    contentDescription = null,
-                                    tint = MaterialTheme.appColors.primary,
-                                    modifier = Modifier.size(24.dp)
-                                )
-                                Spacer(Modifier.height(8.dp))
-                                Text(
-                                    text = item.value,
-                                    style = MaterialTheme.appTypography.titleLarge,
-                                    color = MaterialTheme.appColors.textDark
-                                )
-                                Spacer(Modifier.height(4.dp))
-                                Text(
-                                    text = item.label,
-                                    style = MaterialTheme.appTypography.bodySmall,
-                                    color = MaterialTheme.appColors.textPrimary
+                                Column(
+                                    modifier = Modifier
+                                        .fillMaxSize()
+                                        .padding(16.dp),
+                                    horizontalAlignment = Alignment.CenterHorizontally,
+                                    verticalArrangement = Arrangement.SpaceBetween
+                                ) {
+                                    Icon(
+                                        imageVector = item.icon,
+                                        contentDescription = null,
+                                        tint = MaterialTheme.appColors.primary,
+                                        modifier = Modifier.size(24.dp)
+                                    )
+                                    Text(
+                                        text = item.value,
+                                        style = MaterialTheme.appTypography.titleLarge,
+                                        color = MaterialTheme.appColors.textDark
+                                    )
+                                    Text(
+                                        text = item.label,
+                                        style = MaterialTheme.appTypography.bodySmall,
+                                        color = MaterialTheme.appColors.textPrimary,
+                                        maxLines = 2,
+                                        overflow = TextOverflow.Ellipsis
+                                    )
+                                }
+                            }
+                        }
+                        if (cards.size < 4) {
+                            repeat(4 - cards.size) {
+                                Spacer(
+                                    modifier = Modifier
+                                        .weight(1f)
+                                        .height(110.dp)
                                 )
                             }
                         }
@@ -239,44 +270,48 @@ private fun NewDashboardScreen(viewModel: NewDashboardViewModel) {
                 )
             }
 
-            item {
-                SectionHeader(title = "Achievements", showViewAll = true)
-                LazyRow(
-                    horizontalArrangement = Arrangement.spacedBy(12.dp)
-                ) {
-                    items(achievements) { a ->
-                        Card(
-                            backgroundColor = MaterialTheme.appColors.surface,
-                            elevation = 0.dp,
-                            shape = MaterialTheme.appShapes.cardShape
-                        ) {
-                            Row(
-                                modifier = Modifier
-                                    .padding(horizontal = 16.dp, vertical = 12.dp),
-                                verticalAlignment = Alignment.CenterVertically
+            if (achievements.isNotEmpty()) {
+                item {
+                    SectionHeader(title = "Achievements", showViewAll = true)
+                    LazyRow(
+                        horizontalArrangement = Arrangement.spacedBy(12.dp)
+                    ) {
+                        items(achievements) { a ->
+                            Card(
+                                backgroundColor = MaterialTheme.appColors.surface,
+                                elevation = 0.dp,
+                                shape = MaterialTheme.appShapes.cardShape
                             ) {
-                                Icon(
-                                    imageVector = a.icon,
-                                    contentDescription = null,
-                                    tint = MaterialTheme.appColors.primary
-                                )
-                                Spacer(Modifier.width(8.dp))
-                                Text(
-                                    text = a.title,
-                                    style = MaterialTheme.appTypography.bodySmall,
-                                    color = MaterialTheme.appColors.textDark
-                                )
+                                Row(
+                                    modifier = Modifier
+                                        .padding(horizontal = 16.dp, vertical = 12.dp),
+                                    verticalAlignment = Alignment.CenterVertically
+                                ) {
+                                    Icon(
+                                        imageVector = a.icon,
+                                        contentDescription = null,
+                                        tint = MaterialTheme.appColors.primary
+                                    )
+                                    Spacer(Modifier.width(8.dp))
+                                    Text(
+                                        text = a.title,
+                                        style = MaterialTheme.appTypography.bodySmall,
+                                        color = MaterialTheme.appColors.textDark
+                                    )
+                                }
                             }
                         }
                     }
                 }
             }
 
-            item {
-                SectionHeader(title = "Recommended for You", showViewAll = true)
-                Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
-                    recommendations.forEach { r ->
-                        RecommendationItem(r)
+            if (recommendations.isNotEmpty()) {
+                item {
+                    SectionHeader(title = "Recommended for You", showViewAll = true)
+                    Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
+                        recommendations.forEach { r ->
+                            RecommendationItem(r)
+                        }
                     }
                 }
             }
@@ -357,48 +392,76 @@ private fun CoursesTabs(
     Spacer(Modifier.height(12.dp))
     when (selectedTab) {
         0 -> {
-            Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
-                continueCourses.chunked(2).forEach { rowItems ->
-                    Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
-                        rowItems.forEach { c ->
-                            Box(modifier = Modifier.weight(1f)) {
-                                CourseCard(c)
+            if (continueCourses.isNotEmpty()) {
+                Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
+                    continueCourses.chunked(2).forEach { rowItems ->
+                        Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
+                            rowItems.forEach { c ->
+                                Box(modifier = Modifier.weight(1f)) {
+                                    CourseCard(c)
+                                }
                             }
-                        }
-                        if (rowItems.size == 1) {
-                            Spacer(modifier = Modifier.weight(1f))
+                            if (rowItems.size == 1) {
+                                Spacer(modifier = Modifier.weight(1f))
+                            }
                         }
                     }
                 }
+                Spacer(Modifier.height(12.dp))
+                ViewAllLink()
+            } else {
+                EmptyTabContent("No courses in progress")
             }
-            Spacer(Modifier.height(12.dp))
-            ViewAllLink()
         }
         1 -> {
-            Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
-                wishlistItems.forEach { WishlistItem(it) }
+            if (wishlistItems.isNotEmpty()) {
+                Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
+                    wishlistItems.forEach { WishlistItem(it) }
+                }
+                Spacer(Modifier.height(12.dp))
+                ViewAllLink()
+            } else {
+                EmptyTabContent("Your wishlist is empty")
             }
-            Spacer(Modifier.height(12.dp))
-            ViewAllLink()
         }
         else -> {
-            Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
-                completedCourses.chunked(2).forEach { rowItems ->
-                    Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
-                        rowItems.forEach { c ->
-                            Box(modifier = Modifier.weight(1f)) {
-                                CourseCard(c)
+            if (completedCourses.isNotEmpty()) {
+                Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
+                    completedCourses.chunked(2).forEach { rowItems ->
+                        Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
+                            rowItems.forEach { c ->
+                                Box(modifier = Modifier.weight(1f)) {
+                                    CourseCard(c)
+                                }
                             }
-                        }
-                        if (rowItems.size == 1) {
-                            Spacer(modifier = Modifier.weight(1f))
+                            if (rowItems.size == 1) {
+                                Spacer(modifier = Modifier.weight(1f))
+                            }
                         }
                     }
                 }
+                Spacer(Modifier.height(12.dp))
+                ViewAllLink()
+            } else {
+                EmptyTabContent("No completed courses yet")
             }
-            Spacer(Modifier.height(12.dp))
-            ViewAllLink()
         }
+    }
+}
+
+@Composable
+private fun EmptyTabContent(message: String) {
+    Box(
+        modifier = Modifier
+            .fillMaxWidth()
+            .height(100.dp),
+        contentAlignment = Alignment.Center
+    ) {
+        Text(
+            text = message,
+            style = MaterialTheme.appTypography.bodySmall,
+            color = MaterialTheme.appColors.textPrimary
+        )
     }
 }
 
@@ -634,16 +697,68 @@ private const val SAMPLE_IMAGE_1 = "https://images.unsplash.com/photo-1509395176
 private const val SAMPLE_IMAGE_2 = "https://images.unsplash.com/photo-1517142089942-ba376ce32a2e?q=80&w=1080&auto=format&fit=crop"
 private const val SAMPLE_IMAGE_3 = "https://images.unsplash.com/photo-1527694224012-bea5e2b3e979?q=80&w=1080&auto=format&fit=crop"
 private const val SAMPLE_IMAGE_4 = "https://images.unsplash.com/photo-1518779578993-ec3579fee39f?q=80&w=1080&auto=format&fit=crop"
-private const val SAMPLE_IMAGE_5 = "https://images.unsplash.com/photo-1508921340878-b1de6f7d16c8?q=80&w=1080&auto=format&fit=crop"
-private const val SAMPLE_IMAGE_6 = "https://images.unsplash.com/photo-1512496015851-a90fb38ba4f4?q=80&w=1080&auto=format&fit=crop"
-private const val SAMPLE_IMAGE_7 = "https://images.unsplash.com/photo-1518770660439-4636190af475?q=80&w=1080&auto=format&fit=crop"
-private const val SAMPLE_IMAGE_8 = "https://images.unsplash.com/photo-1497294815431-197d1f1c9f07?q=80&w=1080&auto=format&fit=crop"
-private const val SAMPLE_IMAGE_9 = "https://images.unsplash.com/photo-1485827404703-89b55f3a8ba0?q=80&w=1080&auto=format&fit=crop"
-private const val SAMPLE_IMAGE_10 = "https://images.unsplash.com/photo-1500530855697-b586d89ba3ee?q=80&w=1080&auto=format&fit=crop"
-private const val SAMPLE_IMAGE_11 = "https://images.unsplash.com/photo-1526401485004-2ca616c53df9?q=80&w=1080&auto=format&fit=crop"
-private const val SAMPLE_IMAGE_12 = "https://images.unsplash.com/photo-1581093588401-9cf9f3ebd57a?q=80&w=1080&auto=format&fit=crop"
-private const val SAMPLE_IMAGE_13 = "https://images.unsplash.com/photo-1469474968028-56623f02e42e?q=80&w=1080&auto=format&fit=crop"
 
 private fun sanitizeUrl(url: String?): String {
     return url?.replace("`", "")?.trim() ?: ""
+}
+
+@Preview(showBackground = true)
+@Composable
+private fun NewDashboardScreenPreview() {
+    OpenEdXTheme {
+        NewDashboardScreenContent(
+            uiState = NewDashboardState(
+                loading = false,
+                summary = listOf(
+                    SummaryCardDto(1, "faBookOpen", 3, "Courses in Progress"),
+                    SummaryCardDto(2, "faCheckCircle", 5, "Completed Courses"),
+                    SummaryCardDto(3, "faChartLine", 12, "Learning Days Streak"),
+                    SummaryCardDto(4, "faAward", 2, "Achievements")
+                ),
+                continueLearning = listOf(
+                    CourseItemDto("1", "Introduction to Computer Science", SAMPLE_IMAGE_1, 45, "Computer Science", "Beginner"),
+                    CourseItemDto("2", "Data Science: Machine Learning", SAMPLE_IMAGE_2, 70, "Data Science", "Intermediate")
+                ),
+                achievements = listOf(
+                    AchievementDto(1, "Fast Learner", null),
+                    AchievementDto(2, "Top Performer", null)
+                ),
+                recommended = listOf(
+                    RecommendationDto("r1", "Advanced Python", "Learn advanced python concepts", "Programming", "10 weeks", "Advanced", SAMPLE_IMAGE_4, 4, 120, "John Doe")
+                ),
+                wishlist = PaginatedDto(
+                    results = listOf(
+                        CourseItemDto("3", "Mobile App Development", SAMPLE_IMAGE_3, 0, "Mobile", "Beginner")
+                    ),
+                    pagination = PaginationDto(null, null, 1, 1)
+                ),
+                completed = PaginatedDto(
+                    results = listOf(
+                        CourseItemDto("1", "Introduction to Computer Science", SAMPLE_IMAGE_1, 100, "Computer Science", "Beginner")
+                    ),
+                    pagination = PaginationDto(null, null, 1, 1)
+                )
+            )
+        )
+    }
+}
+
+@Preview(showBackground = true)
+@Composable
+private fun NewDashboardScreenLoadingPreview() {
+    OpenEdXTheme {
+        NewDashboardScreenContent(
+            uiState = NewDashboardState(loading = true)
+        )
+    }
+}
+
+@Preview(showBackground = true)
+@Composable
+private fun NewDashboardScreenEmptyPreview() {
+    OpenEdXTheme {
+        NewDashboardScreenContent(
+            uiState = NewDashboardState(loading = false)
+        )
+    }
 }

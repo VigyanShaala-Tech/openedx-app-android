@@ -53,4 +53,6 @@
     <string name="auth_send_otp">Send OTP</string>
     <string name="auth_verify_and_sign_in">Verify &amp; Sign in</string>
     <string name="auth_or">or</string>
+    <string name="auth_resend_otp">Resend OTP</string>
+    <string name="auth_resend_in">Resend in</string>
 </resources>

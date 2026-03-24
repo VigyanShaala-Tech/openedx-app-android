@@ -312,6 +312,15 @@ private fun AuthForm(
                     },
                     isMobileError = isMobileError,
                     isOtpError = isOtpError,
+                    secondsLeft = state.otpSecondsLeft,
+                    canResend = state.otpCanResend,
+                    onResend = {
+                        if (mobile.isNotEmpty()) {
+                            onEvent(AuthEvent.SendOtp(mobile))
+                        } else {
+                            isMobileError = true
+                        }
+                    }
                 )
             }
         } else {
@@ -472,6 +481,9 @@ private fun MobileOtpSection(
     onChangeNumber: () -> Unit,
     isMobileError: Boolean,
     isOtpError: Boolean,
+    secondsLeft: Int,
+    canResend: Boolean,
+    onResend: () -> Unit,
 ) {
     Column(modifier = Modifier.fillMaxWidth()) {
         var mobileTextFieldValue by rememberSaveable(stateSaver = TextFieldValue.Saver) {
@@ -561,11 +573,14 @@ private fun MobileOtpSection(
                     style = MaterialTheme.appTypography.bodySmall
                 )
                 Spacer(modifier = Modifier.weight(1f))
+                val resendText = if (canResend) stringResource(id = R.string.auth_resend_otp) else "${stringResource(id = R.string.auth_resend_in)} ${secondsLeft}s"
                 Text(
-                    text = stringResource(id = R.string.auth_change_number),
+                    text = resendText,
                     color = MaterialTheme.appColors.primary,
                     style = MaterialTheme.appTypography.bodySmall,
-                    modifier = Modifier.noRippleClickable { onChangeNumber() }
+                    modifier = Modifier.noRippleClickable {
+                        if (canResend) onResend()
+                    }
                 )
             }
         }

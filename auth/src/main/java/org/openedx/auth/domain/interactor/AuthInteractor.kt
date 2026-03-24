@@ -37,4 +37,8 @@ class AuthInteractor(private val repository: AuthRepository) {
     suspend fun passwordReset(email: String): Boolean {
         return repository.passwordReset(email)
     }
+
+    suspend fun sendOtp(contact: String) = repository.sendOtp(contact)
+    suspend fun verifyOtp(contact: String, otp: String, key: String) = repository.verifyOtp(contact, otp, key)
+    suspend fun loginWithOtp(contact: String, otp: String, key: String) = repository.loginWithOtp(contact, otp, key)
 }

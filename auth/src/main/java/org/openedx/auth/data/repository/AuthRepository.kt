@@ -9,11 +9,16 @@ import org.openedx.core.config.Config
 import org.openedx.core.data.storage.CorePreferences
 import org.openedx.core.domain.model.RegistrationField
 import org.openedx.core.system.EdxError
+import org.openedx.auth.data.api.OtpApi
+import org.openedx.auth.data.api.OtpLoginRequest
+import org.openedx.auth.data.api.OtpSendRequest
+import org.openedx.auth.data.api.OtpVerifyRequest
 
 class AuthRepository(
     private val config: Config,
     private val api: AuthApi,
     private val preferencesManager: CorePreferences,
+    private val otpApi: OtpApi,
 ) {
 
     suspend fun login(
@@ -67,6 +72,15 @@ class AuthRepository(
 
     suspend fun passwordReset(email: String): Boolean {
         return api.passwordReset(email).success
+    }
+
+    suspend fun sendOtp(contact: String) = otpApi.send(OtpSendRequest(contact))
+    suspend fun verifyOtp(contact: String, otp: String, key: String) =
+        otpApi.verify(OtpVerifyRequest(contact, otp, key))
+    suspend fun loginWithOtp(contact: String, otp: String, key: String) {
+        otpApi.login(OtpLoginRequest(contact, otp, key))
+            .mapToDomain()
+            .processAuthResponse()
     }
 
     private suspend fun AuthResponse.processAuthResponse() {

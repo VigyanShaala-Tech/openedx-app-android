@@ -164,16 +164,85 @@ class SignInViewModel(
         }
     }
 
+    private var otpCountdownJob: kotlinx.coroutines.Job? = null
+    private fun startOtpCountdown(seconds: Int) {
+        otpCountdownJob?.cancel()
+        otpCountdownJob = viewModelScope.launch {
+            var left = seconds
+            while (left > 0) {
+                _uiState.update { it.copy(otpSecondsLeft = left, otpCanResend = false) }
+                kotlinx.coroutines.delay(1000)
+                left--
+            }
+            _uiState.update { it.copy(otpSecondsLeft = 0, otpCanResend = true) }
+        }
+    }
+
     fun sendOtp(mobile: String) {
-        _uiMessage.value =
-            UIMessage.SnackBarMessage(resourceManager.getString(R.string.auth_send_otp))
-        logEvent(AuthAnalyticsEvent.SIGN_IN_CLICKED)
+        viewModelScope.launch {
+            try {
+                _uiState.update { it.copy(showProgress = true) }
+                val resp = interactor.sendOtp(mobile)
+                if (resp.success) {
+                    val resendAfter = resp.resend_after_seconds ?: 30
+                    _uiState.update {
+                        it.copy(
+                            otpSent = true,
+                            otpVerificationKey = resp.verification_key.orEmpty(),
+                            otpResendAfterSec = resendAfter,
+                            otpCanResend = false
+                        )
+                    }
+                    startOtpCountdown(resendAfter)
+                    _uiMessage.value = UIMessage.SnackBarMessage(resp.message)
+                } else {
+                    _uiMessage.value = UIMessage.SnackBarMessage(resp.message)
+                }
+            } catch (e: Exception) {
+                if (e.isInternetError()) {
+                    _uiMessage.value =
+                        UIMessage.SnackBarMessage(resourceManager.getString(CoreRes.string.core_error_no_connection))
+                } else {
+                    _uiMessage.value =
+                        UIMessage.SnackBarMessage(resourceManager.getString(CoreRes.string.core_error_unknown_error))
+                }
+            }
+            _uiState.update { it.copy(showProgress = false) }
+        }
     }
 
     fun verifyOtp(mobile: String, otp: String) {
-        _uiMessage.value =
-            UIMessage.SnackBarMessage(resourceManager.getString(R.string.auth_verify_and_sign_in))
-        logEvent(AuthAnalyticsEvent.USER_SIGN_IN_CLICKED)
+        viewModelScope.launch {
+            try {
+                _uiState.update { it.copy(showProgress = true) }
+                val key = uiState.value.otpVerificationKey
+                val verify = interactor.verifyOtp(mobile, otp, key)
+                if (verify.success) {
+                    val updatedKey = verify.verification_key ?: key
+                    _uiState.update { it.copy(otpVerificationKey = updatedKey) }
+                    interactor.loginWithOtp(mobile, otp, updatedKey)
+                    _uiState.update { it.copy(loginSuccess = true) }
+                    setUserId()
+                    appNotifier.send(SignInEvent())
+                    _uiMessage.value = UIMessage.SnackBarMessage(verify.message)
+                } else {
+                    _uiMessage.value = UIMessage.SnackBarMessage(verify.message)
+                }
+            } catch (e: Exception) {
+                if (e is EdxError.InvalidGrantException) {
+                    _uiMessage.value =
+                        UIMessage.SnackBarMessage(resourceManager.getString(CoreRes.string.core_error_invalid_grant))
+                } else if (e.isInternetError()) {
+                    _uiMessage.value =
+                        UIMessage.SnackBarMessage(resourceManager.getString(CoreRes.string.core_error_no_connection))
+                } else {
+                    _uiMessage.value =
+                        UIMessage.SnackBarMessage(resourceManager.getString(CoreRes.string.core_error_unknown_error))
+                }
+                _uiState.update { it.copy(loginFailure = true) }
+            }
+            _uiState.update { it.copy(showProgress = false) }
+        }
     }
 
     fun signInBrowser(activityContext: Activity) {

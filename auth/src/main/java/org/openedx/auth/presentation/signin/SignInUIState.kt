@@ -25,4 +25,9 @@ internal data class SignInUIState(
     val loginSuccess: Boolean = false,
     val agreement: RegistrationField? = null,
     val loginFailure: Boolean = false,
+    val otpSent: Boolean = false,
+    val otpResendAfterSec: Int = 0,
+    val otpSecondsLeft: Int = 0,
+    val otpCanResend: Boolean = true,
+    val otpVerificationKey: String = "",
 )

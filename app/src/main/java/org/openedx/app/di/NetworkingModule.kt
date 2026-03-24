@@ -58,6 +58,7 @@ val networkingModule = module {
     single { provideApi<NotificationsApi>(get()) }
     single { provideApi<DashboardApi>(get()) }
     single { provideApi<org.openedx.auth.data.api.CatalogApi>(get()) }
+    single { provideApi<org.openedx.auth.data.api.OtpApi>(get()) }
 }
 
 inline fun <reified T> provideApi(retrofit: Retrofit): T {

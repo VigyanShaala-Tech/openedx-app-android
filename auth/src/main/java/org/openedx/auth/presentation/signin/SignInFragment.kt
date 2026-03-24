@@ -82,6 +82,7 @@ class SignInFragment : Fragment() {
                                 )
                                 is AuthEvent.SendOtp -> viewModel.sendOtp(event.mobile)
                                 is AuthEvent.VerifyOtp -> viewModel.verifyOtp(event.mobile, event.otp)
+                                is AuthEvent.ResendOtp -> viewModel.sendOtp(event.mobile)
                             }
                         },
                     )
@@ -121,6 +122,7 @@ internal sealed interface AuthEvent {
     data class OpenLink(val links: Map<String, String>, val link: String) : AuthEvent
     data class SendOtp(val mobile: String) : AuthEvent
     data class VerifyOtp(val mobile: String, val otp: String) : AuthEvent
+    data class ResendOtp(val mobile: String) : AuthEvent
     object SignInBrowser : AuthEvent
     object RegisterClick : AuthEvent
     object ForgotPasswordClick : AuthEvent

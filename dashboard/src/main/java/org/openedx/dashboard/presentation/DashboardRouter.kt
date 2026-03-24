@@ -19,5 +19,7 @@ interface DashboardRouter {
 
     fun navigateToAllEnrolledCourses(fm: FragmentManager)
 
+    fun navigateToWishlist(fm: FragmentManager)
+
     fun getProgramFragment(): Fragment
 }

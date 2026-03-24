@@ -181,10 +181,13 @@ val screenModule = module {
             get()
         )
     }
+    viewModel { org.openedx.dashboard.presentation.wishlist.WishlistViewModel(get(), get(), get(), get()) }
     viewModel { AllEnrolledCoursesViewModel(get(), get(), get(), get(), get(), get(), get()) }
     viewModel { (openTab: String) ->
         LearnViewModel(openTab, get(), get(), get(), get())
     }
+    single { org.openedx.auth.presentation.logistration.LogistrationFiltersRepository() }
+    viewModel { org.openedx.auth.presentation.logistration.LogistrationFiltersViewModel(get()) }
 
     factory { DiscoveryRepository(get(), get(), get()) }
     factory { DiscoveryInteractor(get()) }

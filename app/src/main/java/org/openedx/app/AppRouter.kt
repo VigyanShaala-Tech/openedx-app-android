@@ -58,6 +58,7 @@ import org.openedx.profile.presentation.settings.SettingsFragment
 import org.openedx.profile.presentation.video.VideoSettingsFragment
 import org.openedx.whatsnew.WhatsNewRouter
 import org.openedx.whatsnew.presentation.whatsnew.WhatsNewFragment
+import org.openedx.dashboard.presentation.wishlist.WishlistFragment
 
 class AppRouter :
     AuthRouter,
@@ -156,6 +157,10 @@ class AppRouter :
 
     override fun navigateToAllEnrolledCourses(fm: FragmentManager) {
         replaceFragmentWithBackStack(fm, AllEnrolledCoursesFragment())
+    }
+
+    override fun navigateToWishlist(fm: FragmentManager) {
+        replaceFragmentWithBackStack(fm, WishlistFragment())
     }
 
     override fun getProgramFragment(): Fragment {

@@ -80,6 +80,10 @@ import org.openedx.foundation.presentation.WindowType
 import org.openedx.foundation.presentation.rememberWindowSize
 import org.openedx.foundation.presentation.windowSizeValue
 import org.openedx.foundation.utils.UrlUtils
+import org.openedx.auth.presentation.logistration.LogistrationCarousel
+import org.openedx.auth.presentation.logistration.LogistrationCarouselItem
+import org.openedx.auth.presentation.logistration.LogistrationFilters
+import org.openedx.core.R as CoreR
 
 class LogistrationFragment : Fragment() {
 
@@ -266,13 +270,31 @@ private fun LogistrationScreen(
                 item {
                     Column {
                         LogistrationLogoView()
-                        Text(
-                            text = stringResource(id = R.string.pre_auth_title),
-                            style = MaterialTheme.appTypography.headlineSmall,
-                            modifier = Modifier
-                                .testTag("txt_screen_title")
-                                .padding(bottom = 40.dp)
+                        val carouselItems = listOf(
+                            LogistrationCarouselItem(
+                                imageResId = R.drawable.onboarding_1,
+                                title = "Creating Job Opportunities in Science and Technology",
+                                subtitle = "Discover the latest job opportunities in Science and Technology and apply for the ones that match your skills and interests."
+                            ),
+                            LogistrationCarouselItem(
+                                imageResId = R.drawable.onboarding_2,
+                                title = "Learn from Industry Experts",
+                                subtitle = "Access world-class education from renowned instructors and gain practical knowledge that sets you apart."
+                            ),
+                            LogistrationCarouselItem(
+                                imageResId = R.drawable.onboarding_3,
+                                title = "Grow your career in STEM",
+                                subtitle = "Be part of an inspiring global community and make your next leap into higher education or a job."
+                            )
                         )
+                        LogistrationCarousel(items = carouselItems)
+//                        Text(
+//                            text = stringResource(id = R.string.pre_auth_title),
+//                            style = MaterialTheme.appTypography.headlineSmall,
+//                            modifier = Modifier
+//                                .testTag("txt_screen_title")
+//                                .padding(bottom = 40.dp)
+//                        )
                         val focusManager = LocalFocusManager.current
                         Column(Modifier.padding(bottom = 8.dp)) {
                             Text(
@@ -302,6 +324,8 @@ private fun LogistrationScreen(
                                     textFieldValue = TextFieldValue("")
                                 }
                             )
+                            Spacer(Modifier.height(12.dp))
+                            LogistrationFilters()
                         }
 
 //                        Text(

@@ -70,11 +70,16 @@ import org.openedx.dashboard.data.model.PaginatedDto
 import org.openedx.dashboard.data.model.PaginationDto
 import org.openedx.dashboard.data.model.RecommendationDto
 import org.openedx.dashboard.data.model.SummaryCardDto
+import org.openedx.dashboard.presentation.CarouselItem
+import org.openedx.dashboard.presentation.DashboardCarousel
 import org.openedx.foundation.presentation.rememberWindowSize
 import org.openedx.foundation.presentation.windowSizeValue
 import org.openedx.core.R as CoreR
+import org.koin.android.ext.android.inject
+import org.openedx.dashboard.presentation.DashboardRouter
 
 class NewDashboardFragment : Fragment() {
+    private val dashboardRouter: DashboardRouter by inject()
     override fun onCreateView(
         inflater: LayoutInflater,
         container: ViewGroup?,
@@ -85,7 +90,12 @@ class NewDashboardFragment : Fragment() {
             OpenEdXTheme {
                 val windowSize = rememberWindowSize()
                 val viewModel: NewDashboardViewModel = koinViewModel { parametersOf(windowSize) }
-                NewDashboardScreen(viewModel)
+                NewDashboardScreen(
+                    viewModel = viewModel,
+                    onWishlistViewAllClick = {
+                        dashboardRouter.navigateToWishlist(requireActivity().supportFragmentManager)
+                    }
+                )
             }
         }
     }
@@ -98,14 +108,14 @@ private data class AchievementData(val title: String, val icon: androidx.compose
 private data class RecommendationData(val title: String, val category: String, val rating: String, val description: String, val imageUrl: String)
 
 @Composable
-private fun NewDashboardScreen(viewModel: NewDashboardViewModel) {
+private fun NewDashboardScreen(viewModel: NewDashboardViewModel, onWishlistViewAllClick: () -> Unit) {
     val uiState by viewModel.state.collectAsState(NewDashboardState())
-    NewDashboardScreenContent(uiState, viewModel.userName)
+    NewDashboardScreenContent(uiState, viewModel.userName, onWishlistViewAllClick)
 }
 
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
-private fun NewDashboardScreenContent(uiState: NewDashboardState, userName: String) {
+private fun NewDashboardScreenContent(uiState: NewDashboardState, userName: String, onWishlistViewAllClick: () -> Unit) {
     val windowSize = rememberWindowSize()
     val contentPadding by remember(key1 = windowSize) {
         mutableStateOf(
@@ -176,6 +186,28 @@ private fun NewDashboardScreenContent(uiState: NewDashboardState, userName: Stri
             contentPadding = contentPadding,
             verticalArrangement = Arrangement.spacedBy(16.dp)
         ) {
+//            item {
+//                val carouselItems = remember {
+//                    listOf(
+//                        CarouselItem(
+//                            imageUrl = SAMPLE_IMAGE_1,
+//                            title = "Creating Job Opportunities in Science and Technology",
+//                            subtitle = "Discover the latest job opportunities in Science and Technology and apply for the ones that match your skills and interests."
+//                        ),
+//                        CarouselItem(
+//                            imageUrl = SAMPLE_IMAGE_2,
+//                            title = "Learn from Industry Experts",
+//                            subtitle = "Access world-class education from renowned instructors and gain practical knowledge that sets you apart."
+//                        ),
+//                        CarouselItem(
+//                            imageUrl = SAMPLE_IMAGE_3,
+//                            title = "Grow your career in STEM",
+//                            subtitle = "Be part of an inspiring global community and make your next leap into higher education or a job."
+//                        )
+//                    )
+//                }
+//                DashboardCarousel(items = carouselItems)
+//            }
 //            item {
 //                Row(
 //                    modifier = Modifier.fillMaxWidth(),
@@ -278,7 +310,8 @@ private fun NewDashboardScreenContent(uiState: NewDashboardState, userName: Stri
                 CoursesTabs(
                     continueCourses = continueCourses,
                     wishlistItems = wishlistItems,
-                    completedCourses = completedCourses
+                    completedCourses = completedCourses,
+                    onWishlistViewAllClick = onWishlistViewAllClick
                 )
             }
 
@@ -379,6 +412,7 @@ private fun CoursesTabs(
     continueCourses: List<CourseCardData>,
     wishlistItems: List<WishlistItemData>,
     completedCourses: List<CourseCardData>,
+    onWishlistViewAllClick: () -> Unit,
 ) {
     var selectedTab by rememberSaveable { mutableStateOf(0) }
     val tabs = listOf("Continue Learning", "Wishlist", "Completed")
@@ -431,7 +465,7 @@ private fun CoursesTabs(
                     }
                 }
                 Spacer(Modifier.height(12.dp))
-                ViewAllLink()
+                ViewAllLink(onClick = {})
             } else {
                 EmptyTabContent("No courses in progress")
             }
@@ -442,7 +476,7 @@ private fun CoursesTabs(
                     wishlistItems.forEach { WishlistItem(it) }
                 }
                 Spacer(Modifier.height(12.dp))
-                ViewAllLink()
+                ViewAllLink(onClick = onWishlistViewAllClick)
             } else {
                 EmptyTabContent("Your wishlist is empty")
             }
@@ -464,7 +498,7 @@ private fun CoursesTabs(
                     }
                 }
                 Spacer(Modifier.height(12.dp))
-                ViewAllLink()
+                ViewAllLink(onClick = {})
             } else {
                 EmptyTabContent("No completed courses yet")
             }
@@ -489,9 +523,11 @@ private fun EmptyTabContent(message: String) {
 }
 
 @Composable
-private fun ViewAllLink() {
+private fun ViewAllLink(onClick: () -> Unit) {
     Row(
-        modifier = Modifier.fillMaxWidth(),
+        modifier = Modifier
+            .fillMaxWidth()
+            .clickable { onClick() },
         horizontalArrangement = Arrangement.Center,
         verticalAlignment = Alignment.CenterVertically
     ) {
@@ -762,7 +798,8 @@ private fun NewDashboardScreenPreview() {
                     pagination = PaginationDto(null, null, 1, 1)
                 )
             ),
-            userName = "Priya"
+            userName = "Priya",
+            onWishlistViewAllClick = {}
         )
     }
 }
@@ -773,7 +810,8 @@ private fun NewDashboardScreenLoadingPreview() {
     OpenEdXTheme {
         NewDashboardScreenContent(
             uiState = NewDashboardState(loading = true),
-            userName = "Priya"
+            userName = "Priya",
+            onWishlistViewAllClick = {}
         )
     }
 }
@@ -784,7 +822,8 @@ private fun NewDashboardScreenEmptyPreview() {
     OpenEdXTheme {
         NewDashboardScreenContent(
             uiState = NewDashboardState(loading = false),
-            userName = "Priya"
+            userName = "Priya",
+            onWishlistViewAllClick = {}
         )
     }
 }

@@ -113,6 +113,7 @@ val screenModule = module {
             get(),
             get(),
             get(),
+            get(),
         )
     }
 
@@ -186,7 +187,7 @@ val screenModule = module {
     viewModel { (openTab: String) ->
         LearnViewModel(openTab, get(), get(), get(), get())
     }
-    single { org.openedx.auth.presentation.logistration.LogistrationFiltersRepository() }
+    single { org.openedx.auth.presentation.logistration.LogistrationFiltersRepository(get()) }
     viewModel { org.openedx.auth.presentation.logistration.LogistrationFiltersViewModel(get()) }
 
     factory { DiscoveryRepository(get(), get(), get()) }

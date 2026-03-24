@@ -113,6 +113,16 @@ class LogistrationFragment : Fragment() {
                     canLoadMore = canLoadMore,
                     refreshing = refreshing,
                     hasInternetConnection = viewModel.hasInternetConnection,
+                    onSearchSubmit = { query ->
+                        viewModel.searchCatalogCourses(searchTerm = query)
+                    },
+                    onFiltersChanged = { category, level, subject ->
+                        viewModel.searchCatalogCourses(
+                            category = category,
+                            level = level,
+                            subject = subject
+                        )
+                    },
                     onSignInClick = {
                         if (viewModel.isBrowserLoginEnabled) {
                             viewModel.signInBrowser(requireActivity())
@@ -179,6 +189,8 @@ private fun LogistrationScreen(
     canLoadMore: Boolean,
     refreshing: Boolean,
     hasInternetConnection: Boolean,
+    onSearchSubmit: (String) -> Unit,
+    onFiltersChanged: (String, String, String) -> Unit,
     onSearchClick: (String) -> Unit,
     onRegisterClick: () -> Unit,
     onSignInClick: () -> Unit,
@@ -315,7 +327,7 @@ private fun LogistrationScreen(
                                 clearOnSubmit = true,
                                 keyboardActions = {
                                     focusManager.clearFocus()
-                                    onSearchClick(textFieldValue.text)
+                                    onSearchSubmit(textFieldValue.text)
                                 },
                                 onValueChanged = { text ->
                                     textFieldValue = text
@@ -325,7 +337,9 @@ private fun LogistrationScreen(
                                 }
                             )
                             Spacer(Modifier.height(12.dp))
-                            LogistrationFilters()
+                            LogistrationFilters(
+                                onFiltersChanged = onFiltersChanged
+                            )
                         }
 
 //                        Text(
@@ -426,6 +440,8 @@ private fun LogistrationScreen(
 private fun LogistrationPreview() {
     OpenEdXTheme {
         LogistrationScreen(
+            onSearchSubmit = {},
+            onFiltersChanged = { _, _, _ -> },
             onSearchClick = {},
             onSignInClick = {},
             onRegisterClick = {},
@@ -465,6 +481,8 @@ private fun LogistrationPreview() {
 private fun LogistrationRegistrationDisabledPreview() {
     OpenEdXTheme {
         LogistrationScreen(
+            onSearchSubmit = {},
+            onFiltersChanged = { _, _, _ -> },
             onSearchClick = {},
             onSignInClick = {},
             onRegisterClick = {},

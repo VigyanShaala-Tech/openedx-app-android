@@ -36,6 +36,7 @@ class LogistrationViewModel(
     private val discoveryInteractor: DiscoveryInteractor,
     private val resourceManager: ResourceManager,
     private val networkConnection: NetworkConnection,
+    private val catalogApi: org.openedx.auth.data.api.CatalogApi,
 ) : BaseViewModel() {
 
     private val logger = Logger("LogistrationViewModel")
@@ -153,6 +154,68 @@ class LogistrationViewModel(
     fun fetchMore() {
         if (!isLoading && page != -1) {
             loadCoursesInternal()
+        }
+    }
+
+    fun searchCatalogCourses(
+        searchTerm: String? = null,
+        category: String? = null,
+        level: String? = null,
+        subject: String? = null
+    ) {
+        viewModelScope.launch {
+            try {
+                _uiState.value = DiscoveryUIState.Loading
+                val resp = catalogApi.getCourses(
+                    searchTerm = searchTerm?.takeIf { it.isNotBlank() },
+                    category = category?.takeIf { it.isNotBlank() && !category.startsWith("All") },
+                    level = level?.takeIf { it.isNotBlank() && !level.startsWith("All") },
+                    subject = subject?.takeIf { it.isNotBlank() && !subject.startsWith("All") }
+                )
+                val mapped = resp.results.map { c ->
+                    org.openedx.discovery.domain.model.Course(
+                        id = c.id,
+                        blocksUrl = "",
+                        courseId = c.course_id ?: c.id,
+                        effort = "",
+                        enrollmentStart = null,
+                        enrollmentEnd = null,
+                        hidden = c.hidden ?: false,
+                        invitationOnly = c.invitation_only ?: false,
+                        media = org.openedx.core.domain.model.Media(
+                            bannerImage = null,
+                            courseImage = null,
+                            courseVideo = null,
+                            image = org.openedx.core.domain.model.Image(
+                                raw = c.media?.image?.raw ?: "",
+                                small = c.media?.image?.small ?: "",
+                                large = c.media?.image?.large ?: ""
+                            )
+                        ),
+                        mobileAvailable = c.mobile_available ?: true,
+                        name = c.name,
+                        number = "",
+                        org = c.org ?: "",
+                        pacing = "",
+                        shortDescription = c.short_description ?: "",
+                        start = c.start ?: "",
+                        end = c.end ?: "",
+                        startDisplay = c.start_display ?: "",
+                        startType = c.start_type ?: "",
+                        overview = "",
+                        isEnrolled = false
+                    )
+                }
+                _uiState.value = DiscoveryUIState.Courses(mapped)
+            } catch (e: Exception) {
+                if (e.isInternetError()) {
+                    _uiMessage.value =
+                        UIMessage.SnackBarMessage(resourceManager.getString(R.string.core_error_no_connection))
+                } else {
+                    _uiMessage.value =
+                        UIMessage.SnackBarMessage(resourceManager.getString(R.string.core_error_unknown_error))
+                }
+            }
         }
     }
 

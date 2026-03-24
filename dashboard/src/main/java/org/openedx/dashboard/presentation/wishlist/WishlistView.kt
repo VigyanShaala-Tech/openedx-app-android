@@ -15,7 +15,9 @@ import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.grid.GridCells
+import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
+import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.material.Card
 import androidx.compose.material.CircularProgressIndicator
 import androidx.compose.material.Icon
@@ -152,13 +154,17 @@ private fun WishlistView(
                         }
                     }
                     else -> {
-                        LazyColumn(
+                        val windowSize2 = rememberWindowSize()
+                        val columns = if (windowSize2.isTablet) 3 else 2
+                        LazyVerticalGrid(
                             modifier = Modifier.fillMaxSize(),
-                            contentPadding = contentPadding,
-                            verticalArrangement = Arrangement.spacedBy(12.dp)
+                            columns = GridCells.Fixed(columns),
+                            verticalArrangement = Arrangement.spacedBy(16.dp),
+                            horizontalArrangement = Arrangement.spacedBy(16.dp),
+                            contentPadding = contentPadding
                         ) {
-                            items(state.items.size) { index ->
-                                WishlistItem(state.items[index])
+                            items(state.items) { item ->
+                                WishlistGridItem(item)
                             }
                         }
                     }
@@ -175,19 +181,21 @@ private fun WishlistView(
 }
 
 @Composable
-private fun WishlistItem(item: CourseItemDto) {
+private fun WishlistGridItem(item: CourseItemDto) {
     Card(
         backgroundColor = MaterialTheme.appColors.surface,
         elevation = 0.dp,
         shape = MaterialTheme.appShapes.cardShape
     ) {
-        Row(
-            modifier = Modifier.padding(12.dp),
-            verticalAlignment = Alignment.CenterVertically
+        Column(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(8.dp)
         ) {
             AsyncImage(
                 modifier = Modifier
-                    .size(64.dp)
+                    .fillMaxWidth()
+                    .height(110.dp)
                     .clip(MaterialTheme.appShapes.cardShape),
                 contentScale = ContentScale.Crop,
                 model = ImageRequest.Builder(LocalContext.current)
@@ -198,27 +206,33 @@ private fun WishlistItem(item: CourseItemDto) {
                     .build(),
                 contentDescription = null,
             )
-            Spacer(Modifier.width(12.dp))
-            Column(modifier = Modifier.weight(1f)) {
-                Text(
-                    text = item.title,
-                    style = MaterialTheme.appTypography.titleSmall,
-                    color = MaterialTheme.appColors.textDark,
-                    maxLines = 2
+            Spacer(Modifier.height(8.dp))
+            Text(
+                text = item.title,
+                style = MaterialTheme.appTypography.titleSmall,
+                color = MaterialTheme.appColors.textDark,
+                maxLines = 2
+            )
+            Spacer(Modifier.height(6.dp))
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                Icon(
+                    imageVector = Icons.Filled.Star,
+                    contentDescription = null,
+                    tint = MaterialTheme.appColors.primary
                 )
-                Spacer(Modifier.height(4.dp))
+                Spacer(Modifier.width(4.dp))
+                Text(
+                    text = "4.5",
+                    style = MaterialTheme.appTypography.labelSmall,
+                    color = MaterialTheme.appColors.textDark
+                )
+                Spacer(Modifier.width(8.dp))
                 Text(
                     text = (item.level ?: "").trim(),
                     style = MaterialTheme.appTypography.labelSmall,
                     color = MaterialTheme.appColors.textPrimary
                 )
             }
-            Icon(
-                imageVector = Icons.Filled.Star,
-                contentDescription = null,
-                tint = MaterialTheme.appColors.primary,
-                modifier = Modifier.clickable { }
-            )
         }
     }
 }

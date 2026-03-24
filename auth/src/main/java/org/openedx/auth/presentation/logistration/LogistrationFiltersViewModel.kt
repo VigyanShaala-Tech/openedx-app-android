@@ -10,12 +10,15 @@ data class FilterOptions(
     val subjects: List<String>,
 )
 
-class LogistrationFiltersRepository {
+class LogistrationFiltersRepository(
+    private val catalogApi: org.openedx.auth.data.api.CatalogApi
+) {
     suspend fun getFilterOptions(): FilterOptions {
+        val resp = catalogApi.getFilters()
         return FilterOptions(
-            categories = listOf("All Categories", "Data Science", "Art & Design", "Finance", "Health", "Environment"),
-            levels = listOf("All Levels", "Beginner", "Intermediate", "Advanced"),
-            subjects = listOf("All Subjects", "STEM", "Programming", "Mobile", "AI/ML")
+            categories = listOf("All Categories") + resp.categories,
+            levels = listOf("All Levels") + resp.levels,
+            subjects = listOf("All Subjects") + resp.subjects
         )
     }
 }

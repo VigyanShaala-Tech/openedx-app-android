@@ -34,7 +34,8 @@ import org.openedx.core.ui.theme.appTypography
 @Composable
 fun LogistrationFilters(
     modifier: Modifier = Modifier,
-    viewModel: LogistrationFiltersViewModel = koinViewModel()
+    viewModel: LogistrationFiltersViewModel = koinViewModel(),
+    onFiltersChanged: (category: String, level: String, subject: String) -> Unit = { _, _, _ -> }
 ) {
     val state by viewModel.state.collectAsState(FiltersState())
     Row(
@@ -45,17 +46,26 @@ fun LogistrationFilters(
         FilterPill(
             label = state.selectedCategory,
             options = state.options.categories,
-            onSelect = { viewModel.selectCategory(it) }
+            onSelect = {
+                viewModel.selectCategory(it)
+                onFiltersChanged(viewModel.state.value.selectedCategory, viewModel.state.value.selectedLevel, viewModel.state.value.selectedSubject)
+            }
         )
         FilterPill(
             label = state.selectedLevel,
             options = state.options.levels,
-            onSelect = { viewModel.selectLevel(it) }
+            onSelect = {
+                viewModel.selectLevel(it)
+                onFiltersChanged(viewModel.state.value.selectedCategory, viewModel.state.value.selectedLevel, viewModel.state.value.selectedSubject)
+            }
         )
         FilterPill(
             label = state.selectedSubject,
             options = state.options.subjects,
-            onSelect = { viewModel.selectSubject(it) }
+            onSelect = {
+                viewModel.selectSubject(it)
+                onFiltersChanged(viewModel.state.value.selectedCategory, viewModel.state.value.selectedLevel, viewModel.state.value.selectedSubject)
+            }
         )
     }
     Spacer(Modifier.height(8.dp))

@@ -159,18 +159,20 @@ class LogistrationViewModel(
 
     fun searchCatalogCourses(
         searchTerm: String? = null,
-        category: String? = null,
-        level: String? = null,
-        subject: String? = null
+        selected: Map<String, String> = emptyMap()
     ) {
         viewModelScope.launch {
             try {
                 _uiState.value = DiscoveryUIState.Loading
+                val category = selected["categories"]?.takeIf { it.isNotBlank() && !it.startsWith("All") }
+                val level = selected["levels"]?.takeIf { it.isNotBlank() && !it.startsWith("All") }
+                val subject = selected["subjects"]?.takeIf { it.isNotBlank() && !it.startsWith("All") }
+
                 val resp = catalogApi.getCourses(
                     searchTerm = searchTerm?.takeIf { it.isNotBlank() },
-                    category = category?.takeIf { it.isNotBlank() && !category.startsWith("All") },
-                    level = level?.takeIf { it.isNotBlank() && !level.startsWith("All") },
-                    subject = subject?.takeIf { it.isNotBlank() && !subject.startsWith("All") }
+                    category = category,
+                    level = level,
+                    subject = subject
                 )
                 val mapped = resp.results.map { c ->
                     org.openedx.discovery.domain.model.Course(

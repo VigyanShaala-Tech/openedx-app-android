@@ -3,12 +3,15 @@ package org.openedx.auth.presentation.logistration
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.lazy.LazyRow
+import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.DropdownMenu
 import androidx.compose.material.DropdownMenuItem
@@ -35,38 +38,28 @@ import org.openedx.core.ui.theme.appTypography
 fun LogistrationFilters(
     modifier: Modifier = Modifier,
     viewModel: LogistrationFiltersViewModel = koinViewModel(),
-    onFiltersChanged: (category: String, level: String, subject: String) -> Unit = { _, _, _ -> }
+    onFiltersChanged: (selected: Map<String, String>) -> Unit = {}
 ) {
     val state by viewModel.state.collectAsState(FiltersState())
-    Row(
+    val entries = state.options.options.entries.toList()
+    LazyRow(
         modifier = modifier.fillMaxWidth(),
         horizontalArrangement = Arrangement.spacedBy(12.dp),
         verticalAlignment = Alignment.CenterVertically
     ) {
-        FilterPill(
-            label = state.selectedCategory,
-            options = state.options.categories,
-            onSelect = {
-                viewModel.selectCategory(it)
-                onFiltersChanged(viewModel.state.value.selectedCategory, viewModel.state.value.selectedLevel, viewModel.state.value.selectedSubject)
+        items(entries) { (key, options) ->
+            val label = state.selected[key] ?: options.firstOrNull().orEmpty()
+            Box {
+                FilterPill(
+                    label = label,
+                    options = options,
+                    onSelect = {
+                        viewModel.select(key, it)
+                        onFiltersChanged(viewModel.state.value.selected)
+                    }
+                )
             }
-        )
-        FilterPill(
-            label = state.selectedLevel,
-            options = state.options.levels,
-            onSelect = {
-                viewModel.selectLevel(it)
-                onFiltersChanged(viewModel.state.value.selectedCategory, viewModel.state.value.selectedLevel, viewModel.state.value.selectedSubject)
-            }
-        )
-        FilterPill(
-            label = state.selectedSubject,
-            options = state.options.subjects,
-            onSelect = {
-                viewModel.selectSubject(it)
-                onFiltersChanged(viewModel.state.value.selectedCategory, viewModel.state.value.selectedLevel, viewModel.state.value.selectedSubject)
-            }
-        )
+        }
     }
     Spacer(Modifier.height(8.dp))
 }

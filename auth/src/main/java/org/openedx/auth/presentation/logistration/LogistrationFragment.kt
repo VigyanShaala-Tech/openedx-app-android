@@ -116,12 +116,8 @@ class LogistrationFragment : Fragment() {
                     onSearchSubmit = { query ->
                         viewModel.searchCatalogCourses(searchTerm = query)
                     },
-                    onFiltersChanged = { category, level, subject ->
-                        viewModel.searchCatalogCourses(
-                            category = category,
-                            level = level,
-                            subject = subject
-                        )
+                    onFiltersChanged = { selected ->
+                        viewModel.searchCatalogCourses(selected = selected)
                     },
                     onSignInClick = {
                         if (viewModel.isBrowserLoginEnabled) {
@@ -190,7 +186,7 @@ private fun LogistrationScreen(
     refreshing: Boolean,
     hasInternetConnection: Boolean,
     onSearchSubmit: (String) -> Unit,
-    onFiltersChanged: (String, String, String) -> Unit,
+    onFiltersChanged: (Map<String, String>) -> Unit,
     onSearchClick: (String) -> Unit,
     onRegisterClick: () -> Unit,
     onSignInClick: () -> Unit,
@@ -441,7 +437,7 @@ private fun LogistrationPreview() {
     OpenEdXTheme {
         LogistrationScreen(
             onSearchSubmit = {},
-            onFiltersChanged = { _, _, _ -> },
+            onFiltersChanged = { _ -> },
             onSearchClick = {},
             onSignInClick = {},
             onRegisterClick = {},
@@ -482,7 +478,7 @@ private fun LogistrationRegistrationDisabledPreview() {
     OpenEdXTheme {
         LogistrationScreen(
             onSearchSubmit = {},
-            onFiltersChanged = { _, _, _ -> },
+            onFiltersChanged = { _ -> },
             onSearchClick = {},
             onSignInClick = {},
             onRegisterClick = {},

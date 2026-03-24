@@ -1,13 +1,29 @@
 package org.openedx.auth.data.api
 
+import okhttp3.ResponseBody
 import retrofit2.http.GET
 import retrofit2.http.Query
+import retrofit2.http.QueryMap
+import retrofit2.http.Path
 
-data class CatalogFiltersResponse(
-    val categories: List<String>,
-    val subjects: List<String>,
-    val levels: List<String>
-)
+interface CatalogApi {
+    @GET("/api/v1/catalog/filters/")
+    suspend fun getFiltersRaw(): ResponseBody
+
+    @GET("/api/v1/catalog/courses/")
+    suspend fun getCoursesRaw(
+        @Query("search_term") searchTerm: String? = null,
+        @QueryMap(encoded = true) params: Map<String, String> = emptyMap()
+    ): ResponseBody
+
+    @GET("/api/v1/catalog/courses/")
+    suspend fun getCourses(
+        @Query("search_term") searchTerm: String? = null,
+        @Query("category") category: String? = null,
+        @Query("level") level: String? = null,
+        @Query("subject") subject: String? = null
+    ): CatalogCourseList
+}
 
 data class CatalogImage(
     val raw: String?,
@@ -56,16 +72,3 @@ data class CatalogCourseList(
     val results: List<CatalogCourse>,
     val pagination: CatalogPagination
 )
-
-interface CatalogApi {
-    @GET("/api/v1/catalog/filters/")
-    suspend fun getFilters(): CatalogFiltersResponse
-
-    @GET("/api/v1/catalog/courses/")
-    suspend fun getCourses(
-        @Query("search_term") searchTerm: String? = null,
-        @Query("category") category: String? = null,
-        @Query("level") level: String? = null,
-        @Query("subject") subject: String? = null
-    ): CatalogCourseList
-}

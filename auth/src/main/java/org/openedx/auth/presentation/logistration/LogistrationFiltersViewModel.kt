@@ -3,31 +3,36 @@ package org.openedx.auth.presentation.logistration
 import androidx.lifecycle.viewModelScope
 import kotlinx.coroutines.launch
 import org.openedx.foundation.presentation.BaseViewModel
+import com.google.gson.Gson
+import com.google.gson.reflect.TypeToken
 
 data class FilterOptions(
-    val categories: List<String>,
-    val levels: List<String>,
-    val subjects: List<String>,
+    val options: Map<String, List<String>>
 )
 
 class LogistrationFiltersRepository(
-    private val catalogApi: org.openedx.auth.data.api.CatalogApi
+    private val catalogApi: org.openedx.auth.data.api.CatalogApi,
+    private val gson: Gson
 ) {
     suspend fun getFilterOptions(): FilterOptions {
-        val resp = catalogApi.getFilters()
-        return FilterOptions(
-            categories = listOf("All Categories") + resp.categories,
-            levels = listOf("All Levels") + resp.levels,
-            subjects = listOf("All Subjects") + resp.subjects
-        )
+        val json = catalogApi.getFiltersRaw().string()
+        val type = object : TypeToken<Map<String, List<String>>>() {}.type
+        val map: Map<String, List<String>> = try {
+            gson.fromJson<Map<String, List<String>>>(json, type)
+        } catch (e: Exception) {
+            emptyMap()
+        }
+        val normalized = map.mapValues { (key, values) ->
+            val allLabel = "All ${key.replaceFirstChar { if (it.isLowerCase()) it.titlecase() else it.toString() }}"
+            listOf(allLabel) + values
+        }
+        return FilterOptions(options = normalized)
     }
 }
 
 data class FiltersState(
-    val options: FilterOptions = FilterOptions(emptyList(), emptyList(), emptyList()),
-    val selectedCategory: String = "",
-    val selectedLevel: String = "",
-    val selectedSubject: String = ""
+    val options: FilterOptions = FilterOptions(emptyMap()),
+    val selected: Map<String, String> = emptyMap()
 )
 
 class LogistrationFiltersViewModel(
@@ -40,22 +45,12 @@ class LogistrationFiltersViewModel(
     init {
         viewModelScope.launch {
             val opts = repository.getFilterOptions()
-            _state.value = FiltersState(
-                options = opts,
-                selectedCategory = opts.categories.firstOrNull().orEmpty(),
-                selectedLevel = opts.levels.firstOrNull().orEmpty(),
-                selectedSubject = opts.subjects.firstOrNull().orEmpty()
-            )
+            val initialSelected = opts.options.mapValues { (_, values) -> values.firstOrNull().orEmpty() }
+            _state.value = FiltersState(options = opts, selected = initialSelected)
         }
     }
 
-    fun selectCategory(value: String) {
-        _state.value = _state.value.copy(selectedCategory = value)
-    }
-    fun selectLevel(value: String) {
-        _state.value = _state.value.copy(selectedLevel = value)
-    }
-    fun selectSubject(value: String) {
-        _state.value = _state.value.copy(selectedSubject = value)
+    fun select(key: String, value: String) {
+        _state.value = _state.value.copy(selected = _state.value.selected + (key to value))
     }
 }

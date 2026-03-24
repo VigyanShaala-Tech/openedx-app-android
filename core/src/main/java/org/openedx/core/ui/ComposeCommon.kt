@@ -229,7 +229,7 @@ fun MainToolbar(
                 .padding(start = 16.dp),
             text = label,
             color = MaterialTheme.appColors.textDark,
-            style = MaterialTheme.appTypography.headlineBold
+            style = MaterialTheme.appTypography.titleLarge
         )
         IconButton(
             modifier = Modifier

@@ -138,7 +138,7 @@ private fun Header(
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
         MainToolbar(
-            label = stringResource(id = R.string.dashboard_learn),
+            label = stringResource(id = R.string.dashboard_welcome_back, viewModel.userName),
             onSettingsClick = {
                 viewModel.onSettingsClick(fragmentManager)
             }

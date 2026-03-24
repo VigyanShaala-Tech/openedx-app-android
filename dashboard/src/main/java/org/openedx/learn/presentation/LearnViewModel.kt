@@ -13,6 +13,7 @@ import org.openedx.dashboard.presentation.DashboardAnalytics
 import org.openedx.dashboard.presentation.DashboardAnalyticsEvent
 import org.openedx.dashboard.presentation.DashboardAnalyticsKey
 import org.openedx.dashboard.presentation.DashboardRouter
+import org.openedx.core.data.storage.CorePreferences
 import org.openedx.foundation.presentation.BaseViewModel
 import org.openedx.learn.LearnType
 
@@ -21,6 +22,7 @@ class LearnViewModel(
     private val config: Config,
     private val dashboardRouter: DashboardRouter,
     private val analytics: DashboardAnalytics,
+    private val corePreferences: CorePreferences,
 ) : BaseViewModel() {
     private val _uiState = MutableStateFlow(
         LearnUIState(
@@ -45,6 +47,9 @@ class LearnViewModel(
     val getDashboardFragment get() = DashboardNavigator(dashboardType).getDashboardFragment()
 
     val getProgramFragment get() = dashboardRouter.getProgramFragment()
+
+    val userName: String
+        get() = corePreferences.user?.username ?: ""
 
     init {
         viewModelScope.launch {

@@ -5,6 +5,7 @@ import kotlinx.coroutines.async
 import kotlinx.coroutines.launch
 import org.openedx.core.config.Config
 import org.openedx.core.system.connection.NetworkConnection
+import org.openedx.core.data.storage.CorePreferences
 import org.openedx.dashboard.data.model.AchievementDto
 import org.openedx.dashboard.data.model.CourseItemDto
 import org.openedx.dashboard.data.model.PaginatedDto
@@ -35,11 +36,14 @@ class NewDashboardViewModel(
     private val resourceManager: ResourceManager,
     private val networkConnection: NetworkConnection,
     private val windowSize: WindowSize,
+    private val corePreferences: CorePreferences,
 ) : BaseViewModel() {
 
     val apiHostUrl get() = config.getApiHostURL()
     val hasInternetConnection: Boolean get() = networkConnection.isOnline()
     val isTablet get() = windowSize.isTablet
+    val userName: String
+        get() = corePreferences.user?.username?.takeIf { it.isNotBlank() } ?: "Learner"
 
     private val _uiMessage = kotlinx.coroutines.flow.MutableSharedFlow<UIMessage>()
     val uiMessage = _uiMessage

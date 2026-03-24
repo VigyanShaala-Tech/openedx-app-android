@@ -19,6 +19,7 @@
     <string name="dashboard_find_a_course">Find a Course</string>
     <string name="dashboard_no_status_courses">No %1$s Courses</string>
     <string name="dashboard_pull_to_refresh">Swipe down to refresh</string>
+    <string name="dashboard_welcome_back">Welcome back, %1$s</string>
 
     <plurals name="dashboard_past_due_assignment">
         <item quantity="one">%1$d Past Due Assignment</item>

@@ -177,12 +177,13 @@ val screenModule = module {
             get(),
             get(),
             get(),
-            windowSize
+            windowSize,
+            get()
         )
     }
     viewModel { AllEnrolledCoursesViewModel(get(), get(), get(), get(), get(), get(), get()) }
     viewModel { (openTab: String) ->
-        LearnViewModel(openTab, get(), get(), get())
+        LearnViewModel(openTab, get(), get(), get(), get())
     }
 
     factory { DiscoveryRepository(get(), get(), get()) }

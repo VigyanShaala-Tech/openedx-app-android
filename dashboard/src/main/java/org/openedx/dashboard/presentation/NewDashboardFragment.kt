@@ -46,6 +46,8 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Color
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.ComposeView
 import androidx.compose.ui.platform.LocalContext
@@ -98,12 +100,12 @@ private data class RecommendationData(val title: String, val category: String, v
 @Composable
 private fun NewDashboardScreen(viewModel: NewDashboardViewModel) {
     val uiState by viewModel.state.collectAsState(NewDashboardState())
-    NewDashboardScreenContent(uiState)
+    NewDashboardScreenContent(uiState, viewModel.userName)
 }
 
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
-private fun NewDashboardScreenContent(uiState: NewDashboardState) {
+private fun NewDashboardScreenContent(uiState: NewDashboardState, userName: String) {
     val windowSize = rememberWindowSize()
     val contentPadding by remember(key1 = windowSize) {
         mutableStateOf(
@@ -174,35 +176,35 @@ private fun NewDashboardScreenContent(uiState: NewDashboardState) {
             contentPadding = contentPadding,
             verticalArrangement = Arrangement.spacedBy(16.dp)
         ) {
-            item {
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.SpaceBetween,
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-                    Column {
-                        Text(
-                            text = "Welcome back, Priya",
-                            style = MaterialTheme.appTypography.titleLarge,
-                            color = MaterialTheme.appColors.textDark
-                        )
-                    }
-                    Box(
-                        modifier = Modifier
-                            .size(36.dp)
-                            .background(MaterialTheme.appColors.surface, MaterialTheme.appShapes.cardShape)
-                            .clip(MaterialTheme.appShapes.cardShape)
-                            .clickable { }
-                    ) {
-                        Icon(
-                            imageVector = Icons.Filled.EmojiEvents,
-                            contentDescription = null,
-                            tint = MaterialTheme.appColors.primary,
-                            modifier = Modifier.align(Alignment.Center)
-                        )
-                    }
-                }
-            }
+//            item {
+//                Row(
+//                    modifier = Modifier.fillMaxWidth(),
+//                    horizontalArrangement = Arrangement.SpaceBetween,
+//                    verticalAlignment = Alignment.CenterVertically
+//                ) {
+//                    Column {
+//                        Text(
+//                            text = "Welcome back, $userName",
+//                            style = MaterialTheme.appTypography.titleLarge,
+//                            color = MaterialTheme.appColors.textDark
+//                        )
+//                    }
+//                    Card(
+//                        modifier = Modifier.size(36.dp),
+//                        shape = CircleShape,
+//                        elevation = 0.dp,
+//                        backgroundColor = MaterialTheme.appColors.surface
+//                    ) {
+//                        Box(contentAlignment = Alignment.Center) {
+//                            Icon(
+//                                imageVector = Icons.Filled.EmojiEvents,
+//                                contentDescription = null,
+//                                tint = MaterialTheme.appColors.primary
+//                            )
+//                        }
+//                    }
+//                }
+//            }
 
             if (statCards.isNotEmpty()) {
                 item {
@@ -213,12 +215,12 @@ private fun NewDashboardScreenContent(uiState: NewDashboardState) {
                     ) {
                         cards.forEach { item ->
                             Card(
-                                backgroundColor = MaterialTheme.appColors.surface,
-                                elevation = 0.dp,
+                                backgroundColor = MaterialTheme.appColors.background,
+                                elevation = 4.dp,
                                 shape = MaterialTheme.appShapes.cardShape,
                                 modifier = Modifier
                                     .weight(1f)
-                                    .height(110.dp)
+//                                    .height(110.dp)
                             ) {
                                 Column(
                                     modifier = Modifier
@@ -227,20 +229,30 @@ private fun NewDashboardScreenContent(uiState: NewDashboardState) {
                                     horizontalAlignment = Alignment.CenterHorizontally,
                                     verticalArrangement = Arrangement.SpaceBetween
                                 ) {
-                                    Icon(
-                                        imageVector = item.icon,
-                                        contentDescription = null,
-                                        tint = MaterialTheme.appColors.primary,
-                                        modifier = Modifier.size(24.dp)
-                                    )
+                                    Box(
+                                        modifier = Modifier
+                                            .size(36.dp)
+                                            .background(
+                                                MaterialTheme.appColors.primary.copy(alpha = 0.12f),
+                                                CircleShape
+                                            ),
+                                        contentAlignment = Alignment.Center
+                                    ) {
+                                        Icon(
+                                            imageVector = item.icon,
+                                            contentDescription = null,
+                                            tint = MaterialTheme.appColors.primary,
+                                            modifier = Modifier.size(20.dp)
+                                        )
+                                    }
                                     Text(
                                         text = item.value,
-                                        style = MaterialTheme.appTypography.titleLarge,
+                                        style = MaterialTheme.appTypography.titleMedium,
                                         color = MaterialTheme.appColors.textDark
                                     )
                                     Text(
                                         text = item.label,
-                                        style = MaterialTheme.appTypography.bodySmall,
+                                        style = MaterialTheme.appTypography.labelSmall,
                                         color = MaterialTheme.appColors.textPrimary,
                                         maxLines = 2,
                                         overflow = TextOverflow.Ellipsis
@@ -287,11 +299,22 @@ private fun NewDashboardScreenContent(uiState: NewDashboardState) {
                                         .padding(horizontal = 16.dp, vertical = 12.dp),
                                     verticalAlignment = Alignment.CenterVertically
                                 ) {
-                                    Icon(
-                                        imageVector = a.icon,
-                                        contentDescription = null,
-                                        tint = MaterialTheme.appColors.primary
-                                    )
+                                    Box(
+                                        modifier = Modifier
+                                            .size(36.dp)
+                                            .background(
+                                                MaterialTheme.appColors.primary.copy(alpha = 0.12f),
+                                                CircleShape
+                                            ),
+                                        contentAlignment = Alignment.Center
+                                    ) {
+                                        Icon(
+                                            imageVector = a.icon,
+                                            contentDescription = null,
+                                            tint = MaterialTheme.appColors.primary,
+                                            modifier = Modifier.size(20.dp)
+                                        )
+                                    }
                                     Spacer(Modifier.width(8.dp))
                                     Text(
                                         text = a.title,
@@ -738,7 +761,8 @@ private fun NewDashboardScreenPreview() {
                     ),
                     pagination = PaginationDto(null, null, 1, 1)
                 )
-            )
+            ),
+            userName = "Priya"
         )
     }
 }
@@ -748,7 +772,8 @@ private fun NewDashboardScreenPreview() {
 private fun NewDashboardScreenLoadingPreview() {
     OpenEdXTheme {
         NewDashboardScreenContent(
-            uiState = NewDashboardState(loading = true)
+            uiState = NewDashboardState(loading = true),
+            userName = "Priya"
         )
     }
 }
@@ -758,7 +783,8 @@ private fun NewDashboardScreenLoadingPreview() {
 private fun NewDashboardScreenEmptyPreview() {
     OpenEdXTheme {
         NewDashboardScreenContent(
-            uiState = NewDashboardState(loading = false)
+            uiState = NewDashboardState(loading = false),
+            userName = "Priya"
         )
     }
 }

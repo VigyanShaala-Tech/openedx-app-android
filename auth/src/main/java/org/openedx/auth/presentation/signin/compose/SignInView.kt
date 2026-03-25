@@ -56,6 +56,7 @@ import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.text.input.VisualTransformation
+import androidx.compose.ui.text.TextRange
 import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.tooling.preview.Devices
 import androidx.compose.ui.tooling.preview.Preview
@@ -501,8 +502,10 @@ private fun MobileOtpSection(
         OutlinedTextField(
             value = mobileTextFieldValue,
             onValueChange = {
-                mobileTextFieldValue = it
-                onMobileChanged(it.text.trim())
+                val raw = it.text.trim()
+                val normalized = if (raw.startsWith("+91")) raw else "+91${raw.removePrefix("+")}"
+                mobileTextFieldValue = it.copy(text = normalized, selection = TextRange(normalized.length))
+                onMobileChanged(normalized)
             },
             colors = TextFieldDefaults.outlinedTextFieldColors(
                 textColor = MaterialTheme.appColors.textFieldText,

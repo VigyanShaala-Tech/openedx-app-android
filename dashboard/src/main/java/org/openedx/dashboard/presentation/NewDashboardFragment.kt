@@ -22,64 +22,62 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.Card
+import androidx.compose.material.CircularProgressIndicator
 import androidx.compose.material.Icon
+import androidx.compose.material.LinearProgressIndicator
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Scaffold
 import androidx.compose.material.Text
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.ArrowForward
+import androidx.compose.material.icons.automirrored.filled.KeyboardArrowRight
 import androidx.compose.material.icons.filled.Alarm
 import androidx.compose.material.icons.filled.Book
 import androidx.compose.material.icons.filled.CheckCircle
 import androidx.compose.material.icons.filled.EmojiEvents
 import androidx.compose.material.icons.filled.Star
-import androidx.compose.material.LinearProgressIndicator
-import androidx.compose.material.CircularProgressIndicator
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
-import androidx.compose.runtime.getValue
-import androidx.lifecycle.Lifecycle
-import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.ui.platform.LocalLifecycleOwner
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
-import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.ComposeView
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalLifecycleOwner
 import androidx.compose.ui.platform.ViewCompositionStrategy
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.fragment.app.Fragment
+import androidx.lifecycle.Lifecycle
 import coil.compose.AsyncImage
 import coil.request.ImageRequest
+import org.koin.android.ext.android.inject
+import org.koin.androidx.compose.koinViewModel
+import org.koin.core.parameter.parametersOf
 import org.openedx.core.ui.theme.OpenEdXTheme
 import org.openedx.core.ui.theme.appColors
 import org.openedx.core.ui.theme.appShapes
 import org.openedx.core.ui.theme.appTypography
-import org.koin.androidx.compose.koinViewModel
-import org.koin.core.parameter.parametersOf
 import org.openedx.dashboard.data.model.AchievementDto
 import org.openedx.dashboard.data.model.CourseItemDto
 import org.openedx.dashboard.data.model.PaginatedDto
 import org.openedx.dashboard.data.model.PaginationDto
 import org.openedx.dashboard.data.model.RecommendationDto
 import org.openedx.dashboard.data.model.SummaryCardDto
-import org.openedx.dashboard.presentation.CarouselItem
-import org.openedx.dashboard.presentation.DashboardCarousel
 import org.openedx.foundation.presentation.rememberWindowSize
 import org.openedx.foundation.presentation.windowSizeValue
 import org.openedx.core.R as CoreR
-import org.koin.android.ext.android.inject
-import org.openedx.dashboard.presentation.DashboardRouter
 
 class NewDashboardFragment : Fragment() {
     private val dashboardRouter: DashboardRouter by inject()
@@ -123,21 +121,69 @@ class NewDashboardFragment : Fragment() {
     }
 }
 
-private data class StatCardData(val icon: androidx.compose.ui.graphics.vector.ImageVector, val value: String, val label: String)
-private data class CourseCardData(val id: String, val title: String, val tag: String, val imageUrl: String, val progress: Int)
-private data class WishlistItemData(val title: String, val meta: String, val rating: String, val reviews: String, val instructor: String, val imageUrl: String)
-private data class AchievementData(val title: String, val icon: androidx.compose.ui.graphics.vector.ImageVector)
-private data class RecommendationData(val id: String, val title: String, val category: String, val rating: String, val description: String, val imageUrl: String)
+private data class StatCardData(
+    val icon: androidx.compose.ui.graphics.vector.ImageVector,
+    val value: String,
+    val label: String
+)
+
+private data class CourseCardData(
+    val id: String,
+    val title: String,
+    val tag: String,
+    val imageUrl: String,
+    val progress: Int
+)
+
+private data class WishlistItemData(
+    val title: String,
+    val meta: String,
+    val rating: String,
+    val reviews: String,
+    val instructor: String,
+    val imageUrl: String
+)
+
+private data class AchievementData(
+    val title: String,
+    val icon: androidx.compose.ui.graphics.vector.ImageVector
+)
+
+private data class RecommendationData(
+    val id: String,
+    val title: String,
+    val category: String,
+    val rating: String,
+    val description: String,
+    val imageUrl: String
+)
 
 @Composable
-private fun NewDashboardScreen(viewModel: NewDashboardViewModel, onWishlistViewAllClick: () -> Unit, onRecommendationClick: (String) -> Unit, onCourseClick: (String, String) -> Unit) {
+private fun NewDashboardScreen(
+    viewModel: NewDashboardViewModel,
+    onWishlistViewAllClick: () -> Unit,
+    onRecommendationClick: (String) -> Unit,
+    onCourseClick: (String, String) -> Unit
+) {
     val uiState by viewModel.state.collectAsState(NewDashboardState())
-    NewDashboardScreenContent(uiState, viewModel.userName, onWishlistViewAllClick, onRecommendationClick, onCourseClick)
+    NewDashboardScreenContent(
+        uiState,
+        viewModel.userName,
+        onWishlistViewAllClick,
+        onRecommendationClick,
+        onCourseClick
+    )
 }
 
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
-private fun NewDashboardScreenContent(uiState: NewDashboardState, userName: String, onWishlistViewAllClick: () -> Unit, onRecommendationClick: (String) -> Unit, onCourseClick: (String, String) -> Unit) {
+private fun NewDashboardScreenContent(
+    uiState: NewDashboardState,
+    userName: String,
+    onWishlistViewAllClick: () -> Unit,
+    onRecommendationClick: (String) -> Unit,
+    onCourseClick: (String, String) -> Unit
+) {
     val windowSize = rememberWindowSize()
     val contentPadding by remember(key1 = windowSize) {
         mutableStateOf(
@@ -167,10 +213,22 @@ private fun NewDashboardScreenContent(uiState: NewDashboardState, userName: Stri
     }
 
     val continueCourses = uiState.continueLearning.map { course ->
-        CourseCardData(course.id, course.title, course.category ?: "", sanitizeUrl(course.course_image), course.progress)
+        CourseCardData(
+            course.id,
+            course.title,
+            course.category ?: "",
+            sanitizeUrl(course.course_image),
+            course.progress
+        )
     }
     val completedCourses = uiState.completed?.results?.map { course ->
-        CourseCardData(course.id, course.title, course.category ?: "", sanitizeUrl(course.course_image), course.progress)
+        CourseCardData(
+            course.id,
+            course.title,
+            course.category ?: "",
+            sanitizeUrl(course.course_image),
+            course.progress
+        )
     } ?: emptyList()
     val wishlistItems = uiState.wishlist?.results?.map { course ->
         WishlistItemData(
@@ -422,7 +480,7 @@ private fun SectionHeader(title: String, showViewAll: Boolean = false) {
                     color = MaterialTheme.appColors.primary
                 )
                 Icon(
-                    imageVector = Icons.AutoMirrored.Filled.ArrowForward,
+                    imageVector = Icons.AutoMirrored.Filled.KeyboardArrowRight,
                     contentDescription = null,
                     tint = MaterialTheme.appColors.primary
                 )
@@ -457,7 +515,7 @@ private fun CoursesTabs(
                     .weight(1f)
                     .clip(MaterialTheme.appShapes.textFieldShape)
                     .background(
-                        if (selected) MaterialTheme.appColors.primary else MaterialTheme.appColors.tabUnselectedBtnBackground
+                        if (selected) MaterialTheme.appColors.primary else Color.Transparent
                     )
                     .clickable { selectedTab = index }
                     .padding(vertical = 10.dp),
@@ -465,8 +523,8 @@ private fun CoursesTabs(
             ) {
                 Text(
                     text = label,
-                    style = MaterialTheme.appTypography.bodySmall,
-                    color = if (selected) MaterialTheme.appColors.primaryButtonText else MaterialTheme.appColors.tabUnselectedBtnContent
+                    style = MaterialTheme.appTypography.labelSmall,
+                    color = if (selected) MaterialTheme.appColors.primaryButtonText else Color.Black,
                 )
             }
         }
@@ -495,6 +553,7 @@ private fun CoursesTabs(
                 EmptyTabContent("No courses in progress")
             }
         }
+
         1 -> {
             if (wishlistItems.isNotEmpty()) {
                 Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
@@ -506,6 +565,7 @@ private fun CoursesTabs(
                 EmptyTabContent("Your wishlist is empty")
             }
         }
+
         else -> {
             if (completedCourses.isNotEmpty()) {
                 Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
@@ -549,23 +609,33 @@ private fun EmptyTabContent(message: String) {
 
 @Composable
 private fun ViewAllLink(onClick: () -> Unit) {
-    Row(
+    Box(
+        contentAlignment = Alignment.Center,
         modifier = Modifier
             .fillMaxWidth()
-            .clickable { onClick() },
-        horizontalArrangement = Arrangement.Center,
-        verticalAlignment = Alignment.CenterVertically
+            .clip(RoundedCornerShape(8.dp))
+            .background(MaterialTheme.appColors.primary.copy(alpha = 0.12f)) // light grey background
+            .clickable { onClick() }
+            .padding(vertical = 12.dp) // height of button
     ) {
-        Text(
-            text = "View All",
-            style = MaterialTheme.appTypography.bodySmall,
-            color = MaterialTheme.appColors.primary
-        )
-        Icon(
-            imageVector = Icons.AutoMirrored.Filled.ArrowForward,
-            contentDescription = null,
-            tint = MaterialTheme.appColors.primary
-        )
+        Row(
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Text(
+                text = "View All",
+                style = MaterialTheme.appTypography.bodySmall,
+                color = MaterialTheme.appColors.primary
+            )
+
+            Spacer(modifier = Modifier.width(4.dp)) // small gap
+
+            Icon(
+                imageVector = Icons.AutoMirrored.Filled.KeyboardArrowRight,
+                contentDescription = null,
+                tint = MaterialTheme.appColors.primary,
+                modifier = Modifier.size(18.dp) // slightly smaller icon
+            )
+        }
     }
 }
 
@@ -597,7 +667,10 @@ private fun CourseCard(c: CourseCardData, onClick: () -> Unit) {
                 Box(
                     modifier = Modifier
                         .padding(10.dp)
-                        .background(MaterialTheme.appColors.primary, MaterialTheme.appShapes.textFieldShape)
+                        .background(
+                            MaterialTheme.appColors.primary,
+                            MaterialTheme.appShapes.textFieldShape
+                        )
                         .clip(MaterialTheme.appShapes.textFieldShape)
                         .padding(horizontal = 10.dp, vertical = 4.dp)
                 ) {
@@ -647,11 +720,11 @@ private fun WishlistItem(w: WishlistItemData) {
                     .clip(MaterialTheme.appShapes.cardShape),
                 contentScale = ContentScale.Crop,
                 model = ImageRequest.Builder(LocalContext.current)
-                        .data(w.imageUrl)
-                        .error(CoreR.drawable.core_no_image_course)
-                        .placeholder(CoreR.drawable.core_no_image_course)
-                        .crossfade(true)
-                        .build(),
+                    .data(w.imageUrl)
+                    .error(CoreR.drawable.core_no_image_course)
+                    .placeholder(CoreR.drawable.core_no_image_course)
+                    .crossfade(true)
+                    .build(),
                 contentDescription = null,
             )
             Spacer(Modifier.width(12.dp))
@@ -725,11 +798,11 @@ private fun RecommendationItem(r: RecommendationData, onClick: () -> Unit) {
                     .clip(MaterialTheme.appShapes.cardShape),
                 contentScale = ContentScale.Crop,
                 model = ImageRequest.Builder(LocalContext.current)
-                        .data(r.imageUrl)
-                        .error(CoreR.drawable.core_no_image_course)
-                        .placeholder(CoreR.drawable.core_no_image_course)
-                        .crossfade(true)
-                        .build(),
+                    .data(r.imageUrl)
+                    .error(CoreR.drawable.core_no_image_course)
+                    .placeholder(CoreR.drawable.core_no_image_course)
+                    .crossfade(true)
+                    .build(),
                 contentDescription = null,
             )
             Spacer(Modifier.width(12.dp))
@@ -737,7 +810,10 @@ private fun RecommendationItem(r: RecommendationData, onClick: () -> Unit) {
                 Row(verticalAlignment = Alignment.CenterVertically) {
                     Box(
                         modifier = Modifier
-                            .background(MaterialTheme.appColors.primary, MaterialTheme.appShapes.textFieldShape)
+                            .background(
+                                MaterialTheme.appColors.primary,
+                                MaterialTheme.appShapes.textFieldShape
+                            )
                             .clip(MaterialTheme.appShapes.textFieldShape)
                             .padding(horizontal = 8.dp, vertical = 2.dp)
                     ) {
@@ -781,10 +857,14 @@ private fun RecommendationItem(r: RecommendationData, onClick: () -> Unit) {
     }
 }
 
-private const val SAMPLE_IMAGE_1 = "https://images.unsplash.com/photo-1509395176047-4a66953fd231?q=80&w=1080&auto=format&fit=crop"
-private const val SAMPLE_IMAGE_2 = "https://images.unsplash.com/photo-1517142089942-ba376ce32a2e?q=80&w=1080&auto=format&fit=crop"
-private const val SAMPLE_IMAGE_3 = "https://images.unsplash.com/photo-1527694224012-bea5e2b3e979?q=80&w=1080&auto=format&fit=crop"
-private const val SAMPLE_IMAGE_4 = "https://images.unsplash.com/photo-1518779578993-ec3579fee39f?q=80&w=1080&auto=format&fit=crop"
+private const val SAMPLE_IMAGE_1 =
+    "https://images.unsplash.com/photo-1509395176047-4a66953fd231?q=80&w=1080&auto=format&fit=crop"
+private const val SAMPLE_IMAGE_2 =
+    "https://images.unsplash.com/photo-1517142089942-ba376ce32a2e?q=80&w=1080&auto=format&fit=crop"
+private const val SAMPLE_IMAGE_3 =
+    "https://images.unsplash.com/photo-1527694224012-bea5e2b3e979?q=80&w=1080&auto=format&fit=crop"
+private const val SAMPLE_IMAGE_4 =
+    "https://images.unsplash.com/photo-1518779578993-ec3579fee39f?q=80&w=1080&auto=format&fit=crop"
 
 private fun sanitizeUrl(url: String?): String {
     return url?.replace("`", "")?.trim() ?: ""
@@ -804,25 +884,64 @@ private fun NewDashboardScreenPreview() {
                     SummaryCardDto(4, "faAward", 2, "Achievements")
                 ),
                 continueLearning = listOf(
-                    CourseItemDto("1", "Introduction to Computer Science", SAMPLE_IMAGE_1, 45, "Computer Science", "Beginner"),
-                    CourseItemDto("2", "Data Science: Machine Learning", SAMPLE_IMAGE_2, 70, "Data Science", "Intermediate")
+                    CourseItemDto(
+                        "1",
+                        "Introduction to Computer Science",
+                        SAMPLE_IMAGE_1,
+                        45,
+                        "Computer Science",
+                        "Beginner"
+                    ),
+                    CourseItemDto(
+                        "2",
+                        "Data Science: Machine Learning",
+                        SAMPLE_IMAGE_2,
+                        70,
+                        "Data Science",
+                        "Intermediate"
+                    )
                 ),
                 achievements = listOf(
                     AchievementDto(1, "Fast Learner", null),
                     AchievementDto(2, "Top Performer", null)
                 ),
                 recommended = listOf(
-                    RecommendationDto("r1", "Advanced Python", "Learn advanced python concepts", "Programming", "10 weeks", "Advanced", SAMPLE_IMAGE_4, 4, 120, "John Doe")
+                    RecommendationDto(
+                        "r1",
+                        "Advanced Python",
+                        "Learn advanced python concepts",
+                        "Programming",
+                        "10 weeks",
+                        "Advanced",
+                        SAMPLE_IMAGE_4,
+                        4,
+                        120,
+                        "John Doe"
+                    )
                 ),
                 wishlist = PaginatedDto(
                     results = listOf(
-                        CourseItemDto("3", "Mobile App Development", SAMPLE_IMAGE_3, 0, "Mobile", "Beginner")
+                        CourseItemDto(
+                            "3",
+                            "Mobile App Development",
+                            SAMPLE_IMAGE_3,
+                            0,
+                            "Mobile",
+                            "Beginner"
+                        )
                     ),
                     pagination = PaginationDto(null, null, 1, 1)
                 ),
                 completed = PaginatedDto(
                     results = listOf(
-                        CourseItemDto("1", "Introduction to Computer Science", SAMPLE_IMAGE_1, 100, "Computer Science", "Beginner")
+                        CourseItemDto(
+                            "1",
+                            "Introduction to Computer Science",
+                            SAMPLE_IMAGE_1,
+                            100,
+                            "Computer Science",
+                            "Beginner"
+                        )
                     ),
                     pagination = PaginationDto(null, null, 1, 1)
                 )

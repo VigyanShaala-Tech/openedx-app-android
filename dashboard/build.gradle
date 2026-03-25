@@ -55,6 +55,7 @@ android {
 
 dependencies {
     implementation project(path: ':core')
+    implementation 'androidx.compose.foundation:foundation:1.10.5'
 
     testImplementation "junit:junit:$junit_version"
     testImplementation "io.mockk:mockk:$mockk_version"

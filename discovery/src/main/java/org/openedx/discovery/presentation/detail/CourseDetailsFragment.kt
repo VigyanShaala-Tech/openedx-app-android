@@ -14,6 +14,7 @@ import android.webkit.WebResourceRequest
 import android.webkit.WebView
 import android.webkit.WebViewClient
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -323,6 +324,7 @@ internal fun CourseDetailsScreen(
                                         hasInternetConnection = hasInternetConnection,
                                         isInternetConnectionShown = isInternetConnectionShown,
                                         course = uiState.course,
+                                        htmlBody = htmlBody,
                                         isWishlisted = uiState.isWishlisted,
                                         onButtonClick = {
                                             onButtonClick()
@@ -338,6 +340,7 @@ internal fun CourseDetailsScreen(
                                         hasInternetConnection = hasInternetConnection,
                                         isInternetConnectionShown = isInternetConnectionShown,
                                         course = uiState.course,
+                                        htmlBody = htmlBody,
                                         isWishlisted = uiState.isWishlisted,
                                         onButtonClick = {
                                             onButtonClick()
@@ -346,42 +349,6 @@ internal fun CourseDetailsScreen(
                                             onWishlistClick()
                                         }
                                     )
-                                }
-                                if (isPreview) {
-                                    Text(
-                                        text = htmlBody,
-                                        modifier = Modifier
-                                            .testTag("txt_course_description")
-                                            .padding(all = 20.dp),
-                                    )
-                                } else {
-                                    var webViewAlpha by remember { mutableFloatStateOf(0f) }
-                                    if (webViewAlpha == 0f) {
-                                        Box(
-                                            modifier = Modifier
-                                                .fillMaxWidth()
-                                                .padding(top = 20.dp),
-                                            contentAlignment = Alignment.Center
-                                        ) {
-                                            CircularProgressIndicator(color = MaterialTheme.appColors.primary)
-                                        }
-                                    }
-                                    Surface(
-                                        modifier = Modifier
-                                            .padding(top = 16.dp)
-                                            .fillMaxWidth()
-                                            .alpha(webViewAlpha),
-                                        color = MaterialTheme.appColors.background
-                                    ) {
-                                        CourseDescription(
-                                            modifier = webViewPadding,
-                                            apiHostUrl = apiHostUrl,
-                                            body = htmlBody,
-                                            onWebPageLoaded = {
-                                                webViewAlpha = 1f
-                                            }
-                                        )
-                                    }
                                 }
                             }
                         }
@@ -413,6 +380,7 @@ private fun CourseDetailNativeContent(
     course: Course,
     hasInternetConnection: Boolean,
     isInternetConnectionShown: MutableState<Boolean>,
+    htmlBody: String,
     isWishlisted: Boolean,
     onButtonClick: () -> Unit,
     onWishlistClick: () -> Unit,
@@ -532,6 +500,95 @@ private fun CourseDetailNativeContent(
                     )
                 }
             }
+            Spacer(Modifier.height(24.dp))
+            var selectedTab by rememberSaveable { mutableStateOf(0) }
+            val tabs = listOf("OverView", "Curriculum", "Instructor", "Reviews")
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = contentHorizontalPadding),
+                horizontalArrangement = Arrangement.spacedBy(24.dp)
+            ) {
+                tabs.forEachIndexed { index, label ->
+                    Column(
+                        horizontalAlignment = Alignment.CenterHorizontally,
+                        modifier = Modifier
+                            .clickable { selectedTab = index }
+                    ) {
+                        Text(
+                            text = label,
+                            style = MaterialTheme.appTypography.bodySmall,
+                            color = if (selectedTab == index) MaterialTheme.appColors.primary else MaterialTheme.appColors.textPrimary
+                        )
+                        Spacer(Modifier.height(6.dp))
+                        Box(
+                            modifier = Modifier
+                                .width(60.dp)
+                                .height(2.dp)
+                                .background(if (selectedTab == index) MaterialTheme.appColors.primary else MaterialTheme.appColors.background)
+                        )
+                    }
+                }
+            }
+            Spacer(Modifier.height(12.dp))
+            when (selectedTab) {
+                0 -> {
+                    Text(
+                        text = stringResource(id = R.string.discovery_course_details),
+                        style = MaterialTheme.appTypography.titleMedium,
+                        color = MaterialTheme.appColors.textPrimary
+                    )
+                    Spacer(Modifier.height(8.dp))
+                    var webViewAlpha by remember { mutableFloatStateOf(0f) }
+                    if (webViewAlpha == 0f) {
+                        Box(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(top = 12.dp),
+                            contentAlignment = Alignment.Center
+                        ) {
+                            CircularProgressIndicator(color = MaterialTheme.appColors.primary)
+                        }
+                    }
+                    Surface(
+                        modifier = Modifier
+                            .padding(top = 8.dp)
+                            .fillMaxWidth()
+                            .alpha(webViewAlpha),
+                        color = MaterialTheme.appColors.background
+                    ) {
+                        CourseDescription(
+                            modifier = Modifier.padding(vertical = 8.dp),
+                            apiHostUrl = apiHostUrl,
+                            body = htmlBody,
+                            onWebPageLoaded = {
+                                webViewAlpha = 1f
+                            }
+                        )
+                    }
+                }
+                1 -> {
+                    Text(
+                        text = "No content",
+                        style = MaterialTheme.appTypography.titleMedium,
+                        color = MaterialTheme.appColors.textPrimary
+                    )
+                }
+                2 -> {
+                    Text(
+                        text = "No content",
+                        style = MaterialTheme.appTypography.titleMedium,
+                        color = MaterialTheme.appColors.textPrimary
+                    )
+                }
+                else -> {
+                    Text(
+                        text = "No content",
+                        style = MaterialTheme.appTypography.titleMedium,
+                        color = MaterialTheme.appColors.textPrimary
+                    )
+                }
+            }
         }
     }
 }
@@ -545,6 +602,7 @@ private fun CourseDetailNativeContentLandscape(
     course: Course,
     hasInternetConnection: Boolean,
     isInternetConnectionShown: MutableState<Boolean>,
+    htmlBody: String,
     isWishlisted: Boolean,
     onButtonClick: () -> Unit,
     onWishlistClick: () -> Unit,
@@ -555,6 +613,7 @@ private fun CourseDetailNativeContentLandscape(
         course = course,
         hasInternetConnection = hasInternetConnection,
         isInternetConnectionShown = isInternetConnectionShown,
+        htmlBody = htmlBody,
         isWishlisted = isWishlisted,
         onButtonClick = onButtonClick,
         onWishlistClick = onWishlistClick

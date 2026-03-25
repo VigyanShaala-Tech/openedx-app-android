@@ -104,7 +104,7 @@ class MainFragment : Fragment(R.layout.fragment_main) {
             if (viewModel.isDownloadsFragmentEnabled) {
                 add(R.id.fragmentDownloads to { DownloadsFragment() })
             }
-            add(R.id.fragmentProfile to { ProfileFragment() })
+            add(R.id.fragmentProfile to { org.openedx.profile.presentation.vsprofile.VsProfileFragment() })
         }
     }
 

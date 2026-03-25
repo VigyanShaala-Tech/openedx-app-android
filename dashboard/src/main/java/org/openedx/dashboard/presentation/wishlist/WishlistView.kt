@@ -112,20 +112,24 @@ private fun WishlistView(
             .navigationBarsPadding(),
         backgroundColor = MaterialTheme.appColors.background,
         topBar = {
-            Column(
+            Row(
                 modifier = Modifier
                     .fillMaxWidth()
                     .statusBarsInset()
                     .displayCutoutForLandscape()
-                    .padding(horizontal = contentPadding.calculateLeftPadding(layoutDirection = androidx.compose.ui.unit.LayoutDirection.Ltr))
+                    .padding(
+                        horizontal = contentPadding.calculateLeftPadding(
+                            layoutDirection = androidx.compose.ui.unit.LayoutDirection.Ltr
+                        ),
+                        vertical = 8.dp
+                    ),
+                verticalAlignment = Alignment.CenterVertically
             ) {
-                BackBtn(
-                    tint = MaterialTheme.appColors.textDark
-                ) { onBack() }
+                BackBtn(tint = MaterialTheme.appColors.textDark) { onBack() }
+                Spacer(Modifier.width(12.dp))
                 Text(
-                    modifier = Modifier.padding(vertical = 8.dp),
-                    text = "Wishlist",
-                    style = MaterialTheme.appTypography.headlineBold,
+                    text = "My Wishlist",
+                    style = MaterialTheme.appTypography.titleLarge,
                     color = MaterialTheme.appColors.textDark
                 )
             }

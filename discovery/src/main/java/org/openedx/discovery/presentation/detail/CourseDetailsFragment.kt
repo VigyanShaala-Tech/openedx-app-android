@@ -546,7 +546,6 @@ private fun CourseDetailNativeContent(
             )
             if (!(enrollmentEnd != null && Date() > enrollmentEnd)) {
                 Spacer(Modifier.height(32.dp))
-                val wishlistText = stringResource(id = R.string.discovery_add_to_wishlist)
                 OpenEdXButton(
                     modifier = buttonWidth,
                     text = buttonText,

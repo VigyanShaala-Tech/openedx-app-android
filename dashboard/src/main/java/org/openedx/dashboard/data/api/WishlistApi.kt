@@ -1,11 +1,9 @@
 package org.openedx.dashboard.data.api
 
+import org.openedx.dashboard.data.model.WishlistRequest
+import org.openedx.dashboard.data.model.WishlistResponse
 import retrofit2.http.Body
 import retrofit2.http.POST
-
-data class WishlistRequest(val course_id: String)
-data class WishlistResponse(val success: Boolean, val message: String?)
-
 interface WishlistApi {
     @POST("/api/v1/wishlist/add/")
     suspend fun add(@Body body: WishlistRequest): WishlistResponse

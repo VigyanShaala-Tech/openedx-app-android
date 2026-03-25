@@ -122,12 +122,26 @@ data class GradingPolicyDb(
     @ColumnInfo("gradeRange")
     val gradeRange: Map<String, Float>,
     @ColumnInfo("assignmentColors")
-    val assignmentColors: List<String>
+    val assignmentColors: List<String>?
 ) {
+    companion object {
+        val defaultColors = listOf(
+            "#D24242",
+            "#7B9645",
+            "#5A5AD8",
+            "#B0842C",
+            "#2E90C2",
+            "#D13F88",
+            "#36A17D",
+            "#AE5AD8",
+            "#3BA03B"
+        )
+    }
+
     fun mapToDomain() = CourseProgress.GradingPolicy(
         assignmentPolicies = assignmentPolicies.map { it.mapToDomain() },
         gradeRange = gradeRange,
-        assignmentColors = assignmentColors.map { colorString ->
+        assignmentColors = (assignmentColors?.takeIf { it.isNotEmpty() } ?: defaultColors).map { colorString ->
             Color(colorString.toColorInt())
         }
     )

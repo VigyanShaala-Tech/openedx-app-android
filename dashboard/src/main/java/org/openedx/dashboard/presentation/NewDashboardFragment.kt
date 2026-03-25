@@ -69,12 +69,17 @@ import org.openedx.core.ui.theme.OpenEdXTheme
 import org.openedx.core.ui.theme.appColors
 import org.openedx.core.ui.theme.appShapes
 import org.openedx.core.ui.theme.appTypography
+import org.openedx.dashboard.data.model.AchievementData
 import org.openedx.dashboard.data.model.AchievementDto
+import org.openedx.dashboard.data.model.CourseCardData
 import org.openedx.dashboard.data.model.CourseItemDto
 import org.openedx.dashboard.data.model.PaginatedDto
 import org.openedx.dashboard.data.model.PaginationDto
+import org.openedx.dashboard.data.model.RecommendationData
 import org.openedx.dashboard.data.model.RecommendationDto
+import org.openedx.dashboard.data.model.StatCardData
 import org.openedx.dashboard.data.model.SummaryCardDto
+import org.openedx.dashboard.data.model.WishlistItemData
 import org.openedx.foundation.presentation.rememberWindowSize
 import org.openedx.foundation.presentation.windowSizeValue
 import org.openedx.core.R as CoreR
@@ -120,43 +125,6 @@ class NewDashboardFragment : Fragment() {
         }
     }
 }
-
-private data class StatCardData(
-    val icon: androidx.compose.ui.graphics.vector.ImageVector,
-    val value: String,
-    val label: String
-)
-
-private data class CourseCardData(
-    val id: String,
-    val title: String,
-    val tag: String,
-    val imageUrl: String,
-    val progress: Int
-)
-
-private data class WishlistItemData(
-    val title: String,
-    val meta: String,
-    val rating: String,
-    val reviews: String,
-    val instructor: String,
-    val imageUrl: String
-)
-
-private data class AchievementData(
-    val title: String,
-    val icon: androidx.compose.ui.graphics.vector.ImageVector
-)
-
-private data class RecommendationData(
-    val id: String,
-    val title: String,
-    val category: String,
-    val rating: String,
-    val description: String,
-    val imageUrl: String
-)
 
 @Composable
 private fun NewDashboardScreen(
@@ -358,11 +326,13 @@ private fun NewDashboardScreenContent(
                                             modifier = Modifier.size(20.dp)
                                         )
                                     }
+                                    Spacer(Modifier.height(4.dp))
                                     Text(
                                         text = item.value,
                                         style = MaterialTheme.appTypography.titleMedium,
                                         color = MaterialTheme.appColors.textDark
                                     )
+                                    Spacer(Modifier.height(4.dp))
                                     Text(
                                         text = item.label,
                                         style = MaterialTheme.appTypography.labelSmall,
@@ -388,6 +358,7 @@ private fun NewDashboardScreenContent(
 
             item {
                 SectionHeader(title = "My Courses")
+                Spacer(Modifier.height(8.dp))
                 CoursesTabs(
                     continueCourses = continueCourses,
                     wishlistItems = wishlistItems,
@@ -400,6 +371,7 @@ private fun NewDashboardScreenContent(
             if (achievements.isNotEmpty()) {
                 item {
                     SectionHeader(title = "Achievements", showViewAll = true)
+                    Spacer(Modifier.height(8.dp))
                     LazyRow(
                         horizontalArrangement = Arrangement.spacedBy(12.dp)
                     ) {
@@ -409,10 +381,10 @@ private fun NewDashboardScreenContent(
                                 elevation = 0.dp,
                                 shape = MaterialTheme.appShapes.cardShape
                             ) {
-                                Row(
+                                Column(
                                     modifier = Modifier
                                         .padding(horizontal = 16.dp, vertical = 12.dp),
-                                    verticalAlignment = Alignment.CenterVertically
+                                    horizontalAlignment = Alignment.CenterHorizontally
                                 ) {
                                     Box(
                                         modifier = Modifier
@@ -430,11 +402,13 @@ private fun NewDashboardScreenContent(
                                             modifier = Modifier.size(20.dp)
                                         )
                                     }
-                                    Spacer(Modifier.width(8.dp))
+                                    Spacer(Modifier.height(8.dp))
                                     Text(
                                         text = a.title,
                                         style = MaterialTheme.appTypography.bodySmall,
-                                        color = MaterialTheme.appColors.textDark
+                                        color = MaterialTheme.appColors.textDark,
+                                        maxLines = 2,
+                                        overflow = TextOverflow.Ellipsis
                                     )
                                 }
                             }
@@ -690,14 +664,27 @@ private fun CourseCard(c: CourseCardData, onClick: () -> Unit) {
                     overflow = TextOverflow.Ellipsis
                 )
                 Spacer(Modifier.height(8.dp))
-                LinearProgressIndicator(
-                    progress = c.progress / 100f,
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .height(6.dp),
-                    color = MaterialTheme.appColors.progressBarColor,
-                    backgroundColor = MaterialTheme.appColors.progressBarBackgroundColor
-                )
+                Column(
+                    modifier = Modifier.fillMaxWidth()
+                ) {
+                    // Percentage text
+                    Text(
+                        text = "${c.progress}%",
+                        style = MaterialTheme.appTypography.bodySmall,
+                        color = Color(0xFF7A7A7A), // subtle grey
+                        modifier = Modifier.padding(bottom = 6.dp)
+                    )
+
+                    LinearProgressIndicator(
+                        progress = c.progress / 100f,
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .height(8.dp)
+                            .clip(RoundedCornerShape(50)),
+                        color = MaterialTheme.appColors.primary,
+                        backgroundColor = MaterialTheme.appColors.progressBarBackgroundColor
+                    )
+                }
             }
         }
     }
@@ -954,7 +941,7 @@ private fun NewDashboardScreenPreview() {
     }
 }
 
-@Preview(showBackground = true)
+//@Preview(showBackground = true)
 @Composable
 private fun NewDashboardScreenLoadingPreview() {
     OpenEdXTheme {
@@ -968,7 +955,7 @@ private fun NewDashboardScreenLoadingPreview() {
     }
 }
 
-@Preview(showBackground = true)
+//@Preview(showBackground = true)
 @Composable
 private fun NewDashboardScreenEmptyPreview() {
     OpenEdXTheme {

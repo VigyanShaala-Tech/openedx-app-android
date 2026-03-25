@@ -12,6 +12,8 @@ import org.openedx.dashboard.data.model.PaginatedDto
 import org.openedx.dashboard.data.model.RecommendationDto
 import org.openedx.dashboard.data.model.SummaryCardDto
 import org.openedx.dashboard.data.DashboardDao
+import org.openedx.dashboard.data.model.WishlistRequest
+import org.openedx.dashboard.data.model.WishlistResponse
 import org.openedx.dashboard.domain.CourseStatusFilter
 import org.openedx.foundation.utils.FileUtil
 
@@ -103,11 +105,11 @@ class DashboardRepository(
         return dashboardApi.getCompleted()
     }
 
-    suspend fun removeFromWishlist(courseId: String): org.openedx.dashboard.data.api.WishlistResponse {
-        return wishlistApi.remove(org.openedx.dashboard.data.api.WishlistRequest(courseId))
+    suspend fun removeFromWishlist(courseId: String): WishlistResponse {
+        return wishlistApi.remove(WishlistRequest(courseId))
     }
 
-    suspend fun addToWishlist(courseId: String): org.openedx.dashboard.data.api.WishlistResponse {
-        return wishlistApi.add(org.openedx.dashboard.data.api.WishlistRequest(courseId))
+    suspend fun addToWishlist(courseId: String): WishlistResponse {
+        return wishlistApi.add(WishlistRequest(courseId))
     }
 }

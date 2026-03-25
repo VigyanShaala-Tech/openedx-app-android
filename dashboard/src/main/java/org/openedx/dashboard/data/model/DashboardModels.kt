@@ -84,6 +84,32 @@ data class RecommendationData(
     val imageUrl: String
 )
 
+data class AchievementsAllDto(
+    val stats: List<AchievementStatDto>,
+    val earned_badges: List<EarnedBadgeDto>,
+    val badges_in_progress: List<BadgeProgressDto>
+)
+
+data class AchievementStatDto(
+    val id: Int,
+    val icon: String,
+    val number: Int,
+    val label: String
+)
+
+data class EarnedBadgeDto(
+    val icon_url: String?,
+    val title: String,
+    val description: String
+)
+
+data class BadgeProgressDto(
+    val icon_url: String?,
+    val title: String,
+    val description: String,
+    val progress: Int?
+)
+
 
 data class WishlistRequest(val course_id: String)
 data class WishlistResponse(val success: Boolean, val message: String?)

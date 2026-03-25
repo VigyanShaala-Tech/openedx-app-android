@@ -6,6 +6,7 @@ import org.openedx.dashboard.data.model.CourseItemDto
 import org.openedx.dashboard.data.model.PaginatedDto
 import org.openedx.dashboard.data.model.RecommendationDto
 import org.openedx.dashboard.data.model.SummaryCardDto
+import org.openedx.dashboard.data.model.AchievementsAllDto
 import org.openedx.dashboard.data.repository.DashboardRepository
 import org.openedx.dashboard.domain.CourseStatusFilter
 
@@ -38,6 +39,7 @@ class DashboardInteractor(
     suspend fun getWishlist(): PaginatedDto<CourseItemDto> = repository.getWishlist()
     suspend fun getInProgress(): PaginatedDto<CourseItemDto> = repository.getInProgress()
     suspend fun getCompleted(): PaginatedDto<CourseItemDto> = repository.getCompleted()
+    suspend fun getAllAchievements(): AchievementsAllDto = repository.getAllAchievements()
 
     suspend fun addToWishlist(courseId: String) = repository.addToWishlist(courseId)
     suspend fun removeFromWishlist(courseId: String) = repository.removeFromWishlist(courseId)

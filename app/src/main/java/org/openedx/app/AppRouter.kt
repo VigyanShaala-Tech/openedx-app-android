@@ -59,6 +59,7 @@ import org.openedx.profile.presentation.video.VideoSettingsFragment
 import org.openedx.whatsnew.WhatsNewRouter
 import org.openedx.whatsnew.presentation.whatsnew.WhatsNewFragment
 import org.openedx.dashboard.presentation.wishlist.WishlistFragment
+import org.openedx.dashboard.presentation.achievements.AchievementsFragment
 
 class AppRouter :
     AuthRouter,
@@ -164,6 +165,10 @@ class AppRouter :
 
     override fun navigateToWishlist(fm: FragmentManager) {
         replaceFragmentWithBackStack(fm, WishlistFragment())
+    }
+
+    override fun navigateToAchievements(fm: FragmentManager) {
+        replaceFragmentWithBackStack(fm, AchievementsFragment())
     }
 
     override fun getProgramFragment(): Fragment {

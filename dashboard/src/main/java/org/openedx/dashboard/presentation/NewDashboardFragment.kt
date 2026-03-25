@@ -107,6 +107,9 @@ class NewDashboardFragment : Fragment() {
                     onWishlistViewAllClick = {
                         dashboardRouter.navigateToWishlist(requireActivity().supportFragmentManager)
                     },
+                    onAchievementsViewAllClick = {
+                        dashboardRouter.navigateToAchievements(requireActivity().supportFragmentManager)
+                    },
                     onRecommendationClick = { courseId ->
                         dashboardRouter.navigateToCourseDetail(
                             requireActivity().supportFragmentManager,
@@ -142,6 +145,7 @@ class NewDashboardFragment : Fragment() {
 private fun NewDashboardScreen(
     viewModel: NewDashboardViewModel,
     onWishlistViewAllClick: () -> Unit,
+    onAchievementsViewAllClick: () -> Unit,
     onRecommendationClick: (String) -> Unit,
     onCourseClick: (String, String) -> Unit,
     onContinueViewAllClick: () -> Unit,
@@ -152,6 +156,7 @@ private fun NewDashboardScreen(
         uiState,
         viewModel.userName,
         onWishlistViewAllClick,
+        onAchievementsViewAllClick,
         onRecommendationClick,
         onCourseClick,
         onContinueViewAllClick,
@@ -165,6 +170,7 @@ private fun NewDashboardScreenContent(
     uiState: NewDashboardState,
     userName: String,
     onWishlistViewAllClick: () -> Unit,
+    onAchievementsViewAllClick: () -> Unit,
     onRecommendationClick: (String) -> Unit,
     onCourseClick: (String, String) -> Unit,
     onContinueViewAllClick: () -> Unit,
@@ -390,7 +396,7 @@ private fun NewDashboardScreenContent(
 
             if (achievements.isNotEmpty()) {
                 item {
-                    SectionHeader(title = "Achievements", showViewAll = true)
+                    SectionHeader(title = "Achievements", showViewAll = true, onViewAllClick = onAchievementsViewAllClick)
                     Spacer(Modifier.height(8.dp))
                     LazyRow(
                         horizontalArrangement = Arrangement.spacedBy(12.dp)
@@ -452,7 +458,7 @@ private fun NewDashboardScreenContent(
 }
 
 @Composable
-private fun SectionHeader(title: String, showViewAll: Boolean = false) {
+private fun SectionHeader(title: String, showViewAll: Boolean = false, onViewAllClick: () -> Unit = {}) {
     Row(
         modifier = Modifier.fillMaxWidth(),
         horizontalArrangement = Arrangement.SpaceBetween,
@@ -465,7 +471,7 @@ private fun SectionHeader(title: String, showViewAll: Boolean = false) {
         )
         if (showViewAll) {
             Row(
-                modifier = Modifier.clickable { },
+                modifier = Modifier.clickable { onViewAllClick() },
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 Text(
@@ -957,6 +963,7 @@ private fun NewDashboardScreenPreview() {
             ),
             userName = "Priya",
             onWishlistViewAllClick = {},
+            onAchievementsViewAllClick = {},
             onRecommendationClick = {},
             onCourseClick = { _, _ -> },
             onContinueViewAllClick = {},
@@ -973,6 +980,7 @@ private fun NewDashboardScreenLoadingPreview() {
             uiState = NewDashboardState(loading = true),
             userName = "Priya",
             onWishlistViewAllClick = {},
+            onAchievementsViewAllClick = {},
             onRecommendationClick = {},
             onCourseClick = { _, _ -> },
             onContinueViewAllClick = {},
@@ -989,6 +997,7 @@ private fun NewDashboardScreenEmptyPreview() {
             uiState = NewDashboardState(loading = false),
             userName = "Priya",
             onWishlistViewAllClick = {},
+            onAchievementsViewAllClick = {},
             onRecommendationClick = {},
             onCourseClick = { _, _ -> },
             onContinueViewAllClick = {},

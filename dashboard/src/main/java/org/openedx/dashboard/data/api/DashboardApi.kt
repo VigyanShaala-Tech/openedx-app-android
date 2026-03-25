@@ -5,6 +5,7 @@ import org.openedx.dashboard.data.model.CourseItemDto
 import org.openedx.dashboard.data.model.PaginatedDto
 import org.openedx.dashboard.data.model.RecommendationDto
 import org.openedx.dashboard.data.model.SummaryCardDto
+import org.openedx.dashboard.data.model.AchievementsAllDto
 import retrofit2.http.GET
 
 interface DashboardApi {
@@ -29,4 +30,7 @@ interface DashboardApi {
 
     @GET("/api/v1/dashboard/completed-courses/")
     suspend fun getCompleted(): PaginatedDto<CourseItemDto>
+
+    @GET("/api/v1/achievements/all/")
+    suspend fun getAllAchievements(): AchievementsAllDto
 }

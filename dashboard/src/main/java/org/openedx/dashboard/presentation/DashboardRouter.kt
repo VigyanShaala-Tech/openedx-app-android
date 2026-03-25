@@ -25,4 +25,6 @@ interface DashboardRouter {
     fun getProgramFragment(): Fragment
 
     fun navigateToCourseDetail(fm: FragmentManager, courseId: String)
+
+    fun navigateToAchievements(fm: FragmentManager)
 }

@@ -184,6 +184,7 @@ val screenModule = module {
         )
     }
     viewModel { org.openedx.dashboard.presentation.wishlist.WishlistViewModel(get(), get(), get(), get(), get()) }
+    viewModel { org.openedx.dashboard.presentation.achievements.AchievementsViewModel(get(), get(), get(), get()) }
     viewModel { (initialFilter: org.openedx.dashboard.domain.CourseStatusFilter) -> AllEnrolledCoursesViewModel(get(), get(), get(), get(), get(), get(), get(), initialFilter) }
     viewModel { (openTab: String) ->
         LearnViewModel(openTab, get(), get(), get(), get())

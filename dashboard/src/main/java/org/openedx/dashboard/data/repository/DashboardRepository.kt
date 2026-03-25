@@ -11,6 +11,7 @@ import org.openedx.dashboard.data.model.CourseItemDto
 import org.openedx.dashboard.data.model.PaginatedDto
 import org.openedx.dashboard.data.model.RecommendationDto
 import org.openedx.dashboard.data.model.SummaryCardDto
+import org.openedx.dashboard.data.model.AchievementsAllDto
 import org.openedx.dashboard.data.DashboardDao
 import org.openedx.dashboard.data.model.WishlistRequest
 import org.openedx.dashboard.data.model.WishlistResponse
@@ -103,6 +104,10 @@ class DashboardRepository(
 
     suspend fun getCompleted(): PaginatedDto<CourseItemDto> {
         return dashboardApi.getCompleted()
+    }
+
+    suspend fun getAllAchievements(): AchievementsAllDto {
+        return dashboardApi.getAllAchievements()
     }
 
     suspend fun removeFromWishlist(courseId: String): WishlistResponse {

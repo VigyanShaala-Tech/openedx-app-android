@@ -27,7 +27,7 @@ interface DiscoveryApi {
         )
     ): CourseList
 
-    @GET("/api/courses/v1/courses/{course_id}")
+    @GET("/api/v1/catalog/courses/{course_id}/")
     suspend fun getCourseDetail(
         @Path("course_id") courseId: String?,
         @Query("username") username: String? = null
@@ -35,4 +35,19 @@ interface DiscoveryApi {
 
     @POST("/api/enrollment/v1/enrollment")
     suspend fun enrollInACourse(@Body enrollBody: EnrollBody): ResponseBody
+
+    @GET("/api/v1/catalog/course-curriculum/{course_id}/")
+    suspend fun getCourseCurriculum(
+        @Path("course_id") courseId: String
+    ): Map<String, List<String>>
+
+    @GET("/api/v1/catalog/course-instructors/{course_id}/")
+    suspend fun getCourseInstructors(
+        @Path("course_id") courseId: String
+    ): List<org.openedx.discovery.data.model.InstructorDto>
+
+    @GET("/api/v1/catalog/course-reviews/{course_id}/")
+    suspend fun getCourseReviews(
+        @Path("course_id") courseId: String
+    ): List<org.openedx.discovery.data.model.ReviewDto>
 }

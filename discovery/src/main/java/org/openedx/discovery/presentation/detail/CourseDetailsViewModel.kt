@@ -3,6 +3,7 @@ package org.openedx.discovery.presentation.detail
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.viewModelScope
+import kotlinx.coroutines.async
 import kotlinx.coroutines.launch
 import org.openedx.core.R
 import org.openedx.core.config.Config
@@ -82,16 +83,26 @@ class CourseDetailsViewModel(
         _uiState.value = CourseDetailsUIState.Loading
         viewModelScope.launch {
             try {
-                course = if (hasInternetConnection) {
+                val courseData = if (hasInternetConnection) {
                     interactor.getCourseDetails(courseId)
                 } else {
                     interactor.getCourseDetailsFromCache(courseId)
                 }
+                course = courseData
+                val curriculumDeferred = async { interactor.getCourseCurriculum(courseId) }
+                val instructorsDeferred = async { interactor.getCourseInstructors(courseId) }
+                val reviewsDeferred = async { interactor.getCourseReviews(courseId) }
+                val curriculum = try { curriculumDeferred.await() } catch (_: Exception) { emptyMap() }
+                val instructors = try { instructorsDeferred.await() } catch (_: Exception) { emptyList() }
+                val reviews = try { reviewsDeferred.await() } catch (_: Exception) { emptyList() }
                 course?.let {
                     _uiState.value = CourseDetailsUIState.CourseData(
                         course = it,
                         isUserLoggedIn = isUserLoggedIn,
-                        isWishlisted = false
+                        isWishlisted = it.isWishlisted,
+                        curriculum = curriculum,
+                        instructors = instructors,
+                        reviews = reviews
                     )
                 } ?: run {
                     _uiMessage.value =

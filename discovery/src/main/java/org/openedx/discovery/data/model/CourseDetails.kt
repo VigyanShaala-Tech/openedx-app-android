@@ -48,6 +48,14 @@ data class CourseDetails(
     val overview: String?,
     @SerializedName("is_enrolled")
     val isEnrolled: Boolean?,
+    @SerializedName("rating")
+    val rating: Int?,
+    @SerializedName("no_of_reviews")
+    val noOfReviews: Int?,
+    @SerializedName("enrollments")
+    val enrollments: Int?,
+    @SerializedName("is_wishlisted")
+    val isWishlisted: Boolean?,
 ) {
 
     fun mapToDomain(): Course {
@@ -72,7 +80,11 @@ data class CourseDetails(
             pacing = pacing.orEmpty(),
             overview = overview.orEmpty(),
             isEnrolled = isEnrolled ?: false,
-            media = mapMediaToDomain()
+            media = mapMediaToDomain(),
+            rating = rating ?: 0,
+            noOfReviews = noOfReviews ?: 0,
+            enrollments = enrollments ?: 0,
+            isWishlisted = isWishlisted ?: false
         )
     }
 

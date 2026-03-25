@@ -14,6 +14,10 @@ class DiscoveryInteractor(private val repository: DiscoveryRepository) {
         repository.enrollInACourse(courseId = id)
     }
 
+    suspend fun getCourseCurriculum(courseId: String) = repository.getCourseCurriculum(courseId)
+    suspend fun getCourseInstructors(courseId: String) = repository.getCourseInstructors(courseId)
+    suspend fun getCourseReviews(courseId: String) = repository.getCourseReviews(courseId)
+
     suspend fun getCoursesList(
         username: String?,
         organization: String?,

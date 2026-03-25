@@ -22,16 +22,16 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.aspectRatio
-import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.widthIn
+import androidx.compose.foundation.lazy.LazyRow
+import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.CircularProgressIndicator
@@ -42,6 +42,11 @@ import androidx.compose.material.Scaffold
 import androidx.compose.material.Surface
 import androidx.compose.material.Text
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Alarm
+import androidx.compose.material.icons.filled.Favorite
+import androidx.compose.material.icons.filled.People
+import androidx.compose.material.icons.filled.Star
+import androidx.compose.material.icons.outlined.FavoriteBorder
 import androidx.compose.material.icons.outlined.Report
 import androidx.compose.material.rememberScaffoldState
 import androidx.compose.runtime.Composable
@@ -57,6 +62,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.rememberVectorPainter
 import androidx.compose.ui.platform.ComposeView
@@ -87,10 +93,10 @@ import org.openedx.core.ui.OfflineModeDialog
 import org.openedx.core.ui.OpenEdXButton
 import org.openedx.core.ui.Toolbar
 import org.openedx.core.ui.displayCutoutForLandscape
-import org.openedx.core.ui.isPreview
 import org.openedx.core.ui.statusBarsInset
 import org.openedx.core.ui.theme.OpenEdXTheme
 import org.openedx.core.ui.theme.appColors
+import org.openedx.core.ui.theme.appShapes
 import org.openedx.core.ui.theme.appTypography
 import org.openedx.core.utils.EmailUtil
 import org.openedx.discovery.R
@@ -100,6 +106,7 @@ import org.openedx.discovery.presentation.ui.ImageHeader
 import org.openedx.discovery.presentation.ui.WarningLabel
 import org.openedx.foundation.extension.applyDarkModeIfEnabled
 import org.openedx.foundation.extension.isEmailValid
+import org.openedx.foundation.extension.toImageLink
 import org.openedx.foundation.presentation.UIMessage
 import org.openedx.foundation.presentation.WindowSize
 import org.openedx.foundation.presentation.WindowType
@@ -326,6 +333,9 @@ internal fun CourseDetailsScreen(
                                         course = uiState.course,
                                         htmlBody = htmlBody,
                                         isWishlisted = uiState.isWishlisted,
+                                        curriculum = uiState.curriculum,
+                                        instructors = uiState.instructors,
+                                        reviews = uiState.reviews,
                                         onButtonClick = {
                                             onButtonClick()
                                         },
@@ -342,6 +352,9 @@ internal fun CourseDetailsScreen(
                                         course = uiState.course,
                                         htmlBody = htmlBody,
                                         isWishlisted = uiState.isWishlisted,
+                                        curriculum = uiState.curriculum,
+                                        instructors = uiState.instructors,
+                                        reviews = uiState.reviews,
                                         onButtonClick = {
                                             onButtonClick()
                                         },
@@ -382,6 +395,9 @@ private fun CourseDetailNativeContent(
     isInternetConnectionShown: MutableState<Boolean>,
     htmlBody: String,
     isWishlisted: Boolean,
+    curriculum: Map<String, List<String>>,
+    instructors: List<org.openedx.discovery.domain.model.Instructor>,
+    reviews: List<org.openedx.discovery.domain.model.Review>,
     onButtonClick: () -> Unit,
     onWishlistClick: () -> Unit,
 ) {
@@ -427,9 +443,9 @@ private fun CourseDetailNativeContent(
                     .padding(10.dp)
             ) {
                 Icon(
-                    painter = painterResource(id = CoreR.drawable.core_ic_heart),
+                    imageVector = if (isWishlisted) Icons.Filled.Favorite else Icons.Outlined.FavoriteBorder,
                     contentDescription = null,
-                    tint = if (isWishlisted) MaterialTheme.appColors.primary else MaterialTheme.appColors.cardViewBorder,
+                    tint = MaterialTheme.appColors.primary,
                     modifier = Modifier.size(24.dp)
                 )
             }
@@ -455,6 +471,50 @@ private fun CourseDetailNativeContent(
                 .fillMaxWidth()
                 .padding(horizontal = contentHorizontalPadding)
         ) {
+            Row(
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.spacedBy(12.dp)
+            ) {
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    Icon(
+                        imageVector = Icons.Filled.Star,
+                        contentDescription = null,
+                        tint = MaterialTheme.appColors.primary
+                    )
+                    Spacer(Modifier.width(4.dp))
+                    Text(
+                        text = "${course.rating.toDouble()} (${course.noOfReviews} reviews)",
+                        style = MaterialTheme.appTypography.labelSmall,
+                        color = MaterialTheme.appColors.textPrimary
+                    )
+                }
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    Icon(
+                        imageVector = Icons.Filled.Alarm,
+                        contentDescription = null,
+                        tint = MaterialTheme.appColors.textPrimary
+                    )
+                    Spacer(Modifier.width(4.dp))
+                    Text(
+                        text = course.effort,
+                        style = MaterialTheme.appTypography.labelSmall,
+                        color = MaterialTheme.appColors.textPrimary
+                    )
+                }
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    Icon(
+                        imageVector = Icons.Filled.People,
+                        contentDescription = null,
+                        tint = MaterialTheme.appColors.textPrimary
+                    )
+                    Spacer(Modifier.width(4.dp))
+                    Text(
+                        text = "${course.enrollments} students",
+                        style = MaterialTheme.appTypography.labelSmall,
+                        color = MaterialTheme.appColors.textPrimary
+                    )
+                }
+            }
             val enrollmentEnd = course.enrollmentEnd
             if (!hasInternetConnection) {
                 isInternetConnectionShown.value = true
@@ -487,33 +547,25 @@ private fun CourseDetailNativeContent(
             if (!(enrollmentEnd != null && Date() > enrollmentEnd)) {
                 Spacer(Modifier.height(32.dp))
                 val wishlistText = stringResource(id = R.string.discovery_add_to_wishlist)
-                Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
-                    OpenEdXButton(
-                        modifier = buttonWidth.weight(1f),
-                        text = buttonText,
-                        onClick = onButtonClick
-                    )
-                    OpenEdXButton(
-                        modifier = buttonWidth.weight(1f),
-                        text = wishlistText,
-                        onClick = onWishlistClick
-                    )
-                }
+                OpenEdXButton(
+                    modifier = buttonWidth,
+                    text = buttonText,
+                    onClick = onButtonClick
+                )
             }
             Spacer(Modifier.height(24.dp))
             var selectedTab by rememberSaveable { mutableStateOf(0) }
             val tabs = listOf("OverView", "Curriculum", "Instructor", "Reviews")
-            Row(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(horizontal = contentHorizontalPadding),
-                horizontalArrangement = Arrangement.spacedBy(24.dp)
+            LazyRow(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.spacedBy(24.dp),
+                contentPadding = androidx.compose.foundation.layout.PaddingValues(horizontal = contentHorizontalPadding)
             ) {
-                tabs.forEachIndexed { index, label ->
+                items(tabs.indices.toList()) { index ->
+                    val label = tabs[index]
                     Column(
                         horizontalAlignment = Alignment.CenterHorizontally,
-                        modifier = Modifier
-                            .clickable { selectedTab = index }
+                        modifier = Modifier.clickable { selectedTab = index }
                     ) {
                         Text(
                             text = label,
@@ -567,33 +619,202 @@ private fun CourseDetailNativeContent(
                         )
                     }
                 }
+
                 1 -> {
                     Text(
-                        text = "No content",
+                        text = "Course Curriculum",
                         style = MaterialTheme.appTypography.titleMedium,
                         color = MaterialTheme.appColors.textPrimary
                     )
+                    Spacer(Modifier.height(8.dp))
+                    if (curriculum.isEmpty()) {
+                        Text(
+                            text = "No content",
+                            style = MaterialTheme.appTypography.bodySmall,
+                            color = MaterialTheme.appColors.textPrimary
+                        )
+                    } else {
+                        curriculum.forEach { (section, items) ->
+                            Text(
+                                text = section,
+                                style = MaterialTheme.appTypography.titleSmall,
+                                color = MaterialTheme.appColors.textDark
+                            )
+                            Spacer(Modifier.height(6.dp))
+                            items.forEachIndexed { index, item ->
+                                Row(
+                                    verticalAlignment = Alignment.CenterVertically,
+                                    modifier = Modifier.padding(vertical = 6.dp)
+                                ) {
+                                    Box(
+                                        modifier = Modifier
+                                            .size(24.dp)
+                                            .clip(MaterialTheme.appShapes.cardShape)
+                                            .background(MaterialTheme.appColors.primary.copy(alpha = 0.12f)),
+                                        contentAlignment = Alignment.Center
+                                    ) {
+                                        Text(
+                                            text = (index + 1).toString(),
+                                            style = MaterialTheme.appTypography.labelSmall,
+                                            color = MaterialTheme.appColors.primary
+                                        )
+                                    }
+                                    Spacer(Modifier.width(12.dp))
+                                    Text(
+                                        text = item,
+                                        style = MaterialTheme.appTypography.bodySmall,
+                                        color = MaterialTheme.appColors.textPrimary
+                                    )
+                                }
+                            }
+                            Spacer(Modifier.height(12.dp))
+                        }
+                    }
                 }
+
                 2 -> {
                     Text(
-                        text = "No content",
+                        text = "Instructor",
                         style = MaterialTheme.appTypography.titleMedium,
                         color = MaterialTheme.appColors.textPrimary
                     )
+                    Spacer(Modifier.height(8.dp))
+                    if (instructors.isEmpty()) {
+                        Text(
+                            text = "No content",
+                            style = MaterialTheme.appTypography.bodySmall,
+                            color = MaterialTheme.appColors.textPrimary
+                        )
+                    } else {
+                        instructors.forEach { instructor ->
+                            Row(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .padding(vertical = 8.dp),
+                                verticalAlignment = Alignment.CenterVertically
+                            ) {
+                                coil.compose.AsyncImage(
+                                    model = coil.request.ImageRequest.Builder(LocalContext.current)
+                                        .data(instructor.profilePicture.toImageLink(apiHostUrl))
+                                        .error(CoreR.drawable.core_ic_default_profile_picture)
+                                        .placeholder(CoreR.drawable.core_ic_default_profile_picture)
+                                        .build(),
+                                    contentDescription = null,
+                                    modifier = Modifier
+                                        .size(40.dp)
+                                        .clip(androidx.compose.foundation.shape.CircleShape)
+                                )
+                                Spacer(Modifier.width(12.dp))
+                                Column {
+                                    Text(
+                                        text = instructor.name,
+                                        style = MaterialTheme.appTypography.titleSmall,
+                                        color = MaterialTheme.appColors.textDark
+                                    )
+                                    Spacer(Modifier.height(4.dp))
+                                    Text(
+                                        text = instructor.bio,
+                                        style = MaterialTheme.appTypography.bodySmall,
+                                        color = MaterialTheme.appColors.textPrimary
+                                    )
+                                }
+                            }
+                        }
+                    }
                 }
+
                 else -> {
                     Text(
-                        text = "No content",
+                        text = "Reviews",
                         style = MaterialTheme.appTypography.titleMedium,
                         color = MaterialTheme.appColors.textPrimary
                     )
+                    Spacer(Modifier.height(8.dp))
+                    if (reviews.isEmpty()) {
+                        Text(
+                            text = "No content",
+                            style = MaterialTheme.appTypography.bodySmall,
+                            color = MaterialTheme.appColors.textPrimary
+                        )
+                    } else {
+                        Surface(
+                            color = MaterialTheme.appColors.surface,
+                            shape = MaterialTheme.appShapes.cardShape,
+                            elevation = 0.dp,
+                        ) {
+                            Column(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .padding(16.dp)
+                            ) {
+                                Text(
+                                    text = String.format("%.1f", course.rating.toDouble()),
+                                    style = MaterialTheme.appTypography.titleLarge,
+                                    color = MaterialTheme.appColors.textDark
+                                )
+                                Spacer(Modifier.height(6.dp))
+                                Row(verticalAlignment = Alignment.CenterVertically) {
+                                    repeat(5) {
+                                        Icon(
+                                            imageVector = Icons.Filled.Star,
+                                            contentDescription = null,
+                                            tint = MaterialTheme.appColors.primary
+                                        )
+                                    }
+                                    Spacer(Modifier.width(8.dp))
+                                    Text(
+                                        text = "${course.noOfReviews} reviews",
+                                        style = MaterialTheme.appTypography.labelSmall,
+                                        color = MaterialTheme.appColors.textPrimary
+                                    )
+                                }
+                            }
+                        }
+                        Spacer(Modifier.height(12.dp))
+                        reviews.forEach { review ->
+                            Column(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .padding(vertical = 10.dp)
+                            ) {
+                                Row(verticalAlignment = Alignment.CenterVertically) {
+                                    Text(
+                                        text = review.name,
+                                        style = MaterialTheme.appTypography.titleSmall,
+                                        color = MaterialTheme.appColors.textDark
+                                    )
+                                    Spacer(Modifier.width(8.dp))
+                                    Row(verticalAlignment = Alignment.CenterVertically) {
+                                        repeat(review.rating) {
+                                            Icon(
+                                                imageVector = Icons.Filled.Star,
+                                                contentDescription = null,
+                                                tint = MaterialTheme.appColors.primary
+                                            )
+                                        }
+                                    }
+                                }
+                                Spacer(Modifier.height(4.dp))
+                                Text(
+                                    text = review.comment,
+                                    style = MaterialTheme.appTypography.bodySmall,
+                                    color = MaterialTheme.appColors.textPrimary
+                                )
+                                Spacer(Modifier.height(2.dp))
+                                Text(
+                                    text = review.submittedAt,
+                                    style = MaterialTheme.appTypography.labelSmall,
+                                    color = MaterialTheme.appColors.textPrimary
+                                )
+                            }
+                        }
+                    }
                 }
             }
         }
     }
 }
 
- 
 
 @Composable
 private fun CourseDetailNativeContentLandscape(
@@ -604,6 +825,9 @@ private fun CourseDetailNativeContentLandscape(
     isInternetConnectionShown: MutableState<Boolean>,
     htmlBody: String,
     isWishlisted: Boolean,
+    curriculum: Map<String, List<String>>,
+    instructors: List<org.openedx.discovery.domain.model.Instructor>,
+    reviews: List<org.openedx.discovery.domain.model.Review>,
     onButtonClick: () -> Unit,
     onWishlistClick: () -> Unit,
 ) {
@@ -615,6 +839,9 @@ private fun CourseDetailNativeContentLandscape(
         isInternetConnectionShown = isInternetConnectionShown,
         htmlBody = htmlBody,
         isWishlisted = isWishlisted,
+        curriculum = curriculum,
+        instructors = instructors,
+        reviews = reviews,
         onButtonClick = onButtonClick,
         onWishlistClick = onWishlistClick
     )

@@ -22,6 +22,18 @@ class DiscoveryRepository(
         return course.mapToDomain()
     }
 
+    suspend fun getCourseCurriculum(courseId: String): Map<String, List<String>> {
+        return api.getCourseCurriculum(courseId)
+    }
+
+    suspend fun getCourseInstructors(courseId: String): List<org.openedx.discovery.domain.model.Instructor> {
+        return api.getCourseInstructors(courseId).map { it.mapToDomain() }
+    }
+
+    suspend fun getCourseReviews(courseId: String): List<org.openedx.discovery.domain.model.Review> {
+        return api.getCourseReviews(courseId).map { it.mapToDomain() }
+    }
+
     suspend fun getCourseDetailFromCache(id: String): Course? {
         return dao.getCourseById(id)?.mapToDomain()
     }

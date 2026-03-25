@@ -53,6 +53,31 @@ class CourseDetailsViewModel(
         getCourseDetail()
     }
 
+    fun toggleWishlist() {
+        val current = _uiState.value
+        if (current is CourseDetailsUIState.CourseData) {
+            viewModelScope.launch {
+                try {
+                    if (current.isWishlisted) {
+                        interactor.removeFromWishlist(courseId)
+                        _uiState.value = current.copy(isWishlisted = false)
+                    } else {
+                        interactor.addToWishlist(courseId)
+                        _uiState.value = current.copy(isWishlisted = true)
+                    }
+                    notifier.send(org.openedx.core.system.notifier.CourseDashboardUpdate())
+                } catch (e: Exception) {
+                    if (e.isInternetError()) {
+                        _uiMessage.value =
+                            UIMessage.SnackBarMessage(resourceManager.getString(org.openedx.core.R.string.core_error_no_connection))
+                    } else {
+                        _uiMessage.value =
+                            UIMessage.SnackBarMessage(resourceManager.getString(org.openedx.core.R.string.core_error_unknown_error))
+                    }
+                }
+            }
+        }
+    }
     fun getCourseDetail() {
         _uiState.value = CourseDetailsUIState.Loading
         viewModelScope.launch {
@@ -65,7 +90,8 @@ class CourseDetailsViewModel(
                 course?.let {
                     _uiState.value = CourseDetailsUIState.CourseData(
                         course = it,
-                        isUserLoggedIn = isUserLoggedIn
+                        isUserLoggedIn = isUserLoggedIn,
+                        isWishlisted = false
                     )
                 } ?: run {
                     _uiMessage.value =

@@ -13,6 +13,7 @@ class DiscoveryRepository(
     private val api: DiscoveryApi,
     private val dao: DiscoveryDao,
     private val preferencesManager: CorePreferences,
+    private val wishlistApi: org.openedx.discovery.data.api.WishlistApi,
 ) {
 
     suspend fun getCourseDetail(id: String): Course {
@@ -76,5 +77,13 @@ class DiscoveryRepository(
             pageResponse.pagination.mapToDomain(),
             pageResponse.results?.map { it.mapToDomain() } ?: emptyList()
         )
+    }
+
+    suspend fun addToWishlist(courseId: String): org.openedx.discovery.data.api.WishlistResponse {
+        return wishlistApi.add(org.openedx.discovery.data.api.WishlistRequest(courseId))
+    }
+
+    suspend fun removeFromWishlist(courseId: String): org.openedx.discovery.data.api.WishlistResponse {
+        return wishlistApi.remove(org.openedx.discovery.data.api.WishlistRequest(courseId))
     }
 }

@@ -156,7 +156,7 @@ val screenModule = module {
     }
     viewModel { RestorePasswordViewModel(get(), get(), get(), get()) }
 
-    factory { DashboardRepository(get(), get(), get(), get(), get()) }
+    factory { DashboardRepository(get(), get(), get(), get(), get(), get()) }
     factory { DashboardInteractor(get()) }
     viewModel { DashboardListViewModel(get(), get(), get(), get(), get(), get()) }
     viewModel { (windowSize: WindowSize) ->
@@ -179,10 +179,11 @@ val screenModule = module {
             get(),
             get(),
             windowSize,
+            get(),
             get()
         )
     }
-    viewModel { org.openedx.dashboard.presentation.wishlist.WishlistViewModel(get(), get(), get(), get()) }
+    viewModel { org.openedx.dashboard.presentation.wishlist.WishlistViewModel(get(), get(), get(), get(), get()) }
     viewModel { AllEnrolledCoursesViewModel(get(), get(), get(), get(), get(), get(), get()) }
     viewModel { (openTab: String) ->
         LearnViewModel(openTab, get(), get(), get(), get())
@@ -190,7 +191,7 @@ val screenModule = module {
     single { org.openedx.auth.presentation.logistration.LogistrationFiltersRepository(get(), get()) }
     viewModel { org.openedx.auth.presentation.logistration.LogistrationFiltersViewModel(get()) }
 
-    factory { DiscoveryRepository(get(), get(), get()) }
+    factory { DiscoveryRepository(get(), get(), get(), get()) }
     factory { DiscoveryInteractor(get()) }
     viewModel { NativeDiscoveryViewModel(get(), get(), get(), get(), get(), get()) }
     viewModel { (querySearch: String) ->

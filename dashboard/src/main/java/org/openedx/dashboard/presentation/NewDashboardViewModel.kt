@@ -17,6 +17,8 @@ import org.openedx.foundation.presentation.BaseViewModel
 import org.openedx.foundation.presentation.UIMessage
 import org.openedx.foundation.presentation.WindowSize
 import org.openedx.foundation.system.ResourceManager
+import org.openedx.core.system.notifier.CourseDashboardUpdate
+import org.openedx.core.system.notifier.DiscoveryNotifier
 
 data class NewDashboardState(
     val loading: Boolean = true,
@@ -37,6 +39,7 @@ class NewDashboardViewModel(
     private val networkConnection: NetworkConnection,
     private val windowSize: WindowSize,
     private val corePreferences: CorePreferences,
+    private val discoveryNotifier: DiscoveryNotifier,
 ) : BaseViewModel() {
 
     val apiHostUrl get() = config.getApiHostURL()
@@ -53,6 +56,13 @@ class NewDashboardViewModel(
 
     init {
         loadAll(isRefreshing = false)
+        viewModelScope.launch {
+            discoveryNotifier.notifier.collect {
+                if (it is CourseDashboardUpdate) {
+                    refresh()
+                }
+            }
+        }
     }
 
     fun refresh() {

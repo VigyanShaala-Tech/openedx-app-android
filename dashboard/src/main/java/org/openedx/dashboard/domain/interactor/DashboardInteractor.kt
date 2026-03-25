@@ -38,4 +38,7 @@ class DashboardInteractor(
     suspend fun getWishlist(): PaginatedDto<CourseItemDto> = repository.getWishlist()
     suspend fun getInProgress(): PaginatedDto<CourseItemDto> = repository.getInProgress()
     suspend fun getCompleted(): PaginatedDto<CourseItemDto> = repository.getCompleted()
+
+    suspend fun addToWishlist(courseId: String) = repository.addToWishlist(courseId)
+    suspend fun removeFromWishlist(courseId: String) = repository.removeFromWishlist(courseId)
 }

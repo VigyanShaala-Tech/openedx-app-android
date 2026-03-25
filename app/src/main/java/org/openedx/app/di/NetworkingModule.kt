@@ -55,8 +55,10 @@ val networkingModule = module {
     single { provideApi<ProfileApi>(get()) }
     single { provideApi<DiscussionApi>(get()) }
     single { provideApi<DiscoveryApi>(get()) }
+    single { provideApi<org.openedx.discovery.data.api.WishlistApi>(get()) }
     single { provideApi<NotificationsApi>(get()) }
     single { provideApi<DashboardApi>(get()) }
+    single { provideApi<org.openedx.dashboard.data.api.WishlistApi>(get()) }
     single { provideApi<org.openedx.auth.data.api.CatalogApi>(get()) }
     single { provideApi<org.openedx.auth.data.api.OtpApi>(get()) }
 }

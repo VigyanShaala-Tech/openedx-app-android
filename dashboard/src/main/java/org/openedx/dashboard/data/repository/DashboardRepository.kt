@@ -21,6 +21,7 @@ class DashboardRepository(
     private val dao: DashboardDao,
     private val preferencesManager: CorePreferences,
     private val fileUtil: FileUtil,
+    private val wishlistApi: org.openedx.dashboard.data.api.WishlistApi,
 ) {
 
     suspend fun getEnrolledCourses(page: Int): DashboardCourseList {
@@ -100,5 +101,13 @@ class DashboardRepository(
 
     suspend fun getCompleted(): PaginatedDto<CourseItemDto> {
         return dashboardApi.getCompleted()
+    }
+
+    suspend fun removeFromWishlist(courseId: String): org.openedx.dashboard.data.api.WishlistResponse {
+        return wishlistApi.remove(org.openedx.dashboard.data.api.WishlistRequest(courseId))
+    }
+
+    suspend fun addToWishlist(courseId: String): org.openedx.dashboard.data.api.WishlistResponse {
+        return wishlistApi.add(org.openedx.dashboard.data.api.WishlistRequest(courseId))
     }
 }

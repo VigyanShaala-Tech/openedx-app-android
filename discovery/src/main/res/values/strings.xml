@@ -9,6 +9,8 @@
     <string name="discovery_course_details">Course details</string>
     <string name="discovery_enroll_now">Enroll now</string>
     <string name="discovery_view_course">View course</string>
+    <string name="discovery_add_to_wishlist">Add to wishlist</string>
+    <string name="discovery_added_to_wishlist">Added to wishlist</string>
     <string name="discovery_you_cant_enroll">You cannot enroll in this course because the enrollment date is over.</string>
     <string name="discovery_no_internet_label">To enroll in this course, please make sure you are connected to the internet.</string>
     <string name="discovery_enrolled_successfully">You have been successfully enrolled in this course.</string>

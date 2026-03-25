@@ -180,6 +180,9 @@ class CourseDetailsFragment : Fragment() {
                             }
                         }
                     },
+                    onWishlistClick = {
+                        viewModel.toggleWishlist()
+                    },
                     onRegisterClick = {
                         router.navigateToSignUp(parentFragmentManager, viewModel.courseId, null)
                     },
@@ -217,6 +220,7 @@ internal fun CourseDetailsScreen(
     onReloadClick: () -> Unit,
     onBackClick: () -> Unit,
     onButtonClick: () -> Unit,
+    onWishlistClick: () -> Unit,
     onRegisterClick: () -> Unit,
     onSignInClick: () -> Unit,
 ) {
@@ -319,8 +323,12 @@ internal fun CourseDetailsScreen(
                                         hasInternetConnection = hasInternetConnection,
                                         isInternetConnectionShown = isInternetConnectionShown,
                                         course = uiState.course,
+                                        isWishlisted = uiState.isWishlisted,
                                         onButtonClick = {
                                             onButtonClick()
+                                        },
+                                        onWishlistClick = {
+                                            onWishlistClick()
                                         }
                                     )
                                 } else {
@@ -330,8 +338,12 @@ internal fun CourseDetailsScreen(
                                         hasInternetConnection = hasInternetConnection,
                                         isInternetConnectionShown = isInternetConnectionShown,
                                         course = uiState.course,
+                                        isWishlisted = uiState.isWishlisted,
                                         onButtonClick = {
                                             onButtonClick()
+                                        },
+                                        onWishlistClick = {
+                                            onWishlistClick()
                                         }
                                     )
                                 }
@@ -401,7 +413,9 @@ private fun CourseDetailNativeContent(
     course: Course,
     hasInternetConnection: Boolean,
     isInternetConnectionShown: MutableState<Boolean>,
+    isWishlisted: Boolean,
     onButtonClick: () -> Unit,
+    onWishlistClick: () -> Unit,
 ) {
     val uriHandler = LocalUriHandler.current
     val buttonWidth by remember(key1 = windowSize) {
@@ -438,6 +452,19 @@ private fun CourseDetailNativeContent(
                 courseImage = course.media.image?.large,
                 courseName = course.name
             )
+            androidx.compose.material.IconButton(
+                onClick = onWishlistClick,
+                modifier = Modifier
+                    .align(Alignment.TopEnd)
+                    .padding(10.dp)
+            ) {
+                Icon(
+                    painter = painterResource(id = CoreR.drawable.core_ic_heart),
+                    contentDescription = null,
+                    tint = if (isWishlisted) MaterialTheme.appColors.primary else MaterialTheme.appColors.cardViewBorder,
+                    modifier = Modifier.size(24.dp)
+                )
+            }
             if (!course.media.courseVideo?.uri.isNullOrEmpty()) {
                 IconButton(
                     modifier = Modifier.testTag("ib_play_video"),
@@ -491,15 +518,25 @@ private fun CourseDetailNativeContent(
             )
             if (!(enrollmentEnd != null && Date() > enrollmentEnd)) {
                 Spacer(Modifier.height(32.dp))
-                OpenEdXButton(
-                    modifier = buttonWidth,
-                    text = buttonText,
-                    onClick = onButtonClick
-                )
+                val wishlistText = stringResource(id = R.string.discovery_add_to_wishlist)
+                Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
+                    OpenEdXButton(
+                        modifier = buttonWidth.weight(1f),
+                        text = buttonText,
+                        onClick = onButtonClick
+                    )
+                    OpenEdXButton(
+                        modifier = buttonWidth.weight(1f),
+                        text = wishlistText,
+                        onClick = onWishlistClick
+                    )
+                }
             }
         }
     }
 }
+
+ 
 
 @Composable
 private fun CourseDetailNativeContentLandscape(
@@ -508,100 +545,20 @@ private fun CourseDetailNativeContentLandscape(
     course: Course,
     hasInternetConnection: Boolean,
     isInternetConnectionShown: MutableState<Boolean>,
+    isWishlisted: Boolean,
     onButtonClick: () -> Unit,
+    onWishlistClick: () -> Unit,
 ) {
-    val uriHandler = LocalUriHandler.current
-    val buttonWidth by remember(key1 = windowSize) {
-        mutableStateOf(
-            windowSize.windowSizeValue(
-                expanded = Modifier.width(230.dp),
-                compact = Modifier.fillMaxWidth()
-            )
-        )
-    }
-
-    val buttonText = if (course.isEnrolled) {
-        stringResource(id = R.string.discovery_view_course)
-    } else {
-        stringResource(id = R.string.discovery_enroll_now)
-    }
-
-    Row(
-        Modifier.heightIn(200.dp),
-        verticalAlignment = Alignment.Top
-    ) {
-        Column(
-            Modifier
-                .fillMaxHeight()
-                .weight(weight = 3f),
-            verticalArrangement = Arrangement.SpaceBetween
-        ) {
-            Column {
-                Text(
-                    modifier = Modifier.testTag("txt_course_short_description"),
-                    text = course.shortDescription,
-                    style = MaterialTheme.appTypography.labelSmall,
-                    color = MaterialTheme.appColors.textPrimaryVariant
-                )
-                Spacer(Modifier.height(16.dp))
-                Text(
-                    modifier = Modifier.testTag("txt_course_name"),
-                    text = course.name,
-                    style = MaterialTheme.appTypography.titleLarge,
-                    color = MaterialTheme.appColors.textPrimary
-                )
-                Spacer(Modifier.height(12.dp))
-                Text(
-                    modifier = Modifier.testTag("txt_course_org"),
-                    text = course.org,
-                    style = MaterialTheme.appTypography.labelMedium,
-                    color = MaterialTheme.appColors.textAccent
-                )
-                Spacer(Modifier.height(42.dp))
-            }
-            val enrollmentEnd = course.enrollmentEnd
-            if (!hasInternetConnection) {
-                isInternetConnectionShown.value = true
-                NoInternetLabel()
-                Spacer(Modifier.height(24.dp))
-            } else if (enrollmentEnd != null && Date() > enrollmentEnd) {
-                EnrollOverLabel()
-                Spacer(Modifier.height(24.dp))
-            } else {
-                OpenEdXButton(
-                    modifier = buttonWidth,
-                    text = buttonText,
-                    onClick = onButtonClick
-                )
-            }
-        }
-        Spacer(Modifier.width(24.dp))
-        Box(contentAlignment = Alignment.Center) {
-            ImageHeader(
-                modifier = Modifier
-                    .width(263.dp)
-                    .height(200.dp),
-                apiHostUrl = apiHostUrl,
-                courseImage = course.media.image?.large,
-                courseName = course.name
-            )
-            if (!course.media.courseVideo?.uri.isNullOrEmpty()) {
-                IconButton(
-                    modifier = Modifier.testTag("ib_play_video"),
-                    onClick = {
-                        uriHandler.openUri(course.media.courseVideo?.uri!!)
-                    }
-                ) {
-                    Icon(
-                        modifier = Modifier.size(40.dp),
-                        painter = painterResource(R.drawable.discovery_ic_play),
-                        contentDescription = null,
-                        tint = Color.LightGray
-                    )
-                }
-            }
-        }
-    }
+    CourseDetailNativeContent(
+        windowSize = windowSize,
+        apiHostUrl = apiHostUrl,
+        course = course,
+        hasInternetConnection = hasInternetConnection,
+        isInternetConnectionShown = isInternetConnectionShown,
+        isWishlisted = isWishlisted,
+        onButtonClick = onButtonClick,
+        onWishlistClick = onWishlistClick
+    )
 }
 
 @Composable
@@ -700,6 +657,7 @@ private fun CourseDetailNativeContentPreview() {
             onReloadClick = {},
             onBackClick = {},
             onButtonClick = {},
+            onWishlistClick = {},
             onRegisterClick = {},
             onSignInClick = {},
         )
@@ -723,6 +681,7 @@ private fun CourseDetailNativeContentTabletPreview() {
             onReloadClick = {},
             onBackClick = {},
             onButtonClick = {},
+            onWishlistClick = {},
             onRegisterClick = {},
             onSignInClick = {},
         )

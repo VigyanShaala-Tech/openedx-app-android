@@ -26,6 +26,7 @@ import androidx.compose.material.Scaffold
 import androidx.compose.material.Text
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Star
+import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.pullrefresh.PullRefreshIndicator
 import androidx.compose.material.pullrefresh.pullRefresh
 import androidx.compose.material.pullrefresh.rememberPullRefreshState
@@ -52,6 +53,7 @@ import org.koin.androidx.compose.koinViewModel
 import org.openedx.core.ui.BackBtn
 import org.openedx.core.ui.HandleUIMessage
 import org.openedx.core.ui.displayCutoutForLandscape
+import org.openedx.core.ui.statusBarsInset
 import org.openedx.core.ui.theme.OpenEdXTheme
 import org.openedx.core.ui.theme.appColors
 import org.openedx.core.ui.theme.appShapes
@@ -73,7 +75,8 @@ fun WishlistView(
         state = uiState,
         uiMessage = uiMessage,
         onBack = { fragmentManager.popBackStack() },
-        onRefresh = { viewModel.refresh() }
+        onRefresh = { viewModel.refresh() },
+        onRemove = { courseId -> viewModel.remove(courseId) }
     )
 }
 
@@ -83,7 +86,8 @@ private fun WishlistView(
     state: WishlistUIState,
     uiMessage: org.openedx.foundation.presentation.UIMessage?,
     onBack: () -> Unit,
-    onRefresh: () -> Unit
+    onRefresh: () -> Unit,
+    onRemove: (String) -> Unit
 ) {
     val windowSize = rememberWindowSize()
     val scaffoldState = rememberScaffoldState()
@@ -106,29 +110,33 @@ private fun WishlistView(
         modifier = Modifier
             .fillMaxSize()
             .navigationBarsPadding(),
-        backgroundColor = MaterialTheme.appColors.background
+        backgroundColor = MaterialTheme.appColors.background,
+        topBar = {
+            Column(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .statusBarsInset()
+                    .displayCutoutForLandscape()
+                    .padding(horizontal = contentPadding.calculateLeftPadding(layoutDirection = androidx.compose.ui.unit.LayoutDirection.Ltr))
+            ) {
+                BackBtn(
+                    tint = MaterialTheme.appColors.textDark
+                ) { onBack() }
+                Text(
+                    modifier = Modifier.padding(vertical = 8.dp),
+                    text = "Wishlist",
+                    style = MaterialTheme.appTypography.headlineBold,
+                    color = MaterialTheme.appColors.textDark
+                )
+            }
+        }
     ) { paddingValues ->
         HandleUIMessage(uiMessage = uiMessage, scaffoldState = scaffoldState)
         Column(
             modifier = Modifier
                 .fillMaxSize()
-                .displayCutoutForLandscape()
                 .padding(paddingValues),
         ) {
-            BackBtn(
-                modifier = Modifier.padding(horizontal = contentPadding.calculateLeftPadding(layoutDirection = androidx.compose.ui.unit.LayoutDirection.Ltr)),
-                tint = MaterialTheme.appColors.textDark
-            ) { onBack() }
-
-            Text(
-                modifier = Modifier
-                    .padding(horizontal = contentPadding.calculateLeftPadding(layoutDirection = androidx.compose.ui.unit.LayoutDirection.Ltr))
-                    .padding(vertical = 8.dp),
-                text = "Wishlist",
-                style = MaterialTheme.appTypography.headlineBold,
-                color = MaterialTheme.appColors.textDark
-            )
-
             Box(
                 modifier = Modifier
                     .fillMaxSize()
@@ -164,7 +172,7 @@ private fun WishlistView(
                             contentPadding = contentPadding
                         ) {
                             items(state.items) { item ->
-                                WishlistGridItem(item)
+                                WishlistGridItem(item, onRemove)
                             }
                         }
                     }
@@ -181,7 +189,7 @@ private fun WishlistView(
 }
 
 @Composable
-private fun WishlistGridItem(item: CourseItemDto) {
+private fun WishlistGridItem(item: CourseItemDto, onRemove: (String) -> Unit) {
     Card(
         backgroundColor = MaterialTheme.appColors.surface,
         elevation = 0.dp,
@@ -192,20 +200,34 @@ private fun WishlistGridItem(item: CourseItemDto) {
                 .fillMaxWidth()
                 .padding(8.dp)
         ) {
-            AsyncImage(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .height(110.dp)
-                    .clip(MaterialTheme.appShapes.cardShape),
-                contentScale = ContentScale.Crop,
-                model = ImageRequest.Builder(LocalContext.current)
-                    .data(item.course_image)
-                    .error(CoreR.drawable.core_no_image_course)
-                    .placeholder(CoreR.drawable.core_no_image_course)
-                    .crossfade(true)
-                    .build(),
-                contentDescription = null,
-            )
+            Box {
+                AsyncImage(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(110.dp)
+                        .clip(MaterialTheme.appShapes.cardShape),
+                    contentScale = ContentScale.Crop,
+                    model = ImageRequest.Builder(LocalContext.current)
+                        .data(item.course_image)
+                        .error(CoreR.drawable.core_no_image_course)
+                        .placeholder(CoreR.drawable.core_no_image_course)
+                        .crossfade(true)
+                        .build(),
+                    contentDescription = null,
+                )
+                androidx.compose.material.IconButton(
+                    onClick = { onRemove(item.id) },
+                    modifier = Modifier
+                        .align(Alignment.TopEnd)
+                        .padding(6.dp)
+                ) {
+                    androidx.compose.material.Icon(
+                        imageVector = Icons.Filled.Close,
+                        contentDescription = null,
+                        tint = MaterialTheme.appColors.textPrimary
+                    )
+                }
+            }
             Spacer(Modifier.height(8.dp))
             Text(
                 text = item.title,
@@ -251,7 +273,8 @@ private fun WishlistPreview() {
             ),
             uiMessage = null,
             onBack = {},
-            onRefresh = {}
+            onRefresh = {},
+            onRemove = {}
         )
     }
 }

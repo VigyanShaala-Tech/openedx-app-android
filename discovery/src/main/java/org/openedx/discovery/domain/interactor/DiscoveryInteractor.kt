@@ -30,4 +30,7 @@ class DiscoveryInteractor(private val repository: DiscoveryRepository) {
     suspend fun getCoursesListFromCache(): List<Course> {
         return repository.getCachedCoursesList()
     }
+
+    suspend fun addToWishlist(courseId: String) = repository.addToWishlist(courseId)
+    suspend fun removeFromWishlist(courseId: String) = repository.removeFromWishlist(courseId)
 }

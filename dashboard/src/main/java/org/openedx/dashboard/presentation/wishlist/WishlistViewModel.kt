@@ -18,6 +18,8 @@ import org.openedx.foundation.extension.isInternetError
 import org.openedx.foundation.presentation.BaseViewModel
 import org.openedx.foundation.presentation.UIMessage
 import org.openedx.foundation.system.ResourceManager
+import org.openedx.core.system.notifier.CourseDashboardUpdate
+import org.openedx.core.system.notifier.DiscoveryNotifier
 
 data class WishlistUIState(
     val loading: Boolean = true,
@@ -30,6 +32,7 @@ class WishlistViewModel(
     private val networkConnection: NetworkConnection,
     private val interactor: DashboardInteractor,
     private val resourceManager: ResourceManager,
+    private val discoveryNotifier: DiscoveryNotifier,
 ) : BaseViewModel() {
 
     val apiHostUrl get() = config.getApiHostURL()
@@ -61,6 +64,28 @@ class WishlistViewModel(
                 )
             } catch (e: Exception) {
                 _uiState.value = _uiState.value.copy(loading = false, refreshing = false)
+                if (e.isInternetError()) {
+                    _uiMessage.emit(
+                        UIMessage.SnackBarMessage(resourceManager.getString(R.string.core_error_no_connection))
+                    )
+                } else {
+                    _uiMessage.emit(
+                        UIMessage.SnackBarMessage(resourceManager.getString(R.string.core_error_unknown_error))
+                    )
+                }
+            }
+        }
+    }
+
+    fun remove(courseId: String) {
+        viewModelScope.launch {
+            try {
+                interactor.removeFromWishlist(courseId)
+                _uiState.value = _uiState.value.copy(
+                    items = _uiState.value.items.filterNot { it.id == courseId }
+                )
+                discoveryNotifier.send(CourseDashboardUpdate())
+            } catch (e: Exception) {
                 if (e.isInternetError()) {
                     _uiMessage.emit(
                         UIMessage.SnackBarMessage(resourceManager.getString(R.string.core_error_no_connection))

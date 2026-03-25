@@ -43,6 +43,9 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.runtime.getValue
+import androidx.lifecycle.Lifecycle
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.ui.platform.LocalLifecycleOwner
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -90,10 +93,29 @@ class NewDashboardFragment : Fragment() {
             OpenEdXTheme {
                 val windowSize = rememberWindowSize()
                 val viewModel: NewDashboardViewModel = koinViewModel { parametersOf(windowSize) }
+                val lifecycleState by LocalLifecycleOwner.current.lifecycle.currentStateFlow.collectAsState()
+                LaunchedEffect(lifecycleState) {
+                    if (lifecycleState == Lifecycle.State.RESUMED) {
+                        viewModel.refresh()
+                    }
+                }
                 NewDashboardScreen(
                     viewModel = viewModel,
                     onWishlistViewAllClick = {
                         dashboardRouter.navigateToWishlist(requireActivity().supportFragmentManager)
+                    },
+                    onRecommendationClick = { courseId ->
+                        dashboardRouter.navigateToCourseDetail(
+                            requireActivity().supportFragmentManager,
+                            courseId
+                        )
+                    },
+                    onCourseClick = { id, title ->
+                        dashboardRouter.navigateToCourseOutline(
+                            fm = requireActivity().supportFragmentManager,
+                            courseId = id,
+                            courseTitle = title
+                        )
                     }
                 )
             }
@@ -102,20 +124,20 @@ class NewDashboardFragment : Fragment() {
 }
 
 private data class StatCardData(val icon: androidx.compose.ui.graphics.vector.ImageVector, val value: String, val label: String)
-private data class CourseCardData(val title: String, val tag: String, val imageUrl: String, val progress: Int)
+private data class CourseCardData(val id: String, val title: String, val tag: String, val imageUrl: String, val progress: Int)
 private data class WishlistItemData(val title: String, val meta: String, val rating: String, val reviews: String, val instructor: String, val imageUrl: String)
 private data class AchievementData(val title: String, val icon: androidx.compose.ui.graphics.vector.ImageVector)
-private data class RecommendationData(val title: String, val category: String, val rating: String, val description: String, val imageUrl: String)
+private data class RecommendationData(val id: String, val title: String, val category: String, val rating: String, val description: String, val imageUrl: String)
 
 @Composable
-private fun NewDashboardScreen(viewModel: NewDashboardViewModel, onWishlistViewAllClick: () -> Unit) {
+private fun NewDashboardScreen(viewModel: NewDashboardViewModel, onWishlistViewAllClick: () -> Unit, onRecommendationClick: (String) -> Unit, onCourseClick: (String, String) -> Unit) {
     val uiState by viewModel.state.collectAsState(NewDashboardState())
-    NewDashboardScreenContent(uiState, viewModel.userName, onWishlistViewAllClick)
+    NewDashboardScreenContent(uiState, viewModel.userName, onWishlistViewAllClick, onRecommendationClick, onCourseClick)
 }
 
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
-private fun NewDashboardScreenContent(uiState: NewDashboardState, userName: String, onWishlistViewAllClick: () -> Unit) {
+private fun NewDashboardScreenContent(uiState: NewDashboardState, userName: String, onWishlistViewAllClick: () -> Unit, onRecommendationClick: (String) -> Unit, onCourseClick: (String, String) -> Unit) {
     val windowSize = rememberWindowSize()
     val contentPadding by remember(key1 = windowSize) {
         mutableStateOf(
@@ -145,10 +167,10 @@ private fun NewDashboardScreenContent(uiState: NewDashboardState, userName: Stri
     }
 
     val continueCourses = uiState.continueLearning.map { course ->
-        CourseCardData(course.title, course.category ?: "", sanitizeUrl(course.course_image), course.progress)
+        CourseCardData(course.id, course.title, course.category ?: "", sanitizeUrl(course.course_image), course.progress)
     }
     val completedCourses = uiState.completed?.results?.map { course ->
-        CourseCardData(course.title, course.category ?: "", sanitizeUrl(course.course_image), course.progress)
+        CourseCardData(course.id, course.title, course.category ?: "", sanitizeUrl(course.course_image), course.progress)
     } ?: emptyList()
     val wishlistItems = uiState.wishlist?.results?.map { course ->
         WishlistItemData(
@@ -165,6 +187,7 @@ private fun NewDashboardScreenContent(uiState: NewDashboardState, userName: Stri
     }
     val recommendations = uiState.recommended.map { rec ->
         RecommendationData(
+            rec.id,
             rec.title,
             rec.category ?: "",
             (rec.rating ?: 0).toString(),
@@ -311,7 +334,8 @@ private fun NewDashboardScreenContent(uiState: NewDashboardState, userName: Stri
                     continueCourses = continueCourses,
                     wishlistItems = wishlistItems,
                     completedCourses = completedCourses,
-                    onWishlistViewAllClick = onWishlistViewAllClick
+                    onWishlistViewAllClick = onWishlistViewAllClick,
+                    onCourseClick = onCourseClick
                 )
             }
 
@@ -366,7 +390,7 @@ private fun NewDashboardScreenContent(uiState: NewDashboardState, userName: Stri
                     SectionHeader(title = "Recommended for You", showViewAll = true)
                     Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
                         recommendations.forEach { r ->
-                            RecommendationItem(r)
+                            RecommendationItem(r) { onRecommendationClick(r.id) }
                         }
                     }
                 }
@@ -413,6 +437,7 @@ private fun CoursesTabs(
     wishlistItems: List<WishlistItemData>,
     completedCourses: List<CourseCardData>,
     onWishlistViewAllClick: () -> Unit,
+    onCourseClick: (String, String) -> Unit,
 ) {
     var selectedTab by rememberSaveable { mutableStateOf(0) }
     val tabs = listOf("Continue Learning", "Wishlist", "Completed")
@@ -455,7 +480,7 @@ private fun CoursesTabs(
                         Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
                             rowItems.forEach { c ->
                                 Box(modifier = Modifier.weight(1f)) {
-                                    CourseCard(c)
+                                    CourseCard(c) { onCourseClick(c.id, c.title) }
                                 }
                             }
                             if (rowItems.size == 1) {
@@ -488,7 +513,7 @@ private fun CoursesTabs(
                         Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
                             rowItems.forEach { c ->
                                 Box(modifier = Modifier.weight(1f)) {
-                                    CourseCard(c)
+                                    CourseCard(c) { onCourseClick(c.id, c.title) }
                                 }
                             }
                             if (rowItems.size == 1) {
@@ -545,13 +570,15 @@ private fun ViewAllLink(onClick: () -> Unit) {
 }
 
 @Composable
-private fun CourseCard(c: CourseCardData) {
+private fun CourseCard(c: CourseCardData, onClick: () -> Unit) {
     Card(
         backgroundColor = MaterialTheme.appColors.surface,
         elevation = 0.dp,
         shape = MaterialTheme.appShapes.cardShape
     ) {
-        Column {
+        Column(
+            modifier = Modifier.clickable { onClick() }
+        ) {
             Box {
                 AsyncImage(
                     modifier = Modifier
@@ -680,14 +707,16 @@ private fun WishlistItem(w: WishlistItemData) {
 }
 
 @Composable
-private fun RecommendationItem(r: RecommendationData) {
+private fun RecommendationItem(r: RecommendationData, onClick: () -> Unit) {
     Card(
         backgroundColor = MaterialTheme.appColors.surface,
         elevation = 0.dp,
         shape = MaterialTheme.appShapes.cardShape
     ) {
         Row(
-            modifier = Modifier.padding(12.dp),
+            modifier = Modifier
+                .padding(12.dp)
+                .clickable { onClick() },
             verticalAlignment = Alignment.CenterVertically
         ) {
             AsyncImage(
@@ -799,7 +828,9 @@ private fun NewDashboardScreenPreview() {
                 )
             ),
             userName = "Priya",
-            onWishlistViewAllClick = {}
+            onWishlistViewAllClick = {},
+            onRecommendationClick = {},
+            onCourseClick = { _, _ -> }
         )
     }
 }
@@ -811,7 +842,9 @@ private fun NewDashboardScreenLoadingPreview() {
         NewDashboardScreenContent(
             uiState = NewDashboardState(loading = true),
             userName = "Priya",
-            onWishlistViewAllClick = {}
+            onWishlistViewAllClick = {},
+            onRecommendationClick = {},
+            onCourseClick = { _, _ -> }
         )
     }
 }
@@ -823,7 +856,9 @@ private fun NewDashboardScreenEmptyPreview() {
         NewDashboardScreenContent(
             uiState = NewDashboardState(loading = false),
             userName = "Priya",
-            onWishlistViewAllClick = {}
+            onWishlistViewAllClick = {},
+            onRecommendationClick = {},
+            onCourseClick = { _, _ -> }
         )
     }
 }

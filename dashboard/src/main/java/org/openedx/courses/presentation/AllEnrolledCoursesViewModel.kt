@@ -14,11 +14,15 @@ import kotlinx.coroutines.launch
 import org.openedx.core.R
 import org.openedx.core.config.Config
 import org.openedx.core.domain.model.EnrolledCourse
+import org.openedx.core.domain.model.EnrolledCourseData
+import org.openedx.core.domain.model.CourseSharingUtmParameters
+import org.openedx.core.domain.model.Progress
 import org.openedx.core.system.connection.NetworkConnection
 import org.openedx.core.system.notifier.CourseDashboardUpdate
 import org.openedx.core.system.notifier.DiscoveryNotifier
 import org.openedx.dashboard.domain.CourseStatusFilter
 import org.openedx.dashboard.domain.interactor.DashboardInteractor
+import org.openedx.dashboard.data.model.CourseItemDto
 import org.openedx.dashboard.presentation.DashboardAnalytics
 import org.openedx.dashboard.presentation.DashboardRouter
 import org.openedx.foundation.extension.isInternetError
@@ -87,16 +91,36 @@ class AllEnrolledCoursesViewModel(
                 _uiState.update { it.copy(refreshing = true) }
                 isLoading = true
                 page = 1
-                val response = interactor.getAllUserCourses(page, currentFilter.value)
-                if (response.pagination.next.isNotEmpty() && page != response.pagination.numPages) {
-                    _uiState.update { it.copy(canLoadMore = true) }
-                    page++
-                } else {
-                    _uiState.update { it.copy(canLoadMore = false) }
-                    page = -1
+                when (currentFilter.value) {
+                    CourseStatusFilter.IN_PROGRESS -> {
+                        val response = interactor.getInProgress()
+                        val mapped = response.results.map { it.mapToEnrolled() }
+                        _uiState.update { it.copy(canLoadMore = false) }
+                        page = -1
+                        coursesList.clear()
+                        coursesList.addAll(mapped)
+                    }
+                    CourseStatusFilter.COMPLETE -> {
+                        val response = interactor.getCompleted()
+                        val mapped = response.results.map { it.mapToEnrolled() }
+                        _uiState.update { it.copy(canLoadMore = false) }
+                        page = -1
+                        coursesList.clear()
+                        coursesList.addAll(mapped)
+                    }
+                    else -> {
+                        val response = interactor.getAllUserCourses(page, currentFilter.value)
+                        if (response.pagination.next.isNotEmpty() && page != response.pagination.numPages) {
+                            _uiState.update { it.copy(canLoadMore = true) }
+                            page++
+                        } else {
+                            _uiState.update { it.copy(canLoadMore = false) }
+                            page = -1
+                        }
+                        coursesList.clear()
+                        coursesList.addAll(response.courses)
+                    }
                 }
-                coursesList.clear()
-                coursesList.addAll(response.courses)
                 _uiState.update { it.copy(courses = coursesList.toList()) }
             } catch (e: Exception) {
                 if (e.isInternetError()) {
@@ -127,25 +151,43 @@ class AllEnrolledCoursesViewModel(
         job = viewModelScope.launch {
             try {
                 isLoading = true
-                val response = if (networkConnection.isOnline() || page > 1) {
-                    interactor.getAllUserCourses(page, currentFilter.value)
-                } else {
-                    null
-                }
-                if (response != null) {
-                    if (response.pagination.next.isNotEmpty() && page != response.pagination.numPages) {
-                        _uiState.update { it.copy(canLoadMore = true) }
-                        page++
-                    } else {
+                when (currentFilter.value) {
+                    CourseStatusFilter.IN_PROGRESS -> {
+                        val response = interactor.getInProgress()
+                        val mapped = response.results.map { it.mapToEnrolled() }
                         _uiState.update { it.copy(canLoadMore = false) }
                         page = -1
+                        coursesList.addAll(mapped)
                     }
-                    coursesList.addAll(response.courses)
-                } else {
-                    val cachedList = interactor.getEnrolledCoursesFromCache()
-                    _uiState.update { it.copy(canLoadMore = false) }
-                    page = -1
-                    coursesList.addAll(cachedList)
+                    CourseStatusFilter.COMPLETE -> {
+                        val response = interactor.getCompleted()
+                        val mapped = response.results.map { it.mapToEnrolled() }
+                        _uiState.update { it.copy(canLoadMore = false) }
+                        page = -1
+                        coursesList.addAll(mapped)
+                    }
+                    else -> {
+                        val response = if (networkConnection.isOnline() || page > 1) {
+                            interactor.getAllUserCourses(page, currentFilter.value)
+                        } else {
+                            null
+                        }
+                        if (response != null) {
+                            if (response.pagination.next.isNotEmpty() && page != response.pagination.numPages) {
+                                _uiState.update { it.copy(canLoadMore = true) }
+                                page++
+                            } else {
+                                _uiState.update { it.copy(canLoadMore = false) }
+                                page = -1
+                            }
+                            coursesList.addAll(response.courses)
+                        } else {
+                            val cachedList = interactor.getEnrolledCoursesFromCache()
+                            _uiState.update { it.copy(canLoadMore = false) }
+                            page = -1
+                            coursesList.addAll(cachedList)
+                        }
+                    }
                 }
                 _uiState.update { it.copy(courses = coursesList.toList()) }
             } catch (e: Exception) {
@@ -205,6 +247,43 @@ class AllEnrolledCoursesViewModel(
             fm = fragmentManager,
             courseId = courseId,
             courseTitle = courseName
+        )
+    }
+
+    private fun CourseItemDto.mapToEnrolled(): EnrolledCourse {
+        val progressValue = org.openedx.core.domain.model.Progress(progress, 100)
+        val courseData = EnrolledCourseData(
+            id = id,
+            name = title,
+            number = "",
+            org = "",
+            start = null,
+            startDisplay = "",
+            startType = "",
+            end = null,
+            dynamicUpgradeDeadline = "",
+            subscriptionId = "",
+            coursewareAccess = null,
+            media = null,
+            courseImage = course_image ?: "",
+            courseAbout = "",
+            courseSharingUtmParameters = org.openedx.core.domain.model.CourseSharingUtmParameters("", ""),
+            courseUpdates = "",
+            courseHandouts = "",
+            discussionUrl = "",
+            videoOutline = "",
+            isSelfPaced = true
+        )
+        return EnrolledCourse(
+            auditAccessExpires = null,
+            created = "",
+            mode = "",
+            isActive = true,
+            course = courseData,
+            certificate = null,
+            progress = progressValue,
+            courseStatus = null,
+            courseAssignments = null
         )
     }
 }

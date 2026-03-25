@@ -12,7 +12,7 @@ import kotlinx.coroutines.launch
 import org.openedx.core.R
 import org.openedx.core.config.Config
 import org.openedx.core.system.connection.NetworkConnection
-import org.openedx.dashboard.data.model.CourseItemDto
+import org.openedx.dashboard.data.model.WishlistItemData
 import org.openedx.dashboard.domain.interactor.DashboardInteractor
 import org.openedx.foundation.extension.isInternetError
 import org.openedx.foundation.presentation.BaseViewModel
@@ -24,7 +24,7 @@ import org.openedx.core.system.notifier.DiscoveryNotifier
 data class WishlistUIState(
     val loading: Boolean = true,
     val refreshing: Boolean = false,
-    val items: List<CourseItemDto> = emptyList(),
+    val items: List<WishlistItemData> = emptyList(),
 )
 
 class WishlistViewModel(

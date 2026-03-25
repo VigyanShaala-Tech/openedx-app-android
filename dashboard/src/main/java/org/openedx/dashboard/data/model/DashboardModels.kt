@@ -75,15 +75,15 @@ data class WishlistItemData(
     @SerializedName("duration")
     val duration: String,
     @SerializedName("progress")
-    val progress: String,
+    val progress: String?,
     @SerializedName("category")
     val category: String,
     @SerializedName("level")
     val level: String,
     @SerializedName("rating")
-    val rating: String,
+    val rating: Float?,
     @SerializedName("reviews")
-    val reviews: String,
+    val reviews: Int?,
     @SerializedName("instructor")
     val instructor: String,
 )

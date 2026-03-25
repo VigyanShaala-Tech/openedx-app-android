@@ -11,6 +11,7 @@ import org.openedx.dashboard.data.model.CourseItemDto
 import org.openedx.dashboard.data.model.PaginatedDto
 import org.openedx.dashboard.data.model.RecommendationDto
 import org.openedx.dashboard.data.model.SummaryCardDto
+import org.openedx.dashboard.data.model.WishlistItemData
 import org.openedx.dashboard.domain.interactor.DashboardInteractor
 import org.openedx.foundation.extension.isInternetError
 import org.openedx.foundation.presentation.BaseViewModel
@@ -27,7 +28,7 @@ data class NewDashboardState(
     val continueLearning: List<CourseItemDto> = emptyList(),
     val achievements: List<AchievementDto> = emptyList(),
     val recommended: List<RecommendationDto> = emptyList(),
-    val wishlist: PaginatedDto<CourseItemDto>? = null,
+    val wishlist: PaginatedDto<WishlistItemData>? = null,
     val inProgress: PaginatedDto<CourseItemDto>? = null,
     val completed: PaginatedDto<CourseItemDto>? = null,
 )

@@ -58,7 +58,7 @@ import org.openedx.core.ui.theme.OpenEdXTheme
 import org.openedx.core.ui.theme.appColors
 import org.openedx.core.ui.theme.appShapes
 import org.openedx.core.ui.theme.appTypography
-import org.openedx.dashboard.data.model.CourseItemDto
+import org.openedx.dashboard.data.model.WishlistItemData
 import org.openedx.foundation.presentation.rememberWindowSize
 import org.openedx.foundation.presentation.windowSizeValue
 import org.openedx.core.R as CoreR
@@ -159,7 +159,7 @@ private fun WishlistView(
                             contentAlignment = Alignment.Center
                         ) {
                             Text(
-                                text = "Your wishlist is empty",
+                                text = androidx.compose.ui.res.stringResource(org.openedx.dashboard.R.string.dashboard_wishlist_empty),
                                 style = MaterialTheme.appTypography.titleMedium,
                                 color = MaterialTheme.appColors.textPrimary
                             )
@@ -193,7 +193,7 @@ private fun WishlistView(
 }
 
 @Composable
-private fun WishlistGridItem(item: CourseItemDto, onRemove: (String) -> Unit) {
+private fun WishlistGridItem(item: WishlistItemData, onRemove: (String) -> Unit) {
     Card(
         backgroundColor = MaterialTheme.appColors.surface,
         elevation = 0.dp,
@@ -212,7 +212,7 @@ private fun WishlistGridItem(item: CourseItemDto, onRemove: (String) -> Unit) {
                         .clip(MaterialTheme.appShapes.cardShape),
                     contentScale = ContentScale.Crop,
                     model = ImageRequest.Builder(LocalContext.current)
-                        .data(item.course_image)
+                        .data(item.image)
                         .error(CoreR.drawable.core_no_image_course)
                         .placeholder(CoreR.drawable.core_no_image_course)
                         .crossfade(true)
@@ -247,14 +247,14 @@ private fun WishlistGridItem(item: CourseItemDto, onRemove: (String) -> Unit) {
                     tint = MaterialTheme.appColors.primary
                 )
                 Spacer(Modifier.width(4.dp))
-                Text(
-                    text = "4.5",
-                    style = MaterialTheme.appTypography.labelSmall,
-                    color = MaterialTheme.appColors.textDark
-                )
+                    Text(
+                        text = item.rating?.toString() ?: "",
+                        style = MaterialTheme.appTypography.labelSmall,
+                        color = MaterialTheme.appColors.textDark
+                    )
                 Spacer(Modifier.width(8.dp))
                 Text(
-                    text = (item.level ?: "").trim(),
+                    text = item.level.trim(),
                     style = MaterialTheme.appTypography.labelSmall,
                     color = MaterialTheme.appColors.textPrimary
                 )
@@ -271,8 +271,32 @@ private fun WishlistPreview() {
             state = WishlistUIState(
                 loading = false,
                 items = listOf(
-                    CourseItemDto("1", "Android Development", "", 0, "Mobile", "Beginner"),
-                    CourseItemDto("2", "Kotlin Fundamentals", "", 0, "Programming", "Intermediate")
+                    org.openedx.dashboard.data.model.WishlistItemData(
+                        id = "1",
+                        title = "Android Development",
+                        description = "Build Android apps",
+                        image = "",
+                        duration = "40 Hours",
+                        progress = "0",
+                        category = "Mobile",
+                        level = "Beginner",
+                        rating = 4.5f,
+                        reviews = 10,
+                        instructor = "John Smith"
+                    ),
+                    org.openedx.dashboard.data.model.WishlistItemData(
+                        id = "2",
+                        title = "Kotlin Fundamentals",
+                        description = "Learn Kotlin basics",
+                        image = "",
+                        duration = "20 Hours",
+                        progress = "0",
+                        category = "Programming",
+                        level = "Intermediate",
+                        rating = 4.0f,
+                        reviews = 8,
+                        instructor = "Jane Doe"
+                    )
                 )
             ),
             uiMessage = null,

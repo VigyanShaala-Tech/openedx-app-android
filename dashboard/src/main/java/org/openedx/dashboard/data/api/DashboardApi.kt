@@ -6,6 +6,7 @@ import org.openedx.dashboard.data.model.PaginatedDto
 import org.openedx.dashboard.data.model.RecommendationDto
 import org.openedx.dashboard.data.model.SummaryCardDto
 import org.openedx.dashboard.data.model.AchievementsAllDto
+import org.openedx.dashboard.data.model.WishlistItemData
 import retrofit2.http.GET
 
 interface DashboardApi {
@@ -23,7 +24,7 @@ interface DashboardApi {
     suspend fun getRecommendedCourses(): List<RecommendationDto>
 
     @GET("/api/v1/dashboard/wishlist/")
-    suspend fun getWishlist(): PaginatedDto<CourseItemDto>
+    suspend fun getWishlist(): PaginatedDto<WishlistItemData>
 
     @GET("/api/v1/dashboard/in-progress-courses/")
     suspend fun getInProgress(): PaginatedDto<CourseItemDto>

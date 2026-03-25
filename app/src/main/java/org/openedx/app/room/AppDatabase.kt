@@ -22,8 +22,9 @@ import org.openedx.dashboard.data.DashboardDao
 import org.openedx.discovery.data.converter.DiscoveryConverter
 import org.openedx.discovery.data.model.room.CourseEntity
 import org.openedx.discovery.data.storage.DiscoveryDao
+import org.openedx.core.data.model.room.WishlistEntity
 
-const val DATABASE_VERSION = 5
+const val DATABASE_VERSION = 6
 const val DATABASE_NAME = "OpenEdX_db"
 
 @Suppress("MagicNumber")
@@ -40,6 +41,7 @@ const val DATABASE_NAME = "OpenEdX_db"
         CourseEnrollmentDetailsEntity::class,
         VideoProgressEntity::class,
         CourseProgressEntity::class,
+        WishlistEntity::class,
     ],
     autoMigrations = [
         AutoMigration(1, 2),

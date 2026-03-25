@@ -12,6 +12,8 @@ import org.openedx.dashboard.data.model.PaginatedDto
 import org.openedx.dashboard.data.model.RecommendationDto
 import org.openedx.dashboard.data.model.SummaryCardDto
 import org.openedx.dashboard.data.model.AchievementsAllDto
+import org.openedx.dashboard.data.model.WishlistItemData
+import org.openedx.core.data.model.room.WishlistEntity
 import org.openedx.dashboard.data.DashboardDao
 import org.openedx.dashboard.data.model.WishlistRequest
 import org.openedx.dashboard.data.model.WishlistResponse
@@ -94,8 +96,26 @@ class DashboardRepository(
         return dashboardApi.getRecommendedCourses()
     }
 
-    suspend fun getWishlist(): PaginatedDto<CourseItemDto> {
-        return dashboardApi.getWishlist()
+    suspend fun getWishlist(): PaginatedDto<WishlistItemData> {
+        val response = dashboardApi.getWishlist()
+        dao.clearWishlist()
+        val entities = response.results.map {
+            WishlistEntity(
+                id = it.id,
+                title = it.title,
+                description = it.description,
+                image = it.image.replace("`", "").trim(),
+                duration = it.duration,
+                progress = it.progress ?: "0",
+                category = it.category,
+                level = it.level,
+                rating = it.rating?.toString() ?: "",
+                reviews = it.reviews?.toString() ?: "",
+                instructor = it.instructor
+            )
+        }
+        dao.insertWishlistItems(*entities.toTypedArray())
+        return response
     }
 
     suspend fun getInProgress(): PaginatedDto<CourseItemDto> {

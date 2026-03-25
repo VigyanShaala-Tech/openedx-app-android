@@ -223,21 +223,7 @@ private fun NewDashboardScreenContent(
             course.progress
         )
     } ?: emptyList()
-    val wishlistItems = uiState.wishlist?.results?.map { course ->
-        WishlistItemData(
-            title = course.title,
-            level = (course.level ?: "").trim(),
-            rating="0",
-            reviews = "0 reviews",
-            instructor = "",
-            image = sanitizeUrl(course.course_image),
-            duration = "4 hours",
-            category = course.category ?: "",
-            id = course.id,
-            description = "test description",
-            progress = "10"
-        )
-    } ?: emptyList()
+    val wishlistItems = uiState.wishlist?.results?.map { it.copy(image = sanitizeUrl(it.image)) } ?: emptyList()
     val achievements = uiState.achievements.map { a ->
         AchievementData(a.title, Icons.Filled.EmojiEvents)
     }
@@ -787,13 +773,13 @@ private fun WishlistItem(w: WishlistItemData) {
                     )
                     Spacer(Modifier.width(4.dp))
                     Text(
-                        text = w.rating,
+                        text = w.rating?.toString() ?: "",
                         style = MaterialTheme.appTypography.bodySmall,
                         color = MaterialTheme.appColors.textDark
                     )
                     Spacer(Modifier.width(6.dp))
                     Text(
-                        text = "(${w.reviews})",
+                        text = "(${w.reviews ?: 0})",
                         style = MaterialTheme.appTypography.labelSmall,
                         color = MaterialTheme.appColors.textPrimary
                     )
@@ -959,13 +945,18 @@ private fun NewDashboardScreenPreview() {
                 ),
                 wishlist = PaginatedDto(
                     results = listOf(
-                        CourseItemDto(
-                            "3",
-                            "Mobile App Development",
-                            SAMPLE_IMAGE_3,
-                            0,
-                            "Mobile",
-                            "Beginner"
+                        org.openedx.dashboard.data.model.WishlistItemData(
+                            id = "3",
+                            title = "Mobile App Development",
+                            description = "Learn to build Android apps",
+                            image = SAMPLE_IMAGE_3,
+                            duration = "40 Hours",
+                            progress = "0",
+                            category = "Mobile",
+                            level = "Beginner",
+                            rating = 4.0f,
+                            reviews = 125,
+                            instructor = "Jane Doe"
                         )
                     ),
                     pagination = PaginationDto(null, null, 1, 1)

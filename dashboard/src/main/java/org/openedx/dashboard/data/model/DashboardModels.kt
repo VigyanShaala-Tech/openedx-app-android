@@ -1,5 +1,7 @@
 package org.openedx.dashboard.data.model
 
+import com.google.gson.annotations.SerializedName
+
 data class SummaryCardDto(
     val id: Int,
     val icon: String,
@@ -62,12 +64,28 @@ data class CourseCardData(
 )
 
 data class WishlistItemData(
+    @SerializedName("id")
+    val id: String,
+    @SerializedName("title")
     val title: String,
-    val meta: String,
+    @SerializedName("description")
+    val description: String,
+    @SerializedName("image")
+    val image: String,
+    @SerializedName("duration")
+    val duration: String,
+    @SerializedName("progress")
+    val progress: String,
+    @SerializedName("category")
+    val category: String,
+    @SerializedName("level")
+    val level: String,
+    @SerializedName("rating")
     val rating: String,
+    @SerializedName("reviews")
     val reviews: String,
+    @SerializedName("instructor")
     val instructor: String,
-    val imageUrl: String
 )
 
 data class AchievementData(

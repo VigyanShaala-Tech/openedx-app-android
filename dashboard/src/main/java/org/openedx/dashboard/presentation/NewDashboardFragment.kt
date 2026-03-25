@@ -225,12 +225,17 @@ private fun NewDashboardScreenContent(
     } ?: emptyList()
     val wishlistItems = uiState.wishlist?.results?.map { course ->
         WishlistItemData(
-            course.title,
-            (course.level ?: "").trim(),
-            "0",
-            "0 reviews",
-            "",
-            sanitizeUrl(course.course_image)
+            title = course.title,
+            level = (course.level ?: "").trim(),
+            rating="0",
+            reviews = "0 reviews",
+            instructor = "",
+            image = sanitizeUrl(course.course_image),
+            duration = "4 hours",
+            category = course.category ?: "",
+            id = course.id,
+            description = "test description",
+            progress = "10"
         )
     } ?: emptyList()
     val achievements = uiState.achievements.map { a ->
@@ -397,7 +402,11 @@ private fun NewDashboardScreenContent(
 
             if (achievements.isNotEmpty()) {
                 item {
-                    SectionHeader(title = androidx.compose.ui.res.stringResource(org.openedx.dashboard.R.string.dashboard_earned_badges), showViewAll = true, onViewAllClick = onAchievementsViewAllClick)
+                    SectionHeader(
+                        title = androidx.compose.ui.res.stringResource(org.openedx.dashboard.R.string.dashboard_earned_badges),
+                        showViewAll = true,
+                        onViewAllClick = onAchievementsViewAllClick
+                    )
                     Spacer(Modifier.height(8.dp))
                     LazyRow(
                         horizontalArrangement = Arrangement.spacedBy(12.dp)
@@ -446,7 +455,10 @@ private fun NewDashboardScreenContent(
 
             if (recommendations.isNotEmpty()) {
                 item {
-                    SectionHeader(title = androidx.compose.ui.res.stringResource(org.openedx.dashboard.R.string.dashboard_recommended_for_you), showViewAll = true)
+                    SectionHeader(
+                        title = androidx.compose.ui.res.stringResource(org.openedx.dashboard.R.string.dashboard_recommended_for_you),
+                        showViewAll = true
+                    )
                     Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
                         recommendations.forEach { r ->
                             RecommendationItem(r) { onRecommendationClick(r.id) }
@@ -459,7 +471,11 @@ private fun NewDashboardScreenContent(
 }
 
 @Composable
-private fun SectionHeader(title: String, showViewAll: Boolean = false, onViewAllClick: () -> Unit = {}) {
+private fun SectionHeader(
+    title: String,
+    showViewAll: Boolean = false,
+    onViewAllClick: () -> Unit = {}
+) {
     Row(
         modifier = Modifier.fillMaxWidth(),
         horizontalArrangement = Arrangement.SpaceBetween,
@@ -740,7 +756,7 @@ private fun WishlistItem(w: WishlistItemData) {
                     .clip(MaterialTheme.appShapes.cardShape),
                 contentScale = ContentScale.Crop,
                 model = ImageRequest.Builder(LocalContext.current)
-                    .data(w.imageUrl)
+                    .data(w.image)
                     .error(CoreR.drawable.core_no_image_course)
                     .placeholder(CoreR.drawable.core_no_image_course)
                     .crossfade(true)
@@ -758,7 +774,7 @@ private fun WishlistItem(w: WishlistItemData) {
                 )
                 Spacer(Modifier.height(4.dp))
                 Text(
-                    text = w.meta,
+                    text = "${w.duration}-${w.category}",
                     style = MaterialTheme.appTypography.labelSmall,
                     color = MaterialTheme.appColors.textPrimary
                 )
@@ -767,7 +783,7 @@ private fun WishlistItem(w: WishlistItemData) {
                     Icon(
                         imageVector = Icons.Filled.Star,
                         contentDescription = null,
-                        tint = MaterialTheme.appColors.primary
+                        tint = MaterialTheme.appColors.rateStars
                     )
                     Spacer(Modifier.width(4.dp))
                     Text(
@@ -826,7 +842,9 @@ private fun RecommendationItem(r: RecommendationData, onClick: () -> Unit) {
                 contentDescription = null,
             )
 //            Spacer(Modifier.width(12.dp))
-            Column(modifier = Modifier.weight(1f).padding(12.dp)) {
+            Column(modifier = Modifier
+                .weight(1f)
+                .padding(12.dp)) {
                 Row(verticalAlignment = Alignment.CenterVertically) {
                     Box(
                         modifier = Modifier

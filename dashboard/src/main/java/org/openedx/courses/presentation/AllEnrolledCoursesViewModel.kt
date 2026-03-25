@@ -33,7 +33,8 @@ class AllEnrolledCoursesViewModel(
     private val resourceManager: ResourceManager,
     private val discoveryNotifier: DiscoveryNotifier,
     private val analytics: DashboardAnalytics,
-    private val dashboardRouter: DashboardRouter
+    private val dashboardRouter: DashboardRouter,
+    initialFilter: CourseStatusFilter
 ) : BaseViewModel() {
 
     val apiHostUrl get() = config.getApiHostURL()
@@ -52,7 +53,7 @@ class AllEnrolledCoursesViewModel(
     val uiMessage: SharedFlow<UIMessage>
         get() = _uiMessage.asSharedFlow()
 
-    private val currentFilter: MutableStateFlow<CourseStatusFilter> = MutableStateFlow(CourseStatusFilter.ALL)
+    private val currentFilter: MutableStateFlow<CourseStatusFilter> = MutableStateFlow(initialFilter)
 
     private var job: Job? = null
 

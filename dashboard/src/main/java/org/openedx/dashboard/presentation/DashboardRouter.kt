@@ -18,6 +18,7 @@ interface DashboardRouter {
     fun navigateToCourseSearch(fm: FragmentManager, querySearch: String)
 
     fun navigateToAllEnrolledCourses(fm: FragmentManager)
+    fun navigateToAllEnrolledCourses(fm: FragmentManager, initialFilter: String)
 
     fun navigateToWishlist(fm: FragmentManager)
 

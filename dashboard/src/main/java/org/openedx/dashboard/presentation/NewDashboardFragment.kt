@@ -119,6 +119,18 @@ class NewDashboardFragment : Fragment() {
                             courseId = id,
                             courseTitle = title
                         )
+                    },
+                    onContinueViewAllClick = {
+                        dashboardRouter.navigateToAllEnrolledCourses(
+                            requireActivity().supportFragmentManager,
+                            "IN_PROGRESS"
+                        )
+                    },
+                    onCompletedViewAllClick = {
+                        dashboardRouter.navigateToAllEnrolledCourses(
+                            requireActivity().supportFragmentManager,
+                            "COMPLETED"
+                        )
                     }
                 )
             }
@@ -131,7 +143,9 @@ private fun NewDashboardScreen(
     viewModel: NewDashboardViewModel,
     onWishlistViewAllClick: () -> Unit,
     onRecommendationClick: (String) -> Unit,
-    onCourseClick: (String, String) -> Unit
+    onCourseClick: (String, String) -> Unit,
+    onContinueViewAllClick: () -> Unit,
+    onCompletedViewAllClick: () -> Unit
 ) {
     val uiState by viewModel.state.collectAsState(NewDashboardState())
     NewDashboardScreenContent(
@@ -139,7 +153,9 @@ private fun NewDashboardScreen(
         viewModel.userName,
         onWishlistViewAllClick,
         onRecommendationClick,
-        onCourseClick
+        onCourseClick,
+        onContinueViewAllClick,
+        onCompletedViewAllClick
     )
 }
 
@@ -150,7 +166,9 @@ private fun NewDashboardScreenContent(
     userName: String,
     onWishlistViewAllClick: () -> Unit,
     onRecommendationClick: (String) -> Unit,
-    onCourseClick: (String, String) -> Unit
+    onCourseClick: (String, String) -> Unit,
+    onContinueViewAllClick: () -> Unit,
+    onCompletedViewAllClick: () -> Unit
 ) {
     val windowSize = rememberWindowSize()
     val contentPadding by remember(key1 = windowSize) {
@@ -364,7 +382,9 @@ private fun NewDashboardScreenContent(
                     wishlistItems = wishlistItems,
                     completedCourses = completedCourses,
                     onWishlistViewAllClick = onWishlistViewAllClick,
-                    onCourseClick = onCourseClick
+                    onCourseClick = onCourseClick,
+                    onContinueViewAllClick = onContinueViewAllClick,
+                    onCompletedViewAllClick = onCompletedViewAllClick
                 )
             }
 
@@ -470,6 +490,8 @@ private fun CoursesTabs(
     completedCourses: List<CourseCardData>,
     onWishlistViewAllClick: () -> Unit,
     onCourseClick: (String, String) -> Unit,
+    onContinueViewAllClick: () -> Unit,
+    onCompletedViewAllClick: () -> Unit
 ) {
     var selectedTab by rememberSaveable { mutableStateOf(0) }
     val tabs = listOf("Continue Learning", "Wishlist", "Completed")
@@ -522,7 +544,7 @@ private fun CoursesTabs(
                     }
                 }
                 Spacer(Modifier.height(12.dp))
-                ViewAllLink(onClick = {})
+                ViewAllLink(onClick = onContinueViewAllClick)
             } else {
                 EmptyTabContent("No courses in progress")
             }
@@ -557,7 +579,7 @@ private fun CoursesTabs(
                     }
                 }
                 Spacer(Modifier.height(12.dp))
-                ViewAllLink(onClick = {})
+                ViewAllLink(onClick = onCompletedViewAllClick)
             } else {
                 EmptyTabContent("No completed courses yet")
             }
@@ -936,7 +958,9 @@ private fun NewDashboardScreenPreview() {
             userName = "Priya",
             onWishlistViewAllClick = {},
             onRecommendationClick = {},
-            onCourseClick = { _, _ -> }
+            onCourseClick = { _, _ -> },
+            onContinueViewAllClick = {},
+            onCompletedViewAllClick = {}
         )
     }
 }
@@ -950,7 +974,9 @@ private fun NewDashboardScreenLoadingPreview() {
             userName = "Priya",
             onWishlistViewAllClick = {},
             onRecommendationClick = {},
-            onCourseClick = { _, _ -> }
+            onCourseClick = { _, _ -> },
+            onContinueViewAllClick = {},
+            onCompletedViewAllClick = {}
         )
     }
 }
@@ -964,7 +990,9 @@ private fun NewDashboardScreenEmptyPreview() {
             userName = "Priya",
             onWishlistViewAllClick = {},
             onRecommendationClick = {},
-            onCourseClick = { _, _ -> }
+            onCourseClick = { _, _ -> },
+            onContinueViewAllClick = {},
+            onCompletedViewAllClick = {}
         )
     }
 }

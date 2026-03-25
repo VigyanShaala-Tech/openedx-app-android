@@ -104,9 +104,15 @@ import java.util.Date
 
 @Composable
 fun AllEnrolledCoursesView(
-    fragmentManager: FragmentManager
+    fragmentManager: FragmentManager,
+    initialFilter: String = ""
 ) {
-    val viewModel: AllEnrolledCoursesViewModel = koinViewModel()
+    val initial = try {
+        org.openedx.dashboard.domain.CourseStatusFilter.valueOf(initialFilter.ifEmpty { org.openedx.dashboard.domain.CourseStatusFilter.ALL.name })
+    } catch (_: Exception) {
+        org.openedx.dashboard.domain.CourseStatusFilter.ALL
+    }
+    val viewModel: AllEnrolledCoursesViewModel = koinViewModel(parameters = { org.koin.core.parameter.parametersOf(initial) })
     val uiState by viewModel.uiState.collectAsState()
     val uiMessage by viewModel.uiMessage.collectAsState(null)
 

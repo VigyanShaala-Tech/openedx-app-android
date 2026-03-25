@@ -158,6 +158,9 @@ class AppRouter :
     override fun navigateToAllEnrolledCourses(fm: FragmentManager) {
         replaceFragmentWithBackStack(fm, AllEnrolledCoursesFragment())
     }
+    override fun navigateToAllEnrolledCourses(fm: FragmentManager, initialFilter: String) {
+        replaceFragmentWithBackStack(fm, org.openedx.courses.presentation.AllEnrolledCoursesFragment.newInstance(initialFilter))
+    }
 
     override fun navigateToWishlist(fm: FragmentManager) {
         replaceFragmentWithBackStack(fm, WishlistFragment())

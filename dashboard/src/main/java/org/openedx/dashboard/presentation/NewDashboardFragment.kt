@@ -9,6 +9,7 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.IntrinsicSize
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -381,7 +382,7 @@ private fun NewDashboardScreenContent(
             }
 
             item {
-                SectionHeader(title = "My Courses")
+                SectionHeader(title = androidx.compose.ui.res.stringResource(org.openedx.dashboard.R.string.dashboard_my_courses))
                 Spacer(Modifier.height(8.dp))
                 CoursesTabs(
                     continueCourses = continueCourses,
@@ -396,7 +397,7 @@ private fun NewDashboardScreenContent(
 
             if (achievements.isNotEmpty()) {
                 item {
-                    SectionHeader(title = "Achievements", showViewAll = true, onViewAllClick = onAchievementsViewAllClick)
+                    SectionHeader(title = androidx.compose.ui.res.stringResource(org.openedx.dashboard.R.string.dashboard_earned_badges), showViewAll = true, onViewAllClick = onAchievementsViewAllClick)
                     Spacer(Modifier.height(8.dp))
                     LazyRow(
                         horizontalArrangement = Arrangement.spacedBy(12.dp)
@@ -445,7 +446,7 @@ private fun NewDashboardScreenContent(
 
             if (recommendations.isNotEmpty()) {
                 item {
-                    SectionHeader(title = "Recommended for You", showViewAll = true)
+                    SectionHeader(title = androidx.compose.ui.res.stringResource(org.openedx.dashboard.R.string.dashboard_recommended_for_you), showViewAll = true)
                     Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
                         recommendations.forEach { r ->
                             RecommendationItem(r) { onRecommendationClick(r.id) }
@@ -475,7 +476,7 @@ private fun SectionHeader(title: String, showViewAll: Boolean = false, onViewAll
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 Text(
-                    text = "View All",
+                    text = androidx.compose.ui.res.stringResource(org.openedx.dashboard.R.string.dashboard_view_all),
                     style = MaterialTheme.appTypography.bodySmall,
                     color = MaterialTheme.appColors.primary
                 )
@@ -499,8 +500,12 @@ private fun CoursesTabs(
     onContinueViewAllClick: () -> Unit,
     onCompletedViewAllClick: () -> Unit
 ) {
-    var selectedTab by rememberSaveable { mutableStateOf(0) }
-    val tabs = listOf("Continue Learning", "Wishlist", "Completed")
+    var selectedTab by rememberSaveable { mutableStateOf(1) }
+    val tabs = listOf(
+        androidx.compose.ui.res.stringResource(org.openedx.dashboard.R.string.dashboard_continue_learning),
+        androidx.compose.ui.res.stringResource(org.openedx.dashboard.R.string.dashboard_wishlist),
+        androidx.compose.ui.res.stringResource(org.openedx.dashboard.R.string.dashboard_completed)
+    )
 
     Row(
         modifier = Modifier
@@ -552,7 +557,7 @@ private fun CoursesTabs(
                 Spacer(Modifier.height(12.dp))
                 ViewAllLink(onClick = onContinueViewAllClick)
             } else {
-                EmptyTabContent("No courses in progress")
+                EmptyTabContent(androidx.compose.ui.res.stringResource(org.openedx.dashboard.R.string.dashboard_no_courses_in_progress))
             }
         }
 
@@ -564,7 +569,7 @@ private fun CoursesTabs(
                 Spacer(Modifier.height(12.dp))
                 ViewAllLink(onClick = onWishlistViewAllClick)
             } else {
-                EmptyTabContent("Your wishlist is empty")
+                EmptyTabContent(androidx.compose.ui.res.stringResource(org.openedx.dashboard.R.string.dashboard_wishlist_empty))
             }
         }
 
@@ -587,7 +592,7 @@ private fun CoursesTabs(
                 Spacer(Modifier.height(12.dp))
                 ViewAllLink(onClick = onCompletedViewAllClick)
             } else {
-                EmptyTabContent("No completed courses yet")
+                EmptyTabContent(androidx.compose.ui.res.stringResource(org.openedx.dashboard.R.string.dashboard_no_completed_courses))
             }
         }
     }
@@ -803,13 +808,13 @@ private fun RecommendationItem(r: RecommendationData, onClick: () -> Unit) {
     ) {
         Row(
             modifier = Modifier
-                .padding(12.dp)
+                .height(IntrinsicSize.Min)
                 .clickable { onClick() },
             verticalAlignment = Alignment.CenterVertically
         ) {
             AsyncImage(
                 modifier = Modifier
-                    .size(64.dp)
+                    .size(80.dp)
                     .clip(MaterialTheme.appShapes.cardShape),
                 contentScale = ContentScale.Crop,
                 model = ImageRequest.Builder(LocalContext.current)
@@ -820,13 +825,13 @@ private fun RecommendationItem(r: RecommendationData, onClick: () -> Unit) {
                     .build(),
                 contentDescription = null,
             )
-            Spacer(Modifier.width(12.dp))
-            Column(modifier = Modifier.weight(1f)) {
+//            Spacer(Modifier.width(12.dp))
+            Column(modifier = Modifier.weight(1f).padding(12.dp)) {
                 Row(verticalAlignment = Alignment.CenterVertically) {
                     Box(
                         modifier = Modifier
                             .background(
-                                MaterialTheme.appColors.primary,
+                                MaterialTheme.appColors.primary.copy(alpha = 0.12f),
                                 MaterialTheme.appShapes.textFieldShape
                             )
                             .clip(MaterialTheme.appShapes.textFieldShape)
@@ -835,14 +840,14 @@ private fun RecommendationItem(r: RecommendationData, onClick: () -> Unit) {
                         Text(
                             text = r.category,
                             style = MaterialTheme.appTypography.labelSmall,
-                            color = MaterialTheme.appColors.primaryButtonText
+                            color = MaterialTheme.appColors.primary
                         )
                     }
                     Spacer(Modifier.width(8.dp))
                     Icon(
                         imageVector = Icons.Filled.Star,
                         contentDescription = null,
-                        tint = MaterialTheme.appColors.primary
+                        tint = MaterialTheme.appColors.rateStars
                     )
                     Spacer(Modifier.width(4.dp))
                     Text(

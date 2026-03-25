@@ -20,6 +20,25 @@
     <string name="dashboard_no_status_courses">No %1$s Courses</string>
     <string name="dashboard_pull_to_refresh">Swipe down to refresh</string>
     <string name="dashboard_welcome_back">Welcome back, %1$s</string>
+    <string name="dashboard_my_achievements">My Achievements</string>
+    <string name="dashboard_earned_badges">Earned Badges</string>
+    <string name="dashboard_badges_in_progress">Badges in Progress</string>
+    <string name="dashboard_my_courses">My Courses</string>
+    <string name="dashboard_continue_learning">Continue Learning</string>
+    <string name="dashboard_wishlist">Wishlist</string>
+    <string name="dashboard_completed">Completed</string>
+    <string name="dashboard_no_courses_in_progress">No courses in progress</string>
+    <string name="dashboard_wishlist_empty">Your wishlist is empty</string>
+    <string name="dashboard_no_completed_courses">No completed courses yet</string>
+    <string name="dashboard_recommended_for_you">Recommended for You</string>
+    <string name="dashboard_badge_10_hours_title">10 Hours of Learning</string>
+    <string name="dashboard_badge_10_hours_desc">Completed 10 hours of learning content.</string>
+    <string name="dashboard_badge_research_title">Research Pioneer</string>
+    <string name="dashboard_badge_research_desc">Completed your first research project.</string>
+    <string name="dashboard_badge_community_title">Community Helper</string>
+    <string name="dashboard_badge_community_desc">Helped 5 peers in discussion forums.</string>
+    <string name="dashboard_badge_5_courses_title">5 Courses Completed</string>
+    <string name="dashboard_badge_5_courses_desc">Completed 5 courses on the platform.</string>
 
     <plurals name="dashboard_past_due_assignment">
         <item quantity="one">%1$d Past Due Assignment</item>

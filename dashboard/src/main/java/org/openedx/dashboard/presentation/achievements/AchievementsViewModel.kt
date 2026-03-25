@@ -58,10 +58,10 @@ class AchievementsViewModel(
             try {
                 val response = interactor.getAllAchievements()
                 val fallbackProgress = listOf(
-                    BadgeProgressDto(null, "10 Hours of Learning", "Completed 10 hours of learning content.", 70),
-                    BadgeProgressDto(null, "Research Pioneer", "Completed your first research project.", 40),
-                    BadgeProgressDto(null, "Community Helper", "Helped 5 peers in discussion forums.", 60),
-                    BadgeProgressDto(null, "5 Courses Completed", "Completed 5 courses on the platform.", 60),
+                    BadgeProgressDto(null, resourceManager.getString(org.openedx.dashboard.R.string.dashboard_badge_10_hours_title), resourceManager.getString(org.openedx.dashboard.R.string.dashboard_badge_10_hours_desc), 70),
+                    BadgeProgressDto(null, resourceManager.getString(org.openedx.dashboard.R.string.dashboard_badge_research_title), resourceManager.getString(org.openedx.dashboard.R.string.dashboard_badge_research_desc), 40),
+                    BadgeProgressDto(null, resourceManager.getString(org.openedx.dashboard.R.string.dashboard_badge_community_title), resourceManager.getString(org.openedx.dashboard.R.string.dashboard_badge_community_desc), 60),
+                    BadgeProgressDto(null, resourceManager.getString(org.openedx.dashboard.R.string.dashboard_badge_5_courses_title), resourceManager.getString(org.openedx.dashboard.R.string.dashboard_badge_5_courses_desc), 60),
                 )
                 _uiState.value = _uiState.value.copy(
                     loading = false,

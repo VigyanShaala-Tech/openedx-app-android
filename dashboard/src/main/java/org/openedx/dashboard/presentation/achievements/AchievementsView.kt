@@ -65,6 +65,8 @@ import org.openedx.dashboard.data.model.BadgeProgressDto
 import org.openedx.dashboard.data.model.EarnedBadgeDto
 import org.openedx.foundation.presentation.rememberWindowSize
 import org.openedx.foundation.presentation.windowSizeValue
+import androidx.compose.ui.res.stringResource
+import org.openedx.dashboard.R
 import org.openedx.core.R as CoreR
 
 @Composable
@@ -130,7 +132,7 @@ private fun AchievementsView(
                 BackBtn(tint = MaterialTheme.appColors.textDark) { onBack() }
                 Spacer(Modifier.width(12.dp))
                 Text(
-                    text = "My Achievements",
+                    text = stringResource(R.string.dashboard_my_achievements),
                     style = MaterialTheme.appTypography.titleLarge,
                     color = MaterialTheme.appColors.textDark
                 )
@@ -184,7 +186,7 @@ private fun AchievementsView(
                             if (state.earnedBadges.isNotEmpty()) {
                                 item {
                                     Text(
-                                        text = "Earned Badges",
+                                        text = stringResource(R.string.dashboard_earned_badges),
                                         style = MaterialTheme.appTypography.titleMedium,
                                         color = MaterialTheme.appColors.textDark
                                     )
@@ -218,7 +220,7 @@ private fun AchievementsView(
                             if (state.badgesInProgress.isNotEmpty()) {
                                 item {
                                     Text(
-                                        text = "Badges in Progress",
+                                        text = stringResource(R.string.dashboard_badges_in_progress),
                                         style = MaterialTheme.appTypography.titleMedium,
                                         color = MaterialTheme.appColors.textDark
                                     )

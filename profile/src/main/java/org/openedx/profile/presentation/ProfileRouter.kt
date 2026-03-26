@@ -8,9 +8,13 @@ interface ProfileRouter {
 
     fun navigateToEditProfile(fm: FragmentManager, account: Account)
 
+    fun navigateToAboutVigyanshaala(fm: FragmentManager)
+
     fun navigateToDeleteAccount(fm: FragmentManager)
 
     fun navigateToSettings(fm: FragmentManager)
+
+    fun navigateToVsSettings(fm: FragmentManager)
 
     fun restartApp(fm: FragmentManager, isLogistrationEnabled: Boolean)
 
@@ -21,6 +25,8 @@ interface ProfileRouter {
     fun navigateToWebContent(fm: FragmentManager, title: String, url: String)
 
     fun navigateToManageAccount(fm: FragmentManager)
+
+    fun navigateToCalendarSettings(fm: FragmentManager)
 
     fun navigateToCoursesToSync(fm: FragmentManager)
 }

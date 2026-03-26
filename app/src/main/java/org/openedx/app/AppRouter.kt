@@ -56,6 +56,8 @@ import org.openedx.profile.presentation.manageaccount.ManageAccountFragment
 import org.openedx.profile.presentation.profile.ProfileFragment
 import org.openedx.profile.presentation.settings.SettingsFragment
 import org.openedx.profile.presentation.video.VideoSettingsFragment
+import org.openedx.profile.presentation.vsprofile.AboutVigyanshaalaFragment
+import org.openedx.profile.presentation.vsprofile.VsSettingsFragment
 import org.openedx.whatsnew.WhatsNewRouter
 import org.openedx.whatsnew.presentation.whatsnew.WhatsNewFragment
 import org.openedx.dashboard.presentation.wishlist.WishlistFragment
@@ -410,6 +412,10 @@ class AppRouter :
         replaceFragmentWithBackStack(fm, EditProfileFragment.newInstance(account))
     }
 
+    override fun navigateToAboutVigyanshaala(fm: FragmentManager) {
+        replaceFragmentWithBackStack(fm, AboutVigyanshaalaFragment())
+    }
+
     override fun navigateToDeleteAccount(fm: FragmentManager) {
         replaceFragmentWithBackStack(fm, DeleteProfileFragment())
     }
@@ -419,6 +425,10 @@ class AppRouter :
             fm,
             SettingsFragment()
         )
+    }
+
+    override fun navigateToVsSettings(fm: FragmentManager) {
+        replaceFragmentWithBackStack(fm, VsSettingsFragment())
     }
 
     override fun restartApp(fm: FragmentManager, isLogistrationEnabled: Boolean) {

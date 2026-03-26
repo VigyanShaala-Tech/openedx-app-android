@@ -1,6 +1,5 @@
 package org.openedx.profile.presentation.vsprofile
 
-import android.content.Intent
 import android.content.res.Configuration
 import android.os.Bundle
 import android.view.LayoutInflater
@@ -20,27 +19,18 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.Card
+import androidx.compose.material.Divider
 import androidx.compose.material.Icon
 import androidx.compose.material.IconButton
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Scaffold
 import androidx.compose.material.Text
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.Help
-import androidx.compose.material.icons.automirrored.filled.HelpOutline
 import androidx.compose.material.icons.automirrored.filled.KeyboardArrowRight
 import androidx.compose.material.icons.automirrored.filled.Logout
-import androidx.compose.material.icons.filled.ChatBubbleOutline
 import androidx.compose.material.icons.filled.Close
-import androidx.compose.material.icons.filled.Edit
-import androidx.compose.material.icons.filled.HeadsetMic
-import androidx.compose.material.icons.filled.Info
-import androidx.compose.material.icons.filled.Person
-import androidx.compose.material.icons.filled.Settings
-import androidx.compose.material.icons.filled.Share
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -52,7 +42,6 @@ import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.ComposeView
 import androidx.compose.ui.platform.ViewCompositionStrategy
 import androidx.compose.ui.platform.testTag
@@ -67,11 +56,9 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Dialog
 import androidx.fragment.app.Fragment
-import org.koin.android.ext.android.inject
 import org.koin.androidx.viewmodel.ext.android.viewModel
-import org.openedx.core.data.storage.CorePreferences
-import org.openedx.core.presentation.global.AppData
 import org.openedx.core.ui.OpenEdXButton
+import org.openedx.core.ui.Toolbar
 import org.openedx.core.ui.displayCutoutForLandscape
 import org.openedx.core.ui.statusBarsInset
 import org.openedx.core.ui.theme.OpenEdXTheme
@@ -79,15 +66,12 @@ import org.openedx.core.ui.theme.appColors
 import org.openedx.core.ui.theme.appShapes
 import org.openedx.core.ui.theme.appTypography
 import org.openedx.profile.R
-import org.openedx.profile.presentation.ProfileRouter
-import org.openedx.profile.presentation.profile.ProfileViewModel
+import org.openedx.profile.presentation.settings.SettingsUIState
+import org.openedx.profile.presentation.settings.SettingsViewModel
 
-class VsProfileFragment : Fragment() {
-    private val router: ProfileRouter by inject()
-    private val corePreferences: CorePreferences by inject()
-    private val appData: AppData by inject()
-    private val settingsViewModel by viewModel<org.openedx.profile.presentation.settings.SettingsViewModel>()
-    private val profileViewModel by viewModel<ProfileViewModel>()
+class VsSettingsFragment : Fragment() {
+
+    private val viewModel by viewModel<SettingsViewModel>()
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -97,28 +81,31 @@ class VsProfileFragment : Fragment() {
         setViewCompositionStrategy(ViewCompositionStrategy.DisposeOnViewTreeLifecycleDestroyed)
         setContent {
             OpenEdXTheme {
-                val logoutSuccess by settingsViewModel.successLogout.collectAsState(false)
-                VsProfileScreen(
-                    userName = corePreferences.user?.username ?: stringResource(id = R.string.profile_student_user),
-                    userEmail = corePreferences.user?.email ?: stringResource(id = R.string.profile_student_email),
-                    onSettingsClick = { router.navigateToVsSettings(requireActivity().supportFragmentManager) },
-                    onAboutClick = { router.navigateToAboutVigyanshaala(requireActivity().supportFragmentManager) },
-                    onLogoutClick = { settingsViewModel.logout() },
-                    onEditClick = { profileViewModel.profileEditClicked(requireActivity().supportFragmentManager) },
-                    onShareClick = {
-                        val shareIntent = Intent(Intent.ACTION_SEND).apply {
-                            type = "text/plain"
-                            putExtra(
-                                Intent.EXTRA_TEXT,
-                                "https://play.google.com/store/apps/details?id=${appData.applicationId}"
-                            )
-                        }
-                        startActivity(Intent.createChooser(shareIntent, null))
+                val logoutSuccess by viewModel.successLogout.collectAsState(false)
+                val uiState by viewModel.uiState.collectAsState()
+
+                VsSettingsScreen(
+                    versionName = (uiState as? SettingsUIState.Data)?.configuration?.versionName ?: "1.0.0",
+                    onBackClick = {
+                        requireActivity().supportFragmentManager.popBackStack()
+                    },
+                    onManageAccountClick = {
+                        viewModel.manageAccountClicked(requireActivity().supportFragmentManager)
+                    },
+                    onVideoClick = {
+                        viewModel.videoSettingsClicked(requireActivity().supportFragmentManager)
+                    },
+                    onCalendarClick = {
+                        viewModel.calendarSettingsClicked(requireActivity().supportFragmentManager)
+                    },
+                    onLogoutClick = {
+                        viewModel.logout()
                     }
                 )
+
                 androidx.compose.runtime.LaunchedEffect(logoutSuccess) {
                     if (logoutSuccess) {
-                        settingsViewModel.restartApp(requireActivity().supportFragmentManager)
+                        viewModel.restartApp(requireActivity().supportFragmentManager)
                     }
                 }
             }
@@ -127,14 +114,13 @@ class VsProfileFragment : Fragment() {
 }
 
 @Composable
-private fun VsProfileScreen(
-    userName: String,
-    userEmail: String,
-    onSettingsClick: () -> Unit,
-    onAboutClick: () -> Unit,
-    onLogoutClick: () -> Unit,
-    onEditClick: () -> Unit = {},
-    onShareClick: () -> Unit = {}
+private fun VsSettingsScreen(
+    versionName: String,
+    onBackClick: () -> Unit,
+    onManageAccountClick: () -> Unit,
+    onVideoClick: () -> Unit,
+    onCalendarClick: () -> Unit,
+    onLogoutClick: () -> Unit
 ) {
     var showLogoutDialog by rememberSaveable { mutableStateOf(false) }
 
@@ -142,7 +128,26 @@ private fun VsProfileScreen(
         modifier = Modifier
             .fillMaxSize()
             .background(MaterialTheme.appColors.background),
-        backgroundColor = MaterialTheme.appColors.background
+        backgroundColor = MaterialTheme.appColors.background,
+        topBar = {
+            Column(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .background(Color(0xFF689F38))
+                    .statusBarsInset()
+            ) {
+                Toolbar(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .displayCutoutForLandscape(),
+                    label = stringResource(id = org.openedx.core.R.string.core_settings),
+                    canShowBackBtn = true,
+                    onBackClick = onBackClick,
+                    labelTint = Color.White,
+                    iconTint = Color.White
+                )
+            }
+        }
     ) { paddingValues ->
         if (showLogoutDialog) {
             LogoutDialog(
@@ -160,24 +165,66 @@ private fun VsProfileScreen(
             modifier = Modifier
                 .fillMaxSize()
                 .padding(paddingValues)
-                .statusBarsInset()
-                .displayCutoutForLandscape()
                 .padding(horizontal = 24.dp, vertical = 24.dp)
                 .verticalScroll(rememberScrollState()),
-            verticalArrangement = Arrangement.spacedBy(12.dp)
+            verticalArrangement = Arrangement.spacedBy(16.dp)
         ) {
+            Card(
+                backgroundColor = MaterialTheme.appColors.surface,
+                elevation = 4.dp,
+                shape = MaterialTheme.appShapes.cardShape,
+                modifier = Modifier.fillMaxWidth()
+            ) {
+                VsSettingsItem(
+                    title = stringResource(id = org.openedx.core.R.string.core_manage_account),
+                    onClick = onManageAccountClick
+                )
+            }
+
             Text(
-                text = stringResource(id = R.string.profile_title),
-                style = MaterialTheme.appTypography.titleLarge.copy(
-                    fontWeight = FontWeight.Bold,
-                    fontSize = 32.sp
-                ),
-                color = MaterialTheme.appColors.textDark,
-                modifier = Modifier.padding(bottom = 8.dp)
+                text = stringResource(id = org.openedx.core.R.string.core_settings),
+                style = MaterialTheme.appTypography.labelLarge,
+                color = MaterialTheme.appColors.textSecondary,
+                modifier = Modifier.padding(top = 8.dp)
             )
 
             Card(
-                backgroundColor = MaterialTheme.appColors.background,
+                backgroundColor = MaterialTheme.appColors.surface,
+                elevation = 4.dp,
+                shape = MaterialTheme.appShapes.cardShape,
+                modifier = Modifier.fillMaxWidth()
+            ) {
+                Column {
+                    VsSettingsItem(
+                        title = stringResource(id = R.string.profile_video),
+                        onClick = onVideoClick
+                    )
+                    Divider(
+                        color = MaterialTheme.appColors.cardViewBorder,
+                        thickness = 1.dp,
+                        modifier = Modifier.padding(horizontal = 16.dp)
+                    )
+                    VsSettingsItem(
+                        title = stringResource(id = R.string.profile_dates_and_calendar),
+                        onClick = onCalendarClick
+                    )
+                }
+            }
+
+            Card(
+                backgroundColor = MaterialTheme.appColors.surface,
+                elevation = 4.dp,
+                shape = MaterialTheme.appShapes.cardShape,
+                modifier = Modifier.fillMaxWidth()
+            ) {
+                VsSettingsItem(
+                    title = stringResource(id = org.openedx.core.R.string.core_version, versionName),
+                    showChevron = false
+                )
+            }
+
+            Card(
+                backgroundColor = MaterialTheme.appColors.surface,
                 elevation = 4.dp,
                 shape = MaterialTheme.appShapes.cardShape,
                 modifier = Modifier.fillMaxWidth()
@@ -185,120 +232,24 @@ private fun VsProfileScreen(
                 Row(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .padding(20.dp),
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-                    Box(
-                        modifier = Modifier
-                            .size(64.dp)
-                            .clip(CircleShape)
-                            .background(MaterialTheme.appColors.surface),
-                        contentAlignment = Alignment.Center
-                    ) {
-                        Icon(
-                            imageVector = Icons.Filled.Person,
-                            contentDescription = null,
-                            tint = MaterialTheme.appColors.textPrimary,
-                            modifier = Modifier.size(32.dp)
-                        )
-                    }
-                    Spacer(Modifier.size(16.dp))
-                    Column(modifier = Modifier.weight(1f)) {
-                        Text(
-                            text = userName,
-                            style = MaterialTheme.appTypography.titleMedium.copy(
-                                fontWeight = FontWeight.SemiBold,
-                                fontSize = 18.sp
-                            ),
-                            color = MaterialTheme.appColors.textDark
-                        )
-                        Spacer(Modifier.size(4.dp))
-                        Text(
-                            text = userEmail,
-                            style = MaterialTheme.appTypography.bodyMedium,
-                            color = MaterialTheme.appColors.textPrimaryVariant
-                        )
-                    }
-                    Box(
-                        modifier = Modifier
-                            .size(36.dp)
-                            .clip(CircleShape)
-                            .background(Color(0xFFE8F5E9))
-                            .clickable { onEditClick() },
-                        contentAlignment = Alignment.Center
-                    ) {
-                        Icon(
-                            imageVector = Icons.Filled.Edit,
-                            contentDescription = null,
-                            tint = Color(0xFF4CAF50),
-                            modifier = Modifier.size(18.dp)
-                        )
-                    }
-                }
-            }
-
-            Spacer(Modifier.height(8.dp))
-
-            VsProfileItem(
-                icon = Icons.Filled.Settings,
-                title = stringResource(id = R.string.profile_settings),
-                onClick = onSettingsClick
-            )
-            VsProfileItem(
-                icon = Icons.Filled.ChatBubbleOutline,
-                title = stringResource(id = R.string.profile_chat_with_curie),
-                onClick = {}
-            )
-            VsProfileItem(
-                icon = Icons.Filled.HeadsetMic,
-                title = stringResource(id = R.string.profile_technical_support),
-                onClick = {}
-            )
-            VsProfileItem(
-                icon = Icons.AutoMirrored.Filled.HelpOutline,
-                title = stringResource(id = R.string.profile_help_and_support),
-                onClick = {}
-            )
-            VsProfileItem(
-                icon = Icons.Filled.Info,
-                title = stringResource(id = R.string.profile_about_vigyanshaala),
-                onClick = onAboutClick
-            )
-            VsProfileItem(
-                icon = Icons.AutoMirrored.Filled.Help,
-                title = stringResource(id = R.string.profile_faqs),
-                onClick = {}
-            )
-            VsProfileItem(
-                icon = Icons.Filled.Share,
-                title = stringResource(id = R.string.profile_share_app),
-                onClick = onShareClick
-            )
-
-            Card(
-                backgroundColor = MaterialTheme.appColors.background,
-                elevation = 4.dp,
-                shape = MaterialTheme.appShapes.cardShape,
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .clickable { showLogoutDialog = true }
-            ) {
-                Row(
-                    modifier = Modifier
-                        .fillMaxWidth()
+                        .clickable { showLogoutDialog = true }
                         .padding(16.dp),
-                    verticalAlignment = Alignment.CenterVertically
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.SpaceBetween
                 ) {
+                    Text(
+                        text = stringResource(id = R.string.profile_logout),
+                        style = MaterialTheme.appTypography.bodyMedium.copy(
+                            fontWeight = FontWeight.Medium,
+                            fontSize = 16.sp
+                        ),
+                        color = MaterialTheme.appColors.error
+                    )
                     Icon(
                         imageVector = Icons.AutoMirrored.Filled.Logout,
                         contentDescription = null,
-                        tint = MaterialTheme.appColors.error
-                    )
-                    Spacer(Modifier.size(12.dp))
-                    Text(
-                        text = stringResource(id = R.string.profile_logout),
-                        style = MaterialTheme.appTypography.titleSmall.copy(fontWeight = FontWeight.SemiBold),
-                        color = MaterialTheme.appColors.error
+                        tint = MaterialTheme.appColors.error,
+                        modifier = Modifier.size(20.dp)
                     )
                 }
             }
@@ -307,42 +258,29 @@ private fun VsProfileScreen(
 }
 
 @Composable
-private fun VsProfileItem(
-    icon: ImageVector,
+private fun VsSettingsItem(
     title: String,
-    modifier: Modifier = Modifier,
+    showChevron: Boolean = true,
     onClick: () -> Unit = {}
 ) {
-    Card(
-        backgroundColor = MaterialTheme.appColors.background,
-        elevation = 4.dp,
-        shape = MaterialTheme.appShapes.cardShape,
-        modifier = modifier
+    Row(
+        modifier = Modifier
             .fillMaxWidth()
-            .clickable { onClick() }
+            .clickable(enabled = showChevron) { onClick() }
+            .padding(16.dp),
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.SpaceBetween
     ) {
-        Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(16.dp),
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            Icon(
-                imageVector = icon,
-                contentDescription = null,
-                tint = MaterialTheme.appColors.textPrimaryVariant,
-                modifier = Modifier.size(20.dp)
-            )
-            Spacer(Modifier.size(16.dp))
-            Text(
-                text = title,
-                style = MaterialTheme.appTypography.bodyMedium.copy(
-                    fontWeight = FontWeight.Medium,
-                    fontSize = 16.sp
-                ),
-                color = MaterialTheme.appColors.textDark,
-                modifier = Modifier.weight(1f)
-            )
+        Text(
+            text = title,
+            style = MaterialTheme.appTypography.bodyMedium.copy(
+                fontWeight = FontWeight.Medium,
+                fontSize = 16.sp
+            ),
+            color = MaterialTheme.appColors.textDark,
+            modifier = Modifier.weight(1f)
+        )
+        if (showChevron) {
             Icon(
                 imageVector = Icons.AutoMirrored.Filled.KeyboardArrowRight,
                 contentDescription = null,
@@ -452,13 +390,14 @@ private fun LogoutDialog(
 @Preview(uiMode = Configuration.UI_MODE_NIGHT_NO)
 @Preview(uiMode = Configuration.UI_MODE_NIGHT_YES)
 @Composable
-private fun VsProfileScreenPreview() {
+private fun VsSettingsScreenPreview() {
     OpenEdXTheme {
-        VsProfileScreen(
-            userName = "Student User",
-            userEmail = "student@example.com",
-            onSettingsClick = {},
-            onAboutClick = {},
+        VsSettingsScreen(
+            versionName = "1.0.0",
+            onBackClick = {},
+            onManageAccountClick = {},
+            onVideoClick = {},
+            onCalendarClick = {},
             onLogoutClick = {}
         )
     }

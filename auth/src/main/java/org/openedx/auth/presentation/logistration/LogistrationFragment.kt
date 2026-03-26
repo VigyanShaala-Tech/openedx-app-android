@@ -126,7 +126,7 @@ class LogistrationFragment : Fragment() {
                         if (viewModel.isBrowserLoginEnabled) {
                             viewModel.signInBrowser(requireActivity())
                         } else {
-                            viewModel.navigateToSignIn(parentFragmentManager)
+                            viewModel.navigateToSignIn(requireActivity().supportFragmentManager)
                         }
                     },
                     onRegisterClick = {
@@ -137,11 +137,11 @@ class LogistrationFragment : Fragment() {
                                 url = ApiConstants.URL_REGISTER_BROWSER,
                             )
                         } else {
-                            viewModel.navigateToSignUp(parentFragmentManager)
+                            viewModel.navigateToSignUp(requireActivity().supportFragmentManager)
                         }
                     },
                     onSearchClick = { querySearch ->
-                        viewModel.navigateToDiscovery(parentFragmentManager, querySearch)
+                        viewModel.navigateToDiscovery(requireActivity().supportFragmentManager, querySearch)
                     },
                     paginationCallback = {
                         viewModel.fetchMore()
@@ -155,7 +155,7 @@ class LogistrationFragment : Fragment() {
                     onItemClick = { course ->
                         viewModel.courseDetailClicked(course.id, course.name)
                         viewModel.courseDetailClickedEvent(course.id, course.name)
-                        viewModel.navigateToCourseDetail(parentFragmentManager, course.id)
+                        viewModel.navigateToCourseDetail(requireActivity().supportFragmentManager, course.id)
                     },
                     isRegistrationEnabled = viewModel.isRegistrationEnabled,
                     onBackClick = {

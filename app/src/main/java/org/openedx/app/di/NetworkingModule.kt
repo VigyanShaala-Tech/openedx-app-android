@@ -27,6 +27,7 @@ val networkingModule = module {
 
     single {
         OkHttpClient.Builder().apply {
+            connectTimeout(60, TimeUnit.SECONDS)
             writeTimeout(60, TimeUnit.SECONDS)
             readTimeout(60, TimeUnit.SECONDS)
             addInterceptor(HeadersInterceptor(get(), get(), get()))

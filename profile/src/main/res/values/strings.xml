@@ -74,4 +74,14 @@
     <string name="profile_no_courses_with_current_filter">No courses match the current filter.</string>
     <string name="profile_show_full_dates">Show full dates like “%1$s”</string>
 
+    <string name="profile_title">Profile</string>
+    <string name="profile_student_user">Student User</string>
+    <string name="profile_student_email">student@example.com</string>
+    <string name="profile_settings">Settings</string>
+    <string name="profile_chat_with_curie">Chat with Curie</string>
+    <string name="profile_technical_support">Technical Support</string>
+    <string name="profile_help_and_support">Help &amp; Support</string>
+    <string name="profile_about_vigyanshaala">About Vigyanshaala</string>
+    <string name="profile_faqs">Frequently Asked Questions (FAQs)</string>
+    <string name="profile_share_app">Share the Vigyanshaala App</string>
 </resources>

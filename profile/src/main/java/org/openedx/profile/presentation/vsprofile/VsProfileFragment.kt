@@ -1,5 +1,6 @@
 package org.openedx.profile.presentation.vsprofile
 
+import android.content.res.Configuration
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.ViewGroup
@@ -15,32 +16,44 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.Card
 import androidx.compose.material.Icon
 import androidx.compose.material.MaterialTheme
+import androidx.compose.material.Scaffold
 import androidx.compose.material.Text
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.Help
+import androidx.compose.material.icons.automirrored.filled.HelpOutline
 import androidx.compose.material.icons.automirrored.filled.KeyboardArrowRight
-import androidx.compose.material.icons.filled.ChatBubble
+import androidx.compose.material.icons.automirrored.filled.Logout
+import androidx.compose.material.icons.filled.ChatBubbleOutline
+import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.icons.filled.HeadsetMic
-import androidx.compose.material.icons.filled.Help
 import androidx.compose.material.icons.filled.Info
-import androidx.compose.material.icons.filled.Logout
+import androidx.compose.material.icons.filled.Person
 import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material.icons.filled.Share
-import androidx.compose.material.Scaffold
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.ComposeView
 import androidx.compose.ui.platform.ViewCompositionStrategy
+import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.fragment.app.Fragment
-import org.koin.androidx.viewmodel.ext.android.viewModel
 import org.koin.android.ext.android.inject
+import org.koin.androidx.viewmodel.ext.android.viewModel
 import org.openedx.core.data.storage.CorePreferences
 import org.openedx.core.ui.displayCutoutForLandscape
 import org.openedx.core.ui.statusBarsInset
@@ -48,6 +61,7 @@ import org.openedx.core.ui.theme.OpenEdXTheme
 import org.openedx.core.ui.theme.appColors
 import org.openedx.core.ui.theme.appShapes
 import org.openedx.core.ui.theme.appTypography
+import org.openedx.profile.R
 import org.openedx.profile.presentation.ProfileRouter
 
 class VsProfileFragment : Fragment() {
@@ -65,8 +79,8 @@ class VsProfileFragment : Fragment() {
             OpenEdXTheme {
                 val logoutSuccess by settingsViewModel.successLogout.collectAsState(false)
                 VsProfileScreen(
-                    userName = corePreferences.user?.username.orEmpty(),
-                    userEmail = corePreferences.user?.email.orEmpty(),
+                    userName = corePreferences.user?.username ?: stringResource(id = R.string.profile_student_user),
+                    userEmail = corePreferences.user?.email ?: stringResource(id = R.string.profile_student_email),
                     onSettingsClick = { router.navigateToSettings(requireActivity().supportFragmentManager) },
                     onLogoutClick = { settingsViewModel.logout() }
                 )
@@ -99,99 +113,122 @@ private fun VsProfileScreen(
                 .padding(paddingValues)
                 .statusBarsInset()
                 .displayCutoutForLandscape()
-                .padding(horizontal = 16.dp, vertical = 16.dp),
+                .padding(horizontal = 24.dp, vertical = 24.dp)
+                .verticalScroll(rememberScrollState()),
             verticalArrangement = Arrangement.spacedBy(12.dp)
         ) {
             Text(
-                text = "Profile",
-                style = MaterialTheme.appTypography.titleLarge,
-                color = MaterialTheme.appColors.textDark
+                text = stringResource(id = R.string.profile_title),
+                style = MaterialTheme.appTypography.titleLarge.copy(
+                    fontWeight = FontWeight.Bold,
+                    fontSize = 32.sp
+                ),
+                color = MaterialTheme.appColors.textDark,
+                modifier = Modifier.padding(bottom = 8.dp)
             )
+
             Card(
-                backgroundColor = MaterialTheme.appColors.surface,
-                elevation = 0.dp,
+                backgroundColor = MaterialTheme.appColors.background,
+                elevation = 4.dp,
                 shape = MaterialTheme.appShapes.cardShape,
+                modifier = Modifier.fillMaxWidth()
             ) {
                 Row(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .padding(16.dp),
+                        .padding(20.dp),
                     verticalAlignment = Alignment.CenterVertically
                 ) {
                     Box(
                         modifier = Modifier
-                            .size(48.dp)
-                            .clip(androidx.compose.foundation.shape.CircleShape)
-                            .background(MaterialTheme.appColors.tabUnselectedBtnBackground),
+                            .size(64.dp)
+                            .clip(CircleShape)
+                            .background(MaterialTheme.appColors.surface),
                         contentAlignment = Alignment.Center
                     ) {
                         Icon(
-                            imageVector = Icons.Filled.Info,
+                            imageVector = Icons.Filled.Person,
                             contentDescription = null,
-                            tint = MaterialTheme.appColors.textPrimary
+                            tint = MaterialTheme.appColors.textPrimary,
+                            modifier = Modifier.size(32.dp)
                         )
                     }
-                    Spacer(Modifier.size(12.dp))
+                    Spacer(Modifier.size(16.dp))
                     Column(modifier = Modifier.weight(1f)) {
                         Text(
-                            text = userName.ifEmpty { "Student User" },
-                            style = MaterialTheme.appTypography.titleSmall,
+                            text = userName,
+                            style = MaterialTheme.appTypography.titleMedium.copy(
+                                fontWeight = FontWeight.SemiBold,
+                                fontSize = 18.sp
+                            ),
                             color = MaterialTheme.appColors.textDark
                         )
                         Spacer(Modifier.size(4.dp))
                         Text(
-                            text = userEmail.ifEmpty { "student@example.com" },
-                            style = MaterialTheme.appTypography.labelSmall,
-                            color = MaterialTheme.appColors.textPrimary
+                            text = userEmail,
+                            style = MaterialTheme.appTypography.bodyMedium,
+                            color = MaterialTheme.appColors.textPrimaryVariant
                         )
                     }
-                    Icon(
-                        imageVector = Icons.AutoMirrored.Filled.KeyboardArrowRight,
-                        contentDescription = null,
-                        tint = MaterialTheme.appColors.textPrimary
-                    )
+                    Box(
+                        modifier = Modifier
+                            .size(36.dp)
+                            .clip(CircleShape)
+                            .background(Color(0xFFE8F5E9))
+                            .clickable { },
+                        contentAlignment = Alignment.Center
+                    ) {
+                        Icon(
+                            imageVector = Icons.Filled.Edit,
+                            contentDescription = null,
+                            tint = Color(0xFF4CAF50),
+                            modifier = Modifier.size(18.dp)
+                        )
+                    }
                 }
             }
 
+            Spacer(Modifier.height(8.dp))
+
             VsProfileItem(
                 icon = Icons.Filled.Settings,
-                title = "Settings",
+                title = stringResource(id = R.string.profile_settings),
                 onClick = onSettingsClick
             )
             VsProfileItem(
-                icon = Icons.Filled.ChatBubble,
-                title = "Chat with Curie",
+                icon = Icons.Filled.ChatBubbleOutline,
+                title = stringResource(id = R.string.profile_chat_with_curie),
                 onClick = {}
             )
             VsProfileItem(
                 icon = Icons.Filled.HeadsetMic,
-                title = "Technical Support",
+                title = stringResource(id = R.string.profile_technical_support),
                 onClick = {}
             )
             VsProfileItem(
-                icon = Icons.Filled.Help,
-                title = "Help & Support",
+                icon = Icons.AutoMirrored.Filled.HelpOutline,
+                title = stringResource(id = R.string.profile_help_and_support),
                 onClick = {}
             )
             VsProfileItem(
                 icon = Icons.Filled.Info,
-                title = "About Vigyanshaala",
+                title = stringResource(id = R.string.profile_about_vigyanshaala),
                 onClick = {}
             )
             VsProfileItem(
-                icon = Icons.Filled.Help,
-                title = "Frequently Asked Questions (FAQs)",
+                icon = Icons.AutoMirrored.Filled.Help,
+                title = stringResource(id = R.string.profile_faqs),
                 onClick = {}
             )
             VsProfileItem(
                 icon = Icons.Filled.Share,
-                title = "Share the Vigyanshaala App",
+                title = stringResource(id = R.string.profile_share_app),
                 onClick = {}
             )
 
             Card(
-                backgroundColor = MaterialTheme.appColors.surface,
-                elevation = 0.dp,
+                backgroundColor = MaterialTheme.appColors.background,
+                elevation = 4.dp,
                 shape = MaterialTheme.appShapes.cardShape,
                 modifier = Modifier
                     .fillMaxWidth()
@@ -204,15 +241,15 @@ private fun VsProfileScreen(
                     verticalAlignment = Alignment.CenterVertically
                 ) {
                     Icon(
-                        imageVector = Icons.Filled.Logout,
+                        imageVector = Icons.AutoMirrored.Filled.Logout,
                         contentDescription = null,
-                        tint = MaterialTheme.appColors.warning
+                        tint = MaterialTheme.appColors.error
                     )
                     Spacer(Modifier.size(12.dp))
                     Text(
-                        text = "Log out",
-                        style = MaterialTheme.appTypography.titleSmall,
-                        color = MaterialTheme.appColors.warning
+                        text = stringResource(id = R.string.profile_logout),
+                        style = MaterialTheme.appTypography.titleSmall.copy(fontWeight = FontWeight.SemiBold),
+                        color = MaterialTheme.appColors.error
                     )
                 }
             }
@@ -222,15 +259,16 @@ private fun VsProfileScreen(
 
 @Composable
 private fun VsProfileItem(
-    icon: androidx.compose.ui.graphics.vector.ImageVector,
+    icon: ImageVector,
     title: String,
-    onClick: () -> Unit
+    modifier: Modifier = Modifier,
+    onClick: () -> Unit = {}
 ) {
     Card(
-        backgroundColor = MaterialTheme.appColors.surface,
-        elevation = 0.dp,
+        backgroundColor = MaterialTheme.appColors.background,
+        elevation = 4.dp,
         shape = MaterialTheme.appShapes.cardShape,
-        modifier = Modifier
+        modifier = modifier
             .fillMaxWidth()
             .clickable { onClick() }
     ) {
@@ -243,20 +281,39 @@ private fun VsProfileItem(
             Icon(
                 imageVector = icon,
                 contentDescription = null,
-                tint = MaterialTheme.appColors.textPrimary
+                tint = MaterialTheme.appColors.textPrimaryVariant,
+                modifier = Modifier.size(20.dp)
             )
-            Spacer(Modifier.size(12.dp))
+            Spacer(Modifier.size(16.dp))
             Text(
                 text = title,
-                style = MaterialTheme.appTypography.titleSmall,
+                style = MaterialTheme.appTypography.bodyMedium.copy(
+                    fontWeight = FontWeight.Medium,
+                    fontSize = 16.sp
+                ),
                 color = MaterialTheme.appColors.textDark,
                 modifier = Modifier.weight(1f)
             )
             Icon(
                 imageVector = Icons.AutoMirrored.Filled.KeyboardArrowRight,
                 contentDescription = null,
-                tint = MaterialTheme.appColors.textPrimary
+                tint = MaterialTheme.appColors.textPrimaryVariant,
+                modifier = Modifier.size(20.dp)
             )
         }
+    }
+}
+
+@Preview(uiMode = Configuration.UI_MODE_NIGHT_NO)
+@Preview(uiMode = Configuration.UI_MODE_NIGHT_YES)
+@Composable
+private fun VsProfileScreenPreview() {
+    OpenEdXTheme {
+        VsProfileScreen(
+            userName = "Student User",
+            userEmail = "student@example.com",
+            onSettingsClick = {},
+            onLogoutClick = {}
+        )
     }
 }

@@ -1,6 +1,7 @@
 package org.openedx.auth.presentation.logistration
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -74,9 +75,10 @@ private fun FilterPill(
     Row(
         modifier = Modifier
             .clip(RoundedCornerShape(20.dp))
-            .background(MaterialTheme.appColors.textFieldBackground, MaterialTheme.appShapes.textFieldShape)
+            .border(1.dp, MaterialTheme.appColors.textFieldBorder, RoundedCornerShape(20.dp))
+            .background(MaterialTheme.appColors.background, RoundedCornerShape(20.dp))
             .clickable { expanded.value = true }
-            .padding(horizontal = 16.dp, vertical = 10.dp),
+            .padding(horizontal = 16.dp, vertical = 8.dp),
         verticalAlignment = Alignment.CenterVertically
     ) {
         Text(

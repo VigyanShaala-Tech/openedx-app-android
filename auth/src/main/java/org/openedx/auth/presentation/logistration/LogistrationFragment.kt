@@ -299,8 +299,8 @@ private fun LogistrationScreen(
                             val carouselItems = listOf(
                                 LogistrationCarouselItem(
                                     imageResId = R.drawable.onboarding_1,
-                                    title = "Creating Job Opportunities in Science and Technology",
-                                    subtitle = "Discover the latest job opportunities in Science and Technology and apply for the ones that match your skills and interests."
+                                    title = "Grow your career IN STEM",
+                                    subtitle = "Calling EVERY Woman pursuing STEM - Science, Technology, Engineering, Maths Degree to be part of an inspiring global community and make your next leap into higher education or job."
                                 ),
                                 LogistrationCarouselItem(
                                     imageResId = R.drawable.onboarding_2,
@@ -309,8 +309,8 @@ private fun LogistrationScreen(
                                 ),
                                 LogistrationCarouselItem(
                                     imageResId = R.drawable.onboarding_3,
-                                    title = "Grow your career in STEM",
-                                    subtitle = "Be part of an inspiring global community and make your next leap into higher education or a job."
+                                    title = "Creating Job Opportunities in Science and Technology",
+                                    subtitle = "Discover the latest job opportunities in Science and Technology and apply for the ones that match your skills and interests."
                                 )
                             )
                             LogistrationCarousel(items = carouselItems)
@@ -337,21 +337,13 @@ private fun LogistrationScreen(
 //                        )
                         val focusManager = LocalFocusManager.current
                         Column(Modifier.padding(bottom = 8.dp)) {
-                            if (!origin.equals("RECOMMENDED", true)) {
-                                Text(
-                                    modifier = Modifier
-                                        .testTag("txt_search_label")
-                                        .padding(bottom = 10.dp),
-                                    style = MaterialTheme.appTypography.titleMedium,
-                                    text = stringResource(id = R.string.pre_auth_search_title),
-                                )
-                            }
+                            Spacer(Modifier.height(16.dp))
                             SearchBar(
                                 modifier = Modifier
                                     .testTag("tf_discovery_search")
                                     .fillMaxWidth()
                                     .height(48.dp),
-                                label = if (origin.equals("RECOMMENDED", true)) "Search courses..." else stringResource(id = R.string.pre_auth_search_hint),
+                                label = "Search courses...",
                                 requestFocus = false,
                                 searchValue = textFieldValue,
                                 clearOnSubmit = true,
@@ -366,7 +358,7 @@ private fun LogistrationScreen(
                                     textFieldValue = TextFieldValue("")
                                 }
                             )
-                            Spacer(Modifier.height(12.dp))
+                            Spacer(Modifier.height(16.dp))
                             LogistrationFilters(
                                 onFiltersChanged = onFiltersChanged
                             )
@@ -376,8 +368,8 @@ private fun LogistrationScreen(
                             Text(
                                 text = "Showing ${state.courses.size} of ${state.courses.size} courses",
                                 style = MaterialTheme.appTypography.bodySmall,
-                                color = MaterialTheme.appColors.textDark,
-                                modifier = Modifier.padding(vertical = 8.dp)
+                                color = MaterialTheme.appColors.primary,
+                                modifier = Modifier.padding(bottom = 16.dp)
                             )
                         }
 

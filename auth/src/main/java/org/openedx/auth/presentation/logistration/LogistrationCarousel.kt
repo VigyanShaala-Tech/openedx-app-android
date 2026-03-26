@@ -1,6 +1,7 @@
 package org.openedx.auth.presentation.logistration
 
 import androidx.compose.foundation.ExperimentalFoundationApi
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -13,21 +14,19 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.rememberPagerState
-import androidx.compose.material.Card
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.layout.ContentScale
-import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
-import androidx.compose.foundation.Image
-import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.unit.sp
 import org.openedx.core.ui.theme.appColors
 import org.openedx.core.ui.theme.appShapes
 import org.openedx.core.ui.theme.appTypography
@@ -48,69 +47,68 @@ fun LogistrationCarousel(
     val pagerState = rememberPagerState(pageCount = { items.size })
     Column(
         modifier = modifier
-            .fillMaxWidth()
-            .clip(MaterialTheme.appShapes.cardShape)
-            .background(MaterialTheme.appColors.surface)
-            .padding(16.dp),
-        horizontalAlignment = Alignment.CenterHorizontally,
-        verticalArrangement = Arrangement.spacedBy(12.dp)
+            .fillMaxWidth(),
+        horizontalAlignment = Alignment.CenterHorizontally
     ) {
-        Card(
-            elevation = 0.dp,
-            shape = MaterialTheme.appShapes.cardShape,
-            backgroundColor = MaterialTheme.appColors.surface
-        ) {
-            HorizontalPager(state = pagerState) { page ->
-                val item = items[page]
-                Column(
+        HorizontalPager(
+            state = pagerState,
+            modifier = Modifier.fillMaxWidth()
+        ) { page ->
+            val item = items[page]
+            Column(
+                modifier = Modifier
+                    .fillMaxWidth(),
+                horizontalAlignment = Alignment.CenterHorizontally
+            ) {
+                Image(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .padding(bottom = 8.dp),
-                    horizontalAlignment = Alignment.CenterHorizontally
-                ) {
-                    Image(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .height(160.dp)
-                            .clip(MaterialTheme.appShapes.cardShape),
-                        painter = painterResource(id = item.imageResId),
-                        contentDescription = null,
-                        contentScale = ContentScale.Crop
-                    )
-                    Spacer(Modifier.height(12.dp))
-                    Text(
-                        text = item.title,
-                        style = MaterialTheme.appTypography.headlineSmall,
-                        color = MaterialTheme.appColors.textDark,
-                        textAlign = TextAlign.Center,
-                        maxLines = 2,
-                        overflow = TextOverflow.Ellipsis
-                    )
-                    Spacer(Modifier.height(6.dp))
-                    Text(
-                        text = item.subtitle,
-                        style = MaterialTheme.appTypography.bodySmall,
-                        color = MaterialTheme.appColors.textPrimary,
-                        textAlign = TextAlign.Center,
-                        maxLines = 3,
-                        overflow = TextOverflow.Ellipsis
-                    )
-                }
+                        .height(220.dp)
+                        .clip(MaterialTheme.appShapes.cardShape),
+                    painter = painterResource(id = item.imageResId),
+                    contentDescription = null,
+                    contentScale = ContentScale.Crop
+                )
+                Spacer(Modifier.height(20.dp))
+                Text(
+                    text = item.title,
+                    style = MaterialTheme.appTypography.titleMedium.copy(
+                        fontWeight = FontWeight.Bold,
+                        fontSize = 18.sp
+                    ),
+                    color = MaterialTheme.appColors.textDark,
+                    textAlign = TextAlign.Center,
+                    modifier = Modifier.padding(horizontal = 16.dp)
+                )
+                Spacer(Modifier.height(8.dp))
+                Text(
+                    text = item.subtitle,
+                    style = MaterialTheme.appTypography.bodyMedium.copy(
+                        lineHeight = 20.sp,
+                        fontSize = 14.sp
+                    ),
+                    color = MaterialTheme.appColors.textPrimaryLight,
+                    textAlign = TextAlign.Center,
+                    modifier = Modifier.padding(horizontal = 24.dp)
+                )
             }
         }
+        
+        Spacer(Modifier.height(24.dp))
+        
         Row(
-            horizontalArrangement = Arrangement.spacedBy(6.dp),
+            horizontalArrangement = Arrangement.spacedBy(8.dp),
             verticalAlignment = Alignment.CenterVertically
         ) {
             repeat(items.size) { index ->
                 val selected = pagerState.currentPage == index
                 Box(
                     modifier = Modifier
-                        .size(if (selected) 8.dp else 6.dp)
-                        .clip(MaterialTheme.appShapes.cardShape)
+                        .size(10.dp)
+                        .clip(androidx.compose.foundation.shape.CircleShape)
                         .background(
                             if (selected) MaterialTheme.appColors.textDark
-                            else MaterialTheme.appColors.textFieldBorder
+                            else MaterialTheme.appColors.textFieldBorder.copy(alpha = 0.5f)
                         )
                 )
             }

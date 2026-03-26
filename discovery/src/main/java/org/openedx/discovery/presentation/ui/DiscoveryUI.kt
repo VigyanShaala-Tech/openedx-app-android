@@ -105,16 +105,16 @@ fun DiscoveryCourseItem(
         modifier = Modifier
             .testTag("btn_course_card")
             .fillMaxWidth()
-            .height(140.dp)
             .clickable { onClick(course.courseId) }
+            .padding(vertical = 12.dp)
             .background(MaterialTheme.appColors.background),
     ) {
         Row(
             modifier = Modifier
-                .fillMaxSize()
+                .fillMaxWidth()
                 .background(MaterialTheme.appColors.background),
             horizontalArrangement = Arrangement.spacedBy(16.dp),
-            verticalAlignment = Alignment.CenterVertically
+            verticalAlignment = Alignment.Top
         ) {
             AsyncImage(
                 model = ImageRequest.Builder(LocalContext.current)
@@ -133,25 +133,52 @@ fun DiscoveryCourseItem(
                 modifier = Modifier
                     .fillMaxWidth()
                     .height(105.dp),
+                verticalArrangement = Arrangement.SpaceBetween
             ) {
                 Text(
                     modifier = Modifier
-                        .testTag("txt_course_org")
-                        .padding(top = 12.dp),
-                    text = course.org,
-                    color = MaterialTheme.appColors.textFieldHint,
-                    style = MaterialTheme.appTypography.labelMedium
-                )
-                Text(
-                    modifier = Modifier
                         .testTag("txt_course_title")
-                        .fillMaxWidth()
-                        .padding(top = 8.dp),
+                        .fillMaxWidth(),
                     text = course.name,
-                    color = MaterialTheme.appColors.textPrimary,
+                    color = MaterialTheme.appColors.textDark,
                     style = MaterialTheme.appTypography.titleSmall,
-                    maxLines = 3,
+                    maxLines = 2,
                     overflow = TextOverflow.Ellipsis
+                )
+                
+                Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                    // Placeholder chips to match design
+                    Box(
+                        modifier = Modifier
+                            .clip(androidx.compose.foundation.shape.RoundedCornerShape(12.dp))
+                            .background(MaterialTheme.appColors.successBackground.copy(alpha = 0.2f))
+                            .padding(horizontal = 8.dp, vertical = 4.dp)
+                    ) {
+                        Text(
+                            text = "Beginner",
+                            style = MaterialTheme.appTypography.labelSmall,
+                            color = MaterialTheme.appColors.successGreen
+                        )
+                    }
+                    Box(
+                        modifier = Modifier
+                            .clip(androidx.compose.foundation.shape.RoundedCornerShape(12.dp))
+                            .background(MaterialTheme.appColors.textFieldBackground)
+                            .padding(horizontal = 8.dp, vertical = 4.dp)
+                    ) {
+                        Text(
+                            text = "STEM",
+                            style = MaterialTheme.appTypography.labelSmall,
+                            color = MaterialTheme.appColors.textPrimary
+                        )
+                    }
+                }
+
+                Text(
+                    modifier = Modifier.testTag("txt_course_org"),
+                    text = course.org,
+                    color = MaterialTheme.appColors.textPrimaryLight,
+                    style = MaterialTheme.appTypography.labelMedium
                 )
             }
         }

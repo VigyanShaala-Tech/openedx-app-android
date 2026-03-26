@@ -64,9 +64,11 @@ import org.openedx.core.ui.AuthButtonsPanel
 import org.openedx.core.ui.HandleUIMessage
 import org.openedx.core.ui.OfflineModeDialog
 import org.openedx.core.ui.SearchBar
+import org.openedx.core.ui.Toolbar
 import org.openedx.core.ui.displayCutoutForLandscape
 import org.openedx.core.ui.noRippleClickable
 import org.openedx.core.ui.shouldLoadMore
+import org.openedx.core.ui.statusBarsInset
 import org.openedx.core.ui.theme.OpenEdXTheme
 import org.openedx.core.ui.theme.appColors
 import org.openedx.core.ui.theme.appTypography
@@ -154,11 +156,11 @@ class LogistrationFragment : Fragment() {
                         viewModel.courseDetailClicked(course.id, course.name)
                         viewModel.courseDetailClickedEvent(course.id, course.name)
                         viewModel.navigateToCourseDetail(parentFragmentManager, course.id)
-                        // Note: router might need to be DiscoveryRouter or AuthRouter might need to handle this
-                        // For now we navigate to discovery search with the course name as a workaround or 
-                        // if we want to navigate to detail, we need the right router.
                     },
-                    isRegistrationEnabled = viewModel.isRegistrationEnabled
+                    isRegistrationEnabled = viewModel.isRegistrationEnabled,
+                    onBackClick = {
+                        requireActivity().onBackPressedDispatcher.onBackPressed()
+                    }
                 )
             }
         }
@@ -206,6 +208,7 @@ private fun LogistrationScreen(
     onReloadClick: () -> Unit,
     onItemClick: (org.openedx.discovery.domain.model.Course) -> Unit,
     isRegistrationEnabled: Boolean,
+    onBackClick: () -> Unit,
 ) {
     var textFieldValue by rememberSaveable(stateSaver = TextFieldValue.Saver) {
         mutableStateOf(TextFieldValue(""))
@@ -249,7 +252,7 @@ private fun LogistrationScreen(
                 }
             }
         }
-    ) {
+    ) { paddingValues ->
         val contentWidth by remember(key1 = windowSize) {
             mutableStateOf(
                 windowSize.windowSizeValue(
@@ -276,7 +279,8 @@ private fun LogistrationScreen(
         Box(
             modifier = Modifier
                 .fillMaxSize()
-                .padding(it)
+                .padding(paddingValues)
+                .statusBarsInset()
                 .displayCutoutForLandscape()
                 .pullRefresh(pullRefreshState)
         ) {
@@ -311,11 +315,12 @@ private fun LogistrationScreen(
                             )
                             LogistrationCarousel(items = carouselItems)
                         } else {
-                            Text(
-                                text = "Explore Our Courses",
-                                style = MaterialTheme.appTypography.headlineSmall,
-                                modifier = Modifier.padding(bottom = 8.dp)
+                            Toolbar(
+                                label = "Explore Our Courses",
+                                canShowBackBtn = true,
+                                onBackClick = onBackClick
                             )
+                            Spacer(Modifier.height(8.dp))
                             Text(
                                 text = "Discover a comprehensive collection of STEM courses designed to help you build skills and advance your career.",
                                 style = MaterialTheme.appTypography.bodySmall,
@@ -474,6 +479,7 @@ private fun LogistrationScreen(
 private fun LogistrationPreview() {
     OpenEdXTheme {
         LogistrationScreen(
+            origin = null,
             onSearchSubmit = {},
             onFiltersChanged = { _ -> },
             onSearchClick = {},
@@ -503,6 +509,7 @@ private fun LogistrationPreview() {
             canLoadMore = false,
             refreshing = false,
             hasInternetConnection = true,
+            onBackClick = {}
         )
     }
 }
@@ -515,6 +522,7 @@ private fun LogistrationPreview() {
 private fun LogistrationRegistrationDisabledPreview() {
     OpenEdXTheme {
         LogistrationScreen(
+            origin = null,
             onSearchSubmit = {},
             onFiltersChanged = { _ -> },
             onSearchClick = {},
@@ -544,6 +552,7 @@ private fun LogistrationRegistrationDisabledPreview() {
             canLoadMore = false,
             refreshing = false,
             hasInternetConnection = true,
+            onBackClick = {}
         )
     }
 }

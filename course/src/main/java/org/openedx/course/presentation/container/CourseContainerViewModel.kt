@@ -125,6 +125,9 @@ class CourseContainerViewModel(
     val hasInternetConnection: Boolean
         get() = networkConnection.isOnline()
 
+    val apiHostUrl: String
+        get() = config.getApiHostURL()
+
     init {
         viewModelScope.launch {
             courseNotifier.notifier.collect { event ->

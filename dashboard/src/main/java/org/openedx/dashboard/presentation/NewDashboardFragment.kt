@@ -39,6 +39,7 @@ import androidx.compose.material.icons.filled.Book
 import androidx.compose.material.icons.filled.CheckCircle
 import androidx.compose.material.icons.filled.EmojiEvents
 import androidx.compose.material.icons.filled.Star
+import androidx.compose.material.icons.filled.Close
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
@@ -161,7 +162,8 @@ private fun NewDashboardScreen(
         onRecommendationClick,
         onCourseClick,
         onContinueViewAllClick,
-        onCompletedViewAllClick
+        onCompletedViewAllClick,
+        onRemoveWishlist = { id -> viewModel.removeFromWishlist(id) }
     )
 }
 
@@ -175,7 +177,8 @@ private fun NewDashboardScreenContent(
     onRecommendationClick: (String) -> Unit,
     onCourseClick: (String, String) -> Unit,
     onContinueViewAllClick: () -> Unit,
-    onCompletedViewAllClick: () -> Unit
+    onCompletedViewAllClick: () -> Unit,
+    onRemoveWishlist: (String) -> Unit
 ) {
     val windowSize = rememberWindowSize()
     val contentPadding by remember(key1 = windowSize) {
@@ -382,7 +385,8 @@ private fun NewDashboardScreenContent(
                     onWishlistViewAllClick = onWishlistViewAllClick,
                     onCourseClick = onCourseClick,
                     onContinueViewAllClick = onContinueViewAllClick,
-                    onCompletedViewAllClick = onCompletedViewAllClick
+                    onCompletedViewAllClick = onCompletedViewAllClick,
+                    onRemoveWishlist = onRemoveWishlist
                 )
             }
 
@@ -500,7 +504,8 @@ private fun CoursesTabs(
     onWishlistViewAllClick: () -> Unit,
     onCourseClick: (String, String) -> Unit,
     onContinueViewAllClick: () -> Unit,
-    onCompletedViewAllClick: () -> Unit
+    onCompletedViewAllClick: () -> Unit,
+    onRemoveWishlist: (String) -> Unit
 ) {
     var selectedTab by rememberSaveable { mutableStateOf(1) }
     val tabs = listOf(
@@ -566,7 +571,7 @@ private fun CoursesTabs(
         1 -> {
             if (wishlistItems.isNotEmpty()) {
                 Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
-                    wishlistItems.forEach { WishlistItem(it) }
+                    wishlistItems.forEach { WishlistItem(it, onRemove = onRemoveWishlist) }
                 }
                 Spacer(Modifier.height(12.dp))
                 ViewAllLink(onClick = onWishlistViewAllClick)
@@ -726,76 +731,81 @@ private fun CourseCard(c: CourseCardData, onClick: () -> Unit) {
 }
 
 @Composable
-private fun WishlistItem(w: WishlistItemData) {
+private fun WishlistItem(w: WishlistItemData, onRemove: (String) -> Unit) {
     Card(
         backgroundColor = MaterialTheme.appColors.surface,
         elevation = 0.dp,
         shape = MaterialTheme.appShapes.cardShape
     ) {
-        Row(
-            modifier = Modifier.padding(12.dp),
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            AsyncImage(
-                modifier = Modifier
-                    .size(64.dp)
-                    .clip(MaterialTheme.appShapes.cardShape),
-                contentScale = ContentScale.Crop,
-                model = ImageRequest.Builder(LocalContext.current)
-                    .data(w.image)
-                    .error(CoreR.drawable.core_no_image_course)
-                    .placeholder(CoreR.drawable.core_no_image_course)
-                    .crossfade(true)
-                    .build(),
-                contentDescription = null,
-            )
-            Spacer(Modifier.width(12.dp))
-            Column(modifier = Modifier.weight(1f)) {
-                Text(
-                    text = w.title,
-                    style = MaterialTheme.appTypography.titleSmall,
-                    color = MaterialTheme.appColors.textDark,
-                    maxLines = 2,
-                    overflow = TextOverflow.Ellipsis
+        Box {
+            Row(
+                modifier = Modifier.padding(12.dp),
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                AsyncImage(
+                    modifier = Modifier
+                        .size(64.dp)
+                        .clip(MaterialTheme.appShapes.cardShape),
+                    contentScale = ContentScale.Crop,
+                    model = ImageRequest.Builder(LocalContext.current)
+                        .data(w.image)
+                        .error(CoreR.drawable.core_no_image_course)
+                        .placeholder(CoreR.drawable.core_no_image_course)
+                        .crossfade(true)
+                        .build(),
+                    contentDescription = null,
                 )
-                Spacer(Modifier.height(4.dp))
-                Text(
-                    text = "${w.duration}-${w.category}",
-                    style = MaterialTheme.appTypography.labelSmall,
-                    color = MaterialTheme.appColors.textPrimary
-                )
-                Spacer(Modifier.height(6.dp))
-                Row(verticalAlignment = Alignment.CenterVertically) {
-                    Icon(
-                        imageVector = Icons.Filled.Star,
-                        contentDescription = null,
-                        tint = MaterialTheme.appColors.rateStars
-                    )
-                    Spacer(Modifier.width(4.dp))
+                Spacer(Modifier.width(12.dp))
+                Column(modifier = Modifier.weight(1f)) {
                     Text(
-                        text = w.rating?.toString() ?: "",
-                        style = MaterialTheme.appTypography.bodySmall,
-                        color = MaterialTheme.appColors.textDark
+                        text = w.title,
+                        style = MaterialTheme.appTypography.titleSmall,
+                        color = MaterialTheme.appColors.textDark,
+                        maxLines = 2,
+                        overflow = TextOverflow.Ellipsis
                     )
-                    Spacer(Modifier.width(6.dp))
+                    Spacer(Modifier.height(4.dp))
                     Text(
-                        text = "(${w.reviews ?: 0})",
+                        text = "${w.duration}-${w.category}",
+                        style = MaterialTheme.appTypography.labelSmall,
+                        color = MaterialTheme.appColors.textPrimary
+                    )
+                    Spacer(Modifier.height(6.dp))
+                    Row(verticalAlignment = Alignment.CenterVertically) {
+                        Icon(
+                            imageVector = Icons.Filled.Star,
+                            contentDescription = null,
+                            tint = MaterialTheme.appColors.rateStars
+                        )
+                        Spacer(Modifier.width(4.dp))
+                        Text(
+                            text = w.rating?.toString() ?: "",
+                            style = MaterialTheme.appTypography.bodySmall,
+                            color = MaterialTheme.appColors.textDark
+                        )
+                        Spacer(Modifier.width(6.dp))
+                        Text(
+                            text = "(${w.reviews ?: 0})",
+                            style = MaterialTheme.appTypography.labelSmall,
+                            color = MaterialTheme.appColors.textPrimary
+                        )
+                    }
+                    Spacer(Modifier.height(4.dp))
+                    Text(
+                        text = w.instructor,
                         style = MaterialTheme.appTypography.labelSmall,
                         color = MaterialTheme.appColors.textPrimary
                     )
                 }
-                Spacer(Modifier.height(4.dp))
-                Text(
-                    text = w.instructor,
-                    style = MaterialTheme.appTypography.labelSmall,
-                    color = MaterialTheme.appColors.textPrimary
-                )
             }
             Icon(
-                imageVector = Icons.Default.CheckCircle,
+                imageVector = Icons.Filled.Close,
                 contentDescription = null,
-                tint = MaterialTheme.appColors.tabUnselectedBtnContent,
-                modifier = Modifier.clickable { }
+                tint = MaterialTheme.appColors.textPrimary,
+                modifier = Modifier
+                    .padding(8.dp)
+                    .align(Alignment.TopEnd)
+                    .clickable { onRemove(w.id) }
             )
         }
     }
@@ -981,7 +991,8 @@ private fun NewDashboardScreenPreview() {
             onRecommendationClick = {},
             onCourseClick = { _, _ -> },
             onContinueViewAllClick = {},
-            onCompletedViewAllClick = {}
+            onCompletedViewAllClick = {},
+            onRemoveWishlist = {}
         )
     }
 }
@@ -998,7 +1009,8 @@ private fun NewDashboardScreenLoadingPreview() {
             onRecommendationClick = {},
             onCourseClick = { _, _ -> },
             onContinueViewAllClick = {},
-            onCompletedViewAllClick = {}
+            onCompletedViewAllClick = {},
+            onRemoveWishlist = {}
         )
     }
 }
@@ -1015,7 +1027,8 @@ private fun NewDashboardScreenEmptyPreview() {
             onRecommendationClick = {},
             onCourseClick = { _, _ -> },
             onContinueViewAllClick = {},
-            onCompletedViewAllClick = {}
+            onCompletedViewAllClick = {},
+            onRemoveWishlist = {}
         )
     }
 }

@@ -1,5 +1,6 @@
 package org.openedx.course.presentation.container
 
+import android.content.Intent
 import android.content.res.Configuration
 import android.os.Build
 import android.os.Bundle
@@ -65,6 +66,7 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import androidx.core.content.ContextCompat
 import androidx.core.os.bundleOf
 import androidx.core.view.isVisible
 import androidx.fragment.app.Fragment
@@ -126,6 +128,9 @@ class CourseContainerFragment : Fragment(R.layout.fragment_course_container) {
     ) { granted ->
         Log.d(CourseContainerFragment::class.java.simpleName, "Permission granted: $granted")
     }
+    private val shareLauncher = registerForActivityResult(
+        ActivityResultContracts.StartActivityForResult()
+    ) { _ -> }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -203,6 +208,9 @@ class CourseContainerFragment : Fragment(R.layout.fragment_course_container) {
                 isResumed = isResumed,
                 openTab = requireArguments().getString(ARG_OPEN_TAB, CourseContainerTab.HOME.name),
                 fragmentManager = fm,
+                    onShare = { intent ->
+                        shareLauncher.launch(intent)
+                    },
                 onRefresh = { page ->
                     onRefresh(page)
                 }
@@ -259,6 +267,7 @@ fun CourseDashboard(
     isResumed: Boolean,
     openTab: String,
     fragmentManager: FragmentManager,
+    onShare: (Intent) -> Unit,
     onRefresh: (page: Int) -> Unit,
 ) {
     val refreshing by viewModel.refreshing.collectAsState(true)
@@ -413,6 +422,7 @@ fun CourseDashboard(
                                         homePagerState = homePagerState,
                                         isResumed = isResumed,
                                         fragmentManager = fragmentManager,
+                                        onShare = onShare,
                                         onContentTabSelected = { tab ->
                                             selectedContentTab = tab
                                         }
@@ -460,6 +470,7 @@ private fun DashboardPager(
     isResumed: Boolean,
     fragmentManager: FragmentManager,
     onContentTabSelected: (CourseContentTab) -> Unit,
+    onShare: (Intent) -> Unit,
 ) {
     val scope = rememberCoroutineScope()
 
@@ -565,6 +576,24 @@ private fun DashboardPager(
                             viewModel.courseId,
                             HandoutsType.Announcements
                         )
+                    },
+                    onAboutCourseClick = {
+                        viewModel.courseRouter.navigateToHandoutsWebView(
+                            fragmentManager,
+                            viewModel.courseId,
+                            HandoutsType.Announcements
+                        )
+                    },
+                    onShareCourseClick = {
+                        val host = viewModel.apiHostUrl
+                            .removePrefix("https://")
+                            .removePrefix("http://")
+                        val shareUrl = "https://apps.$host/public/courses/${viewModel.courseId}"
+                        val shareIntent = Intent(Intent.ACTION_SEND).apply {
+                            type = "text/plain"
+                            putExtra(Intent.EXTRA_TEXT, shareUrl)
+                        }
+                        onShare(Intent.createChooser(shareIntent, null))
                     }
                 )
             }

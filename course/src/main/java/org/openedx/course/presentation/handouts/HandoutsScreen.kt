@@ -20,6 +20,9 @@ import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Scaffold
 import androidx.compose.material.Surface
 import androidx.compose.material.Text
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.outlined.Info
+import androidx.compose.material.icons.outlined.Share
 import androidx.compose.material.rememberScaffoldState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -28,6 +31,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.painter.Painter
+import androidx.compose.ui.graphics.vector.rememberVectorPainter
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Devices
@@ -49,6 +53,8 @@ fun HandoutsScreen(
     windowSize: WindowSize,
     onHandoutsClick: () -> Unit,
     onAnnouncementsClick: () -> Unit,
+    onAboutCourseClick: () -> Unit,
+    onShareCourseClick: () -> Unit,
 ) {
     val scaffoldState = rememberScaffoldState()
     Scaffold(
@@ -95,6 +101,22 @@ fun HandoutsScreen(
                             description = stringResource(id = courseR.string.course_latest_news),
                             painter = painterResource(id = courseR.drawable.course_ic_announcements),
                             onClick = onAnnouncementsClick
+                        )
+                    }
+                    item {
+                        HandoutsItem(
+                            title = stringResource(id = courseR.string.course_about),
+                            description = stringResource(id = courseR.string.course_about_desc),
+                            painter = rememberVectorPainter(Icons.Outlined.Info),
+                            onClick = onAboutCourseClick
+                        )
+                    }
+                    item {
+                        HandoutsItem(
+                            title = stringResource(id = courseR.string.course_share),
+                            description = stringResource(id = courseR.string.course_share_desc),
+                            painter = rememberVectorPainter(Icons.Outlined.Share),
+                            onClick = onShareCourseClick
                         )
                     }
                 }
@@ -153,7 +175,9 @@ private fun HandoutsScreenPreview() {
         HandoutsScreen(
             windowSize = WindowSize(WindowType.Compact, WindowType.Compact),
             onHandoutsClick = {},
-            onAnnouncementsClick = {}
+            onAnnouncementsClick = {},
+            onAboutCourseClick = {},
+            onShareCourseClick = {}
         )
     }
 }
@@ -166,7 +190,9 @@ private fun HandoutsScreenTabletPreview() {
         HandoutsScreen(
             windowSize = WindowSize(WindowType.Medium, WindowType.Medium),
             onHandoutsClick = {},
-            onAnnouncementsClick = {}
+            onAnnouncementsClick = {},
+            onAboutCourseClick = {},
+            onShareCourseClick = {}
         )
     }
 }

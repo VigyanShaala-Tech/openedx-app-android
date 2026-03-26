@@ -107,4 +107,29 @@ class NewDashboardViewModel(
             }
         }
     }
+
+    fun removeFromWishlist(courseId: String) {
+        viewModelScope.launch {
+            try {
+                interactor.removeFromWishlist(courseId)
+                val current = _state.value.wishlist
+                if (current != null) {
+                    val updated = current.copy(
+                        results = current.results.filterNot { it.id == courseId }
+                    )
+                    _state.value = _state.value.copy(wishlist = updated)
+                }
+            } catch (e: Exception) {
+                if (e.isInternetError()) {
+                    _uiMessage.emit(
+                        UIMessage.SnackBarMessage(resourceManager.getString(org.openedx.core.R.string.core_error_no_connection))
+                    )
+                } else {
+                    _uiMessage.emit(
+                        UIMessage.SnackBarMessage(resourceManager.getString(org.openedx.core.R.string.core_error_unknown_error))
+                    )
+                }
+            }
+        }
+    }
 }

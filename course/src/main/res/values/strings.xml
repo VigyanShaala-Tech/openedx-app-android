@@ -7,8 +7,12 @@
     <string name="course_navigation_finish">Finish</string>
     <string name="course_handouts">Handouts</string>
     <string name="course_announcements">Announcements</string>
+    <string name="course_about">About this Course</string>
+    <string name="course_share">Share this Course</string>
     <string name="course_find_important_info">Find important course information</string>
     <string name="course_latest_news">Keep up with the latest news</string>
+    <string name="course_about_desc">View course details and overview</string>
+    <string name="course_share_desc">Share with friends and colleagues</string>
     <string name="course_good_job">Good job!</string>
     <string name="course_section_finished">You\'ve completed \"%s\".</string>
     <string name="course_back_to_outline">Back to outline</string>

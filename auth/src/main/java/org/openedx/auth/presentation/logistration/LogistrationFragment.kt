@@ -317,7 +317,7 @@ private fun LogistrationScreen(
                         } else {
                             Toolbar(
                                 label = "Explore Our Courses",
-                                canShowBackBtn = true,
+                                canShowBackBtn = false,
                                 onBackClick = onBackClick
                             )
                             Spacer(Modifier.height(8.dp))

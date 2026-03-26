@@ -11,6 +11,7 @@ import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.launch
+import org.openedx.auth.presentation.logistration.LogistrationFragment
 import org.openedx.core.config.Config
 import org.openedx.core.system.notifier.DiscoveryNotifier
 import org.openedx.core.system.notifier.NavigationToDiscovery
@@ -39,7 +40,8 @@ class MainViewModel(
         get() = _appUpgradeEvent
 
     val isDiscoveryTypeWebView get() = config.getDiscoveryConfig().isViewTypeWebView()
-    val getDiscoveryFragment get() = DiscoveryNavigator(isDiscoveryTypeWebView).getDiscoveryFragment()
+//    val getDiscoveryFragment get() = DiscoveryNavigator(isDiscoveryTypeWebView).getDiscoveryFragment()
+    val getDiscoveryFragment get() = LogistrationFragment.newInstance(null, "RECOMMENDED")
 
     val isDownloadsFragmentEnabled get() = config.getDownloadsConfig().isEnabled
 

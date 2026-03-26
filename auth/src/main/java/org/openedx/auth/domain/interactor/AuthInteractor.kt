@@ -30,6 +30,10 @@ class AuthInteractor(private val repository: AuthRepository) {
         return repository.register(mapFields)
     }
 
+    suspend fun registerVs(mapFields: Map<String, Any>) {
+        return repository.registerVs(mapFields)
+    }
+
     suspend fun validateRegistrationFields(mapFields: Map<String, String>): ValidationFields {
         return repository.validateRegistrationFields(mapFields)
     }

@@ -11,6 +11,7 @@ import org.openedx.auth.presentation.logistration.LogistrationViewModel
 import org.openedx.auth.presentation.restore.RestorePasswordViewModel
 import org.openedx.auth.presentation.signin.SignInViewModel
 import org.openedx.auth.presentation.signup.SignUpViewModel
+import org.openedx.auth.presentation.signup.VsSignUpViewModel
 import org.openedx.core.Validator
 import org.openedx.core.domain.interactor.CalendarInteractor
 import org.openedx.core.presentation.dialog.selectorbottomsheet.SelectDialogViewModel
@@ -154,6 +155,20 @@ val screenModule = module {
             infoType
         )
     }
+
+    viewModel { (courseId: String?, infoType: String?) ->
+        VsSignUpViewModel(
+            get(),
+            get(),
+            get(),
+            get(),
+            get(),
+            get(),
+            courseId,
+            infoType
+        )
+    }
+
     viewModel { RestorePasswordViewModel(get(), get(), get(), get()) }
 
     factory { DashboardRepository(get(), get(), get(), get(), get(), get()) }

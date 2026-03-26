@@ -9,6 +9,7 @@ import org.openedx.auth.presentation.logistration.LogistrationFragment
 import org.openedx.auth.presentation.restore.RestorePasswordFragment
 import org.openedx.auth.presentation.signin.SignInFragment
 import org.openedx.auth.presentation.signup.SignUpFragment
+import org.openedx.auth.presentation.signup.VsSignUpFragment
 import org.openedx.core.CalendarRouter
 import org.openedx.core.FragmentViewType
 import org.openedx.core.presentation.global.appupgrade.AppUpgradeRouter
@@ -97,7 +98,9 @@ class AppRouter :
     }
 
     override fun navigateToSignUp(fm: FragmentManager, courseId: String?, infoType: String?) {
-        replaceFragmentWithBackStack(fm, SignUpFragment.newInstance(courseId, infoType))
+        // Comment out current signup screen redirection and redirect to new created signup screen
+        // replaceFragmentWithBackStack(fm, SignUpFragment.newInstance(courseId, infoType))
+        replaceFragmentWithBackStack(fm, VsSignUpFragment.newInstance(courseId, infoType))
     }
 
     override fun navigateToLogistration(fm: FragmentManager, courseId: String?) {

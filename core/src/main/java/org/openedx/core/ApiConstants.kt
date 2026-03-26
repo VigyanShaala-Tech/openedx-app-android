@@ -10,6 +10,7 @@ object ApiConstants {
     const val URL_REGISTRATION_FIELDS = "/user_api/v1/account/registration"
     const val URL_VALIDATE_REGISTRATION_FIELDS = "/api/user/v1/validation/registration"
     const val URL_REGISTER = "/api/user/v1/account/registration/"
+    const val URL_REGISTER_VS = "/api/user/v2/account/registration/"
     const val URL_REGISTER_BROWSER = "/register"
     const val URL_PASSWORD_RESET = "/password_reset/"
 

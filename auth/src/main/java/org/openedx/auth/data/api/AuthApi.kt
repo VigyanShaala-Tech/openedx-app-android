@@ -7,6 +7,7 @@ import org.openedx.auth.data.model.ValidationFields
 import org.openedx.core.ApiConstants
 import org.openedx.core.data.model.User
 import retrofit2.Call
+import retrofit2.http.Body
 import retrofit2.http.Field
 import retrofit2.http.FieldMap
 import retrofit2.http.FormUrlEncoded
@@ -64,6 +65,9 @@ interface AuthApi {
     @FormUrlEncoded
     @POST(ApiConstants.URL_REGISTER)
     suspend fun registerUser(@FieldMap fields: Map<String, String>)
+
+    @POST(ApiConstants.URL_REGISTER_VS)
+    suspend fun registerUserVs(@Body fields: Map<String, Any>)
 
     @FormUrlEncoded
     @POST(ApiConstants.URL_VALIDATE_REGISTRATION_FIELDS)

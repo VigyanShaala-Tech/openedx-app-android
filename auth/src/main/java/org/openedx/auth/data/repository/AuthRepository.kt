@@ -66,6 +66,10 @@ class AuthRepository(
         return api.registerUser(mapFields)
     }
 
+    suspend fun registerVs(mapFields: Map<String, Any>) {
+        return api.registerUserVs(mapFields)
+    }
+
     suspend fun validateRegistrationFields(mapFields: Map<String, String>): ValidationFields {
         return api.validateRegistrationFields(mapFields)
     }

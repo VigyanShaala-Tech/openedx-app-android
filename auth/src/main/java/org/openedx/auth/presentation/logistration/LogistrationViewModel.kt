@@ -205,7 +205,11 @@ class LogistrationViewModel(
                         startDisplay = c.start_display ?: "",
                         startType = c.start_type ?: "",
                         overview = "",
-                        isEnrolled = false
+                        isEnrolled = false,
+                        rating = "0",
+                        noOfReviews = "0",
+                        enrollments = "0",
+                        isWishlisted = false
                     )
                 }
                 _uiState.value = DiscoveryUIState.Courses(mapped)
@@ -221,11 +225,11 @@ class LogistrationViewModel(
         }
     }
 
-    fun courseDetailClicked(courseId: String, courseName: String) {
-        analytics.discoveryCourseClickedEvent(courseId, courseName)
+    fun courseDetailClicked(courseId: String?, courseName: String?) {
+        analytics.discoveryCourseClickedEvent(courseId?:"", courseName?:"")
     }
 
-    fun courseDetailClickedEvent(courseId: String, courseTitle: String) {
+    fun courseDetailClickedEvent(courseId: String?, courseTitle: String?) {
         val event = DiscoveryAnalyticsEvent.COURSE_INFO
         analytics.logEvent(
             event.eventName,
@@ -243,10 +247,10 @@ class LogistrationViewModel(
         logEvent(AuthAnalyticsEvent.SIGN_IN_CLICKED)
     }
 
-    fun navigateToCourseDetail(parentFragmentManager: FragmentManager,courseId: String) {
+    fun navigateToCourseDetail(parentFragmentManager: FragmentManager, courseId: String?) {
         router.navigateToCourseDetail(
             parentFragmentManager,
-            courseId
+            courseId?:""
         )
     }
 

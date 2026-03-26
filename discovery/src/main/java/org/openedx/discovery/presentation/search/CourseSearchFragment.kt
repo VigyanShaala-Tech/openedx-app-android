@@ -496,5 +496,9 @@ private val mockCourse = Course(
     startDisplay = "startDisplay",
     startType = "startType",
     overview = "",
-    isEnrolled = false
+    isEnrolled = false,
+    rating = "0",
+    noOfReviews = "0",
+    enrollments = "0",
+    isWishlisted = false
 )

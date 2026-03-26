@@ -99,7 +99,7 @@ class CourseDetailsViewModel(
                     _uiState.value = CourseDetailsUIState.CourseData(
                         course = it,
                         isUserLoggedIn = isUserLoggedIn,
-                        isWishlisted = it.isWishlisted,
+                        isWishlisted = it.isWishlisted ?: false,
                         curriculum = curriculum,
                         instructors = instructors,
                         reviews = reviews

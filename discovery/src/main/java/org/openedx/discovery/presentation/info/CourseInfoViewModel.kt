@@ -102,7 +102,7 @@ class CourseInfoViewModel(
                     interactor.getCourseDetails(courseId)
                 }.isEnrolled
 
-                if (isCourseEnrolled) {
+                if (isCourseEnrolled == true) {
                     _uiMessage.emit(
                         UIMessage.ToastMessage(resourceManager.getString(R.string.discovery_you_are_already_enrolled))
                     )

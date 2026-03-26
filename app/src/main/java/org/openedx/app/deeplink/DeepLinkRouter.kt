@@ -65,9 +65,9 @@ class DeepLinkRouter(
         launch(Dispatchers.Main) {
             val courseId = deepLink.courseId ?: return@launch navigateToDashboard(fm)
             val course = getCourseDetails(courseId) ?: return@launch navigateToDashboard(fm)
-            if (!course.isEnrolled) return@launch navigateToDashboard(fm)
+            if (course.isEnrolled != true) return@launch navigateToDashboard(fm)
 
-            handleSpecificCourseNavigation(fm, deepLink, course.name)
+            handleSpecificCourseNavigation(fm, deepLink, course.name.orEmpty())
         }
     }
 

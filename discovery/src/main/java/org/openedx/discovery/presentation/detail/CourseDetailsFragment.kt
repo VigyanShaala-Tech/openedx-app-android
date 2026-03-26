@@ -171,18 +171,18 @@ class CourseDetailsFragment : Fragment() {
                                     )
                                 }
 
-                                currentState.course.isEnrolled -> {
+                                currentState.course.isEnrolled == true -> {
                                     router.navigateToCourseOutline(
                                         requireActivity().supportFragmentManager,
-                                        currentState.course.courseId,
-                                        currentState.course.name,
+                                        currentState.course.courseId.orEmpty(),
+                                        currentState.course.name.orEmpty(),
                                     )
                                 }
 
                                 else -> {
                                     viewModel.enrollInACourse(
-                                        currentState.course.courseId,
-                                        currentState.course.name
+                                        currentState.course.courseId.orEmpty(),
+                                        currentState.course.name.orEmpty()
                                     )
                                 }
                             }
@@ -420,7 +420,7 @@ private fun CourseDetailNativeContent(
         )
     }
 
-    val buttonText = if (course.isEnrolled) {
+    val buttonText = if (course.isEnrolled == true) {
         stringResource(id = R.string.discovery_view_course)
     } else {
         stringResource(id = R.string.discovery_enroll_now)
@@ -433,8 +433,8 @@ private fun CourseDetailNativeContent(
                     .aspectRatio(ratio = 1.86f)
                     .padding(6.dp),
                 apiHostUrl = apiHostUrl,
-                courseImage = course.media.image?.large,
-                courseName = course.name
+                courseImage = course.media?.image?.large,
+                courseName = course.name.orEmpty()
             )
             androidx.compose.material.IconButton(
                 onClick = onWishlistClick,
@@ -449,11 +449,11 @@ private fun CourseDetailNativeContent(
                     modifier = Modifier.size(24.dp)
                 )
             }
-            if (!course.media.courseVideo?.uri.isNullOrEmpty()) {
+            if (!course.media?.courseVideo?.uri.isNullOrEmpty()) {
                 IconButton(
                     modifier = Modifier.testTag("ib_play_video"),
                     onClick = {
-                        uriHandler.openUri(course.media.courseVideo?.uri!!)
+                        uriHandler.openUri(course.media?.courseVideo?.uri!!)
                     }
                 ) {
                     Icon(
@@ -483,7 +483,7 @@ private fun CourseDetailNativeContent(
                     )
                     Spacer(Modifier.width(4.dp))
                     Text(
-                        text = "${course.rating.toDouble()} (${course.noOfReviews} reviews)",
+                        text = "${course.rating?.toDoubleOrNull() ?: 0.0} (${course.noOfReviews ?: 0} reviews)",
                         style = MaterialTheme.appTypography.labelSmall,
                         color = MaterialTheme.appColors.textPrimary
                     )
@@ -496,7 +496,7 @@ private fun CourseDetailNativeContent(
                     )
                     Spacer(Modifier.width(4.dp))
                     Text(
-                        text = course.effort,
+                        text = course.effort.orEmpty(),
                         style = MaterialTheme.appTypography.labelSmall,
                         color = MaterialTheme.appColors.textPrimary
                     )
@@ -509,7 +509,7 @@ private fun CourseDetailNativeContent(
                     )
                     Spacer(Modifier.width(4.dp))
                     Text(
-                        text = "${course.enrollments} students",
+                        text = "${course.enrollments ?: 0} students",
                         style = MaterialTheme.appTypography.labelSmall,
                         color = MaterialTheme.appColors.textPrimary
                     )
@@ -526,21 +526,21 @@ private fun CourseDetailNativeContent(
             }
             Text(
                 modifier = Modifier.testTag("txt_course_short_description"),
-                text = course.shortDescription,
+                text = course.shortDescription.orEmpty(),
                 style = MaterialTheme.appTypography.labelSmall,
                 color = MaterialTheme.appColors.textPrimaryVariant
             )
             Spacer(Modifier.height(16.dp))
             Text(
                 modifier = Modifier.testTag("txt_course_name"),
-                text = course.name,
+                text = course.name.orEmpty(),
                 style = MaterialTheme.appTypography.titleLarge,
                 color = MaterialTheme.appColors.textPrimary
             )
             Spacer(Modifier.height(12.dp))
             Text(
                 modifier = Modifier.testTag("txt_course_org"),
-                text = course.org,
+                text = course.org.orEmpty(),
                 style = MaterialTheme.appTypography.labelMedium,
                 color = MaterialTheme.appColors.textAccent
             )
@@ -747,7 +747,7 @@ private fun CourseDetailNativeContent(
                                     .padding(16.dp)
                             ) {
                                 Text(
-                                    text = String.format("%.1f", course.rating.toDouble()),
+                                    text = String.format("%.1f", course.rating?.toDoubleOrNull() ?: 0.0),
                                     style = MaterialTheme.appTypography.titleLarge,
                                     color = MaterialTheme.appColors.textDark
                                 )
@@ -762,7 +762,7 @@ private fun CourseDetailNativeContent(
                                     }
                                     Spacer(Modifier.width(8.dp))
                                     Text(
-                                        text = "${course.noOfReviews} reviews",
+                                        text = "${course.noOfReviews ?: 0} reviews",
                                         style = MaterialTheme.appTypography.labelSmall,
                                         color = MaterialTheme.appColors.textPrimary
                                     )
@@ -994,5 +994,9 @@ private val mockCourse = Course(
     startDisplay = "startDisplay",
     startType = "startType",
     overview = "",
-    isEnrolled = false
+    isEnrolled = false,
+    rating = "0",
+    noOfReviews = "0",
+    enrollments = "0",
+    isWishlisted = false
 )

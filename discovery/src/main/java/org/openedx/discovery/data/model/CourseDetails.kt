@@ -49,42 +49,42 @@ data class CourseDetails(
     @SerializedName("is_enrolled")
     val isEnrolled: Boolean?,
     @SerializedName("rating")
-    val rating: Int?,
+    val rating: String?,
     @SerializedName("no_of_reviews")
-    val noOfReviews: Int?,
+    val noOfReviews: String?,
     @SerializedName("enrollments")
-    val enrollments: Int?,
+    val enrollments: String?,
     @SerializedName("is_wishlisted")
     val isWishlisted: Boolean?,
 ) {
 
     fun mapToDomain(): Course {
         return Course(
-            id = id.orEmpty(),
-            blocksUrl = blocksUrl.orEmpty(),
-            courseId = courseId.orEmpty(),
-            effort = effort.orEmpty(),
+            id = id,
+            blocksUrl = blocksUrl,
+            courseId = courseId,
+            effort = effort,
             enrollmentStart = parseEnrollmentStartDate(),
             enrollmentEnd = parseEnrollmentEndDate(),
-            hidden = hidden ?: false,
-            invitationOnly = invitationOnly ?: false,
-            mobileAvailable = mobileAvailable ?: false,
-            name = name.orEmpty(),
-            number = number.orEmpty(),
-            org = organization.orEmpty(),
-            shortDescription = shortDescription.orEmpty(),
-            start = start.orEmpty(),
-            end = end.orEmpty(),
-            startDisplay = startDisplay.orEmpty(),
-            startType = startType.orEmpty(),
-            pacing = pacing.orEmpty(),
-            overview = overview.orEmpty(),
-            isEnrolled = isEnrolled ?: false,
+            hidden = hidden,
+            invitationOnly = invitationOnly,
+            mobileAvailable = mobileAvailable,
+            name = name,
+            number = number,
+            org = organization,
+            shortDescription = shortDescription,
+            start = start,
+            end = end,
+            startDisplay = startDisplay,
+            startType = startType,
+            pacing = pacing,
+            overview = overview,
+            isEnrolled = isEnrolled,
             media = mapMediaToDomain(),
-            rating = rating ?: 0,
-            noOfReviews = noOfReviews ?: 0,
-            enrollments = enrollments ?: 0,
-            isWishlisted = isWishlisted ?: false
+            rating = rating,
+            noOfReviews = noOfReviews,
+            enrollments = enrollments,
+            isWishlisted = isWishlisted
         )
     }
 

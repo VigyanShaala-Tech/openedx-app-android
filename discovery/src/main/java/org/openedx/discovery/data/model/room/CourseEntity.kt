@@ -53,7 +53,15 @@ data class CourseEntity(
     @ColumnInfo("overview")
     val overview: String,
     @ColumnInfo("isEnrolled")
-    val isEnrolled: Boolean
+    val isEnrolled: Boolean,
+    @ColumnInfo(name = "rating", defaultValue = "")
+    val rating: String,
+    @ColumnInfo(name = "noOfReviews", defaultValue = "")
+    val noOfReviews: String,
+    @ColumnInfo(name = "enrollments", defaultValue = "")
+    val enrollments: String,
+    @ColumnInfo(name = "isWishlisted", defaultValue = "0")
+    val isWishlisted: Boolean
 ) {
 
     fun mapToDomain(): Course {
@@ -78,7 +86,11 @@ data class CourseEntity(
             startDisplay = startDisplay,
             startType = startType,
             overview = overview,
-            isEnrolled = isEnrolled
+            isEnrolled = isEnrolled,
+            rating = rating,
+            noOfReviews = noOfReviews,
+            enrollments = enrollments,
+            isWishlisted = isWishlisted
         )
     }
 
@@ -105,7 +117,11 @@ data class CourseEntity(
                 pacing = model.pacing.orEmpty(),
                 overview = model.overview.orEmpty(),
                 media = MediaDb.createFrom(model.media),
-                isEnrolled = model.isEnrolled ?: false
+                isEnrolled = model.isEnrolled ?: false,
+                rating = model.rating?.toString().orEmpty(),
+                noOfReviews = model.noOfReviews?.toString().orEmpty(),
+                enrollments = model.enrollments?.toString().orEmpty(),
+                isWishlisted = model.isWishlisted ?: false
             )
         }
     }

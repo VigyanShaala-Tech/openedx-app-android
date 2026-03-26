@@ -129,11 +129,11 @@ class NativeDiscoveryFragment : Fragment() {
                         viewModel.getCoursesList()
                     },
                     onItemClick = { course ->
-                        viewModel.discoveryCourseClicked(course.id, course.name)
-                        viewModel.courseDetailClickedEvent(course.id, course.name)
+                        viewModel.discoveryCourseClicked(course.id.orEmpty(), course.name.orEmpty())
+                        viewModel.courseDetailClickedEvent(course.id.orEmpty(), course.name.orEmpty())
                         router.navigateToCourseDetail(
                             requireActivity().supportFragmentManager,
-                            course.id
+                            course.id.orEmpty()
                         )
                     },
                     onRegisterClick = {
@@ -550,5 +550,9 @@ private val mockCourse = Course(
     startDisplay = "startDisplay",
     startType = "startType",
     overview = "",
-    isEnrolled = false
+    isEnrolled = false,
+    rating = "0",
+    noOfReviews = "0",
+    enrollments = "0",
+    isWishlisted = false
 )

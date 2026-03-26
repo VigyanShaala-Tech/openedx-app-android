@@ -4,7 +4,6 @@ import android.content.res.Configuration
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.ViewGroup
-import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
@@ -24,7 +23,6 @@ import androidx.compose.material.Divider
 import androidx.compose.material.ExperimentalMaterialApi
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Scaffold
-import androidx.compose.material.Surface
 import androidx.compose.material.Text
 import androidx.compose.material.pullrefresh.PullRefreshIndicator
 import androidx.compose.material.pullrefresh.pullRefresh
@@ -45,11 +43,9 @@ import androidx.compose.ui.platform.ComposeView
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.platform.ViewCompositionStrategy
 import androidx.compose.ui.platform.testTag
-import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.semantics.testTagsAsResourceId
 import androidx.compose.ui.text.input.TextFieldValue
-import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.tooling.preview.Devices
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
@@ -66,7 +62,6 @@ import org.openedx.core.ui.OfflineModeDialog
 import org.openedx.core.ui.SearchBar
 import org.openedx.core.ui.Toolbar
 import org.openedx.core.ui.displayCutoutForLandscape
-import org.openedx.core.ui.noRippleClickable
 import org.openedx.core.ui.shouldLoadMore
 import org.openedx.core.ui.statusBarsInset
 import org.openedx.core.ui.theme.OpenEdXTheme
@@ -82,10 +77,6 @@ import org.openedx.foundation.presentation.WindowType
 import org.openedx.foundation.presentation.rememberWindowSize
 import org.openedx.foundation.presentation.windowSizeValue
 import org.openedx.foundation.utils.UrlUtils
-import org.openedx.auth.presentation.logistration.LogistrationCarousel
-import org.openedx.auth.presentation.logistration.LogistrationCarouselItem
-import org.openedx.auth.presentation.logistration.LogistrationFilters
-import org.openedx.core.R as CoreR
 
 class LogistrationFragment : Fragment() {
 
@@ -141,7 +132,10 @@ class LogistrationFragment : Fragment() {
                         }
                     },
                     onSearchClick = { querySearch ->
-                        viewModel.navigateToDiscovery(requireActivity().supportFragmentManager, querySearch)
+                        viewModel.navigateToDiscovery(
+                            requireActivity().supportFragmentManager,
+                            querySearch
+                        )
                     },
                     paginationCallback = {
                         viewModel.fetchMore()
@@ -155,7 +149,10 @@ class LogistrationFragment : Fragment() {
                     onItemClick = { course ->
                         viewModel.courseDetailClicked(course.id, course.name)
                         viewModel.courseDetailClickedEvent(course.id, course.name)
-                        viewModel.navigateToCourseDetail(requireActivity().supportFragmentManager, course.id)
+                        viewModel.navigateToCourseDetail(
+                            requireActivity().supportFragmentManager,
+                            course.id
+                        )
                     },
                     isRegistrationEnabled = viewModel.isRegistrationEnabled,
                     onBackClick = {
@@ -176,6 +173,7 @@ class LogistrationFragment : Fragment() {
             )
             return fragment
         }
+
         fun newInstance(courseId: String?, origin: String?): LogistrationFragment {
             val fragment = LogistrationFragment()
             fragment.arguments = bundleOf(
@@ -256,7 +254,7 @@ private fun LogistrationScreen(
         val contentWidth by remember(key1 = windowSize) {
             mutableStateOf(
                 windowSize.windowSizeValue(
-                    expanded = Modifier.widthIn(max= 560.dp),
+                    expanded = Modifier.widthIn(max = 560.dp),
                     compact = Modifier.fillMaxWidth()
                 )
             )
@@ -570,5 +568,9 @@ private val mockCourse = Course(
     startDisplay = "startDisplay",
     startType = "startType",
     overview = "",
-    isEnrolled = false
+    isEnrolled = false,
+    rating = "4.5",
+    noOfReviews = "100",
+    enrollments = "0",
+    isWishlisted = false
 )

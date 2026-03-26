@@ -105,7 +105,7 @@ fun DiscoveryCourseItem(
         modifier = Modifier
             .testTag("btn_course_card")
             .fillMaxWidth()
-            .clickable { onClick(course.courseId) }
+            .clickable { onClick(course.courseId.orEmpty()) }
             .padding(vertical = 12.dp)
             .background(MaterialTheme.appColors.background),
     ) {
@@ -118,7 +118,7 @@ fun DiscoveryCourseItem(
         ) {
             AsyncImage(
                 model = ImageRequest.Builder(LocalContext.current)
-                    .data(course.media.courseImage?.uri?.toImageLink(apiHostUrl) ?: "")
+                    .data(course.media?.courseImage?.uri?.toImageLink(apiHostUrl) ?: "")
                     .error(сoreR.drawable.core_no_image_course)
                     .placeholder(сoreR.drawable.core_no_image_course)
                     .build(),
@@ -139,7 +139,7 @@ fun DiscoveryCourseItem(
                     modifier = Modifier
                         .testTag("txt_course_title")
                         .fillMaxWidth(),
-                    text = course.name,
+                    text = course.name.orEmpty(),
                     color = MaterialTheme.appColors.textDark,
                     style = MaterialTheme.appTypography.titleSmall,
                     maxLines = 2,
@@ -176,7 +176,7 @@ fun DiscoveryCourseItem(
 
                 Text(
                     modifier = Modifier.testTag("txt_course_org"),
-                    text = course.org,
+                    text = course.org.orEmpty(),
                     color = MaterialTheme.appColors.textPrimaryLight,
                     style = MaterialTheme.appTypography.labelMedium
                 )

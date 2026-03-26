@@ -1,5 +1,8 @@
 package org.openedx.auth.presentation.signup.compose
 
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
@@ -36,6 +39,8 @@ import androidx.compose.ui.unit.sp
 import org.openedx.auth.R
 import org.openedx.auth.presentation.signup.VsSignUpUIState
 import org.openedx.core.ui.HandleUIMessage
+import org.openedx.core.ui.theme.appColors
+import org.openedx.core.ui.theme.appShapes
 import org.openedx.core.ui.theme.appTypography
 import org.openedx.foundation.presentation.UIMessage
 import org.openedx.foundation.presentation.WindowSize
@@ -51,6 +56,7 @@ fun VsSignUpView(
     onSignInClick: () -> Unit,
     onSendOtpClick: (String) -> Unit,
     onVerifyOtpClick: (String, String) -> Unit,
+    onValidationError: (String) -> Unit,
 ) {
     val scaffoldState = rememberScaffoldState()
     var fullName by remember { mutableStateOf("") }
@@ -64,10 +70,6 @@ fun VsSignUpView(
     var passwordVisible by remember { mutableStateOf(false) }
     var confirmPasswordVisible by remember { mutableStateOf(false) }
 
-    val vsGreen = Color(0xFF90C18E)
-    val vsDarkBlue = Color(0xFF1B2344)
-    val vsLightBlueBg = Color(0xFFF3F4F9)
-
     Scaffold(
         scaffoldState = scaffoldState,
         topBar = {
@@ -75,16 +77,25 @@ fun VsSignUpView(
                 modifier = Modifier
                     .fillMaxWidth()
                     .height(140.dp)
-                    .background(vsGreen)
             ) {
+                Image(
+                    painter = painterResource(id = coreR.drawable.core_green_gradient_rect),
+                    contentDescription = null,
+                    modifier = Modifier.fillMaxSize(),
+                    contentScale = ContentScale.FillBounds
+                )
                 IconButton(
                     onClick = onBackClick,
-                    modifier = Modifier.padding(top = 16.dp, start = 8.dp)
+                    modifier = Modifier.padding(top = 24.dp, start = 8.dp)
                 ) {
-                    Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back", tint = Color.White)
+                    Icon(
+                        Icons.AutoMirrored.Filled.ArrowBack,
+                        contentDescription = "Back",
+                        tint = Color.White
+                    )
                 }
                 Image(
-                    painter = painterResource(id = coreR.drawable.core_ic_logo),
+                    painter = painterResource(id = coreR.drawable.core_logo_white),
                     contentDescription = "Vigyan Shaala",
                     modifier = Modifier
                         .align(Alignment.Center)
@@ -93,7 +104,7 @@ fun VsSignUpView(
                 )
             }
         },
-        backgroundColor = Color.White
+        backgroundColor = MaterialTheme.appColors.background
     ) { paddingValues ->
         HandleUIMessage(uiMessage = uiMessage, scaffoldState = scaffoldState)
 
@@ -109,13 +120,13 @@ fun VsSignUpView(
                 text = "Create Account",
                 style = MaterialTheme.appTypography.headlineSmall.copy(
                     fontWeight = FontWeight.Bold,
-                    color = vsDarkBlue,
+                    color = MaterialTheme.appColors.textPrimary,
                     fontSize = 28.sp
                 )
             )
             Text(
                 text = "Join VigyanShaala and start learning today!",
-                style = MaterialTheme.appTypography.bodyMedium.copy(color = Color.Gray)
+                style = MaterialTheme.appTypography.bodyMedium.copy(color = MaterialTheme.appColors.textSecondary)
             )
 
             Spacer(modifier = Modifier.height(24.dp))
@@ -124,8 +135,8 @@ fun VsSignUpView(
             OutlinedButton(
                 onClick = { /* Handle Google Sign In */ },
                 modifier = Modifier.fillMaxWidth().height(48.dp),
-                shape = RoundedCornerShape(8.dp),
-                border = BorderStroke(1.dp, Color.LightGray)
+                shape = MaterialTheme.appShapes.buttonShape,
+                border = BorderStroke(1.dp, MaterialTheme.appColors.cardViewBorder)
             ) {
                 Row(verticalAlignment = Alignment.CenterVertically) {
                     Icon(
@@ -135,15 +146,15 @@ fun VsSignUpView(
                         tint = Color.Unspecified
                     )
                     Spacer(modifier = Modifier.width(8.dp))
-                    Text("Sign up with Google", color = vsDarkBlue)
+                    Text("Sign up with Google", color = MaterialTheme.appColors.textPrimary)
                 }
             }
 
             Spacer(modifier = Modifier.height(16.dp))
             Row(verticalAlignment = Alignment.CenterVertically) {
-                Divider(modifier = Modifier.weight(1f))
-                Text(" or ", modifier = Modifier.padding(horizontal = 8.dp), color = Color.Gray)
-                Divider(modifier = Modifier.weight(1f))
+                Divider(modifier = Modifier.weight(1f), color = MaterialTheme.appColors.cardViewBorder)
+                Text(" or ", modifier = Modifier.padding(horizontal = 8.dp), color = MaterialTheme.appColors.textSecondary)
+                Divider(modifier = Modifier.weight(1f), color = MaterialTheme.appColors.cardViewBorder)
             }
             Spacer(modifier = Modifier.height(16.dp))
 
@@ -170,7 +181,7 @@ fun VsSignUpView(
                 Text(
                     text = "Mobile Number (Optional)",
                     style = MaterialTheme.appTypography.bodyMedium.copy(fontWeight = FontWeight.Bold),
-                    color = vsDarkBlue
+                    color = MaterialTheme.appColors.textPrimary
                 )
                 Spacer(modifier = Modifier.height(8.dp))
                 if (uiState.isOtpVerified) {
@@ -180,18 +191,18 @@ fun VsSignUpView(
                         onValueChange = {},
                         modifier = Modifier.fillMaxWidth(),
                         readOnly = true,
-                        leadingIcon = { Icon(Icons.Outlined.Smartphone, contentDescription = null, tint = vsDarkBlue) },
+                        leadingIcon = { Icon(Icons.Outlined.Smartphone, contentDescription = null, tint = MaterialTheme.appColors.textPrimary) },
                         trailingIcon = { 
                             Icon(
                                 imageVector = Icons.Default.CheckCircle, 
                                 contentDescription = "Verified", 
-                                tint = vsGreen,
+                                tint = MaterialTheme.appColors.primary,
                                 modifier = Modifier.size(24.dp)
                             ) 
                         },
-                        shape = RoundedCornerShape(12.dp),
+                        shape = MaterialTheme.appShapes.textFieldShape,
                         colors = TextFieldDefaults.textFieldColors(
-                            backgroundColor = vsLightBlueBg,
+                            backgroundColor = MaterialTheme.appColors.textFieldBackground,
                             focusedIndicatorColor = Color.Transparent,
                             unfocusedIndicatorColor = Color.Transparent,
                             disabledIndicatorColor = Color.Transparent
@@ -210,43 +221,52 @@ fun VsSignUpView(
                                 .weight(1f)
                                 .border(
                                     width = 2.dp,
-                                    color = if (uiState.isOtpSent) vsGreen else Color.Transparent,
-                                    shape = RoundedCornerShape(12.dp)
+                                    color = if (uiState.isOtpSent) MaterialTheme.appColors.primary else Color.Transparent,
+                                    shape = MaterialTheme.appShapes.textFieldShape
                                 ),
-                            placeholder = { Text("+91 Enter mobile number", color = Color.Gray) },
-                            leadingIcon = { Icon(Icons.Outlined.Smartphone, contentDescription = null, tint = vsDarkBlue) },
-                            shape = RoundedCornerShape(12.dp),
+                            placeholder = { Text("+91 Enter mobile number", color = MaterialTheme.appColors.textSecondary) },
+                            leadingIcon = { Icon(Icons.Outlined.Smartphone, contentDescription = null, tint = MaterialTheme.appColors.textPrimary) },
+                            shape = MaterialTheme.appShapes.textFieldShape,
                             colors = TextFieldDefaults.textFieldColors(
-                                backgroundColor = vsLightBlueBg,
+                                backgroundColor = MaterialTheme.appColors.textFieldBackground,
                                 focusedIndicatorColor = Color.Transparent,
                                 unfocusedIndicatorColor = Color.Transparent,
                                 disabledIndicatorColor = Color.Transparent
                             ),
                             keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Phone)
                         )
-                        Spacer(modifier = Modifier.width(12.dp))
-                        Button(
-                            onClick = { onSendOtpClick(mobileNumber) },
-                            modifier = Modifier
-                                .height(56.dp)
-                                .widthIn(min = 100.dp),
-                            shape = RoundedCornerShape(12.dp),
-                            colors = ButtonDefaults.buttonColors(
-                                backgroundColor = Color.White,
-                                contentColor = vsDarkBlue
-                            ),
-                            elevation = ButtonDefaults.elevation(defaultElevation = 0.dp),
-                            border = BorderStroke(1.dp, Color.LightGray),
-                            enabled = !uiState.isOtpLoading && mobileNumber.isNotBlank()
+                        
+                        AnimatedVisibility(
+                            visible = mobileNumber.isNotEmpty() || uiState.isOtpSent,
+                            enter = fadeIn(),
+                            exit = fadeOut()
                         ) {
-                            if (uiState.isOtpLoading && !uiState.isOtpSent) {
-                                CircularProgressIndicator(modifier = Modifier.size(20.dp), color = vsDarkBlue)
-                            } else {
-                                Text(
-                                    text = if (uiState.isOtpSent) "Sent" else "Send OTP",
-                                    fontSize = 14.sp,
-                                    color = if (uiState.isOtpSent) Color.Gray else vsDarkBlue
-                                )
+                            Row {
+                                Spacer(modifier = Modifier.width(12.dp))
+                                Button(
+                                    onClick = { onSendOtpClick(mobileNumber) },
+                                    modifier = Modifier
+                                        .height(56.dp)
+                                        .widthIn(min = 100.dp),
+                                    shape = MaterialTheme.appShapes.buttonShape,
+                                    colors = ButtonDefaults.buttonColors(
+                                        backgroundColor = MaterialTheme.appColors.background,
+                                        contentColor = MaterialTheme.appColors.textPrimary
+                                    ),
+                                    elevation = ButtonDefaults.elevation(defaultElevation = 0.dp),
+                                    border = BorderStroke(1.dp, MaterialTheme.appColors.cardViewBorder),
+                                    enabled = !uiState.isOtpLoading
+                                ) {
+                                    if (uiState.isOtpLoading && !uiState.isOtpSent) {
+                                        CircularProgressIndicator(modifier = Modifier.size(20.dp), color = MaterialTheme.appColors.textPrimary)
+                                    } else {
+                                        Text(
+                                            text = if (uiState.isOtpSent) "Sent" else "Send OTP",
+                                            fontSize = 14.sp,
+                                            color = if (uiState.isOtpSent) MaterialTheme.appColors.textSecondary else MaterialTheme.appColors.textPrimary
+                                        )
+                                    }
+                                }
                             }
                         }
                     }
@@ -263,12 +283,12 @@ fun VsSignUpView(
                                 modifier = Modifier.weight(1f),
                                 placeholder = { 
                                     Box(modifier = Modifier.fillMaxWidth(), contentAlignment = Alignment.Center) {
-                                        Text("Enter OTP", color = Color.Gray)
+                                        Text("Enter OTP", color = MaterialTheme.appColors.textSecondary)
                                     }
                                 },
-                                shape = RoundedCornerShape(12.dp),
+                                shape = MaterialTheme.appShapes.textFieldShape,
                                 colors = TextFieldDefaults.textFieldColors(
-                                    backgroundColor = vsLightBlueBg,
+                                    backgroundColor = MaterialTheme.appColors.textFieldBackground,
                                     focusedIndicatorColor = Color.Transparent,
                                     unfocusedIndicatorColor = Color.Transparent,
                                     disabledIndicatorColor = Color.Transparent
@@ -282,9 +302,9 @@ fun VsSignUpView(
                                 modifier = Modifier
                                     .height(56.dp)
                                     .widthIn(min = 100.dp),
-                                shape = RoundedCornerShape(12.dp),
+                                shape = MaterialTheme.appShapes.buttonShape,
                                 colors = ButtonDefaults.buttonColors(
-                                    backgroundColor = vsGreen,
+                                    backgroundColor = MaterialTheme.appColors.primary,
                                     contentColor = Color.White
                                 ),
                                 enabled = otpCode.length >= 4 && !uiState.isOtpLoading
@@ -301,7 +321,7 @@ fun VsSignUpView(
                 Text(
                     text = "Verify your mobile to enable OTP login.",
                     style = MaterialTheme.appTypography.bodySmall,
-                    color = Color.Gray,
+                    color = MaterialTheme.appColors.textSecondary,
                     modifier = Modifier.padding(top = 4.dp)
                 )
             }
@@ -332,7 +352,7 @@ fun VsSignUpView(
             Text(
                 text = buildAnnotatedString {
                     append("I am a ")
-                    withStyle(style = SpanStyle(color = Color.Red)) { append("*") }
+                    withStyle(style = SpanStyle(color = MaterialTheme.appColors.error)) { append("*") }
                 },
                 style = MaterialTheme.appTypography.bodyMedium.copy(fontWeight = FontWeight.Bold),
                 modifier = Modifier.padding(top = 16.dp)
@@ -343,7 +363,7 @@ fun VsSignUpView(
                     isSelected = selectedRole == "student",
                     onClick = { selectedRole = "student" },
                     modifier = Modifier.weight(1f),
-                    selectedColor = vsGreen
+                    selectedColor = MaterialTheme.appColors.primary
                 )
                 Spacer(modifier = Modifier.width(16.dp))
                 VsRoleButton(
@@ -351,7 +371,7 @@ fun VsSignUpView(
                     isSelected = selectedRole == "mentor",
                     onClick = { selectedRole = "mentor" },
                     modifier = Modifier.weight(1f),
-                    selectedColor = vsGreen
+                    selectedColor = MaterialTheme.appColors.primary
                 )
             }
 
@@ -362,14 +382,14 @@ fun VsSignUpView(
                 Checkbox(
                     checked = isAgreed,
                     onCheckedChange = { isAgreed = it },
-                    colors = CheckboxDefaults.colors(checkedColor = vsGreen)
+                    colors = CheckboxDefaults.colors(checkedColor = MaterialTheme.appColors.primary)
                 )
                 Text(
                     text = buildAnnotatedString {
                         append("I agree to the ")
-                        withStyle(style = SpanStyle(color = vsGreen)) { append("Terms of Service") }
+                        withStyle(style = SpanStyle(color = MaterialTheme.appColors.primary)) { append("Terms of Service") }
                         append(" and ")
-                        withStyle(style = SpanStyle(color = vsGreen)) { append("Privacy Policy") }
+                        withStyle(style = SpanStyle(color = MaterialTheme.appColors.primary)) { append("Privacy Policy") }
                     },
                     style = MaterialTheme.appTypography.bodySmall,
                     modifier = Modifier.clickable { isAgreed = !isAgreed }
@@ -380,15 +400,18 @@ fun VsSignUpView(
 
             Button(
                 onClick = {
-                    if (vsValidate(fullName, email, password, confirmPassword, isAgreed)) {
+                    val error = vsValidationError(fullName, email, password, confirmPassword, isAgreed)
+                    if (error == null) {
                         onRegisterClick(email, fullName, password, mobileNumber, selectedRole, uiState.verificationKey)
+                    } else {
+                        onValidationError(error)
                     }
                 },
                 modifier = Modifier.fillMaxWidth().height(56.dp),
-                shape = RoundedCornerShape(12.dp),
+                shape = MaterialTheme.appShapes.buttonShape,
                 colors = ButtonDefaults.buttonColors(
-                    backgroundColor = vsGreen,
-                    disabledBackgroundColor = vsGreen.copy(alpha = 0.5f)
+                    backgroundColor = MaterialTheme.appColors.primary,
+                    disabledBackgroundColor = MaterialTheme.appColors.inactiveButtonBackground
                 ),
                 enabled = !uiState.isButtonLoading && isAgreed
             ) {
@@ -404,10 +427,10 @@ fun VsSignUpView(
                 modifier = Modifier.fillMaxWidth().padding(bottom = 32.dp),
                 horizontalArrangement = Arrangement.Center
             ) {
-                Text("Already have an account? ", color = Color.Gray)
+                Text("Already have an account? ", color = MaterialTheme.appColors.textSecondary)
                 Text(
                     "Sign in",
-                    color = vsGreen,
+                    color = MaterialTheme.appColors.primary,
                     modifier = Modifier.clickable { onSignInClick() },
                     fontWeight = FontWeight.Bold
                 )
@@ -434,18 +457,18 @@ fun VsSignUpInputField(
             text = buildAnnotatedString {
                 append(label)
                 if (isRequired) {
-                    withStyle(style = SpanStyle(color = Color.Red)) { append(" *") }
+                    withStyle(style = SpanStyle(color = MaterialTheme.appColors.error)) { append(" *") }
                 }
             },
             style = MaterialTheme.appTypography.bodyMedium.copy(fontWeight = FontWeight.Bold),
-            color = Color(0xFF1B2344)
+            color = MaterialTheme.appColors.textPrimary
         )
         Spacer(modifier = Modifier.height(8.dp))
         TextField(
             value = value,
             onValueChange = onValueChange,
             modifier = Modifier.fillMaxWidth(),
-            placeholder = { Text(placeholder, color = Color.Gray) },
+            placeholder = { Text(placeholder, color = MaterialTheme.appColors.textSecondary) },
             leadingIcon = leadingIcon,
             trailingIcon = if (isPassword) {
                 {
@@ -457,9 +480,9 @@ fun VsSignUpInputField(
             } else null,
             visualTransformation = if (isPassword && !passwordVisible) PasswordVisualTransformation() else VisualTransformation.None,
             keyboardOptions = KeyboardOptions(keyboardType = if (isPassword) KeyboardType.Password else KeyboardType.Text),
-            shape = RoundedCornerShape(12.dp),
+            shape = MaterialTheme.appShapes.textFieldShape,
             colors = TextFieldDefaults.textFieldColors(
-                backgroundColor = Color(0xFFF3F4F9),
+                backgroundColor = MaterialTheme.appColors.textFieldBackground,
                 focusedIndicatorColor = Color.Transparent,
                 unfocusedIndicatorColor = Color.Transparent,
                 disabledIndicatorColor = Color.Transparent
@@ -469,7 +492,7 @@ fun VsSignUpInputField(
             Text(
                 text = helperText,
                 style = MaterialTheme.appTypography.bodySmall,
-                color = Color.Gray,
+                color = MaterialTheme.appColors.textSecondary,
                 modifier = Modifier.padding(top = 4.dp)
             )
         }
@@ -488,25 +511,26 @@ fun VsRoleButton(
         modifier = modifier
             .height(56.dp)
             .clickable { onClick() },
-        shape = RoundedCornerShape(12.dp),
-        color = if (isSelected) selectedColor.copy(alpha = 0.1f) else Color(0xFFF3F4F9),
+        shape = MaterialTheme.appShapes.buttonShape,
+        color = if (isSelected) selectedColor.copy(alpha = 0.1f) else MaterialTheme.appColors.textFieldBackground,
         border = if (isSelected) BorderStroke(1.dp, selectedColor) else null
     ) {
         Box(contentAlignment = Alignment.Center) {
             Text(
                 text = text,
-                color = if (isSelected) selectedColor else Color.Gray,
+                color = if (isSelected) selectedColor else MaterialTheme.appColors.textSecondary,
                 fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Normal
             )
         }
     }
 }
 
-fun vsValidate(fullName: String, email: String, pass: String, confirmPass: String, agreed: Boolean): Boolean {
-    if (fullName.isBlank()) return false
-    if (email.isBlank() || !android.util.Patterns.EMAIL_ADDRESS.matcher(email).matches()) return false
-    if (pass.length < 8) return false
-    if (pass != confirmPass) return false
-    if (!agreed) return false
-    return true
+fun vsValidationError(fullName: String, email: String, pass: String, confirmPass: String, agreed: Boolean): String? {
+    if (fullName.isBlank()) return "Please enter your full name"
+    if (email.isBlank()) return "Please enter your email"
+    if (!android.util.Patterns.EMAIL_ADDRESS.matcher(email).matches()) return "Please enter a valid email"
+    if (pass.length < 8) return "Password must be at least 8 characters"
+    if (pass != confirmPass) return "Passwords do not match"
+    if (!agreed) return "Please agree to the Terms of Service and Privacy Policy"
+    return null
 }

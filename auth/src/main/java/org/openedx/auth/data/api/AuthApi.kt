@@ -4,6 +4,7 @@ import org.openedx.auth.data.model.AuthResponse
 import org.openedx.auth.data.model.PasswordResetResponse
 import org.openedx.auth.data.model.RegistrationFields
 import org.openedx.auth.data.model.ValidationFields
+import org.openedx.auth.data.model.VsRegisterRequest
 import org.openedx.core.ApiConstants
 import org.openedx.core.data.model.User
 import retrofit2.Call
@@ -67,7 +68,7 @@ interface AuthApi {
     suspend fun registerUser(@FieldMap fields: Map<String, String>)
 
     @POST(ApiConstants.URL_REGISTER_VS)
-    suspend fun registerUserVs(@Body fields: Map<String, Any>)
+    suspend fun registerUserVs(@Body body: VsRegisterRequest)
 
     @FormUrlEncoded
     @POST(ApiConstants.URL_VALIDATE_REGISTRATION_FIELDS)

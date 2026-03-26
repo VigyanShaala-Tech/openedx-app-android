@@ -8,9 +8,11 @@ import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import org.openedx.auth.data.model.VsRegisterRequest
 import org.openedx.auth.domain.interactor.AuthInteractor
 import org.openedx.auth.presentation.AuthAnalytics
 import org.openedx.auth.presentation.AuthRouter
+import org.openedx.core.Validator
 import org.openedx.core.data.storage.CorePreferences
 import org.openedx.core.system.notifier.app.AppNotifier
 import org.openedx.core.system.notifier.app.SignInEvent
@@ -41,6 +43,12 @@ class VsSignUpViewModel(
     )
     val uiMessage = _uiMessage.asSharedFlow()
 
+    fun showValidationMessage(message: String) {
+        viewModelScope.launch {
+            _uiMessage.emit(UIMessage.SnackBarMessage(message))
+        }
+    }
+
     fun register(
         email: String,
         name: String,
@@ -51,22 +59,18 @@ class VsSignUpViewModel(
         _uiState.update { it.copy(isButtonLoading = true) }
         viewModelScope.launch {
             try {
-                val payload = mutableMapOf<String, Any>(
-                    "email" to email,
-                    "name" to name,
-                    "password" to password,
-                    "phone_number" to phoneNumber,
-                    "terms_of_service" to true,
-                    "user_role" to userRole,
-                    "username" to email
+                val body = VsRegisterRequest(
+                    email = email,
+                    name = name,
+                    password = password,
+                    phoneNumber = Validator().formatPhoneNumber(phoneNumber),
+                    termsOfService = true,
+                    userRole = userRole.takeIf { it.isNotBlank() },
+                    username = email,
+                    verificationKey = uiState.value.verificationKey.takeIf { uiState.value.isOtpVerified }
                 )
-                if (uiState.value.isOtpVerified) {
-                    uiState.value.verificationKey?.let {
-                        payload["verification_key"] = it
-                    }
-                }
 
-                interactor.registerVs(payload)
+                interactor.registerVs(body)
                 
                 // After successful registration, login the user
                 interactor.login(email, password)
@@ -74,6 +78,7 @@ class VsSignUpViewModel(
                 _uiState.update { it.copy(successLogin = true, isButtonLoading = false) }
                 appNotifier.send(SignInEvent())
             } catch (e: Exception) {
+                e.printStackTrace()
                 _uiState.update { it.copy(isButtonLoading = false) }
                 val errorMessage = if (e.isInternetError()) {
                     coreR.string.core_error_no_connection
@@ -111,12 +116,13 @@ class VsSignUpViewModel(
         }
     }
 
+
     fun verifyOtp(phoneNumber: String, otpCode: String) {
         val verificationKey = uiState.value.verificationKey ?: return
         _uiState.update { it.copy(isOtpLoading = true) }
         viewModelScope.launch {
             try {
-                val response = interactor.verifyOtp(phoneNumber, otpCode, verificationKey)
+                val response = interactor.verifyOtp(Validator().formatPhoneNumber(phoneNumber), otpCode, verificationKey)
                 if (response.success) {
                     _uiState.update {
                         it.copy(

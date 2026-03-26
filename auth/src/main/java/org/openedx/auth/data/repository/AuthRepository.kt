@@ -13,6 +13,7 @@ import org.openedx.auth.data.api.OtpApi
 import org.openedx.auth.data.api.OtpLoginRequest
 import org.openedx.auth.data.api.OtpSendRequest
 import org.openedx.auth.data.api.OtpVerifyRequest
+import org.openedx.auth.data.model.VsRegisterRequest
 
 class AuthRepository(
     private val config: Config,
@@ -66,8 +67,8 @@ class AuthRepository(
         return api.registerUser(mapFields)
     }
 
-    suspend fun registerVs(mapFields: Map<String, Any>) {
-        return api.registerUserVs(mapFields)
+    suspend fun registerVs(body: VsRegisterRequest) {
+        return api.registerUserVs(body)
     }
 
     suspend fun validateRegistrationFields(mapFields: Map<String, String>): ValidationFields {

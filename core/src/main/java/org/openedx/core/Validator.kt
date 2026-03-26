@@ -19,4 +19,18 @@ class Validator {
     fun isPasswordValid(password: String): Boolean {
         return password.length >= 2
     }
+
+    fun formatPhoneNumber(phone: String?): String {
+        if (phone.isNullOrEmpty()) return ""
+
+        val cleaned = phone.replace(Regex("\\D"), "")
+
+        if (phone.startsWith("+91")) return "+91" + cleaned.removePrefix("91")
+
+        return when {
+            cleaned.startsWith("91") && cleaned.length == 12 -> "+$cleaned"
+            cleaned.length == 10 -> "+91$cleaned"
+            else -> "+91${cleaned.takeLast(10)}"
+        }
+    }
 }

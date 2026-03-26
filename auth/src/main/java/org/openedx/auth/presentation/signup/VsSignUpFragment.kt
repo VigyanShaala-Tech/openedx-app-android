@@ -62,6 +62,9 @@ class VsSignUpFragment : Fragment() {
                     },
                     onVerifyOtpClick = { phone, code ->
                         viewModel.verifyOtp(phone, code)
+                    },
+                    onValidationError = { message ->
+                        viewModel.showValidationMessage(message)
                     }
                 )
 

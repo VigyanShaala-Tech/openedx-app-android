@@ -106,6 +106,7 @@ class LogistrationFragment : Fragment() {
                 val refreshing by viewModel.isUpdating.observeAsState(false)
 
                 LogistrationScreen(
+                    origin = arguments?.getString(ARG_ORIGIN),
                     windowSize = windowSize,
                     state = uiState!!,
                     uiMessage = uiMessage,
@@ -165,10 +166,19 @@ class LogistrationFragment : Fragment() {
 
     companion object {
         private const val ARG_COURSE_ID = "courseId"
+        private const val ARG_ORIGIN = "origin"
         fun newInstance(courseId: String?): LogistrationFragment {
             val fragment = LogistrationFragment()
             fragment.arguments = bundleOf(
                 ARG_COURSE_ID to courseId
+            )
+            return fragment
+        }
+        fun newInstance(courseId: String?, origin: String?): LogistrationFragment {
+            val fragment = LogistrationFragment()
+            fragment.arguments = bundleOf(
+                ARG_COURSE_ID to courseId,
+                ARG_ORIGIN to origin
             )
             return fragment
         }
@@ -178,6 +188,7 @@ class LogistrationFragment : Fragment() {
 @OptIn(ExperimentalComposeUiApi::class, ExperimentalMaterialApi::class)
 @Composable
 private fun LogistrationScreen(
+    origin: String? = null,
     windowSize: WindowSize,
     state: DiscoveryUIState,
     uiMessage: UIMessage?,
@@ -221,19 +232,21 @@ private fun LogistrationScreen(
             .navigationBarsPadding(),
         backgroundColor = MaterialTheme.appColors.background,
         bottomBar = {
-            Box(
-                modifier = Modifier
-                    .padding(
-                        horizontal = 16.dp,
-                        vertical = 32.dp,
+            if (!origin.equals("RECOMMENDED", true)) {
+                Box(
+                    modifier = Modifier
+                        .padding(
+                            horizontal = 16.dp,
+                            vertical = 32.dp,
+                        )
+                        .navigationBarsPadding()
+                ) {
+                    AuthButtonsPanel(
+                        onRegisterClick = onRegisterClick,
+                        onSignInClick = onSignInClick,
+                        showRegisterButton = isRegistrationEnabled
                     )
-                    .navigationBarsPadding()
-            ) {
-                AuthButtonsPanel(
-                    onRegisterClick = onRegisterClick,
-                    onSignInClick = onSignInClick,
-                    showRegisterButton = isRegistrationEnabled
-                )
+                }
             }
         }
     ) {
@@ -277,25 +290,39 @@ private fun LogistrationScreen(
             ) {
                 item {
                     Column {
-                        LogistrationLogoView()
-                        val carouselItems = listOf(
-                            LogistrationCarouselItem(
-                                imageResId = R.drawable.onboarding_1,
-                                title = "Creating Job Opportunities in Science and Technology",
-                                subtitle = "Discover the latest job opportunities in Science and Technology and apply for the ones that match your skills and interests."
-                            ),
-                            LogistrationCarouselItem(
-                                imageResId = R.drawable.onboarding_2,
-                                title = "Learn from Industry Experts",
-                                subtitle = "Access world-class education from renowned instructors and gain practical knowledge that sets you apart."
-                            ),
-                            LogistrationCarouselItem(
-                                imageResId = R.drawable.onboarding_3,
-                                title = "Grow your career in STEM",
-                                subtitle = "Be part of an inspiring global community and make your next leap into higher education or a job."
+                        if (!origin.equals("RECOMMENDED", true)) {
+                            LogistrationLogoView()
+                            val carouselItems = listOf(
+                                LogistrationCarouselItem(
+                                    imageResId = R.drawable.onboarding_1,
+                                    title = "Creating Job Opportunities in Science and Technology",
+                                    subtitle = "Discover the latest job opportunities in Science and Technology and apply for the ones that match your skills and interests."
+                                ),
+                                LogistrationCarouselItem(
+                                    imageResId = R.drawable.onboarding_2,
+                                    title = "Learn from Industry Experts",
+                                    subtitle = "Access world-class education from renowned instructors and gain practical knowledge that sets you apart."
+                                ),
+                                LogistrationCarouselItem(
+                                    imageResId = R.drawable.onboarding_3,
+                                    title = "Grow your career in STEM",
+                                    subtitle = "Be part of an inspiring global community and make your next leap into higher education or a job."
+                                )
                             )
-                        )
-                        LogistrationCarousel(items = carouselItems)
+                            LogistrationCarousel(items = carouselItems)
+                        } else {
+                            Text(
+                                text = "Explore Our Courses",
+                                style = MaterialTheme.appTypography.headlineSmall,
+                                modifier = Modifier.padding(bottom = 8.dp)
+                            )
+                            Text(
+                                text = "Discover a comprehensive collection of STEM courses designed to help you build skills and advance your career.",
+                                style = MaterialTheme.appTypography.bodySmall,
+                                modifier = Modifier.padding(bottom = 16.dp),
+                                color = MaterialTheme.appColors.textDark
+                            )
+                        }
 //                        Text(
 //                            text = stringResource(id = R.string.pre_auth_title),
 //                            style = MaterialTheme.appTypography.headlineSmall,
@@ -305,19 +332,21 @@ private fun LogistrationScreen(
 //                        )
                         val focusManager = LocalFocusManager.current
                         Column(Modifier.padding(bottom = 8.dp)) {
-                            Text(
-                                modifier = Modifier
-                                    .testTag("txt_search_label")
-                                    .padding(bottom = 10.dp),
-                                style = MaterialTheme.appTypography.titleMedium,
-                                text = stringResource(id = R.string.pre_auth_search_title),
-                            )
+                            if (!origin.equals("RECOMMENDED", true)) {
+                                Text(
+                                    modifier = Modifier
+                                        .testTag("txt_search_label")
+                                        .padding(bottom = 10.dp),
+                                    style = MaterialTheme.appTypography.titleMedium,
+                                    text = stringResource(id = R.string.pre_auth_search_title),
+                                )
+                            }
                             SearchBar(
                                 modifier = Modifier
                                     .testTag("tf_discovery_search")
                                     .fillMaxWidth()
                                     .height(48.dp),
-                                label = stringResource(id = R.string.pre_auth_search_hint),
+                                label = if (origin.equals("RECOMMENDED", true)) "Search courses..." else stringResource(id = R.string.pre_auth_search_hint),
                                 requestFocus = false,
                                 searchValue = textFieldValue,
                                 clearOnSubmit = true,
@@ -335,6 +364,15 @@ private fun LogistrationScreen(
                             Spacer(Modifier.height(12.dp))
                             LogistrationFilters(
                                 onFiltersChanged = onFiltersChanged
+                            )
+                        }
+
+                        if (state is DiscoveryUIState.Courses) {
+                            Text(
+                                text = "Showing ${state.courses.size} of ${state.courses.size} courses",
+                                style = MaterialTheme.appTypography.bodySmall,
+                                color = MaterialTheme.appColors.textDark,
+                                modifier = Modifier.padding(vertical = 8.dp)
                             )
                         }
 

@@ -68,6 +68,7 @@ import org.koin.android.ext.android.inject
 import org.koin.androidx.compose.koinViewModel
 import org.koin.core.parameter.parametersOf
 import org.openedx.core.ui.theme.OpenEdXTheme
+import org.openedx.auth.presentation.AuthRouter
 import org.openedx.core.ui.theme.appColors
 import org.openedx.core.ui.theme.appShapes
 import org.openedx.core.ui.theme.appTypography
@@ -88,6 +89,7 @@ import org.openedx.core.R as CoreR
 
 class NewDashboardFragment : Fragment() {
     private val dashboardRouter: DashboardRouter by inject()
+    private val authRouter: AuthRouter by inject()
     override fun onCreateView(
         inflater: LayoutInflater,
         container: ViewGroup?,
@@ -111,6 +113,13 @@ class NewDashboardFragment : Fragment() {
                     },
                     onAchievementsViewAllClick = {
                         dashboardRouter.navigateToAchievements(requireActivity().supportFragmentManager)
+                    },
+                    onRecommendedViewAllClick = {
+                        authRouter.navigateToLogistration(
+                            requireActivity().supportFragmentManager,
+                            null,
+                            "RECOMMENDED"
+                        )
                     },
                     onRecommendationClick = { courseId ->
                         dashboardRouter.navigateToCourseDetail(
@@ -148,6 +157,7 @@ private fun NewDashboardScreen(
     viewModel: NewDashboardViewModel,
     onWishlistViewAllClick: () -> Unit,
     onAchievementsViewAllClick: () -> Unit,
+    onRecommendedViewAllClick: () -> Unit,
     onRecommendationClick: (String) -> Unit,
     onCourseClick: (String, String) -> Unit,
     onContinueViewAllClick: () -> Unit,
@@ -159,6 +169,7 @@ private fun NewDashboardScreen(
         viewModel.userName,
         onWishlistViewAllClick,
         onAchievementsViewAllClick,
+        onRecommendedViewAllClick,
         onRecommendationClick,
         onCourseClick,
         onContinueViewAllClick,
@@ -174,6 +185,7 @@ private fun NewDashboardScreenContent(
     userName: String,
     onWishlistViewAllClick: () -> Unit,
     onAchievementsViewAllClick: () -> Unit,
+    onRecommendedViewAllClick: () -> Unit,
     onRecommendationClick: (String) -> Unit,
     onCourseClick: (String, String) -> Unit,
     onContinueViewAllClick: () -> Unit,
@@ -447,7 +459,8 @@ private fun NewDashboardScreenContent(
                 item {
                     SectionHeader(
                         title = androidx.compose.ui.res.stringResource(org.openedx.dashboard.R.string.dashboard_recommended_for_you),
-                        showViewAll = true
+                        showViewAll = true,
+                        onViewAllClick = onRecommendedViewAllClick
                     )
                     Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
                         recommendations.forEach { r ->
@@ -988,6 +1001,7 @@ private fun NewDashboardScreenPreview() {
             userName = "Priya",
             onWishlistViewAllClick = {},
             onAchievementsViewAllClick = {},
+            onRecommendedViewAllClick = {},
             onRecommendationClick = {},
             onCourseClick = { _, _ -> },
             onContinueViewAllClick = {},
@@ -1006,6 +1020,7 @@ private fun NewDashboardScreenLoadingPreview() {
             userName = "Priya",
             onWishlistViewAllClick = {},
             onAchievementsViewAllClick = {},
+            onRecommendedViewAllClick = {},
             onRecommendationClick = {},
             onCourseClick = { _, _ -> },
             onContinueViewAllClick = {},
@@ -1024,6 +1039,7 @@ private fun NewDashboardScreenEmptyPreview() {
             userName = "Priya",
             onWishlistViewAllClick = {},
             onAchievementsViewAllClick = {},
+            onRecommendedViewAllClick = {},
             onRecommendationClick = {},
             onCourseClick = { _, _ -> },
             onContinueViewAllClick = {},

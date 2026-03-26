@@ -102,6 +102,14 @@ class AppRouter :
         replaceFragmentWithBackStack(fm, LogistrationFragment.newInstance(courseId))
     }
 
+    override fun navigateToLogistration(
+        fm: FragmentManager,
+        courseId: String?,
+        origin: String?
+    ) {
+        replaceFragmentWithBackStack(fm, LogistrationFragment.newInstance(courseId, origin))
+    }
+
     override fun navigateToDownloadQueue(fm: FragmentManager, descendants: List<String>) {
         replaceFragmentWithBackStack(fm, DownloadQueueFragment.newInstance(descendants))
     }

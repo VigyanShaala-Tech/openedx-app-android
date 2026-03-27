@@ -11,6 +11,7 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.*
@@ -20,15 +21,19 @@ import androidx.compose.material.icons.filled.CheckCircle
 import androidx.compose.material.icons.filled.Visibility
 import androidx.compose.material.icons.filled.VisibilityOff
 import androidx.compose.material.icons.outlined.Smartphone
+import androidx.compose.material.rememberScaffoldState
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.focus.FocusDirection
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.input.VisualTransformation
@@ -59,6 +64,8 @@ fun VsSignUpView(
     onValidationError: (String) -> Unit,
 ) {
     val scaffoldState = rememberScaffoldState()
+    val focusManager = LocalFocusManager.current
+
     var fullName by remember { mutableStateOf("") }
     var email by remember { mutableStateOf("") }
     var mobileNumber by remember { mutableStateOf("") }
@@ -69,6 +76,11 @@ fun VsSignUpView(
     var isAgreed by remember { mutableStateOf(false) }
     var passwordVisible by remember { mutableStateOf(false) }
     var confirmPasswordVisible by remember { mutableStateOf(false) }
+
+    var fullNameError by remember { mutableStateOf<String?>(null) }
+    var emailError by remember { mutableStateOf<String?>(null) }
+    var passwordError by remember { mutableStateOf<String?>(null) }
+    var confirmPasswordError by remember { mutableStateOf<String?>(null) }
 
     Scaffold(
         scaffoldState = scaffoldState,
@@ -86,7 +98,9 @@ fun VsSignUpView(
                 )
                 IconButton(
                     onClick = onBackClick,
-                    modifier = Modifier.padding(top = 24.dp, start = 8.dp)
+                    modifier = Modifier
+                        .statusBarsPadding()
+                        .padding(top = 16.dp, start = 8.dp)
                 ) {
                     Icon(
                         Icons.AutoMirrored.Filled.ArrowBack,
@@ -98,6 +112,7 @@ fun VsSignUpView(
                     painter = painterResource(id = coreR.drawable.core_logo_white),
                     contentDescription = "Vigyan Shaala",
                     modifier = Modifier
+                        .statusBarsPadding()
                         .align(Alignment.Center)
                         .height(60.dp),
                     contentScale = ContentScale.Fit
@@ -134,7 +149,9 @@ fun VsSignUpView(
             // Google Sign In Button
             OutlinedButton(
                 onClick = { /* Handle Google Sign In */ },
-                modifier = Modifier.fillMaxWidth().height(48.dp),
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(48.dp),
                 shape = MaterialTheme.appShapes.buttonShape,
                 border = BorderStroke(1.dp, MaterialTheme.appColors.cardViewBorder)
             ) {
@@ -161,19 +178,30 @@ fun VsSignUpView(
             VsSignUpInputField(
                 label = "Full Name",
                 value = fullName,
-                onValueChange = { fullName = it },
+                onValueChange = { 
+                    fullName = it
+                    fullNameError = null
+                },
                 placeholder = "Enter your full name",
                 isRequired = true,
-                helperText = "This name will be used on any certificates you earn."
+                helperText = "This name will be used on any certificates you earn.",
+                errorText = fullNameError,
+                imeAction = ImeAction.Next
             )
 
             VsSignUpInputField(
                 label = "Email",
                 value = email,
-                onValueChange = { email = it },
+                onValueChange = { 
+                    email = it
+                    emailError = null
+                },
                 placeholder = "Enter your email",
                 isRequired = true,
-                helperText = "This is what you will use to login."
+                helperText = "This is what you will use to login.",
+                errorText = emailError,
+                keyboardType = KeyboardType.Email,
+                imeAction = ImeAction.Next
             )
 
             // Mobile Number with OTP verification logic
@@ -186,7 +214,7 @@ fun VsSignUpView(
                 Spacer(modifier = Modifier.height(8.dp))
                 if (uiState.isOtpVerified) {
                     // Verified State UI
-                    TextField(
+                    OutlinedTextField(
                         value = mobileNumber,
                         onValueChange = {},
                         modifier = Modifier.fillMaxWidth(),
@@ -201,11 +229,11 @@ fun VsSignUpView(
                             ) 
                         },
                         shape = MaterialTheme.appShapes.textFieldShape,
-                        colors = TextFieldDefaults.textFieldColors(
+                        colors = TextFieldDefaults.outlinedTextFieldColors(
                             backgroundColor = MaterialTheme.appColors.textFieldBackground,
-                            focusedIndicatorColor = Color.Transparent,
-                            unfocusedIndicatorColor = Color.Transparent,
-                            disabledIndicatorColor = Color.Transparent
+                            unfocusedBorderColor = MaterialTheme.appColors.textFieldBorder,
+                            disabledBorderColor = MaterialTheme.appColors.textFieldBorder,
+                            textColor = MaterialTheme.appColors.textFieldText
                         )
                     )
                 } else {
@@ -214,26 +242,28 @@ fun VsSignUpView(
                         modifier = Modifier.fillMaxWidth(),
                         verticalAlignment = Alignment.CenterVertically
                     ) {
-                        TextField(
+                        OutlinedTextField(
                             value = mobileNumber,
                             onValueChange = { mobileNumber = it },
                             modifier = Modifier
-                                .weight(1f)
-                                .border(
-                                    width = 2.dp,
-                                    color = if (uiState.isOtpSent) MaterialTheme.appColors.primary else Color.Transparent,
-                                    shape = MaterialTheme.appShapes.textFieldShape
-                                ),
+                                .weight(1f),
                             placeholder = { Text("+91 Enter mobile number", color = MaterialTheme.appColors.textSecondary) },
                             leadingIcon = { Icon(Icons.Outlined.Smartphone, contentDescription = null, tint = MaterialTheme.appColors.textPrimary) },
                             shape = MaterialTheme.appShapes.textFieldShape,
-                            colors = TextFieldDefaults.textFieldColors(
+                            colors = TextFieldDefaults.outlinedTextFieldColors(
                                 backgroundColor = MaterialTheme.appColors.textFieldBackground,
-                                focusedIndicatorColor = Color.Transparent,
-                                unfocusedIndicatorColor = Color.Transparent,
-                                disabledIndicatorColor = Color.Transparent
+                                unfocusedBorderColor = if (uiState.isOtpSent) MaterialTheme.appColors.primary else MaterialTheme.appColors.textFieldBorder,
+                                focusedBorderColor = MaterialTheme.appColors.primary,
+                                textColor = MaterialTheme.appColors.textFieldText
                             ),
-                            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Phone)
+                            keyboardOptions = KeyboardOptions(
+                                keyboardType = KeyboardType.Phone,
+                                imeAction = if (uiState.isOtpSent) ImeAction.Next else ImeAction.Done
+                            ),
+                            keyboardActions = KeyboardActions(
+                                onNext = { focusManager.moveFocus(FocusDirection.Down) },
+                                onDone = { focusManager.clearFocus() }
+                            )
                         )
                         
                         AnimatedVisibility(
@@ -277,7 +307,7 @@ fun VsSignUpView(
                             modifier = Modifier.fillMaxWidth(),
                             verticalAlignment = Alignment.CenterVertically
                         ) {
-                            TextField(
+                            OutlinedTextField(
                                 value = otpCode,
                                 onValueChange = { otpCode = it },
                                 modifier = Modifier.weight(1f),
@@ -287,13 +317,17 @@ fun VsSignUpView(
                                     }
                                 },
                                 shape = MaterialTheme.appShapes.textFieldShape,
-                                colors = TextFieldDefaults.textFieldColors(
+                                colors = TextFieldDefaults.outlinedTextFieldColors(
                                     backgroundColor = MaterialTheme.appColors.textFieldBackground,
-                                    focusedIndicatorColor = Color.Transparent,
-                                    unfocusedIndicatorColor = Color.Transparent,
-                                    disabledIndicatorColor = Color.Transparent
+                                    unfocusedBorderColor = MaterialTheme.appColors.textFieldBorder,
+                                    focusedBorderColor = MaterialTheme.appColors.primary,
+                                    textColor = MaterialTheme.appColors.textFieldText
                                 ),
-                                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
+                                keyboardOptions = KeyboardOptions(
+                                    keyboardType = KeyboardType.Number,
+                                    imeAction = ImeAction.Next
+                                ),
+                                keyboardActions = KeyboardActions(onNext = { focusManager.moveFocus(FocusDirection.Down) }),
                                 textStyle = LocalTextStyle.current.copy(textAlign = TextAlign.Center)
                             )
                             Spacer(modifier = Modifier.width(12.dp))
@@ -329,24 +363,36 @@ fun VsSignUpView(
             VsSignUpInputField(
                 label = "Password",
                 value = password,
-                onValueChange = { password = it },
+                onValueChange = { 
+                    password = it
+                    passwordError = null
+                },
                 placeholder = "Create a password",
                 isRequired = true,
                 isPassword = true,
                 passwordVisible = passwordVisible,
                 onPasswordToggle = { passwordVisible = !passwordVisible },
-                helperText = "Password must be at least 8 characters."
+                helperText = "Password must be at least 8 characters.",
+                errorText = passwordError,
+                keyboardType = KeyboardType.Password,
+                imeAction = ImeAction.Next
             )
 
             VsSignUpInputField(
                 label = "Confirm Password",
                 value = confirmPassword,
-                onValueChange = { confirmPassword = it },
+                onValueChange = { 
+                    confirmPassword = it
+                    confirmPasswordError = null
+                },
                 placeholder = "Confirm your password",
                 isRequired = true,
                 isPassword = true,
                 passwordVisible = confirmPasswordVisible,
-                onPasswordToggle = { confirmPasswordVisible = !confirmPasswordVisible }
+                onPasswordToggle = { confirmPasswordVisible = !confirmPasswordVisible },
+                errorText = confirmPasswordError,
+                keyboardType = KeyboardType.Password,
+                imeAction = ImeAction.Done
             )
 
             Text(
@@ -400,14 +446,26 @@ fun VsSignUpView(
 
             Button(
                 onClick = {
-                    val error = vsValidationError(fullName, email, password, confirmPassword, isAgreed)
-                    if (error == null) {
-                        onRegisterClick(email, fullName, password, mobileNumber, selectedRole, uiState.verificationKey)
-                    } else {
-                        onValidationError(error)
+                    fullNameError = if (fullName.isBlank()) "Please enter your full name" else null
+                    emailError = when {
+                        email.isBlank() -> "Please enter your email"
+                        !android.util.Patterns.EMAIL_ADDRESS.matcher(email).matches() -> "Please enter a valid email"
+                        else -> null
+                    }
+                    passwordError = if (password.length < 8) "Password must be at least 8 characters" else null
+                    confirmPasswordError = if (password != confirmPassword) "Passwords do not match" else null
+
+                    if (fullNameError == null && emailError == null && passwordError == null && confirmPasswordError == null) {
+                        if (isAgreed) {
+                            onRegisterClick(email, fullName, password, mobileNumber, selectedRole, uiState.verificationKey)
+                        } else {
+                            onValidationError("Please agree to the Terms of Service and Privacy Policy")
+                        }
                     }
                 },
-                modifier = Modifier.fillMaxWidth().height(56.dp),
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(56.dp),
                 shape = MaterialTheme.appShapes.buttonShape,
                 colors = ButtonDefaults.buttonColors(
                     backgroundColor = MaterialTheme.appColors.primary,
@@ -424,7 +482,9 @@ fun VsSignUpView(
 
             Spacer(modifier = Modifier.height(16.dp))
             Row(
-                modifier = Modifier.fillMaxWidth().padding(bottom = 32.dp),
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(bottom = 32.dp),
                 horizontalArrangement = Arrangement.Center
             ) {
                 Text("Already have an account? ", color = MaterialTheme.appColors.textSecondary)
@@ -450,8 +510,11 @@ fun VsSignUpInputField(
     passwordVisible: Boolean = false,
     onPasswordToggle: (() -> Unit)? = null,
     helperText: String? = null,
-    leadingIcon: @Composable (() -> Unit)? = null
+    errorText: String? = null,
+    keyboardType: KeyboardType = KeyboardType.Text,
+    imeAction: ImeAction = ImeAction.Default
 ) {
+    val focusManager = LocalFocusManager.current
     Column(modifier = Modifier.padding(top = 16.dp)) {
         Text(
             text = buildAnnotatedString {
@@ -464,12 +527,11 @@ fun VsSignUpInputField(
             color = MaterialTheme.appColors.textPrimary
         )
         Spacer(modifier = Modifier.height(8.dp))
-        TextField(
+        OutlinedTextField(
             value = value,
             onValueChange = onValueChange,
             modifier = Modifier.fillMaxWidth(),
             placeholder = { Text(placeholder, color = MaterialTheme.appColors.textSecondary) },
-            leadingIcon = leadingIcon,
             trailingIcon = if (isPassword) {
                 {
                     val icon = if (passwordVisible) Icons.Default.Visibility else Icons.Default.VisibilityOff
@@ -479,16 +541,33 @@ fun VsSignUpInputField(
                 }
             } else null,
             visualTransformation = if (isPassword && !passwordVisible) PasswordVisualTransformation() else VisualTransformation.None,
-            keyboardOptions = KeyboardOptions(keyboardType = if (isPassword) KeyboardType.Password else KeyboardType.Text),
+            keyboardOptions = KeyboardOptions(
+                keyboardType = keyboardType,
+                imeAction = imeAction
+            ),
+            keyboardActions = KeyboardActions(
+                onNext = { focusManager.moveFocus(FocusDirection.Down) },
+                onDone = { focusManager.clearFocus() }
+            ),
             shape = MaterialTheme.appShapes.textFieldShape,
-            colors = TextFieldDefaults.textFieldColors(
+            colors = TextFieldDefaults.outlinedTextFieldColors(
+                textColor = MaterialTheme.appColors.textFieldText,
                 backgroundColor = MaterialTheme.appColors.textFieldBackground,
-                focusedIndicatorColor = Color.Transparent,
-                unfocusedIndicatorColor = Color.Transparent,
-                disabledIndicatorColor = Color.Transparent
-            )
+                unfocusedBorderColor = MaterialTheme.appColors.textFieldBorder,
+                focusedBorderColor = MaterialTheme.appColors.primary,
+                cursorColor = MaterialTheme.appColors.textFieldText,
+                errorBorderColor = MaterialTheme.appColors.error
+            ),
+            isError = errorText != null
         )
-        if (helperText != null) {
+        if (errorText != null) {
+            Text(
+                text = errorText,
+                style = MaterialTheme.appTypography.bodySmall,
+                color = MaterialTheme.appColors.error,
+                modifier = Modifier.padding(top = 4.dp)
+            )
+        } else if (helperText != null) {
             Text(
                 text = helperText,
                 style = MaterialTheme.appTypography.bodySmall,
@@ -523,14 +602,4 @@ fun VsRoleButton(
             )
         }
     }
-}
-
-fun vsValidationError(fullName: String, email: String, pass: String, confirmPass: String, agreed: Boolean): String? {
-    if (fullName.isBlank()) return "Please enter your full name"
-    if (email.isBlank()) return "Please enter your email"
-    if (!android.util.Patterns.EMAIL_ADDRESS.matcher(email).matches()) return "Please enter a valid email"
-    if (pass.length < 8) return "Password must be at least 8 characters"
-    if (pass != confirmPass) return "Passwords do not match"
-    if (!agreed) return "Please agree to the Terms of Service and Privacy Policy"
-    return null
 }

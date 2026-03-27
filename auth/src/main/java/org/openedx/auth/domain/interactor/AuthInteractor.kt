@@ -4,6 +4,7 @@ import org.openedx.auth.data.model.AuthType
 import org.openedx.auth.data.model.ValidationFields
 import org.openedx.auth.data.repository.AuthRepository
 import org.openedx.auth.data.model.VsRegisterRequest
+import org.openedx.core.ApiConstants
 import org.openedx.core.domain.model.RegistrationField
 
 class AuthInteractor(private val repository: AuthRepository) {

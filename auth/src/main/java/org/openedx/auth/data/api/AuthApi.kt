@@ -13,6 +13,7 @@ import retrofit2.http.Field
 import retrofit2.http.FieldMap
 import retrofit2.http.FormUrlEncoded
 import retrofit2.http.GET
+import retrofit2.http.Headers
 import retrofit2.http.POST
 import retrofit2.http.Path
 
@@ -67,8 +68,18 @@ interface AuthApi {
     @POST(ApiConstants.URL_REGISTER)
     suspend fun registerUser(@FieldMap fields: Map<String, String>)
 
+    @FormUrlEncoded
     @POST(ApiConstants.URL_REGISTER_VS)
-    suspend fun registerUserVs(@Body body: VsRegisterRequest)
+    suspend fun registerUserVs(
+        @Field("email") email: String?,
+        @Field("name") name: String?,
+        @Field("password") password: String?,
+        @Field("phone_number") phone_number: String?,
+        @Field("terms_of_service") terms_of_service: Boolean?,
+        @Field("user_role") user_role: String?,
+        @Field("username") username: String?,
+        @Field("verification_key") verification_key: String?,
+    )
 
     @FormUrlEncoded
     @POST(ApiConstants.URL_VALIDATE_REGISTRATION_FIELDS)

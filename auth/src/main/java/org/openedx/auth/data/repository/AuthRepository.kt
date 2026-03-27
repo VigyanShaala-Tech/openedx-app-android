@@ -68,7 +68,16 @@ class AuthRepository(
     }
 
     suspend fun registerVs(body: VsRegisterRequest) {
-        return api.registerUserVs(body)
+        return api.registerUserVs(
+            email = body.email,
+            name = body.name,
+            password = body.password,
+            phone_number = body.phoneNumber,
+            terms_of_service = body.termsOfService,
+            user_role = body.userRole,
+            username = body.username,
+            verification_key = body.verificationKey,
+        )
     }
 
     suspend fun validateRegistrationFields(mapFields: Map<String, String>): ValidationFields {

@@ -2,6 +2,9 @@ package org.openedx.auth.data.api
 
 import org.openedx.auth.data.model.AuthResponse
 import retrofit2.http.Body
+import retrofit2.http.Field
+import retrofit2.http.FormUrlEncoded
+import retrofit2.http.Headers
 import retrofit2.http.POST
 
 data class OtpSendRequest(val contact_identifier: String)
@@ -29,6 +32,7 @@ interface OtpApi {
     @POST("/otp/verify/")
     suspend fun verify(@Body body: OtpVerifyRequest): OtpVerifyResponse
 
+    @Headers("content-type: application/json")
     @POST("/otp/login/")
     suspend fun login(@Body body: OtpLoginRequest): AuthResponse
 }

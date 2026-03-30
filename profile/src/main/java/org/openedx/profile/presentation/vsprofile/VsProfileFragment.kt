@@ -99,7 +99,7 @@ class VsProfileFragment : Fragment() {
             OpenEdXTheme {
                 val logoutSuccess by settingsViewModel.successLogout.collectAsState(false)
                 VsProfileScreen(
-                    userName = corePreferences.user?.username ?: stringResource(id = R.string.profile_student_user),
+                    userName = corePreferences.user?.name ?: corePreferences.user?.username ?: stringResource(id = R.string.profile_student_user),
                     userEmail = corePreferences.user?.email ?: stringResource(id = R.string.profile_student_email),
                     onSettingsClick = { router.navigateToVsSettings(requireActivity().supportFragmentManager) },
                     onAboutClick = { router.navigateToAboutVigyanshaala(requireActivity().supportFragmentManager) },

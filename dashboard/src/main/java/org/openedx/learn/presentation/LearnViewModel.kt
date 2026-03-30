@@ -49,7 +49,7 @@ class LearnViewModel(
     val getProgramFragment get() = dashboardRouter.getProgramFragment()
 
     val userName: String
-        get() = corePreferences.user?.username ?: ""
+        get() = corePreferences.user?.name ?: ""
 
     init {
         viewModelScope.launch {

@@ -9,6 +9,7 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.text.ClickableText
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardActions
@@ -442,20 +443,11 @@ fun VsSignUpView(
                     }
                     pop()
                 }
-                
-                Text(
+                Spacer(Modifier.width(8.dp))
+                ClickableText(
                     text = annotatedText,
                     style = MaterialTheme.appTypography.bodySmall,
-                    modifier = Modifier.clickable { 
-                        isAgreed = !isAgreed 
-                    }
-                )
-                // Use a Box or specific click handling if needed, but for now simple annotated text link logic is added in ClickableText if we use it or just handle it in the standard way.
-                // Re-implementing with ClickableText for precise link handling
-                Spacer(Modifier.width(4.dp))
-                androidx.compose.foundation.text.ClickableText(
-                    text = annotatedText,
-                    style = MaterialTheme.appTypography.bodySmall,
+                    modifier = Modifier.weight(1f),
                     onClick = { offset ->
                         annotatedText.getStringAnnotations(tag = "TOS", start = offset, end = offset).firstOrNull()?.let {
                             uriHandler.openUri(it.item)

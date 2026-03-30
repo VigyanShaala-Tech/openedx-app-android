@@ -197,7 +197,7 @@ class LogistrationViewModel(
                         mobileAvailable = c.mobile_available ?: true,
                         name = c.name,
                         number = "",
-                        org = c.org ?: "",
+                        org = c.instructor_name ?: c.org ?: "",
                         pacing = "",
                         shortDescription = c.short_description ?: "",
                         start = c.start ?: "",
@@ -206,10 +206,13 @@ class LogistrationViewModel(
                         startType = c.start_type ?: "",
                         overview = "",
                         isEnrolled = false,
-                        rating = "0",
-                        noOfReviews = "0",
-                        enrollments = "0",
-                        isWishlisted = false
+                        rating = c.rating.toString()?:"0",
+                        noOfReviews = c.no_of_reviews.toString()?:"0",
+                        enrollments = c.enrollments.toString()?:"0",
+                        isWishlisted = false,
+                        level = c.level,
+                        category = c.category,
+                        instructorName = c.instructor_name,
                     )
                 }
                 _uiState.value = DiscoveryUIState.Courses(mapped)

@@ -47,7 +47,9 @@ class NewDashboardViewModel(
     val hasInternetConnection: Boolean get() = networkConnection.isOnline()
     val isTablet get() = windowSize.isTablet
     val userName: String
-        get() = corePreferences.user?.username?.takeIf { it.isNotBlank() } ?: "Learner"
+        get() = corePreferences.user?.username ?: "Learner"
+    val userFullName: String?
+        get() = corePreferences.user?.name
 
     private val _uiMessage = kotlinx.coroutines.flow.MutableSharedFlow<UIMessage>()
     val uiMessage = _uiMessage
@@ -82,16 +84,22 @@ class NewDashboardViewModel(
                 val inProgress = async { interactor.getInProgress() }
                 val completed = async { interactor.getCompleted() }
 
+                val summaryVal = try { summary.await() } catch (e: Exception) { emptyList() }
+                val contLearnVal = try { contLearn.await() } catch (e: Exception) { emptyList() }
+                
                 _state.value = _state.value.copy(
                     loading = false,
+                    summary = summaryVal,
+                    continueLearning = contLearnVal,
+                )
+                
+                _state.value = _state.value.copy(
                     refreshing = false,
-                    summary = summary.await(),
-                    continueLearning = contLearn.await(),
-                    achievements = achievements.await(),
-                    recommended = recommended.await(),
-                    wishlist = wishlist.await(),
-                    inProgress = inProgress.await(),
-                    completed = completed.await(),
+                    achievements = try { achievements.await() } catch (e: Exception) { emptyList() },
+                    recommended = try { recommended.await() } catch (e: Exception) { emptyList() },
+                    wishlist = try { wishlist.await() } catch (e: Exception) { null },
+                    inProgress = try { inProgress.await() } catch (e: Exception) { null },
+                    completed = try { completed.await() } catch (e: Exception) { null },
                 )
             } catch (e: Exception) {
                 _state.value = _state.value.copy(loading = false, refreshing = false)

@@ -41,6 +41,7 @@ import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Scaffold
 import androidx.compose.material.Surface
 import androidx.compose.material.Text
+import androidx.compose.material.TextFieldDefaults
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Alarm
 import androidx.compose.material.icons.filled.Favorite
@@ -75,10 +76,13 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.semantics.testTagsAsResourceId
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Devices
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.compose.ui.viewinterop.AndroidView
 import androidx.compose.ui.zIndex
 import androidx.core.os.bundleOf
@@ -263,21 +267,12 @@ internal fun CourseDetailsScreen(
         val screenWidth by remember(key1 = windowSize) {
             mutableStateOf(
                 windowSize.windowSizeValue(
-                    expanded = if (configuration.orientation == ORIENTATION_PORTRAIT) {
-                        Modifier.widthIn(Dp.Unspecified, 560.dp)
-                    } else {
+                    expanded = if (configuration.orientation == ORIENTATION_LANDSCAPE) {
                         Modifier.widthIn(Dp.Unspecified, 650.dp)
+                    } else {
+                        Modifier.widthIn(Dp.Unspecified, 560.dp)
                     },
                     compact = Modifier.fillMaxWidth()
-                )
-            )
-        }
-
-        val webViewPadding by remember(key1 = windowSize) {
-            mutableStateOf(
-                windowSize.windowSizeValue(
-                    expanded = Modifier.padding(vertical = 24.dp),
-                    compact = Modifier.padding(horizontal = 16.dp, vertical = 24.dp)
                 )
             )
         }
@@ -324,45 +319,24 @@ internal fun CourseDetailsScreen(
 
                         is CourseDetailsUIState.CourseData -> {
                             Column(Modifier.verticalScroll(rememberScrollState())) {
-                                if (configuration.orientation == ORIENTATION_LANDSCAPE && windowSize.isTablet) {
-                                    CourseDetailNativeContentLandscape(
-                                        windowSize = windowSize,
-                                        apiHostUrl = apiHostUrl,
-                                        hasInternetConnection = hasInternetConnection,
-                                        isInternetConnectionShown = isInternetConnectionShown,
-                                        course = uiState.course,
-                                        htmlBody = htmlBody,
-                                        isWishlisted = uiState.isWishlisted,
-                                        curriculum = uiState.curriculum,
-                                        instructors = uiState.instructors,
-                                        reviews = uiState.reviews,
-                                        onButtonClick = {
-                                            onButtonClick()
-                                        },
-                                        onWishlistClick = {
-                                            onWishlistClick()
-                                        }
-                                    )
-                                } else {
-                                    CourseDetailNativeContent(
-                                        windowSize = windowSize,
-                                        apiHostUrl = apiHostUrl,
-                                        hasInternetConnection = hasInternetConnection,
-                                        isInternetConnectionShown = isInternetConnectionShown,
-                                        course = uiState.course,
-                                        htmlBody = htmlBody,
-                                        isWishlisted = uiState.isWishlisted,
-                                        curriculum = uiState.curriculum,
-                                        instructors = uiState.instructors,
-                                        reviews = uiState.reviews,
-                                        onButtonClick = {
-                                            onButtonClick()
-                                        },
-                                        onWishlistClick = {
-                                            onWishlistClick()
-                                        }
-                                    )
-                                }
+                                CourseDetailNativeContent(
+                                    windowSize = windowSize,
+                                    apiHostUrl = apiHostUrl,
+                                    hasInternetConnection = hasInternetConnection,
+                                    isInternetConnectionShown = isInternetConnectionShown,
+                                    course = uiState.course,
+                                    htmlBody = htmlBody,
+                                    isWishlisted = uiState.isWishlisted,
+                                    curriculum = uiState.curriculum,
+                                    instructors = uiState.instructors,
+                                    reviews = uiState.reviews,
+                                    onButtonClick = {
+                                        onButtonClick()
+                                    },
+                                    onWishlistClick = {
+                                        onWishlistClick()
+                                    }
+                                )
                             }
                         }
                     }
@@ -427,6 +401,7 @@ private fun CourseDetailNativeContent(
     }
 
     Column {
+        // 1. Course Banner (Moved to top)
         Box(contentAlignment = Alignment.Center) {
             ImageHeader(
                 modifier = Modifier
@@ -465,25 +440,47 @@ private fun CourseDetailNativeContent(
                 }
             }
         }
-        Spacer(Modifier.height(16.dp))
+
         Column(
             Modifier
                 .fillMaxWidth()
                 .padding(horizontal = contentHorizontalPadding)
         ) {
+            Spacer(Modifier.height(16.dp))
+
+            // 2. Course Title
+            Text(
+                modifier = Modifier.testTag("txt_course_name"),
+                text = course.name.orEmpty(),
+                style = MaterialTheme.appTypography.titleLarge,
+                color = MaterialTheme.appColors.textPrimary
+            )
+            Spacer(Modifier.height(8.dp))
+
+            // 3. Course Short Description
+            Text(
+                modifier = Modifier.testTag("txt_course_short_description"),
+                text = course.shortDescription.orEmpty(),
+                style = MaterialTheme.appTypography.bodyMedium,
+                color = MaterialTheme.appColors.textPrimaryVariant
+            )
+            Spacer(Modifier.height(16.dp))
+
+            // 4. Info Row (Reviews, efforts, students)
             Row(
                 verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.spacedBy(12.dp)
+                horizontalArrangement = Arrangement.spacedBy(16.dp)
             ) {
                 Row(verticalAlignment = Alignment.CenterVertically) {
                     Icon(
                         imageVector = Icons.Filled.Star,
                         contentDescription = null,
-                        tint = MaterialTheme.appColors.primary
+                        tint = MaterialTheme.appColors.rateStars,
+                        modifier = Modifier.size(16.dp)
                     )
                     Spacer(Modifier.width(4.dp))
                     Text(
-                        text = "${course.rating?.toDoubleOrNull() ?: 0.0} (${course.noOfReviews ?: 0} reviews)",
+                        text = "${course.rating?.toDoubleOrNull() ?: 0.0} (${course.noOfReviews ?: 0})",
                         style = MaterialTheme.appTypography.labelSmall,
                         color = MaterialTheme.appColors.textPrimary
                     )
@@ -492,7 +489,8 @@ private fun CourseDetailNativeContent(
                     Icon(
                         imageVector = Icons.Filled.Alarm,
                         contentDescription = null,
-                        tint = MaterialTheme.appColors.textPrimary
+                        tint = MaterialTheme.appColors.textPrimary,
+                        modifier = Modifier.size(16.dp)
                     )
                     Spacer(Modifier.width(4.dp))
                     Text(
@@ -505,7 +503,8 @@ private fun CourseDetailNativeContent(
                     Icon(
                         imageVector = Icons.Filled.People,
                         contentDescription = null,
-                        tint = MaterialTheme.appColors.textPrimary
+                        tint = MaterialTheme.appColors.textPrimary,
+                        modifier = Modifier.size(16.dp)
                     )
                     Spacer(Modifier.width(4.dp))
                     Text(
@@ -515,106 +514,80 @@ private fun CourseDetailNativeContent(
                     )
                 }
             }
+
             val enrollmentEnd = course.enrollmentEnd
             if (!hasInternetConnection) {
                 isInternetConnectionShown.value = true
+                Spacer(Modifier.height(16.dp))
                 NoInternetLabel()
-                Spacer(Modifier.height(24.dp))
             } else if (enrollmentEnd != null && Date() > enrollmentEnd) {
+                Spacer(Modifier.height(16.dp))
                 EnrollOverLabel()
-                Spacer(Modifier.height(24.dp))
             }
-            Text(
-                modifier = Modifier.testTag("txt_course_short_description"),
-                text = course.shortDescription.orEmpty(),
-                style = MaterialTheme.appTypography.labelSmall,
-                color = MaterialTheme.appColors.textPrimaryVariant
-            )
-            Spacer(Modifier.height(16.dp))
-            Text(
-                modifier = Modifier.testTag("txt_course_name"),
-                text = course.name.orEmpty(),
-                style = MaterialTheme.appTypography.titleLarge,
-                color = MaterialTheme.appColors.textPrimary
-            )
-            Spacer(Modifier.height(12.dp))
-            Text(
-                modifier = Modifier.testTag("txt_course_org"),
-                text = course.org.orEmpty(),
-                style = MaterialTheme.appTypography.labelMedium,
-                color = MaterialTheme.appColors.textAccent
-            )
+
+            Spacer(Modifier.height(24.dp))
+
+            // Enrollment Button
             if (!(enrollmentEnd != null && Date() > enrollmentEnd)) {
-                Spacer(Modifier.height(32.dp))
                 OpenEdXButton(
                     modifier = buttonWidth,
                     text = buttonText,
                     onClick = onButtonClick
                 )
             }
+
             Spacer(Modifier.height(24.dp))
+
+            // Left aligned Tabs
             var selectedTab by rememberSaveable { mutableStateOf(0) }
-            val tabs = listOf("OverView", "Curriculum", "Instructor", "Reviews")
-            LazyRow(
+            val tabs = listOf("Overview", "Curriculum", "Instructor", "Reviews")
+            Row(
                 modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.spacedBy(24.dp),
-                contentPadding = androidx.compose.foundation.layout.PaddingValues(horizontal = contentHorizontalPadding)
+                horizontalArrangement = Arrangement.spacedBy(24.dp)
             ) {
-                items(tabs.indices.toList()) { index ->
-                    val label = tabs[index]
+                tabs.forEachIndexed { index, label ->
                     Column(
-                        horizontalAlignment = Alignment.CenterHorizontally,
                         modifier = Modifier.clickable { selectedTab = index }
                     ) {
                         Text(
                             text = label,
-                            style = MaterialTheme.appTypography.bodySmall,
-                            color = if (selectedTab == index) MaterialTheme.appColors.primary else MaterialTheme.appColors.textPrimary
+                            style = MaterialTheme.appTypography.titleSmall,
+                            color = if (selectedTab == index) MaterialTheme.appColors.primary else MaterialTheme.appColors.textSecondary
                         )
-                        Spacer(Modifier.height(6.dp))
+                        Spacer(Modifier.height(4.dp))
                         Box(
                             modifier = Modifier
-                                .width(60.dp)
+                                .width(40.dp)
                                 .height(2.dp)
-                                .background(if (selectedTab == index) MaterialTheme.appColors.primary else MaterialTheme.appColors.background)
+                                .background(if (selectedTab == index) MaterialTheme.appColors.primary else Color.Transparent)
                         )
                     }
                 }
             }
-            Spacer(Modifier.height(12.dp))
+
+            Spacer(Modifier.height(16.dp))
+
             when (selectedTab) {
                 0 -> {
-                    Text(
-                        text = stringResource(id = R.string.discovery_course_details),
-                        style = MaterialTheme.appTypography.titleMedium,
-                        color = MaterialTheme.appColors.textPrimary
-                    )
-                    Spacer(Modifier.height(8.dp))
+                    // Overview - removed string "Course Details"
                     var webViewAlpha by remember { mutableFloatStateOf(0f) }
                     if (webViewAlpha == 0f) {
                         Box(
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .padding(top = 12.dp),
+                            modifier = Modifier.fillMaxWidth().padding(top = 12.dp),
                             contentAlignment = Alignment.Center
                         ) {
                             CircularProgressIndicator(color = MaterialTheme.appColors.primary)
                         }
                     }
                     Surface(
-                        modifier = Modifier
-                            .padding(top = 8.dp)
-                            .fillMaxWidth()
-                            .alpha(webViewAlpha),
+                        modifier = Modifier.fillMaxWidth().alpha(webViewAlpha),
                         color = MaterialTheme.appColors.background
                     ) {
                         CourseDescription(
                             modifier = Modifier.padding(vertical = 8.dp),
                             apiHostUrl = apiHostUrl,
                             body = htmlBody,
-                            onWebPageLoaded = {
-                                webViewAlpha = 1f
-                            }
+                            onWebPageLoaded = { webViewAlpha = 1f }
                         )
                     }
                 }
@@ -625,21 +598,21 @@ private fun CourseDetailNativeContent(
                         style = MaterialTheme.appTypography.titleMedium,
                         color = MaterialTheme.appColors.textPrimary
                     )
-                    Spacer(Modifier.height(8.dp))
+                    Spacer(Modifier.height(12.dp))
                     if (curriculum.isEmpty()) {
                         Text(
-                            text = "No content",
+                            text = "No content available",
                             style = MaterialTheme.appTypography.bodySmall,
-                            color = MaterialTheme.appColors.textPrimary
+                            color = MaterialTheme.appColors.textSecondary
                         )
                     } else {
                         curriculum.forEach { (section, items) ->
                             Text(
                                 text = section,
-                                style = MaterialTheme.appTypography.titleSmall,
+                                style = MaterialTheme.appTypography.titleSmall.copy(fontWeight = FontWeight.Bold),
                                 color = MaterialTheme.appColors.textDark
                             )
-                            Spacer(Modifier.height(6.dp))
+                            Spacer(Modifier.height(8.dp))
                             items.forEachIndexed { index, item ->
                                 Row(
                                     verticalAlignment = Alignment.CenterVertically,
@@ -648,8 +621,8 @@ private fun CourseDetailNativeContent(
                                     Box(
                                         modifier = Modifier
                                             .size(24.dp)
-                                            .clip(MaterialTheme.appShapes.cardShape)
-                                            .background(MaterialTheme.appColors.primary.copy(alpha = 0.12f)),
+                                            .clip(androidx.compose.foundation.shape.CircleShape)
+                                            .background(MaterialTheme.appColors.primary.copy(alpha = 0.1f)),
                                         contentAlignment = Alignment.Center
                                     ) {
                                         Text(
@@ -661,36 +634,34 @@ private fun CourseDetailNativeContent(
                                     Spacer(Modifier.width(12.dp))
                                     Text(
                                         text = item,
-                                        style = MaterialTheme.appTypography.bodySmall,
+                                        style = MaterialTheme.appTypography.bodyMedium,
                                         color = MaterialTheme.appColors.textPrimary
                                     )
                                 }
                             }
-                            Spacer(Modifier.height(12.dp))
+                            Spacer(Modifier.height(16.dp))
                         }
                     }
                 }
 
                 2 -> {
                     Text(
-                        text = "Instructor",
+                        text = "Instructors",
                         style = MaterialTheme.appTypography.titleMedium,
                         color = MaterialTheme.appColors.textPrimary
                     )
-                    Spacer(Modifier.height(8.dp))
+                    Spacer(Modifier.height(12.dp))
                     if (instructors.isEmpty()) {
                         Text(
-                            text = "No content",
+                            text = "No instructor info available",
                             style = MaterialTheme.appTypography.bodySmall,
-                            color = MaterialTheme.appColors.textPrimary
+                            color = MaterialTheme.appColors.textSecondary
                         )
                     } else {
                         instructors.forEach { instructor ->
                             Row(
-                                modifier = Modifier
-                                    .fillMaxWidth()
-                                    .padding(vertical = 8.dp),
-                                verticalAlignment = Alignment.CenterVertically
+                                modifier = Modifier.fillMaxWidth().padding(vertical = 12.dp),
+                                verticalAlignment = Alignment.Top
                             ) {
                                 coil.compose.AsyncImage(
                                     model = coil.request.ImageRequest.Builder(LocalContext.current)
@@ -700,21 +671,31 @@ private fun CourseDetailNativeContent(
                                         .build(),
                                     contentDescription = null,
                                     modifier = Modifier
-                                        .size(40.dp)
+                                        .size(56.dp)
                                         .clip(androidx.compose.foundation.shape.CircleShape)
                                 )
-                                Spacer(Modifier.width(12.dp))
+                                Spacer(Modifier.width(16.dp))
                                 Column {
                                     Text(
                                         text = instructor.name,
-                                        style = MaterialTheme.appTypography.titleSmall,
+                                        style = MaterialTheme.appTypography.titleSmall.copy(fontWeight = FontWeight.Bold),
                                         color = MaterialTheme.appColors.textDark
                                     )
+                                    if (instructor.designation.isNotEmpty()) {
+                                        Text(
+                                            text = instructor.designation,
+                                            style = MaterialTheme.appTypography.labelMedium,
+                                            color = MaterialTheme.appColors.primary,
+                                            modifier = Modifier.padding(top = 2.dp)
+                                        )
+                                    }
                                     Spacer(Modifier.height(4.dp))
                                     Text(
                                         text = instructor.bio,
                                         style = MaterialTheme.appTypography.bodySmall,
-                                        color = MaterialTheme.appColors.textPrimary
+                                        color = MaterialTheme.appColors.textPrimary,
+                                        maxLines = 3,
+                                        overflow = TextOverflow.Ellipsis
                                     )
                                 }
                             }
@@ -751,100 +732,77 @@ private fun CourseDetailNativeContent(
                                     style = MaterialTheme.appTypography.titleLarge,
                                     color = MaterialTheme.appColors.textDark
                                 )
-                                Spacer(Modifier.height(6.dp))
+                                Spacer(Modifier.height(8.dp))
                                 Row(verticalAlignment = Alignment.CenterVertically) {
                                     repeat(5) {
                                         Icon(
                                             imageVector = Icons.Filled.Star,
                                             contentDescription = null,
-                                            tint = MaterialTheme.appColors.primary
+                                            tint = MaterialTheme.appColors.rateStars
                                         )
                                     }
-                                    Spacer(Modifier.width(8.dp))
-                                    Text(
-                                        text = "${course.noOfReviews ?: 0} reviews",
-                                        style = MaterialTheme.appTypography.labelSmall,
-                                        color = MaterialTheme.appColors.textPrimary
-                                    )
                                 }
-                            }
-                        }
-                        Spacer(Modifier.height(12.dp))
-                        reviews.forEach { review ->
-                            Column(
-                                modifier = Modifier
-                                    .fillMaxWidth()
-                                    .padding(vertical = 10.dp)
-                            ) {
-                                Row(verticalAlignment = Alignment.CenterVertically) {
-                                    Text(
-                                        text = review.name,
-                                        style = MaterialTheme.appTypography.titleSmall,
-                                        color = MaterialTheme.appColors.textDark
-                                    )
-                                    Spacer(Modifier.width(8.dp))
-                                    Row(verticalAlignment = Alignment.CenterVertically) {
-                                        repeat(review.rating) {
-                                            Icon(
-                                                imageVector = Icons.Filled.Star,
-                                                contentDescription = null,
-                                                tint = MaterialTheme.appColors.primary
-                                            )
-                                        }
-                                    }
-                                }
-                                Spacer(Modifier.height(4.dp))
+                                Spacer(Modifier.height(8.dp))
                                 Text(
-                                    text = review.comment,
-                                    style = MaterialTheme.appTypography.bodySmall,
-                                    color = MaterialTheme.appColors.textPrimary
-                                )
-                                Spacer(Modifier.height(2.dp))
-                                Text(
-                                    text = review.submittedAt,
+                                    text = "${course.noOfReviews ?: 0} reviews",
                                     style = MaterialTheme.appTypography.labelSmall,
                                     color = MaterialTheme.appColors.textPrimary
                                 )
                             }
                         }
+                        Spacer(Modifier.height(12.dp))
+                        reviews.forEach { review ->
+                            Surface(
+                                modifier = Modifier.fillMaxWidth().padding(vertical = 6.dp),
+                                color = MaterialTheme.appColors.textFieldBackground,
+                                shape = MaterialTheme.appShapes.cardShape
+                            ) {
+                                Column(modifier = Modifier.padding(12.dp)) {
+                                    Row(
+                                        modifier = Modifier.fillMaxWidth(),
+                                        horizontalArrangement = Arrangement.SpaceBetween,
+                                        verticalAlignment = Alignment.CenterVertically
+                                    ) {
+                                        Text(
+                                            text = review.name,
+                                            style = MaterialTheme.appTypography.labelLarge.copy(fontWeight = FontWeight.Bold),
+                                            color = MaterialTheme.appColors.textDark
+                                        )
+                                        Row {
+                                            repeat(5) { index ->
+                                                Icon(
+                                                    imageVector = Icons.Filled.Star,
+                                                    contentDescription = null,
+                                                    tint = if (index < review.rating) MaterialTheme.appColors.rateStars else Color.LightGray,
+                                                    modifier = Modifier.size(14.dp)
+                                                )
+                                            }
+                                        }
+                                    }
+                                    Spacer(Modifier.height(6.dp))
+                                    Text(
+                                        text = review.comment,
+                                        style = MaterialTheme.appTypography.bodySmall,
+                                        color = MaterialTheme.appColors.textPrimary
+                                    )
+                                    Spacer(Modifier.height(8.dp))
+                                    Text(
+                                        text = review.submittedAt,
+                                        style = MaterialTheme.appTypography.labelSmall,
+                                        color = MaterialTheme.appColors.textSecondary,
+                                        modifier = Modifier.align(Alignment.End)
+                                    )
+                                }
+                            }
+                        }
                     }
                 }
             }
+            Spacer(Modifier.height(40.dp))
         }
     }
 }
 
-
-@Composable
-private fun CourseDetailNativeContentLandscape(
-    windowSize: WindowSize,
-    apiHostUrl: String,
-    course: Course,
-    hasInternetConnection: Boolean,
-    isInternetConnectionShown: MutableState<Boolean>,
-    htmlBody: String,
-    isWishlisted: Boolean,
-    curriculum: Map<String, List<String>>,
-    instructors: List<org.openedx.discovery.domain.model.Instructor>,
-    reviews: List<org.openedx.discovery.domain.model.Review>,
-    onButtonClick: () -> Unit,
-    onWishlistClick: () -> Unit,
-) {
-    CourseDetailNativeContent(
-        windowSize = windowSize,
-        apiHostUrl = apiHostUrl,
-        course = course,
-        hasInternetConnection = hasInternetConnection,
-        isInternetConnectionShown = isInternetConnectionShown,
-        htmlBody = htmlBody,
-        isWishlisted = isWishlisted,
-        curriculum = curriculum,
-        instructors = instructors,
-        reviews = reviews,
-        onButtonClick = onButtonClick,
-        onWishlistClick = onWishlistClick
-    )
-}
 
 @Composable
 private fun EnrollOverLabel() {
@@ -949,30 +907,6 @@ private fun CourseDetailNativeContentPreview() {
     }
 }
 
-@Preview(uiMode = UI_MODE_NIGHT_NO, device = Devices.NEXUS_9)
-@Preview(uiMode = UI_MODE_NIGHT_YES, device = Devices.NEXUS_9)
-@Composable
-private fun CourseDetailNativeContentTabletPreview() {
-    OpenEdXTheme {
-        CourseDetailsScreen(
-            windowSize = WindowSize(WindowType.Medium, WindowType.Medium),
-            uiState = CourseDetailsUIState.CourseData(mockCourse),
-            uiMessage = null,
-            apiHostUrl = "http://localhost:8000",
-            hasInternetConnection = false,
-            isUserLoggedIn = true,
-            isRegistrationEnabled = true,
-            htmlBody = "<b>Preview text</b>",
-            onReloadClick = {},
-            onBackClick = {},
-            onButtonClick = {},
-            onWishlistClick = {},
-            onRegisterClick = {},
-            onSignInClick = {},
-        )
-    }
-}
-
 private val mockCourse = Course(
     id = "id",
     blocksUrl = "blocksUrl",
@@ -998,5 +932,8 @@ private val mockCourse = Course(
     rating = "0",
     noOfReviews = "0",
     enrollments = "0",
-    isWishlisted = false
+    isWishlisted = false,
+    instructorName = "Mahendra",
+    category = "Art",
+    level = "Beginner"
 )

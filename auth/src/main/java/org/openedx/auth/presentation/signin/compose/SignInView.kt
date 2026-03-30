@@ -2,40 +2,22 @@ package org.openedx.auth.presentation.signin.compose
 
 import android.content.res.Configuration.UI_MODE_NIGHT_NO
 import android.content.res.Configuration.UI_MODE_NIGHT_YES
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
-import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.IntrinsicSize
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxHeight
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.navigationBarsPadding
-import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.statusBarsPadding
-import androidx.compose.foundation.layout.widthIn
-import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material.CircularProgressIndicator
-import androidx.compose.material.MaterialTheme
-import androidx.compose.material.OutlinedTextField
-import androidx.compose.material.Scaffold
-import androidx.compose.material.Surface
-import androidx.compose.material.Text
-import androidx.compose.material.TextFieldDefaults
-import androidx.compose.material.rememberScaffoldState
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
+import androidx.compose.material.*
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Email
+import androidx.compose.material.icons.filled.PhoneAndroid
+import androidx.compose.runtime.*
 import androidx.compose.runtime.saveable.rememberSaveable
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
@@ -44,19 +26,17 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.platform.testTag
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Email
-import androidx.compose.material.icons.filled.PhoneAndroid
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.semantics.testTagsAsResourceId
+import androidx.compose.ui.text.TextRange
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.text.input.VisualTransformation
-import androidx.compose.ui.text.TextRange
 import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.tooling.preview.Devices
 import androidx.compose.ui.tooling.preview.Preview
@@ -74,7 +54,6 @@ import org.openedx.core.ui.BackBtn
 import org.openedx.core.ui.HandleUIMessage
 import org.openedx.core.ui.HyperlinkText
 import org.openedx.core.ui.OpenEdXButton
-import org.openedx.core.ui.OpenEdXOutlinedButton
 import org.openedx.core.ui.displayCutoutForLandscape
 import org.openedx.core.ui.noRippleClickable
 import org.openedx.core.ui.theme.OpenEdXTheme
@@ -102,11 +81,11 @@ internal fun LoginScreen(
     Scaffold(
         scaffoldState = scaffoldState,
         modifier = Modifier
+            .fillMaxSize()
+            .navigationBarsPadding()
             .semantics {
                 testTagsAsResourceId = true
-            }
-            .fillMaxSize()
-            .navigationBarsPadding(),
+            },
         backgroundColor = MaterialTheme.appColors.background
     ) {
         val contentPaddings by remember {
@@ -194,25 +173,49 @@ internal fun LoginScreen(
                             style = MaterialTheme.appTypography.titleSmall
                         )
                         Spacer(modifier = Modifier.height(16.dp))
+                        
                         if (state.isSocialAuthEnabled) {
                             SocialAuthView(
                                 modifier = buttonWidth,
-                                isGoogleAuthEnabled = state.isGoogleAuthEnabled,
+                                isGoogleAuthEnabled = true,
                                 isFacebookAuthEnabled = state.isFacebookAuthEnabled,
                                 isMicrosoftAuthEnabled = state.isMicrosoftAuthEnabled,
-                                isSignIn = false,
+                                isSignIn = true,
                             ) {
                                 onEvent(AuthEvent.SocialSignIn(it))
                             }
                             Spacer(modifier = Modifier.height(16.dp))
                             DividerWithOrLabel()
                         }
+                        
                         Spacer(modifier = Modifier.height(16.dp))
                         AuthForm(
                             buttonWidth,
                             state,
                             onEvent,
                         )
+                        
+                        Spacer(modifier = Modifier.height(24.dp))
+                        Row(
+                            modifier = Modifier.fillMaxWidth(),
+                            horizontalArrangement = Arrangement.Center,
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            Text(
+                                text = "Don't have an account? ",
+                                style = MaterialTheme.appTypography.bodyMedium,
+                                color = MaterialTheme.appColors.textSecondary
+                            )
+                            Text(
+                                text = "Sign up",
+                                style = MaterialTheme.appTypography.bodyMedium.copy(fontWeight = FontWeight.Bold),
+                                color = MaterialTheme.appColors.primary,
+                                modifier = Modifier.noRippleClickable {
+                                    onEvent(AuthEvent.RegisterClick)
+                                }
+                            )
+                        }
+
                         state.agreement?.let {
                             Spacer(modifier = Modifier.height(24.dp))
                             val linkedText =
@@ -265,14 +268,15 @@ private fun AuthForm(
             LoginTextField(
                 modifier = Modifier
                     .fillMaxWidth(),
-                title = stringResource(id = R.string.auth_email_username),
+                title = stringResource(id = R.string.auth_email),
                 description = stringResource(id = R.string.auth_enter_email_username),
                 onValueChanged = {
                     login = it
                     isEmailError = false
                 },
                 isError = isEmailError,
-                errorMessages = stringResource(id = R.string.auth_error_empty_username_email)
+                errorMessages = stringResource(id = R.string.auth_error_empty_username_email),
+                imeAction = ImeAction.Next
             )
 
             Spacer(modifier = Modifier.height(18.dp))
@@ -285,7 +289,7 @@ private fun AuthForm(
                 },
                 onPressDone = {
                     keyboardController?.hide()
-                    if (password.isNotEmpty()) {
+                    if (login.isNotEmpty() && password.isNotEmpty()) {
                         onEvent(AuthEvent.SignIn(login = login, password = password))
                     } else {
                         isEmailError = login.isEmpty()
@@ -331,34 +335,20 @@ private fun AuthForm(
         Row(
             Modifier
                 .fillMaxWidth()
-                .padding(top = 20.dp, bottom = 36.dp)
+                .padding(top = 20.dp, bottom = 20.dp)
         ) {
-            if (!state.isBrowserLoginEnabled) {
-                if (state.isLogistrationEnabled.not() && state.isRegistrationEnabled) {
-                    Text(
-                        modifier = Modifier
-                            .testTag("txt_register")
-                            .noRippleClickable {
-                                onEvent(AuthEvent.RegisterClick)
-                            },
-                        text = stringResource(id = coreR.string.core_register),
-                        color = MaterialTheme.appColors.primary,
-                        style = MaterialTheme.appTypography.labelLarge
-                    )
-                }
+            if (!state.isBrowserLoginEnabled && isEmailTab) {
                 Spacer(modifier = Modifier.weight(1f))
-                if (isEmailTab) {
-                    Text(
-                        modifier = Modifier
-                            .testTag("txt_forgot_password")
-                            .noRippleClickable {
-                                onEvent(AuthEvent.ForgotPasswordClick)
-                            },
-                        text = stringResource(id = R.string.auth_forgot_password),
-                        color = MaterialTheme.appColors.infoVariant,
-                        style = MaterialTheme.appTypography.labelLarge
-                    )
-                }
+                Text(
+                    modifier = Modifier
+                        .testTag("txt_forgot_password")
+                        .noRippleClickable {
+                            onEvent(AuthEvent.ForgotPasswordClick)
+                        },
+                    text = stringResource(id = R.string.auth_forgot_password),
+                    color = MaterialTheme.appColors.infoVariant,
+                    style = MaterialTheme.appTypography.labelLarge
+                )
             }
         }
 
@@ -449,7 +439,7 @@ private fun AuthMethodTabs(
         Row(modifier = Modifier.fillMaxWidth().height(IntrinsicSize.Min)) {
             ToggleItem(
                 modifier = Modifier.weight(1f).fillMaxHeight(),
-                text = stringResource(id = R.string.auth_email_username),
+                text = stringResource(id = R.string.auth_email),
                 icon = Icons.Filled.Email,
                 isSelected = isEmailSelected,
                 selectedBg = selectedBg,
@@ -632,7 +622,8 @@ private fun ToggleItem(
             .background(bg, shape = MaterialTheme.appShapes.buttonShape)
             .noRippleClickable { onClick() }
             .padding(vertical = 8.dp, horizontal = 8.dp),
-        verticalAlignment = Alignment.CenterVertically
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.Center
     ) {
         androidx.compose.material.Icon(
             imageVector = icon,

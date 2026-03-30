@@ -61,7 +61,13 @@ data class CourseEntity(
     @ColumnInfo(name = "enrollments", defaultValue = "")
     val enrollments: String,
     @ColumnInfo(name = "isWishlisted", defaultValue = "0")
-    val isWishlisted: Boolean
+    val isWishlisted: Boolean,
+    @ColumnInfo(name = "instructorName", defaultValue = "")
+    val instructorName: String,
+    @ColumnInfo(name = "category", defaultValue = "")
+    val category: String,
+    @ColumnInfo(name = "level", defaultValue = "")
+    val level: String,
 ) {
 
     fun mapToDomain(): Course {
@@ -90,7 +96,10 @@ data class CourseEntity(
             rating = rating,
             noOfReviews = noOfReviews,
             enrollments = enrollments,
-            isWishlisted = isWishlisted
+            isWishlisted = isWishlisted,
+            instructorName = instructorName,
+            category = category,
+            level = level
         )
     }
 
@@ -121,7 +130,10 @@ data class CourseEntity(
                 rating = model.rating?.toString().orEmpty(),
                 noOfReviews = model.noOfReviews?.toString().orEmpty(),
                 enrollments = model.enrollments?.toString().orEmpty(),
-                isWishlisted = model.isWishlisted ?: false
+                isWishlisted = model.isWishlisted ?: false,
+                instructorName = model.instructorName.orEmpty(),
+                category = model.category.orEmpty(),
+                level = model.level.orEmpty()
             )
         }
     }

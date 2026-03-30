@@ -34,6 +34,9 @@ import org.koin.androidx.compose.koinViewModel
 import org.openedx.core.ui.theme.appColors
 import org.openedx.core.ui.theme.appShapes
 import org.openedx.core.ui.theme.appTypography
+import androidx.compose.material.ButtonDefaults
+import androidx.compose.material.OutlinedButton
+import androidx.compose.ui.graphics.Color
 
 @Composable
 fun LogistrationFilters(
@@ -58,6 +61,24 @@ fun LogistrationFilters(
                         viewModel.select(key, it)
                         onFiltersChanged(viewModel.state.value.selected)
                     }
+                )
+            }
+        }
+        item {
+            OutlinedButton(
+                onClick = {
+                    viewModel.reset()
+                    onFiltersChanged(viewModel.state.value.selected)
+                },
+                colors = ButtonDefaults.outlinedButtonColors(
+                    contentColor = MaterialTheme.appColors.primary
+                ),
+                border = androidx.compose.foundation.BorderStroke(1.dp, MaterialTheme.appColors.textFieldBorder),
+            ) {
+                Text(
+                    text = "Reset",
+                    style = MaterialTheme.appTypography.bodySmall,
+                    color = MaterialTheme.appColors.primary
                 )
             }
         }

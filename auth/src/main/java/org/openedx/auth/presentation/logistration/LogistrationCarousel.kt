@@ -17,6 +17,7 @@ import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -30,6 +31,7 @@ import androidx.compose.ui.unit.sp
 import org.openedx.core.ui.theme.appColors
 import org.openedx.core.ui.theme.appShapes
 import org.openedx.core.ui.theme.appTypography
+import kotlinx.coroutines.delay
 
 data class LogistrationCarouselItem(
     val imageResId: Int,
@@ -45,6 +47,17 @@ fun LogistrationCarousel(
 ) {
     if (items.isEmpty()) return
     val pagerState = rememberPagerState(pageCount = { items.size })
+    
+    LaunchedEffect(items.size) {
+        while (true) {
+            delay(10_000) // Auto scroll every 10 seconds
+            if (pagerState.pageCount > 0) {
+                val next = (pagerState.currentPage + 1) % pagerState.pageCount
+                pagerState.animateScrollToPage(next)
+            }
+        }
+    }
+
     Column(
         modifier = modifier
             .fillMaxWidth(),
@@ -63,38 +76,40 @@ fun LogistrationCarousel(
                 Image(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .height(220.dp)
+                        .height(130.dp) // Reduced height
                         .clip(MaterialTheme.appShapes.cardShape),
                     painter = painterResource(id = item.imageResId),
                     contentDescription = null,
                     contentScale = ContentScale.Crop
                 )
-                Spacer(Modifier.height(20.dp))
+                Spacer(Modifier.height(16.dp))
                 Text(
                     text = item.title,
                     style = MaterialTheme.appTypography.titleMedium.copy(
                         fontWeight = FontWeight.Bold,
-                        fontSize = 18.sp
+                        fontSize = 16.sp // Slightly reduced font size
                     ),
                     color = MaterialTheme.appColors.textDark,
                     textAlign = TextAlign.Center,
                     modifier = Modifier.padding(horizontal = 16.dp)
                 )
-                Spacer(Modifier.height(8.dp))
+                Spacer(Modifier.height(4.dp))
                 Text(
                     text = item.subtitle,
                     style = MaterialTheme.appTypography.bodyMedium.copy(
-                        lineHeight = 20.sp,
-                        fontSize = 14.sp
+                        lineHeight = 16.sp,
+                        fontSize = 11.sp // Reduced font size for sub-tag line
                     ),
                     color = MaterialTheme.appColors.textPrimaryLight,
                     textAlign = TextAlign.Center,
-                    modifier = Modifier.padding(horizontal = 24.dp)
+                    modifier = Modifier.padding(horizontal = 24.dp),
+                    maxLines = 4, // Adjusted to 4 lines
+                    overflow = TextOverflow.Ellipsis
                 )
             }
         }
         
-        Spacer(Modifier.height(24.dp))
+        Spacer(Modifier.height(16.dp))
         
         Row(
             horizontalArrangement = Arrangement.spacedBy(8.dp),
@@ -104,10 +119,10 @@ fun LogistrationCarousel(
                 val selected = pagerState.currentPage == index
                 Box(
                     modifier = Modifier
-                        .size(10.dp)
+                        .size(8.dp)
                         .clip(androidx.compose.foundation.shape.CircleShape)
                         .background(
-                            if (selected) MaterialTheme.appColors.textDark
+                            if (selected) MaterialTheme.appColors.primary
                             else MaterialTheme.appColors.textFieldBorder.copy(alpha = 0.5f)
                         )
                 )

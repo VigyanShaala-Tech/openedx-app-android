@@ -291,8 +291,7 @@ private fun StatCard(
                     text = label,
                     style = MaterialTheme.appTypography.labelSmall,
                     color = MaterialTheme.appColors.textPrimary,
-                    maxLines = 2,
-                    overflow = TextOverflow.Ellipsis
+                    maxLines = Int.MAX_VALUE
                 )
             }
         }

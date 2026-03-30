@@ -53,4 +53,9 @@ class LogistrationFiltersViewModel(
     fun select(key: String, value: String) {
         _state.value = _state.value.copy(selected = _state.value.selected + (key to value))
     }
+
+    fun reset() {
+        val initialSelected = _state.value.options.options.mapValues { (_, values) -> values.firstOrNull().orEmpty() }
+        _state.value = _state.value.copy(selected = initialSelected)
+    }
 }

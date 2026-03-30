@@ -56,6 +56,12 @@ data class CourseDetails(
     val enrollments: String?,
     @SerializedName("is_wishlisted")
     val isWishlisted: Boolean?,
+    @SerializedName("instructor_name")
+    val instructorName: String?,
+    @SerializedName("level")
+    val level: String?,
+    @SerializedName("category")
+    val category: String?,
 ) {
 
     fun mapToDomain(): Course {
@@ -84,7 +90,10 @@ data class CourseDetails(
             rating = rating,
             noOfReviews = noOfReviews,
             enrollments = enrollments,
-            isWishlisted = isWishlisted
+            isWishlisted = isWishlisted,
+            instructorName = instructorName,
+            category = category,
+            level = level
         )
     }
 

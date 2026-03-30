@@ -23,13 +23,16 @@ import androidx.compose.material.icons.filled.VisibilityOff
 import androidx.compose.material.icons.outlined.Smartphone
 import androidx.compose.material.rememberScaffoldState
 import androidx.compose.runtime.*
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.FocusDirection
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalFocusManager
+import androidx.compose.ui.platform.LocalUriHandler
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.font.FontWeight
@@ -49,6 +52,8 @@ import org.openedx.core.ui.theme.appShapes
 import org.openedx.core.ui.theme.appTypography
 import org.openedx.foundation.presentation.UIMessage
 import org.openedx.foundation.presentation.WindowSize
+import org.openedx.foundation.presentation.WindowType
+import org.openedx.foundation.presentation.windowSizeValue
 import org.openedx.core.R as coreR
 
 @Composable
@@ -65,6 +70,7 @@ fun VsSignUpView(
 ) {
     val scaffoldState = rememberScaffoldState()
     val focusManager = LocalFocusManager.current
+    val uriHandler = LocalUriHandler.current
 
     var fullName by remember { mutableStateOf("") }
     var email by remember { mutableStateOf("") }
@@ -135,7 +141,7 @@ fun VsSignUpView(
                 text = "Create Account",
                 style = MaterialTheme.appTypography.headlineSmall.copy(
                     fontWeight = FontWeight.Bold,
-                    color = MaterialTheme.appColors.textPrimary,
+                    color = MaterialTheme.appColors.textDark,
                     fontSize = 28.sp
                 )
             )
@@ -430,15 +436,42 @@ fun VsSignUpView(
                     onCheckedChange = { isAgreed = it },
                     colors = CheckboxDefaults.colors(checkedColor = MaterialTheme.appColors.primary)
                 )
+                val annotatedText = buildAnnotatedString {
+                    append("I agree to the ")
+                    pushStringAnnotation(tag = "TOS", annotation = "https://vigyanshaala.com/terms-of-service/")
+                    withStyle(style = SpanStyle(color = MaterialTheme.appColors.primary, fontWeight = FontWeight.Bold)) {
+                        append("Terms of Service")
+                    }
+                    pop()
+                    append(" and ")
+                    pushStringAnnotation(tag = "PRIVACY", annotation = "https://vigyanshaala.com/privacy-policy/")
+                    withStyle(style = SpanStyle(color = MaterialTheme.appColors.primary, fontWeight = FontWeight.Bold)) {
+                        append("Privacy Policy")
+                    }
+                    pop()
+                }
+                
                 Text(
-                    text = buildAnnotatedString {
-                        append("I agree to the ")
-                        withStyle(style = SpanStyle(color = MaterialTheme.appColors.primary)) { append("Terms of Service") }
-                        append(" and ")
-                        withStyle(style = SpanStyle(color = MaterialTheme.appColors.primary)) { append("Privacy Policy") }
-                    },
+                    text = annotatedText,
                     style = MaterialTheme.appTypography.bodySmall,
-                    modifier = Modifier.clickable { isAgreed = !isAgreed }
+                    modifier = Modifier.clickable { 
+                        isAgreed = !isAgreed 
+                    }
+                )
+                // Use a Box or specific click handling if needed, but for now simple annotated text link logic is added in ClickableText if we use it or just handle it in the standard way.
+                // Re-implementing with ClickableText for precise link handling
+                Spacer(Modifier.width(4.dp))
+                androidx.compose.foundation.text.ClickableText(
+                    text = annotatedText,
+                    style = MaterialTheme.appTypography.bodySmall,
+                    onClick = { offset ->
+                        annotatedText.getStringAnnotations(tag = "TOS", start = offset, end = offset).firstOrNull()?.let {
+                            uriHandler.openUri(it.item)
+                        }
+                        annotatedText.getStringAnnotations(tag = "PRIVACY", start = offset, end = offset).firstOrNull()?.let {
+                            uriHandler.openUri(it.item)
+                        }
+                    }
                 )
             }
 

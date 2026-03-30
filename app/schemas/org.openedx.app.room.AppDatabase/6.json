@@ -2,11 +2,11 @@
   "formatVersion": 1,
   "database": {
     "version": 6,
-    "identityHash": "28102802a7346b70ab4bea6d0a681e78",
+    "identityHash": "0356d39e315afbb894d9f8f299184c34",
     "entities": [
       {
         "tableName": "course_discovery_table",
-        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id` TEXT NOT NULL, `blocksUrl` TEXT NOT NULL, `courseId` TEXT NOT NULL, `effort` TEXT NOT NULL, `enrollmentStart` TEXT NOT NULL, `enrollmentEnd` TEXT NOT NULL, `hidden` INTEGER NOT NULL, `invitationOnly` INTEGER NOT NULL, `mobileAvailable` INTEGER NOT NULL, `name` TEXT NOT NULL, `number` TEXT NOT NULL, `org` TEXT NOT NULL, `pacing` TEXT NOT NULL, `shortDescription` TEXT NOT NULL, `start` TEXT NOT NULL, `end` TEXT NOT NULL, `startDisplay` TEXT NOT NULL, `startType` TEXT NOT NULL, `overview` TEXT NOT NULL, `isEnrolled` INTEGER NOT NULL, `rating` TEXT NOT NULL DEFAULT '', `noOfReviews` TEXT NOT NULL DEFAULT '', `enrollments` TEXT NOT NULL DEFAULT '', `isWishlisted` INTEGER NOT NULL DEFAULT 0, `bannerImage` TEXT, `courseImage` TEXT, `courseVideo` TEXT, `image` TEXT, PRIMARY KEY(`id`))",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id` TEXT NOT NULL, `blocksUrl` TEXT NOT NULL, `courseId` TEXT NOT NULL, `effort` TEXT NOT NULL, `enrollmentStart` TEXT NOT NULL, `enrollmentEnd` TEXT NOT NULL, `hidden` INTEGER NOT NULL, `invitationOnly` INTEGER NOT NULL, `mobileAvailable` INTEGER NOT NULL, `name` TEXT NOT NULL, `number` TEXT NOT NULL, `org` TEXT NOT NULL, `pacing` TEXT NOT NULL, `shortDescription` TEXT NOT NULL, `start` TEXT NOT NULL, `end` TEXT NOT NULL, `startDisplay` TEXT NOT NULL, `startType` TEXT NOT NULL, `overview` TEXT NOT NULL, `isEnrolled` INTEGER NOT NULL, `rating` TEXT NOT NULL DEFAULT '', `noOfReviews` TEXT NOT NULL DEFAULT '', `enrollments` TEXT NOT NULL DEFAULT '', `isWishlisted` INTEGER NOT NULL DEFAULT 0, `instructorName` TEXT NOT NULL DEFAULT '', `category` TEXT NOT NULL DEFAULT '', `level` TEXT NOT NULL DEFAULT '', `bannerImage` TEXT, `courseImage` TEXT, `courseVideo` TEXT, `image` TEXT, PRIMARY KEY(`id`))",
         "fields": [
           {
             "fieldPath": "id",
@@ -155,6 +155,27 @@
             "affinity": "INTEGER",
             "notNull": true,
             "defaultValue": "0"
+          },
+          {
+            "fieldPath": "instructorName",
+            "columnName": "instructorName",
+            "affinity": "TEXT",
+            "notNull": true,
+            "defaultValue": "''"
+          },
+          {
+            "fieldPath": "category",
+            "columnName": "category",
+            "affinity": "TEXT",
+            "notNull": true,
+            "defaultValue": "''"
+          },
+          {
+            "fieldPath": "level",
+            "columnName": "level",
+            "affinity": "TEXT",
+            "notNull": true,
+            "defaultValue": "''"
           },
           {
             "fieldPath": "media.bannerImage",
@@ -1252,7 +1273,7 @@
     ],
     "setupQueries": [
       "CREATE TABLE IF NOT EXISTS room_master_table (id INTEGER PRIMARY KEY,identity_hash TEXT)",
-      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, '28102802a7346b70ab4bea6d0a681e78')"
+      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, '0356d39e315afbb894d9f8f299184c34')"
     ]
   }
 }

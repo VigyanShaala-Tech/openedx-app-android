@@ -54,10 +54,10 @@ data class CatalogCourse(
     val category: String?,
     val subjects: List<String>?,
     val level: String?,
-    val rating: Double?,
-    val no_of_reviews: Int?,
+    val rating: Double?=0.0,
+    val no_of_reviews: Int?=0,
     val instructor_name: String?,
-    val enrollments: Int?,
+    val enrollments: Int?=0,
     val course_id: String?
 )
 

@@ -572,5 +572,8 @@ private val mockCourse = Course(
     rating = "4.5",
     noOfReviews = "100",
     enrollments = "0",
-    isWishlisted = false
+    isWishlisted = false,
+    level = "level",
+    category = "category",
+    instructorName = "instructorName",
 )

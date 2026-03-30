@@ -14,6 +14,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.material.Icon
 import androidx.compose.material.MaterialTheme
@@ -34,6 +35,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
@@ -141,7 +143,7 @@ fun DiscoveryCourseItem(
                         .fillMaxWidth(),
                     text = course.name.orEmpty(),
                     color = MaterialTheme.appColors.textDark,
-                    style = MaterialTheme.appTypography.titleSmall,
+                    style = MaterialTheme.appTypography.titleSmall.copy(fontWeight = FontWeight.Bold),
                     maxLines = 2,
                     overflow = TextOverflow.Ellipsis
                 )
@@ -151,13 +153,13 @@ fun DiscoveryCourseItem(
                     Box(
                         modifier = Modifier
                             .clip(androidx.compose.foundation.shape.RoundedCornerShape(12.dp))
-                            .background(MaterialTheme.appColors.successBackground.copy(alpha = 0.2f))
+                            .background(MaterialTheme.appColors.primary.copy(alpha = 0.1f))
                             .padding(horizontal = 8.dp, vertical = 4.dp)
                     ) {
                         Text(
-                            text = "Beginner",
+                            text = course.level?:"",
                             style = MaterialTheme.appTypography.labelSmall,
-                            color = MaterialTheme.appColors.successGreen
+                            color = MaterialTheme.appColors.primary
                         )
                     }
                     Box(
@@ -167,7 +169,7 @@ fun DiscoveryCourseItem(
                             .padding(horizontal = 8.dp, vertical = 4.dp)
                     ) {
                         Text(
-                            text = "STEM",
+                            text = course.category?:"",
                             style = MaterialTheme.appTypography.labelSmall,
                             color = MaterialTheme.appColors.textPrimary
                         )
@@ -176,7 +178,7 @@ fun DiscoveryCourseItem(
 
                 Text(
                     modifier = Modifier.testTag("txt_course_org"),
-                    text = course.org.orEmpty(),
+                    text = course.instructorName ?: course.org.orEmpty(),
                     color = MaterialTheme.appColors.textPrimaryLight,
                     style = MaterialTheme.appTypography.labelMedium
                 )

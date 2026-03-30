@@ -28,5 +28,8 @@ data class Course(
     val rating: String?,
     val noOfReviews: String?,
     val enrollments: String?,
-    val isWishlisted: Boolean?
+    val isWishlisted: Boolean?,
+    val instructorName: String?,
+    val category: String?,
+    val level: String?
 )

@@ -45,7 +45,9 @@ import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import org.openedx.auth.R
+import org.openedx.auth.data.model.AuthType
 import org.openedx.auth.presentation.signup.VsSignUpUIState
+import org.openedx.auth.presentation.ui.SocialAuthView
 import org.openedx.core.ui.HandleUIMessage
 import org.openedx.core.ui.theme.appColors
 import org.openedx.core.ui.theme.appShapes
@@ -63,6 +65,7 @@ fun VsSignUpView(
     uiMessage: UIMessage?,
     onBackClick: () -> Unit,
     onRegisterClick: (String, String, String, String, String, String?) -> Unit,
+    onSocialRegisterClick: (AuthType) -> Unit,
     onSignInClick: () -> Unit,
     onSendOtpClick: (String) -> Unit,
     onVerifyOtpClick: (String, String) -> Unit,
@@ -152,25 +155,14 @@ fun VsSignUpView(
 
             Spacer(modifier = Modifier.height(24.dp))
 
-            // Google Sign In Button
-            OutlinedButton(
-                onClick = { /* Handle Google Sign In */ },
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .height(48.dp),
-                shape = MaterialTheme.appShapes.buttonShape,
-                border = BorderStroke(1.dp, MaterialTheme.appColors.cardViewBorder)
-            ) {
-                Row(verticalAlignment = Alignment.CenterVertically) {
-                    Icon(
-                        painter = painterResource(id = R.drawable.auth_ic_google),
-                        contentDescription = null,
-                        modifier = Modifier.size(20.dp),
-                        tint = Color.Unspecified
-                    )
-                    Spacer(modifier = Modifier.width(8.dp))
-                    Text("Sign up with Google", color = MaterialTheme.appColors.textPrimary)
-                }
+            SocialAuthView(
+                modifier = Modifier.fillMaxWidth(),
+                isGoogleAuthEnabled = true,
+                isFacebookAuthEnabled = false,
+                isMicrosoftAuthEnabled = false,
+                isSignIn = false
+            ) { authType ->
+                onSocialRegisterClick(authType)
             }
 
             Spacer(modifier = Modifier.height(16.dp))

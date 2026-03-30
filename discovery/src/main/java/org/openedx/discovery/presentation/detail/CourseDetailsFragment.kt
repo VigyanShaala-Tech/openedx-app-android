@@ -19,6 +19,7 @@ import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.IntrinsicSize
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.aspectRatio
@@ -538,28 +539,41 @@ private fun CourseDetailNativeContent(
 
             Spacer(Modifier.height(24.dp))
 
-            // Left aligned Tabs
             var selectedTab by rememberSaveable { mutableStateOf(0) }
             val tabs = listOf("Overview", "Curriculum", "Instructor", "Reviews")
+
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.spacedBy(24.dp)
             ) {
                 tabs.forEachIndexed { index, label ->
                     Column(
-                        modifier = Modifier.clickable { selectedTab = index }
+                        modifier = Modifier
+                            .clickable { selectedTab = index }
+                            .width(IntrinsicSize.Min), // ✅ FIX
+                        horizontalAlignment = Alignment.Start
                     ) {
                         Text(
                             text = label,
                             style = MaterialTheme.appTypography.titleSmall,
-                            color = if (selectedTab == index) MaterialTheme.appColors.primary else MaterialTheme.appColors.textSecondary
+                            color = if (selectedTab == index)
+                                MaterialTheme.appColors.primary
+                            else
+                                MaterialTheme.appColors.textSecondary
                         )
+
                         Spacer(Modifier.height(4.dp))
+
                         Box(
                             modifier = Modifier
-                                .width(40.dp)
+                                .fillMaxWidth() // now matches text width
                                 .height(2.dp)
-                                .background(if (selectedTab == index) MaterialTheme.appColors.primary else Color.Transparent)
+                                .background(
+                                    if (selectedTab == index)
+                                        MaterialTheme.appColors.primary
+                                    else
+                                        Color.Transparent
+                                )
                         )
                     }
                 }
@@ -704,12 +718,12 @@ private fun CourseDetailNativeContent(
                 }
 
                 else -> {
-                    Text(
-                        text = "Reviews",
-                        style = MaterialTheme.appTypography.titleMedium,
-                        color = MaterialTheme.appColors.textPrimary
-                    )
-                    Spacer(Modifier.height(8.dp))
+//                    Text(
+//                        text = "Reviews",
+//                        style = MaterialTheme.appTypography.titleMedium,
+//                        color = MaterialTheme.appColors.textPrimary
+//                    )
+//                    Spacer(Modifier.height(8.dp))
                     if (reviews.isEmpty()) {
                         Text(
                             text = "No content",
@@ -753,44 +767,59 @@ private fun CourseDetailNativeContent(
                         Spacer(Modifier.height(12.dp))
                         reviews.forEach { review ->
                             Surface(
-                                modifier = Modifier.fillMaxWidth().padding(vertical = 6.dp),
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .padding(vertical = 6.dp),
                                 color = MaterialTheme.appColors.textFieldBackground,
                                 shape = MaterialTheme.appShapes.cardShape
                             ) {
                                 Column(modifier = Modifier.padding(12.dp)) {
+
+                                    // 🔹 Name + Date (Top Row)
                                     Row(
                                         modifier = Modifier.fillMaxWidth(),
                                         horizontalArrangement = Arrangement.SpaceBetween,
-                                        verticalAlignment = Alignment.CenterVertically
+                                        verticalAlignment = Alignment.Top
                                     ) {
                                         Text(
                                             text = review.name,
-                                            style = MaterialTheme.appTypography.labelLarge.copy(fontWeight = FontWeight.Bold),
+                                            style = MaterialTheme.appTypography.labelLarge.copy(
+                                                fontWeight = FontWeight.Bold
+                                            ),
                                             color = MaterialTheme.appColors.textDark
                                         )
-                                        Row {
-                                            repeat(5) { index ->
-                                                Icon(
-                                                    imageVector = Icons.Filled.Star,
-                                                    contentDescription = null,
-                                                    tint = if (index < review.rating) MaterialTheme.appColors.rateStars else Color.LightGray,
-                                                    modifier = Modifier.size(14.dp)
-                                                )
-                                            }
+
+                                        Text(
+                                            text = review.submittedAt,
+                                            style = MaterialTheme.appTypography.labelSmall,
+                                            color = MaterialTheme.appColors.textSecondary
+                                        )
+                                    }
+
+                                    Spacer(Modifier.height(4.dp))
+
+                                    // 🔹 Stars BELOW name (Left aligned)
+                                    Row {
+                                        repeat(5) { index ->
+                                            Icon(
+                                                imageVector = Icons.Filled.Star,
+                                                contentDescription = null,
+                                                tint = if (index < review.rating)
+                                                    MaterialTheme.appColors.rateStars
+                                                else
+                                                    Color.LightGray,
+                                                modifier = Modifier.size(14.dp)
+                                            )
                                         }
                                     }
+
                                     Spacer(Modifier.height(6.dp))
+
+                                    // 🔹 Comment
                                     Text(
                                         text = review.comment,
                                         style = MaterialTheme.appTypography.bodySmall,
                                         color = MaterialTheme.appColors.textPrimary
-                                    )
-                                    Spacer(Modifier.height(8.dp))
-                                    Text(
-                                        text = review.submittedAt,
-                                        style = MaterialTheme.appTypography.labelSmall,
-                                        color = MaterialTheme.appColors.textSecondary,
-                                        modifier = Modifier.align(Alignment.End)
                                     )
                                 }
                             }

@@ -13,6 +13,7 @@ import androidx.fragment.app.Fragment
 import org.koin.android.ext.android.inject
 import org.koin.androidx.viewmodel.ext.android.viewModel
 import org.koin.core.parameter.parametersOf
+import org.openedx.auth.data.model.AuthType
 import org.openedx.auth.presentation.AuthRouter
 import org.openedx.auth.presentation.signup.compose.VsSignUpView
 import org.openedx.core.ui.theme.OpenEdXTheme
@@ -21,6 +22,12 @@ import org.openedx.foundation.presentation.rememberWindowSize
 class VsSignUpFragment : Fragment() {
 
     private val viewModel by viewModel<VsSignUpViewModel> {
+        parametersOf(
+            requireArguments().getString(ARG_COURSE_ID, ""),
+            requireArguments().getString(ARG_INFO_TYPE, "")
+        )
+    }
+    private val signUpViewModel by viewModel<SignUpViewModel> {
         parametersOf(
             requireArguments().getString(ARG_COURSE_ID, ""),
             requireArguments().getString(ARG_INFO_TYPE, "")
@@ -49,6 +56,11 @@ class VsSignUpFragment : Fragment() {
                     },
                     onRegisterClick = { email, name, password, phone, role, _ ->
                         viewModel.register(email, name, password, phone, role)
+                    },
+                    onSocialRegisterClick = { authType ->
+                        if (authType == AuthType.GOOGLE) {
+                            signUpViewModel.socialAuth(this@VsSignUpFragment, authType)
+                        }
                     },
                     onSignInClick = {
                         router.navigateToSignIn(

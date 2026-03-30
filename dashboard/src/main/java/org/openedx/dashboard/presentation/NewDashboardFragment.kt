@@ -246,7 +246,7 @@ private fun NewDashboardScreenContent(
         )
     } ?: emptyList()
     val wishlistItems = uiState.wishlist?.results?.map { it.copy(image = sanitizeUrl(it.image)) } ?: emptyList()
-    
+
     val achievements = uiState.achievements
 
     val recommendations = uiState.recommended.map { rec ->
@@ -260,41 +260,20 @@ private fun NewDashboardScreenContent(
         )
     }
 
-    Scaffold(
-        modifier = Modifier
-            .fillMaxSize()
-            .navigationBarsPadding(),
-        backgroundColor = MaterialTheme.appColors.background
-    ) { paddingValues ->
-        LazyColumn(
+    Box(modifier = Modifier.fillMaxSize()) {
+        Scaffold(
             modifier = Modifier
                 .fillMaxSize()
-                .padding(paddingValues),
-            contentPadding = contentPadding,
-            verticalArrangement = Arrangement.spacedBy(16.dp)
-        ) {
-//            item {
-//                val carouselItems = remember {
-//                    listOf(
-//                        CarouselItem(
-//                            imageUrl = SAMPLE_IMAGE_1,
-//                            title = "Creating Job Opportunities in Science and Technology",
-//                            subtitle = "Discover the latest job opportunities in Science and Technology and apply for the ones that match your skills and interests."
-//                        ),
-//                        CarouselItem(
-//                            imageUrl = SAMPLE_IMAGE_2,
-//                            title = "Learn from Industry Experts",
-//                            subtitle = "Access world-class education from renowned instructors and gain practical knowledge that sets you apart."
-//                        ),
-//                        CarouselItem(
-//                            imageUrl = SAMPLE_IMAGE_3,
-//                            title = "Grow your career in STEM",
-//                            subtitle = "Be part of an inspiring global community and make your next leap into higher education or a job."
-//                        )
-//                    )
-//                }
-//                DashboardCarousel(items = carouselItems)
-//            }
+                .navigationBarsPadding(),
+            backgroundColor = MaterialTheme.appColors.background
+        ) { paddingValues ->
+            LazyColumn(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(paddingValues),
+                contentPadding = contentPadding,
+                verticalArrangement = Arrangement.spacedBy(16.dp)
+            ) {
 //            item {
 //                Row(
 //                    modifier = Modifier.fillMaxWidth(),
@@ -303,7 +282,7 @@ private fun NewDashboardScreenContent(
 //                ) {
 //                    Column {
 //                        Text(
-//                            text = "Welcome back, $userName",
+//                            text = "Welcome back, $displayName",
 //                            style = MaterialTheme.appTypography.titleLarge,
 //                            color = MaterialTheme.appColors.textDark
 //                        )

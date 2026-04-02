@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "929595939098",
+    "project_id": "kalpana-vs01",
+    "storage_bucket": "kalpana-vs01.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:929595939098:android:e2e5ab5d4771877e78b4a3",
+        "android_client_info": {
+          "package_name": "org.app.vigyanshaala"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAQ2_xkFsaD07Nk05oC_kdRLnmU75iJ0N0"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

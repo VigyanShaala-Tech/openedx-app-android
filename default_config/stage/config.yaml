@@ -8,10 +8,10 @@ OAUTH_CLIENT_ID: 'cFd8Le3wxWJU7uRppAx1UggW99BQXzVIibQuB5Wq'
 
 # Keep empty to hide setting
 AGREEMENT_URLS:
-  PRIVACY_POLICY_URL: 'https://uat.vigyanshaala.com/privacy-policy'
-  COOKIE_POLICY_URL: 'https://uat.vigyanshaala.com/cookie-policy'
+  PRIVACY_POLICY_URL: 'https://apps.uat.vigyanshaala.com/public/privacy?view=mobile'
+  COOKIE_POLICY_URL: 'https://apps.uat.vigyanshaala.com/public/privacy?view=mobile'
   DATA_SELL_CONSENT_URL: 'https://uat.vigyanshaala.com/complaints-policy'
-  TOS_URL: 'https://uat.vigyanshaala.com/terms-and-conditions'
+  TOS_URL: 'https://apps.uat.vigyanshaala.com/public/terms?view=mobile'
   EULA_URL: ''
   SUPPORTED_LANGUAGES: [ ] #en is default language
 
@@ -32,20 +32,20 @@ DASHBOARD:
   TYPE: 'gallery'
 
 FIREBASE:
-  ENABLED: false
-  CLOUD_MESSAGING_ENABLED: false
-  PROJECT_NUMBER: ''
-  PROJECT_ID: ''
-  APPLICATION_ID: '' #App ID field from the Firebase console or mobilesdk_app_id from the google-services.json file.
-  API_KEY: ''
+  ENABLED: true
+  CLOUD_MESSAGING_ENABLED: true
+  PROJECT_NUMBER: '929595939098'
+  PROJECT_ID: 'kalpana-vs01'
+  APPLICATION_ID: '1:929595939098:android:e2e5ab5d4771877e78b4a3' #App ID field from the Firebase console or mobilesdk_app_id from the google-services.json file.
+  API_KEY: 'AIzaSyAQ2_xkFsaD07Nk05oC_kdRLnmU75iJ0N0'
 
 BRAZE:
   ENABLED: false
   PUSH_NOTIFICATIONS_ENABLED: false
 
 GOOGLE:
-  ENABLED: false
-  CLIENT_ID: ''
+  ENABLED: true
+  CLIENT_ID: 'AIzaSyBehmGrP9Lrhc_FIfnhyLcoVQtWuA3mKVg'
 
 MICROSOFT:
   ENABLED: false
@@ -75,7 +75,7 @@ TOKEN_TYPE: "JWT"
 WHATS_NEW_ENABLED: false
 PRE_LOGIN_EXPERIENCE_ENABLED: true
 #feature flag enable Social Login buttons
-SOCIAL_AUTH_ENABLED: false
+SOCIAL_AUTH_ENABLED: true
 #feature flag to enable registration from app
 REGISTRATION_ENABLED: true
 #feature flag to do the authentication flow in the browser to log in

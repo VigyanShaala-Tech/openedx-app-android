@@ -2,6 +2,7 @@ package org.openedx.courses.presentation
 
 import android.content.res.Configuration
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -41,6 +42,7 @@ import androidx.compose.material.pullrefresh.PullRefreshIndicator
 import androidx.compose.material.pullrefresh.pullRefresh
 import androidx.compose.material.pullrefresh.rememberPullRefreshState
 import androidx.compose.material.rememberScaffoldState
+import androidx.compose.ui.graphics.Color
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -52,6 +54,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalLayoutDirection
@@ -60,6 +63,7 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.semantics.testTagsAsResourceId
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Devices
@@ -416,73 +420,106 @@ fun CourseItem(
     apiHostUrl: String,
     onClick: (EnrolledCourse) -> Unit,
 ) {
-    Card(
-        modifier = modifier
-            .width(170.dp)
-            .height(180.dp)
-            .clickable {
-                onClick(course)
-            },
-        backgroundColor = MaterialTheme.appColors.background,
-        shape = MaterialTheme.appShapes.courseImageShape,
-        elevation = 4.dp
+    CourseCard(
+        course = course,
+        apiHostUrl = apiHostUrl
     ) {
-        Box {
-            Column {
+        onClick(course)
+    }
+}
+
+@Composable
+private fun CourseCard(
+    course: EnrolledCourse,
+    apiHostUrl: String,
+    onClick: () -> Unit
+) {
+    val percent = (course.progress.value * 100).toInt().coerceIn(0, 100)
+    val tagText = if (percent >= 100) "Completed" else "In Progress"
+    Card(
+        backgroundColor = MaterialTheme.appColors.surface,
+        elevation = 0.dp,
+        shape = MaterialTheme.appShapes.cardShape,
+        modifier = Modifier
+            .clickable { onClick() }
+    ) {
+        Column {
+            Box {
                 AsyncImage(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(120.dp)
+                        .clip(MaterialTheme.appShapes.cardShape),
+                    contentScale = ContentScale.Crop,
                     model = ImageRequest.Builder(LocalContext.current)
                         .data(course.course.courseImage.toImageLink(apiHostUrl))
                         .error(R.drawable.core_no_image_course)
                         .placeholder(R.drawable.core_no_image_course)
+                        .crossfade(true)
                         .build(),
                     contentDescription = null,
-                    contentScale = ContentScale.Crop,
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .height(90.dp)
                 )
-                LinearProgressIndicator(
+                Box(
                     modifier = Modifier
-                        .fillMaxWidth()
-                        .height(8.dp),
-                    progress = course.progress.value,
-                    color = MaterialTheme.appColors.primary,
-                    backgroundColor = MaterialTheme.appColors.divider
-                )
-
-                Text(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(horizontal = 8.dp)
-                        .padding(top = 4.dp),
-                    style = MaterialTheme.appTypography.labelMedium,
-                    color = MaterialTheme.appColors.textFieldHint,
-                    overflow = TextOverflow.Ellipsis,
-                    minLines = 1,
-                    maxLines = 2,
-                    text = TimeUtils.getCourseFormattedDate(
-                        LocalContext.current,
-                        Date(),
-                        course.auditAccessExpires,
-                        course.course.start,
-                        course.course.end,
-                        course.course.startType,
-                        course.course.startDisplay
+                        .padding(10.dp)
+                        .background(
+                            MaterialTheme.appColors.primary,
+                            MaterialTheme.appShapes.textFieldShape
+                        )
+                        .clip(MaterialTheme.appShapes.textFieldShape)
+                        .padding(horizontal = 10.dp, vertical = 4.dp)
+                ) {
+                    Text(
+                        text = tagText,
+                        style = MaterialTheme.appTypography.labelSmall,
+                        color = MaterialTheme.appColors.primaryButtonText
                     )
-                )
+                }
+            }
+            Column(modifier = Modifier.padding(12.dp)) {
                 Text(
-                    modifier = Modifier
-                        .padding(horizontal = 8.dp, vertical = 4.dp),
                     text = course.course.name,
                     style = MaterialTheme.appTypography.titleSmall,
                     color = MaterialTheme.appColors.textDark,
-                    overflow = TextOverflow.Ellipsis,
-                    minLines = 1,
-                    maxLines = 2
+                    maxLines = 2,
+                    overflow = TextOverflow.Ellipsis
                 )
-            }
-            if (!course.course.coursewareAccess?.errorCode.isNullOrEmpty()) {
-                Lock()
+                Spacer(Modifier.height(8.dp))
+                Column(
+                    modifier = Modifier.fillMaxWidth()
+                ) {
+                    Text(
+                        text = TimeUtils.getCourseFormattedDate(
+                            LocalContext.current,
+                            Date(),
+                            course.auditAccessExpires,
+                            course.course.start,
+                            course.course.end,
+                            course.course.startType,
+                            course.course.startDisplay
+                        ),
+                        style = MaterialTheme.appTypography.labelMedium,
+                        color = MaterialTheme.appColors.textFieldHint,
+                        modifier = Modifier.padding(bottom = 6.dp),
+                        maxLines = 1,
+                        overflow = TextOverflow.Ellipsis
+                    )
+                    Text(
+                        text = "$percent%",
+                        style = MaterialTheme.appTypography.bodySmall,
+                        color = Color(0xFF7A7A7A),
+                        modifier = Modifier.padding(bottom = 6.dp)
+                    )
+                    LinearProgressIndicator(
+                        progress = course.progress.value,
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .height(8.dp)
+                            .clip(RoundedCornerShape(50)),
+                        color = MaterialTheme.appColors.primary,
+                        backgroundColor = MaterialTheme.appColors.progressBarBackgroundColor
+                    )
+                }
             }
         }
     }

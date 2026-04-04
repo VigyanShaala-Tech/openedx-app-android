@@ -45,6 +45,7 @@ class VsSignUpFragment : Fragment() {
             OpenEdXTheme {
                 val windowSize = rememberWindowSize()
                 val uiState by viewModel.uiState.collectAsState()
+                val signUpUiState by signUpViewModel.uiState.collectAsState()
                 val uiMessage by viewModel.uiMessage.collectAsState(initial = null)
 
                 VsSignUpView(
@@ -52,10 +53,12 @@ class VsSignUpFragment : Fragment() {
                     uiState = uiState,
                     uiMessage = uiMessage,
                     onBackClick = {
-                        requireActivity().supportFragmentManager.popBackStackImmediate()
+                        if (isAdded) {
+                            activity?.supportFragmentManager?.popBackStackImmediate()
+                        }
                     },
-                    onRegisterClick = { email, name, password, phone, role, _ ->
-                        viewModel.register(email, name, password, phone, role)
+                    onRegisterClick = { email, name, password, phone, role, verificationKey ->
+                        viewModel.register(email, name, password, phone, role, verificationKey)
                     },
                     onSocialRegisterClick = { authType ->
                         if (authType == AuthType.GOOGLE) {
@@ -63,11 +66,13 @@ class VsSignUpFragment : Fragment() {
                         }
                     },
                     onSignInClick = {
-                        router.navigateToSignIn(
-                            parentFragmentManager,
-                            viewModel.courseId,
-                            viewModel.infoType
-                        )
+                        if (isAdded) {
+                            router.navigateToSignIn(
+                                parentFragmentManager,
+                                viewModel.courseId,
+                                viewModel.infoType
+                            )
+                        }
                     },
                     onSendOtpClick = { phone ->
                         viewModel.sendOtp(phone)
@@ -77,14 +82,38 @@ class VsSignUpFragment : Fragment() {
                     },
                     onValidationError = { message ->
                         viewModel.showValidationMessage(message)
+                    },
+                    onDialogOkClick = {
+                        viewModel.navigateToSignIn()
                     }
                 )
 
+                LaunchedEffect(signUpUiState.socialAuth) {
+                    signUpUiState.socialAuth?.let {
+                        viewModel.setSocialAuth(it)
+                    }
+                }
+
                 LaunchedEffect(uiState.successLogin) {
-                    if (uiState.successLogin) {
-                        router.clearBackStack(requireActivity().supportFragmentManager)
+                    if (uiState.successLogin && isAdded) {
+                        val fragmentManager = parentFragmentManager
+                        activity?.supportFragmentManager?.let {
+                            router.clearBackStack(it)
+                        }
                         router.navigateToMain(
-                            parentFragmentManager,
+                            fragmentManager,
+                            viewModel.courseId,
+                            viewModel.infoType
+                        )
+                    }
+                }
+
+                LaunchedEffect(uiState.navigateToSignIn) {
+                    if (uiState.navigateToSignIn && isAdded) {
+                        val fragmentManager = parentFragmentManager
+                        activity?.supportFragmentManager?.popBackStackImmediate()
+                        router.navigateToSignIn(
+                            fragmentManager,
                             viewModel.courseId,
                             viewModel.infoType
                         )

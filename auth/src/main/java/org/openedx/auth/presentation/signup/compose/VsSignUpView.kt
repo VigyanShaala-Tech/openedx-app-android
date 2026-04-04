@@ -71,26 +71,34 @@ fun VsSignUpView(
     onSendOtpClick: (String) -> Unit,
     onVerifyOtpClick: (String, String) -> Unit,
     onValidationError: (String) -> Unit,
+    onDialogOkClick: () -> Unit = {},
 ) {
     val scaffoldState = rememberScaffoldState()
     val focusManager = LocalFocusManager.current
     val uriHandler = LocalUriHandler.current
 
-    var fullName by remember { mutableStateOf("") }
-    var email by remember { mutableStateOf("") }
-    var mobileNumber by remember { mutableStateOf("") }
-    var otpCode by remember { mutableStateOf("") }
-    var password by remember { mutableStateOf("") }
-    var confirmPassword by remember { mutableStateOf("") }
-    var selectedRole by remember { mutableStateOf("student") }
-    var isAgreed by remember { mutableStateOf(false) }
-    var passwordVisible by remember { mutableStateOf(false) }
-    var confirmPasswordVisible by remember { mutableStateOf(false) }
+    var fullName by rememberSaveable { mutableStateOf("") }
+    var email by rememberSaveable { mutableStateOf("") }
+    var mobileNumber by rememberSaveable { mutableStateOf("") }
+    var otpCode by rememberSaveable { mutableStateOf("") }
+    var password by rememberSaveable { mutableStateOf("") }
+    var confirmPassword by rememberSaveable { mutableStateOf("") }
+    var selectedRole by rememberSaveable { mutableStateOf("student") }
+    var isAgreed by rememberSaveable { mutableStateOf(false) }
+    var passwordVisible by rememberSaveable { mutableStateOf(false) }
+    var confirmPasswordVisible by rememberSaveable { mutableStateOf(false) }
 
-    var fullNameError by remember { mutableStateOf<String?>(null) }
-    var emailError by remember { mutableStateOf<String?>(null) }
-    var passwordError by remember { mutableStateOf<String?>(null) }
-    var confirmPasswordError by remember { mutableStateOf<String?>(null) }
+    var fullNameError by rememberSaveable { mutableStateOf<String?>(null) }
+    var emailError by rememberSaveable { mutableStateOf<String?>(null) }
+    var passwordError by rememberSaveable { mutableStateOf<String?>(null) }
+    var confirmPasswordError by rememberSaveable { mutableStateOf<String?>(null) }
+
+    LaunchedEffect(uiState.socialAuth) {
+        uiState.socialAuth?.let {
+            if (it.name.isNotBlank()) fullName = it.name
+            if (it.email.isNotBlank()) email = it.email
+        }
+    }
 
     Scaffold(
         scaffoldState = scaffoldState,
@@ -513,6 +521,35 @@ fun VsSignUpView(
                 )
             }
         }
+    }
+
+    if (uiState.showRegisterSuccessDialog) {
+        AlertDialog(
+            onDismissRequest = {},
+            title = {
+                Text(
+                    text = "Verify your email",
+                    style = MaterialTheme.appTypography.titleMedium,
+                    color = MaterialTheme.appColors.textPrimary
+                )
+            },
+            text = {
+                Text(
+                    text = "Please verify your email to login.",
+                    style = MaterialTheme.appTypography.bodyMedium,
+                    color = MaterialTheme.appColors.textPrimary
+                )
+            },
+            confirmButton = {
+                TextButton(onClick = { onDialogOkClick() }) {
+                    Text(
+                        text = "OK",
+                        style = MaterialTheme.appTypography.labelLarge,
+                        color = MaterialTheme.appColors.primary
+                    )
+                }
+            }
+        )
     }
 }
 

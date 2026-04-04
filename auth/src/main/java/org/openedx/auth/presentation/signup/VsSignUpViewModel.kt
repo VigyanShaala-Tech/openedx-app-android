@@ -10,6 +10,7 @@ import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import org.openedx.auth.data.model.VsRegisterRequest
 import org.openedx.auth.domain.interactor.AuthInteractor
+import org.openedx.auth.domain.model.SocialAuthResponse
 import org.openedx.auth.presentation.AuthAnalytics
 import org.openedx.auth.presentation.AuthRouter
 import org.openedx.core.Validator
@@ -54,7 +55,8 @@ class VsSignUpViewModel(
         name: String,
         password: String,
         phoneNumber: String,
-        userRole: String
+        userRole: String,
+        verificationKey: String? = null
     ) {
         _uiState.update { it.copy(isButtonLoading = true) }
         viewModelScope.launch {
@@ -67,16 +69,12 @@ class VsSignUpViewModel(
                     termsOfService = true,
                     userRole = userRole.takeIf { it.isNotBlank() },
                     username = email,
-                    verificationKey = uiState.value.verificationKey.takeIf { uiState.value.isOtpVerified }
+                    verificationKey = verificationKey ?: uiState.value.verificationKey.takeIf { uiState.value.isOtpVerified }
                 )
 
                 interactor.registerVs(body)
                 
-                // After successful registration, login the user
-                interactor.login(email, password)
-                
-                _uiState.update { it.copy(successLogin = true, isButtonLoading = false) }
-                appNotifier.send(SignInEvent())
+                _uiState.update { it.copy(showRegisterSuccessDialog = true, isButtonLoading = false) }
             } catch (e: Exception) {
                 e.printStackTrace()
                 _uiState.update { it.copy(isButtonLoading = false) }
@@ -142,6 +140,14 @@ class VsSignUpViewModel(
             }
         }
     }
+
+    fun navigateToSignIn() {
+        _uiState.update { it.copy(navigateToSignIn = true) }
+    }
+
+    fun setSocialAuth(socialAuth: SocialAuthResponse) {
+        _uiState.update { it.copy(socialAuth = socialAuth) }
+    }
 }
 
 data class VsSignUpUIState(
@@ -150,5 +156,8 @@ data class VsSignUpUIState(
     val isOtpLoading: Boolean = false,
     val isOtpSent: Boolean = false,
     val isOtpVerified: Boolean = false,
-    val verificationKey: String? = null
+    val verificationKey: String? = null,
+    val showRegisterSuccessDialog: Boolean = false,
+    val navigateToSignIn: Boolean = false,
+    val socialAuth: SocialAuthResponse? = null,
 )

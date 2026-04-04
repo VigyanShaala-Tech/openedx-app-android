@@ -1,19 +1,19 @@
 package org.openedx.auth.data.repository
 
 import org.openedx.auth.data.api.AuthApi
+import org.openedx.auth.data.api.OtpApi
+import org.openedx.auth.data.api.OtpLoginRequest
+import org.openedx.auth.data.api.OtpSendRequest
+import org.openedx.auth.data.api.OtpVerifyRequest
 import org.openedx.auth.data.model.AuthType
 import org.openedx.auth.data.model.ValidationFields
+import org.openedx.auth.data.model.VsRegisterRequest
 import org.openedx.auth.domain.model.AuthResponse
 import org.openedx.core.ApiConstants
 import org.openedx.core.config.Config
 import org.openedx.core.data.storage.CorePreferences
 import org.openedx.core.domain.model.RegistrationField
 import org.openedx.core.system.EdxError
-import org.openedx.auth.data.api.OtpApi
-import org.openedx.auth.data.api.OtpLoginRequest
-import org.openedx.auth.data.api.OtpSendRequest
-import org.openedx.auth.data.api.OtpVerifyRequest
-import org.openedx.auth.data.model.VsRegisterRequest
 
 class AuthRepository(
     private val config: Config,
@@ -88,11 +88,20 @@ class AuthRepository(
         return api.passwordReset(email).success
     }
 
-    suspend fun sendOtp(contact: String) = otpApi.send(OtpSendRequest(contact))
+    // OTP Sign Up
+    suspend fun sendSignUpOtp(contact: String) = otpApi.sendSignUpOtp(OtpSendRequest(contact))
+    suspend fun resendSignUpOtp(contact: String) = otpApi.resendSignUpOtp(OtpSendRequest(contact))
+
+    // OTP Login
+    suspend fun sendLoginOtp(contact: String) = otpApi.sendLoginOtp(OtpSendRequest(contact))
+    suspend fun resendLoginOtp(contact: String) = otpApi.resendLoginOtp(OtpSendRequest(contact))
+
+    // Common OTP Verify
     suspend fun verifyOtp(contact: String, otp: String, key: String) =
-        otpApi.verify(OtpVerifyRequest(contact, otp, key))
+        otpApi.verifyOtp(OtpVerifyRequest(contact, otp, key))
+
     suspend fun loginWithOtp(contact: String, otp: String, key: String) {
-        otpApi.login(OtpLoginRequest(contact, otp, key))
+        otpApi.loginWithOtp(OtpLoginRequest(contact, otp, key))
             .mapToDomain()
             .processAuthResponse()
     }

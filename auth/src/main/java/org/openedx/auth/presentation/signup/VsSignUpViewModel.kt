@@ -16,7 +16,6 @@ import org.openedx.auth.presentation.AuthRouter
 import org.openedx.core.Validator
 import org.openedx.core.data.storage.CorePreferences
 import org.openedx.core.system.notifier.app.AppNotifier
-import org.openedx.core.system.notifier.app.SignInEvent
 import org.openedx.foundation.extension.isInternetError
 import org.openedx.foundation.presentation.BaseViewModel
 import org.openedx.foundation.presentation.UIMessage
@@ -73,7 +72,7 @@ class VsSignUpViewModel(
                 )
 
                 interactor.registerVs(body)
-                
+
                 _uiState.update { it.copy(showRegisterSuccessDialog = true, isButtonLoading = false) }
             } catch (e: Exception) {
                 e.printStackTrace()
@@ -93,7 +92,13 @@ class VsSignUpViewModel(
         _uiState.update { it.copy(isOtpLoading = true) }
         viewModelScope.launch {
             try {
-                val response = interactor.sendOtp(phoneNumber)
+                val formattedPhone = Validator().formatPhoneNumber(phoneNumber)
+                val response = if (uiState.value.isOtpSent) {
+                    interactor.resendSignUpOtp(formattedPhone)
+                } else {
+                    interactor.sendSignUpOtp(formattedPhone)
+                }
+
                 if (response.success) {
                     _uiState.update {
                         it.copy(

@@ -2,9 +2,8 @@ package org.openedx.auth.domain.interactor
 
 import org.openedx.auth.data.model.AuthType
 import org.openedx.auth.data.model.ValidationFields
-import org.openedx.auth.data.repository.AuthRepository
 import org.openedx.auth.data.model.VsRegisterRequest
-import org.openedx.core.ApiConstants
+import org.openedx.auth.data.repository.AuthRepository
 import org.openedx.core.domain.model.RegistrationField
 
 class AuthInteractor(private val repository: AuthRepository) {
@@ -44,7 +43,18 @@ class AuthInteractor(private val repository: AuthRepository) {
         return repository.passwordReset(email)
     }
 
-    suspend fun sendOtp(contact: String) = repository.sendOtp(contact)
-    suspend fun verifyOtp(contact: String, otp: String, key: String) = repository.verifyOtp(contact, otp, key)
-    suspend fun loginWithOtp(contact: String, otp: String, key: String) = repository.loginWithOtp(contact, otp, key)
+    // OTP Sign Up
+    suspend fun sendSignUpOtp(contact: String) = repository.sendSignUpOtp(contact)
+    suspend fun resendSignUpOtp(contact: String) = repository.resendSignUpOtp(contact)
+
+    // OTP Login
+    suspend fun sendLoginOtp(contact: String) = repository.sendLoginOtp(contact)
+    suspend fun resendLoginOtp(contact: String) = repository.resendLoginOtp(contact)
+
+    // Common OTP Verify
+    suspend fun verifyOtp(contact: String, otp: String, key: String) =
+        repository.verifyOtp(contact, otp, key)
+
+    suspend fun loginWithOtp(contact: String, otp: String, key: String) =
+        repository.loginWithOtp(contact, otp, key)
 }

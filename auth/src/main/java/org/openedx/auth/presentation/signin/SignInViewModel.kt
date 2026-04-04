@@ -182,7 +182,13 @@ class SignInViewModel(
         viewModelScope.launch {
             try {
                 _uiState.update { it.copy(showProgress = true) }
-                val resp = interactor.sendOtp(mobile)
+                val formattedPhone = validator.formatPhoneNumber(mobile)
+                val resp = if (uiState.value.otpSent) {
+                    interactor.resendLoginOtp(formattedPhone)
+                } else {
+                    interactor.sendLoginOtp(formattedPhone)
+                }
+
                 if (resp.success) {
                     val resendAfter = resp.resend_after_seconds ?: 30
                     _uiState.update {
@@ -215,12 +221,13 @@ class SignInViewModel(
         viewModelScope.launch {
             try {
                 _uiState.update { it.copy(showProgress = true) }
+                val formattedPhone = validator.formatPhoneNumber(mobile)
                 val key = uiState.value.otpVerificationKey
-                val verify = interactor.verifyOtp(mobile, otp, key)
+                val verify = interactor.verifyOtp(formattedPhone, otp, key)
                 if (verify.success) {
                     val updatedKey = verify.verification_key ?: key
                     _uiState.update { it.copy(otpVerificationKey = updatedKey) }
-                    interactor.loginWithOtp(mobile, otp, updatedKey)
+                    interactor.loginWithOtp(formattedPhone, otp, updatedKey)
                     _uiState.update { it.copy(loginSuccess = true) }
                     setUserId()
                     appNotifier.send(SignInEvent())

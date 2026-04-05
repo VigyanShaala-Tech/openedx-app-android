@@ -1,5 +1,6 @@
 package org.openedx.course.presentation.contenttab
 
+import android.content.res.Configuration
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -17,6 +18,7 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.PagerState
+import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.Divider
@@ -33,9 +35,9 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.PlatformTextStyle
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.fragment.app.FragmentManager
@@ -44,6 +46,7 @@ import org.koin.androidx.compose.koinViewModel
 import org.koin.core.parameter.parametersOf
 import org.openedx.core.ui.CircularProgress
 import org.openedx.core.ui.WebContentScreen
+import org.openedx.core.ui.theme.OpenEdXTheme
 import org.openedx.core.ui.theme.appColors
 import org.openedx.core.ui.theme.appShapes
 import org.openedx.course.presentation.assignments.CourseContentAssignmentScreen
@@ -56,6 +59,7 @@ import org.openedx.course.presentation.home.LiveSessionsCardContent
 import org.openedx.course.presentation.outline.CourseContentAllScreen
 import org.openedx.course.presentation.videos.CourseContentVideoScreen
 import org.openedx.foundation.presentation.WindowSize
+import org.openedx.foundation.presentation.WindowType
 import org.openedx.foundation.presentation.windowSizeValue
 
 @Composable
@@ -69,6 +73,89 @@ fun ContentTabScreen(
     onTabSelected: (CourseContentTab) -> Unit = {},
     onNavigateToHome: () -> Unit = {},
 ) {
+    ContentTabUI(
+        windowSize = windowSize,
+        pagerState = pagerState,
+        onTabSelected = onTabSelected,
+        onTabClicked = {
+            viewModel.logTabClickEvent(it)
+        },
+        content = { page ->
+            if (page < CourseContentTab.entries.size) {
+                when (CourseContentTab.entries[page]) {
+                    CourseContentTab.ALL -> CourseContentAllScreen(
+                        windowSize = windowSize,
+                        viewModel = koinViewModel(parameters = {
+                            parametersOf(
+                                courseId,
+                                courseName
+                            )
+                        }),
+                        fragmentManager = fragmentManager,
+                        onNavigateToHome = onNavigateToHome
+                    )
+
+                    CourseContentTab.VIDEOS -> CourseContentVideoScreen(
+                        windowSize = windowSize,
+                        viewModel = koinViewModel(parameters = {
+                            parametersOf(
+                                courseId,
+                                courseName
+                            )
+                        }),
+                        fragmentManager = fragmentManager,
+                        onNavigateToHome = onNavigateToHome
+                    )
+
+                    CourseContentTab.ASSIGNMENTS -> CourseContentAssignmentScreen(
+                        windowSize = windowSize,
+                        viewModel = koinViewModel(parameters = { parametersOf(courseId) }),
+                        fragmentManager = fragmentManager,
+                        onNavigateToHome = onNavigateToHome
+                    )
+
+                    CourseContentTab.LIVE_SESSIONS -> {
+                        val homeViewModel: CourseHomeViewModel = koinViewModel(
+                            parameters = { parametersOf(courseId, courseName) }
+                        )
+                        val uiState = homeViewModel.uiState.collectAsState().value
+                        if (uiState is org.openedx.course.presentation.home.CourseHomeUIState.CourseData) {
+                            LiveSessionsCardContent(
+                                modifier = Modifier
+                                    .fillMaxSize()
+                                    .verticalScroll(rememberScrollState())
+                                    .padding(top = 16.dp),
+                                uiState = uiState,
+                                onJoinClick = { session ->
+                                    // Handle join click
+                                },
+                                onViewAllLiveSessionsClick = {}
+                            )
+                        } else {
+                            CircularProgress()
+                        }
+                    }
+
+                    CourseContentTab.HANDOUTS -> {
+                        val handoutsViewModel: HandoutsViewModel = koinViewModel(
+                            parameters = { parametersOf(courseId, HandoutsType.Handouts.name) }
+                        )
+                        HandoutsContent(handoutsViewModel, windowSize)
+                    }
+                }
+            }
+        }
+    )
+}
+
+@Composable
+private fun ContentTabUI(
+    windowSize: WindowSize,
+    pagerState: PagerState,
+    onTabSelected: (CourseContentTab) -> Unit = {},
+    onTabClicked: (CourseContentTab) -> Unit = {},
+    content: @Composable (Int) -> Unit
+) {
     val tabsWidth by remember(key1 = windowSize) {
         mutableStateOf(
             windowSize.windowSizeValue(
@@ -78,7 +165,6 @@ fun ContentTabScreen(
         )
     }
     val scope = rememberCoroutineScope()
-    val context = LocalContext.current
 
     LaunchedEffect(pagerState.currentPage) {
         if (pagerState.currentPage < CourseContentTab.entries.size) {
@@ -98,7 +184,7 @@ fun ContentTabScreen(
         ) {
             Row(
                 modifier = Modifier
-                    .padding(start = 16.dp, top = 16.dp, end = 16.dp, bottom = 4.dp)
+                    .padding(16.dp)
                     .then(tabsWidth)
                     .height(40.dp)
                     .clip(MaterialTheme.appShapes.buttonShape)
@@ -106,54 +192,53 @@ fun ContentTabScreen(
                         1.dp,
                         MaterialTheme.appColors.primary,
                         MaterialTheme.appShapes.buttonShape
-                    )
-                    .horizontalScroll(rememberScrollState()),
-                horizontalArrangement = Arrangement.Start,
+                    ),
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 CourseContentTab.entries.forEachIndexed { index, tab ->
+
                     val isSelected = pagerState.currentPage == index
+
                     Box(
                         modifier = Modifier
-                            .background(
-                                if (isSelected) {
-                                    MaterialTheme.appColors.primary
-                                } else {
-                                    MaterialTheme.appColors.background
-                                }
-                            )
+                            .weight(1f) // 🔥 equal width tabs
                             .fillMaxHeight()
+                            .background(
+                                if (isSelected)
+                                    MaterialTheme.appColors.primary
+                                else
+                                    MaterialTheme.appColors.background
+                            )
                             .clickable {
                                 scope.launch {
                                     pagerState.scrollToPage(index)
                                 }
-                                viewModel.logTabClickEvent(CourseContentTab.entries[index])
-                            }
-                            .padding(horizontal = 20.dp),
+                                onTabClicked(tab)
+                            },
                         contentAlignment = Alignment.Center
                     ) {
-                        if (index != 0) {
-                            Divider(
-                                modifier = Modifier
-                                    .fillMaxHeight()
-                                    .width(1.dp)
-                                    .align(Alignment.CenterStart),
-                                color = MaterialTheme.appColors.primary
-                            )
-                        }
                         Text(
                             text = stringResource(tab.labelResId),
-                            color = if (isSelected) {
+                            color = if (isSelected)
                                 MaterialTheme.appColors.primaryButtonText
-                            } else {
-                                MaterialTheme.appColors.primary
-                            },
+                            else
+                                MaterialTheme.appColors.primary,
                             style = MaterialTheme.typography.button.copy(
                                 platformStyle = PlatformTextStyle(
                                     includeFontPadding = false
                                 )
                             ),
                             maxLines = 1
+                        )
+                    }
+
+                    // ✅ Divider BETWEEN tabs (not inside)
+                    if (index != CourseContentTab.entries.lastIndex) {
+                        Divider(
+                            modifier = Modifier
+                                .fillMaxHeight()
+                                .width(1.dp),
+                            color = MaterialTheme.appColors.primary
                         )
                     }
                 }
@@ -165,69 +250,7 @@ fun ContentTabScreen(
                 beyondViewportPageCount = CourseContentTab.entries.size,
                 modifier = Modifier.fillMaxSize()
             ) { page ->
-                if (page < CourseContentTab.entries.size) {
-                    when (CourseContentTab.entries[page]) {
-                        CourseContentTab.ALL -> CourseContentAllScreen(
-                            windowSize = windowSize,
-                            viewModel = koinViewModel(parameters = {
-                                parametersOf(
-                                    courseId,
-                                    courseName
-                                )
-                            }),
-                            fragmentManager = fragmentManager,
-                            onNavigateToHome = onNavigateToHome
-                        )
-
-                        CourseContentTab.VIDEOS -> CourseContentVideoScreen(
-                            windowSize = windowSize,
-                            viewModel = koinViewModel(parameters = {
-                                parametersOf(
-                                    courseId,
-                                    courseName
-                                )
-                            }),
-                            fragmentManager = fragmentManager,
-                            onNavigateToHome = onNavigateToHome
-                        )
-
-                        CourseContentTab.ASSIGNMENTS -> CourseContentAssignmentScreen(
-                            windowSize = windowSize,
-                            viewModel = koinViewModel(parameters = { parametersOf(courseId) }),
-                            fragmentManager = fragmentManager,
-                            onNavigateToHome = onNavigateToHome
-                        )
-
-                        CourseContentTab.LIVE_SESSIONS -> {
-                            val homeViewModel: CourseHomeViewModel = koinViewModel(
-                                parameters = { parametersOf(courseId, courseName) }
-                            )
-                            val uiState = homeViewModel.uiState.collectAsState().value
-                            if (uiState is org.openedx.course.presentation.home.CourseHomeUIState.CourseData) {
-                                LiveSessionsCardContent(
-                                    modifier = Modifier
-                                        .fillMaxSize()
-                                        .verticalScroll(rememberScrollState())
-                                        .padding(top = 16.dp),
-                                    uiState = uiState,
-                                    onJoinClick = { session ->
-                                        // Handle join click
-                                    },
-                                    onViewAllLiveSessionsClick = {}
-                                )
-                            } else {
-                                CircularProgress()
-                            }
-                        }
-
-                        CourseContentTab.HANDOUTS -> {
-                            val handoutsViewModel: HandoutsViewModel = koinViewModel(
-                                parameters = { parametersOf(courseId, HandoutsType.Handouts.name) }
-                            )
-                            HandoutsContent(handoutsViewModel, windowSize)
-                        }
-                    }
-                }
+                content(page)
             }
         }
     }
@@ -238,7 +261,28 @@ private fun HandoutsContent(
     viewModel: HandoutsViewModel,
     windowSize: WindowSize
 ) {
-    val uiState = viewModel.uiState.collectAsState().value
+    val uiState by viewModel.uiState.collectAsState()
+    HandoutsUI(
+        uiState = uiState,
+        windowSize = windowSize,
+        apiHostUrl = viewModel.apiHostUrl,
+        onInjectDarkMode = { content, colorBackgroundValue, colorTextValue ->
+            viewModel.injectDarkMode(
+                content,
+                colorBackgroundValue,
+                colorTextValue
+            )
+        }
+    )
+}
+
+@Composable
+private fun HandoutsUI(
+    uiState: HandoutsUIState,
+    windowSize: WindowSize,
+    apiHostUrl: String,
+    onInjectDarkMode: (String, ULong, ULong) -> String
+) {
     val colorBackgroundValue = MaterialTheme.appColors.background.value
     val colorTextValue = MaterialTheme.appColors.textPrimary.value
     when (uiState) {
@@ -249,10 +293,10 @@ private fun HandoutsContent(
         is HandoutsUIState.HTMLContent -> {
             WebContentScreen(
                 windowSize = windowSize,
-                apiHostUrl = viewModel.apiHostUrl,
+                apiHostUrl = apiHostUrl,
                 title = "",
                 onBackClick = {},
-                htmlBody = viewModel.injectDarkMode(
+                htmlBody = onInjectDarkMode(
                     uiState.htmlContent,
                     colorBackgroundValue,
                     colorTextValue
@@ -263,5 +307,22 @@ private fun HandoutsContent(
         HandoutsUIState.Error -> {
             // Handle error or empty state
         }
+    }
+}
+
+@Preview(uiMode = Configuration.UI_MODE_NIGHT_NO)
+//@Preview(uiMode = Configuration.UI_MODE_NIGHT_YES)
+@Composable
+private fun ContentTabScreenPreview() {
+    OpenEdXTheme {
+        ContentTabUI(
+            windowSize = WindowSize(WindowType.Compact, WindowType.Compact),
+            pagerState = rememberPagerState { CourseContentTab.entries.size },
+            content = { page ->
+                Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+                    Text(text = "Page $page Content")
+                }
+            }
+        )
     }
 }

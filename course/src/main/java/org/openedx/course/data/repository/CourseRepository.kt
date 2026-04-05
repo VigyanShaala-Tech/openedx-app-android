@@ -276,4 +276,7 @@ class CourseRepository(
                 trySend(response.mapToDomain())
             }
         }
+
+    suspend fun getLiveClasses(courseId: String, type: String, page: Int) =
+        api.getLiveClasses(courseId, type, page)
 }

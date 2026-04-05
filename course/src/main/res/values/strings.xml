@@ -48,6 +48,12 @@
     <string name="course_container_content_tab_all">All</string>
     <string name="course_container_content_tab_video">Videos</string>
     <string name="course_container_content_tab_assignment">Assignments</string>
+    <string name="course_container_content_tab_live_sessions">Live Sessions</string>
+    <string name="course_live_sessions_today">Today</string>
+    <string name="course_live_sessions_upcoming">Upcoming</string>
+    <string name="course_live_sessions_past">Past</string>
+    <string name="course_live_sessions_join">Join</string>
+    <string name="course_live_sessions_completed">Completed</string>
 
     <!-- Course Completion UI -->
     <string name="course_completion_title">Course Completion</string>

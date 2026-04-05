@@ -30,6 +30,7 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
@@ -46,6 +47,8 @@ import org.openedx.course.presentation.container.CourseContentTab
 import org.openedx.course.presentation.handouts.HandoutsType
 import org.openedx.course.presentation.handouts.HandoutsUIState
 import org.openedx.course.presentation.handouts.HandoutsViewModel
+import org.openedx.course.presentation.home.CourseHomeViewModel
+import org.openedx.course.presentation.home.LiveSessionsCardContent
 import org.openedx.course.presentation.outline.CourseContentAllScreen
 import org.openedx.course.presentation.videos.CourseContentVideoScreen
 import org.openedx.foundation.presentation.WindowSize
@@ -71,6 +74,7 @@ fun ContentTabScreen(
         )
     }
     val scope = rememberCoroutineScope()
+    val context = LocalContext.current
 
     LaunchedEffect(pagerState.currentPage) {
         val selectedTab = CourseContentTab.entries[pagerState.currentPage]
@@ -189,6 +193,31 @@ fun ContentTabScreen(
                         onNavigateToHome = onNavigateToHome
                     )
 
+                    CourseContentTab.LIVE_SESSIONS -> {
+                        val homeViewModel: CourseHomeViewModel = koinViewModel(
+                            parameters = { parametersOf(courseId, courseName) }
+                        )
+                        val uiState = homeViewModel.uiState.collectAsState().value
+                        if (uiState is org.openedx.course.presentation.home.CourseHomeUIState.CourseData) {
+                            LiveSessionsCardContent(
+                                uiState = uiState,
+                                onJoinClick = { session ->
+                                    // Handle join click
+                                },
+                                onViewAllLiveSessionsClick = {}
+                            )
+                        } else {
+                            CircularProgress()
+                        }
+                    }
+
+                    CourseContentTab.HANDOUTS -> {
+                        val handoutsViewModel: HandoutsViewModel = koinViewModel(
+                            parameters = { parametersOf(courseId, HandoutsType.Handouts.name) }
+                        )
+                        HandoutsContent(handoutsViewModel, windowSize)
+                    }
+
                     CourseContentTab.ANNOUNCEMENTS -> {
                         val announcementsViewModel: HandoutsViewModel = koinViewModel(
                             parameters = { parametersOf(courseId, HandoutsType.Announcements.name) }
@@ -224,6 +253,39 @@ fun ContentTabScreen(
                     }
                 }
             }
+        }
+    }
+}
+
+@Composable
+private fun HandoutsContent(
+    viewModel: HandoutsViewModel,
+    windowSize: WindowSize
+) {
+    val uiState = viewModel.uiState.collectAsState().value
+    val colorBackgroundValue = MaterialTheme.appColors.background.value
+    val colorTextValue = MaterialTheme.appColors.textPrimary.value
+    when (uiState) {
+        is HandoutsUIState.Loading -> {
+            CircularProgress()
+        }
+
+        is HandoutsUIState.HTMLContent -> {
+            WebContentScreen(
+                windowSize = windowSize,
+                apiHostUrl = viewModel.apiHostUrl,
+                title = "",
+                onBackClick = {},
+                htmlBody = viewModel.injectDarkMode(
+                    uiState.htmlContent,
+                    colorBackgroundValue,
+                    colorTextValue
+                )
+            )
+        }
+
+        HandoutsUIState.Error -> {
+            // Handle error or empty state
         }
     }
 }

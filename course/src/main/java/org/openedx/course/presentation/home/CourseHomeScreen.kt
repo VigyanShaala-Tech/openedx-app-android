@@ -7,7 +7,6 @@ import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -17,7 +16,6 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.pager.PagerState
-import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.Card
@@ -45,7 +43,6 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
-import androidx.compose.ui.tooling.preview.Devices
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
@@ -177,6 +174,13 @@ fun CourseHomeScreen(
         onViewAllAnnouncementsClick = {
             viewModel.logViewAllAnnouncementsClick()
             onNavigateToContent(CourseContentTab.ANNOUNCEMENTS)
+        },
+        onJoinClick = { session ->
+            // Handle join click, e.g. open in browser or deep link
+            AndroidUriHandler(context).openUri("https://zoom.us/j/${session.id}") // Placeholder
+        },
+        onViewAllLiveSessionsClick = {
+            onNavigateToContent(CourseContentTab.LIVE_SESSIONS)
         }
     )
 }
@@ -201,6 +205,8 @@ private fun CourseHomeUI(
     onViewAllAssignmentsClick: () -> Unit,
     onViewProgressClick: () -> Unit,
     onViewAllAnnouncementsClick: () -> Unit,
+    onJoinClick: (org.openedx.core.data.model.LiveClassModel) -> Unit,
+    onViewAllLiveSessionsClick: () -> Unit,
 ) {
     val scaffoldState = rememberScaffoldState()
 
@@ -304,6 +310,15 @@ private fun CourseHomeUI(
                                     },
                                     onDownloadClick = onDownloadClick,
                                     onSubSectionClick = onSubSectionClick
+                                )
+                            }
+
+                            // Live Sessions Card
+                            DashboardCard {
+                                LiveSessionsCardContent(
+                                    uiState = uiState,
+                                    onJoinClick = onJoinClick,
+                                    onViewAllLiveSessionsClick = onViewAllLiveSessionsClick
                                 )
                             }
 
@@ -483,7 +498,9 @@ private fun CourseHomeScreenPreview() {
             onViewAllVideosClick = {},
             onViewAllAssignmentsClick = {},
             onViewProgressClick = {},
-            onViewAllAnnouncementsClick = {}
+            onViewAllAnnouncementsClick = {},
+            onJoinClick = {},
+            onViewAllLiveSessionsClick = {}
         )
     }
 }

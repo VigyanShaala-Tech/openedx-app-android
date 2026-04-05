@@ -13,6 +13,7 @@ import org.openedx.core.data.model.CourseStructureModel
 import org.openedx.core.data.model.DownloadCoursePreview
 import org.openedx.core.data.model.EnrollmentStatus
 import org.openedx.core.data.model.HandoutsModel
+import org.openedx.core.data.model.LiveClassResponse
 import org.openedx.core.data.model.ResetCourseDates
 import retrofit2.http.Body
 import retrofit2.http.GET
@@ -115,4 +116,11 @@ interface CourseApi {
     suspend fun getCourseProgress(
         @Path("course_id") courseId: String,
     ): CourseProgressResponse
+
+    @GET("/api/v1/live-classes/{course_id}/")
+    suspend fun getLiveClasses(
+        @Path("course_id") courseId: String,
+        @Query("type") type: String,
+        @Query("page") page: Int
+    ): LiveClassResponse
 }

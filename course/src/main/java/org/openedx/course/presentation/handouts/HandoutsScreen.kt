@@ -11,6 +11,7 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.lazy.LazyColumn
@@ -23,6 +24,7 @@ import androidx.compose.material.Text
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.Info
 import androidx.compose.material.icons.outlined.Share
+import androidx.compose.material.icons.outlined.Videocam
 import androidx.compose.material.rememberScaffoldState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -53,6 +55,7 @@ fun HandoutsScreen(
     windowSize: WindowSize,
     onHandoutsClick: () -> Unit,
     onAnnouncementsClick: () -> Unit,
+    onLiveSessionsClick: () -> Unit = {},
     onAboutCourseClick: () -> Unit,
     onShareCourseClick: () -> Unit,
 ) {
@@ -105,6 +108,14 @@ fun HandoutsScreen(
                     }
                     item {
                         HandoutsItem(
+                            title = stringResource(id = courseR.string.course_container_content_tab_live_sessions),
+                            description = "View and join course live sessions",
+                            painter = rememberVectorPainter(Icons.Outlined.Videocam),
+                            onClick = onLiveSessionsClick
+                        )
+                    }
+                    item {
+                        HandoutsItem(
                             title = stringResource(id = courseR.string.course_about),
                             description = stringResource(id = courseR.string.course_about_desc),
                             painter = rememberVectorPainter(Icons.Outlined.Info),
@@ -140,11 +151,12 @@ private fun HandoutsItem(
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.SpaceBetween
     ) {
-        Row(verticalAlignment = Alignment.CenterVertically) {
+        Row(modifier = Modifier.weight(1f), verticalAlignment = Alignment.CenterVertically) {
             Icon(
                 painter = painter,
                 contentDescription = null,
-                tint = MaterialTheme.appColors.textPrimary
+                tint = MaterialTheme.appColors.textPrimary,
+                modifier = Modifier.size(24.dp)
             )
             Spacer(modifier = Modifier.width(12.dp))
             Column(

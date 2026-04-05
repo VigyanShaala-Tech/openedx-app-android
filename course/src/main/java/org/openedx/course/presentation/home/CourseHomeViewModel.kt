@@ -141,7 +141,10 @@ class CourseHomeViewModel(
                         courseAssignments = courseAssignments,
                         videoPreview = state.videoPreview,
                         videoProgress = state.videoProgress,
-                        announcements = state.announcements
+                        announcements = state.announcements,
+                        liveClassesToday = state.liveClassesToday,
+                        liveClassesUpcoming = state.liveClassesUpcoming,
+                        liveClassesPast = state.liveClassesPast
                     )
                 }
             }
@@ -187,6 +190,23 @@ class CourseHomeViewModel(
                 emptyList()
             }
 
+            // Fetch live classes
+            val liveClassesToday = try {
+                interactor.getLiveClasses(courseId, "today", 1).results
+            } catch (e: Exception) {
+                emptyList()
+            }
+            val liveClassesUpcoming = try {
+                interactor.getLiveClasses(courseId, "upcoming", 1).results
+            } catch (e: Exception) {
+                emptyList()
+            }
+            val liveClassesPast = try {
+                interactor.getLiveClasses(courseId, "past", 1).results
+            } catch (e: Exception) {
+                emptyList()
+            }
+
             combine(
                 courseStructureFlow,
                 courseStatusFlow,
@@ -203,7 +223,10 @@ class CourseHomeViewModel(
                     courseStatus,
                     datesBannerInfo,
                     courseProgress,
-                    announcements
+                    announcements,
+                    liveClassesToday,
+                    liveClassesUpcoming,
+                    liveClassesPast
                 )
             }.catch { e ->
                 handleCourseDataError(e)
@@ -217,7 +240,10 @@ class CourseHomeViewModel(
         courseStatus: CourseComponentStatus,
         datesBannerInfo: CourseDatesBannerInfo,
         courseProgress: CourseProgress,
-        announcements: List<org.openedx.core.domain.model.AnnouncementModel> = emptyList()
+        announcements: List<org.openedx.core.domain.model.AnnouncementModel> = emptyList(),
+        liveClassesToday: List<org.openedx.core.data.model.LiveClassModel> = emptyList(),
+        liveClassesUpcoming: List<org.openedx.core.data.model.LiveClassModel> = emptyList(),
+        liveClassesPast: List<org.openedx.core.data.model.LiveClassModel> = emptyList()
     ) {
         setBlocks(blocks)
         courseSubSections.clear()
@@ -275,7 +301,10 @@ class CourseHomeViewModel(
             courseAssignments = courseAssignments,
             videoPreview = (_uiState.value as? CourseHomeUIState.CourseData)?.videoPreview,
             videoProgress = videoProgress,
-            announcements = announcements
+            announcements = announcements,
+            liveClassesToday = liveClassesToday,
+            liveClassesUpcoming = liveClassesUpcoming,
+            liveClassesPast = liveClassesPast
         )
         getVideoPreview(firstIncompleteVideo)
     }

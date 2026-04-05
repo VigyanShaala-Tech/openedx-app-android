@@ -1,5 +1,6 @@
 package org.openedx.course.presentation.home
 
+import org.openedx.core.domain.model.AnnouncementModel
 import org.openedx.core.domain.model.Block
 import org.openedx.core.domain.model.CourseDatesBannerInfo
 import org.openedx.core.domain.model.CourseProgress
@@ -23,6 +24,7 @@ sealed class CourseHomeUIState {
         val courseAssignments: List<Block>,
         val videoPreview: VideoPreview?,
         val videoProgress: Float?,
+        val announcements: List<AnnouncementModel> = emptyList(),
     ) : CourseHomeUIState()
 
     data object Error : CourseHomeUIState()

@@ -33,5 +33,6 @@ enum class CourseContentTab(
 ) {
     ALL(R.string.course_container_content_tab_all),
     VIDEOS(R.string.course_container_content_tab_video),
-    ASSIGNMENTS(R.string.course_container_content_tab_assignment)
+    ASSIGNMENTS(R.string.course_container_content_tab_assignment),
+    ANNOUNCEMENTS(R.string.course_announcements)
 }

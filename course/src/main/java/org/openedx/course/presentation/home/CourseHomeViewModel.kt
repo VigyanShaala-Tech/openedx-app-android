@@ -140,7 +140,8 @@ class CourseHomeViewModel(
                         courseVideos = courseVideos,
                         courseAssignments = courseAssignments,
                         videoPreview = state.videoPreview,
-                        videoProgress = state.videoProgress
+                        videoProgress = state.videoProgress,
+                        announcements = state.announcements
                     )
                 }
             }
@@ -178,6 +179,14 @@ class CourseHomeViewModel(
             val courseStatusFlow = interactor.getCourseStatusFlow(courseId)
             val courseDatesFlow = interactor.getCourseDatesFlow(courseId)
             val courseProgressFlow = interactor.getCourseProgress(courseId, false, true)
+            
+            // Fetch announcements
+            val announcements = try {
+                interactor.getAnnouncements(courseId)
+            } catch (e: Exception) {
+                emptyList()
+            }
+
             combine(
                 courseStructureFlow,
                 courseStatusFlow,
@@ -193,7 +202,8 @@ class CourseHomeViewModel(
                     courseStructure,
                     courseStatus,
                     datesBannerInfo,
-                    courseProgress
+                    courseProgress,
+                    announcements
                 )
             }.catch { e ->
                 handleCourseDataError(e)
@@ -206,7 +216,8 @@ class CourseHomeViewModel(
         courseStructure: CourseStructure,
         courseStatus: CourseComponentStatus,
         datesBannerInfo: CourseDatesBannerInfo,
-        courseProgress: CourseProgress
+        courseProgress: CourseProgress,
+        announcements: List<org.openedx.core.domain.model.AnnouncementModel> = emptyList()
     ) {
         setBlocks(blocks)
         courseSubSections.clear()
@@ -263,7 +274,8 @@ class CourseHomeViewModel(
             courseVideos = courseVideos,
             courseAssignments = courseAssignments,
             videoPreview = (_uiState.value as? CourseHomeUIState.CourseData)?.videoPreview,
-            videoProgress = videoProgress
+            videoProgress = videoProgress,
+            announcements = announcements
         )
         getVideoPreview(firstIncompleteVideo)
     }
@@ -658,6 +670,23 @@ class CourseHomeViewModel(
                     put(
                         CourseAnalyticsKey.NAME.key,
                         CourseAnalyticsEvent.COURSE_HOME_GRADES_VIEW_PROGRESS.biValue
+                    )
+                    put(CourseAnalyticsKey.COURSE_ID.key, courseId)
+                    put(CourseAnalyticsKey.COURSE_NAME.key, currentState.courseStructure.name)
+                }
+            )
+        }
+    }
+
+    fun logViewAllAnnouncementsClick() {
+        val currentState = uiState.value
+        if (currentState is CourseHomeUIState.CourseData) {
+            analytics.logEvent(
+                CourseAnalyticsEvent.ANNOUNCEMENTS.eventName,
+                buildMap {
+                    put(
+                        CourseAnalyticsKey.NAME.key,
+                        CourseAnalyticsEvent.ANNOUNCEMENTS.biValue
                     )
                     put(CourseAnalyticsKey.COURSE_ID.key, courseId)
                     put(CourseAnalyticsKey.COURSE_NAME.key, currentState.courseStructure.name)

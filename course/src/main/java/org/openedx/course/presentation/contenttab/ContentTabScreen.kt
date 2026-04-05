@@ -22,6 +22,7 @@ import androidx.compose.material.Scaffold
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -36,10 +37,15 @@ import androidx.fragment.app.FragmentManager
 import kotlinx.coroutines.launch
 import org.koin.androidx.compose.koinViewModel
 import org.koin.core.parameter.parametersOf
+import org.openedx.core.ui.CircularProgress
+import org.openedx.core.ui.WebContentScreen
 import org.openedx.core.ui.theme.appColors
 import org.openedx.core.ui.theme.appShapes
 import org.openedx.course.presentation.assignments.CourseContentAssignmentScreen
 import org.openedx.course.presentation.container.CourseContentTab
+import org.openedx.course.presentation.handouts.HandoutsType
+import org.openedx.course.presentation.handouts.HandoutsUIState
+import org.openedx.course.presentation.handouts.HandoutsViewModel
 import org.openedx.course.presentation.outline.CourseContentAllScreen
 import org.openedx.course.presentation.videos.CourseContentVideoScreen
 import org.openedx.foundation.presentation.WindowSize
@@ -182,6 +188,40 @@ fun ContentTabScreen(
                         fragmentManager = fragmentManager,
                         onNavigateToHome = onNavigateToHome
                     )
+
+                    CourseContentTab.ANNOUNCEMENTS -> {
+                        val announcementsViewModel: HandoutsViewModel = koinViewModel(
+                            parameters = { parametersOf(courseId, HandoutsType.Announcements.name) }
+                        )
+                        val uiState = announcementsViewModel.uiState.collectAsState().value
+                        val colorBackgroundValue = MaterialTheme.appColors.background.value
+                        val colorTextValue = MaterialTheme.appColors.textPrimary.value
+                        when (uiState) {
+                            is HandoutsUIState.Loading -> {
+                                CircularProgress()
+                            }
+
+                            is HandoutsUIState.HTMLContent -> {
+                                WebContentScreen(
+                                    windowSize = windowSize,
+                                    apiHostUrl = announcementsViewModel.apiHostUrl,
+                                    title = "",
+                                    onBackClick = {},
+                                    htmlBody = announcementsViewModel.injectDarkMode(
+                                        uiState.htmlContent,
+                                        colorBackgroundValue,
+                                        colorTextValue
+                                    )
+                                )
+                            }
+
+                            HandoutsUIState.Error -> {
+                                CourseAnnouncementsEmptyState(
+                                    onReturnToCourseClick = onNavigateToHome
+                                )
+                            }
+                        }
+                    }
                 }
             }
         }

@@ -127,6 +127,20 @@ fun CourseContentAssignmentEmptyState(
 }
 
 @Composable
+fun CourseAnnouncementsEmptyState(
+    modifier: Modifier = Modifier,
+    onReturnToCourseClick: () -> Unit,
+    showReturnButton: Boolean = true
+) {
+    ContentTabEmptyState(
+        modifier = modifier,
+        message = stringResource(id = org.openedx.core.R.string.core_no_announcements),
+        onReturnToCourseClick = onReturnToCourseClick,
+        showReturnButton = showReturnButton
+    )
+}
+
+@Composable
 fun CourseHomeGradesEmptyState(
     modifier: Modifier = Modifier,
 ) {

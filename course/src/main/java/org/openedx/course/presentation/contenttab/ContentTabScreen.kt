@@ -3,6 +3,7 @@ package org.openedx.course.presentation.contenttab
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -16,6 +17,7 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.PagerState
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.material.Divider
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Scaffold
@@ -77,8 +79,10 @@ fun ContentTabScreen(
     val context = LocalContext.current
 
     LaunchedEffect(pagerState.currentPage) {
-        val selectedTab = CourseContentTab.entries[pagerState.currentPage]
-        onTabSelected(selectedTab)
+        if (pagerState.currentPage < CourseContentTab.entries.size) {
+            val selectedTab = CourseContentTab.entries[pagerState.currentPage]
+            onTabSelected(selectedTab)
+        }
     }
 
     Scaffold(
@@ -100,12 +104,13 @@ fun ContentTabScreen(
                         1.dp,
                         MaterialTheme.appColors.primary,
                         MaterialTheme.appShapes.buttonShape
-                    ),
-                horizontalArrangement = Arrangement.Center
+                    )
+                    .horizontalScroll(rememberScrollState()),
+                horizontalArrangement = Arrangement.Start,
+                verticalAlignment = Alignment.CenterVertically
             ) {
                 CourseContentTab.entries.forEachIndexed { index, tab ->
                     val isSelected = pagerState.currentPage == index
-                    val isEdgeItem = index == 0 || index == CourseContentTab.entries.size - 1
                     Box(
                         modifier = Modifier
                             .background(
@@ -115,17 +120,17 @@ fun ContentTabScreen(
                                     MaterialTheme.appColors.background
                                 }
                             )
-                            .weight(1f)
                             .fillMaxHeight()
                             .clickable {
                                 scope.launch {
                                     pagerState.scrollToPage(index)
                                 }
                                 viewModel.logTabClickEvent(CourseContentTab.entries[index])
-                            },
+                            }
+                            .padding(horizontal = 20.dp),
                         contentAlignment = Alignment.Center
                     ) {
-                        if (!isEdgeItem) {
+                        if (index != 0) {
                             Divider(
                                 modifier = Modifier
                                     .fillMaxHeight()
@@ -141,17 +146,9 @@ fun ContentTabScreen(
                             } else {
                                 MaterialTheme.appColors.primary
                             },
-                            style = MaterialTheme.typography.button
+                            style = MaterialTheme.typography.button,
+                            maxLines = 1
                         )
-                        if (!isEdgeItem) {
-                            Divider(
-                                modifier = Modifier
-                                    .fillMaxHeight()
-                                    .width(1.dp)
-                                    .align(Alignment.CenterEnd),
-                                color = MaterialTheme.appColors.primary
-                            )
-                        }
                     }
                 }
             }
@@ -161,94 +158,62 @@ fun ContentTabScreen(
                 userScrollEnabled = false,
                 beyondViewportPageCount = CourseContentTab.entries.size
             ) { page ->
-                when (CourseContentTab.entries[page]) {
-                    CourseContentTab.ALL -> CourseContentAllScreen(
-                        windowSize = windowSize,
-                        viewModel = koinViewModel(parameters = {
-                            parametersOf(
-                                courseId,
-                                courseName
-                            )
-                        }),
-                        fragmentManager = fragmentManager,
-                        onNavigateToHome = onNavigateToHome
-                    )
-
-                    CourseContentTab.VIDEOS -> CourseContentVideoScreen(
-                        windowSize = windowSize,
-                        viewModel = koinViewModel(parameters = {
-                            parametersOf(
-                                courseId,
-                                courseName
-                            )
-                        }),
-                        fragmentManager = fragmentManager,
-                        onNavigateToHome = onNavigateToHome
-                    )
-
-                    CourseContentTab.ASSIGNMENTS -> CourseContentAssignmentScreen(
-                        windowSize = windowSize,
-                        viewModel = koinViewModel(parameters = { parametersOf(courseId) }),
-                        fragmentManager = fragmentManager,
-                        onNavigateToHome = onNavigateToHome
-                    )
-
-                    CourseContentTab.LIVE_SESSIONS -> {
-                        val homeViewModel: CourseHomeViewModel = koinViewModel(
-                            parameters = { parametersOf(courseId, courseName) }
+                if (page < CourseContentTab.entries.size) {
+                    when (CourseContentTab.entries[page]) {
+                        CourseContentTab.ALL -> CourseContentAllScreen(
+                            windowSize = windowSize,
+                            viewModel = koinViewModel(parameters = {
+                                parametersOf(
+                                    courseId,
+                                    courseName
+                                )
+                            }),
+                            fragmentManager = fragmentManager,
+                            onNavigateToHome = onNavigateToHome
                         )
-                        val uiState = homeViewModel.uiState.collectAsState().value
-                        if (uiState is org.openedx.course.presentation.home.CourseHomeUIState.CourseData) {
-                            LiveSessionsCardContent(
-                                uiState = uiState,
-                                onJoinClick = { session ->
-                                    // Handle join click
-                                },
-                                onViewAllLiveSessionsClick = {}
+
+                        CourseContentTab.VIDEOS -> CourseContentVideoScreen(
+                            windowSize = windowSize,
+                            viewModel = koinViewModel(parameters = {
+                                parametersOf(
+                                    courseId,
+                                    courseName
+                                )
+                            }),
+                            fragmentManager = fragmentManager,
+                            onNavigateToHome = onNavigateToHome
+                        )
+
+                        CourseContentTab.ASSIGNMENTS -> CourseContentAssignmentScreen(
+                            windowSize = windowSize,
+                            viewModel = koinViewModel(parameters = { parametersOf(courseId) }),
+                            fragmentManager = fragmentManager,
+                            onNavigateToHome = onNavigateToHome
+                        )
+
+                        CourseContentTab.LIVE_SESSIONS -> {
+                            val homeViewModel: CourseHomeViewModel = koinViewModel(
+                                parameters = { parametersOf(courseId, courseName) }
                             )
-                        } else {
-                            CircularProgress()
-                        }
-                    }
-
-                    CourseContentTab.HANDOUTS -> {
-                        val handoutsViewModel: HandoutsViewModel = koinViewModel(
-                            parameters = { parametersOf(courseId, HandoutsType.Handouts.name) }
-                        )
-                        HandoutsContent(handoutsViewModel, windowSize)
-                    }
-
-                    CourseContentTab.ANNOUNCEMENTS -> {
-                        val announcementsViewModel: HandoutsViewModel = koinViewModel(
-                            parameters = { parametersOf(courseId, HandoutsType.Announcements.name) }
-                        )
-                        val uiState = announcementsViewModel.uiState.collectAsState().value
-                        val colorBackgroundValue = MaterialTheme.appColors.background.value
-                        val colorTextValue = MaterialTheme.appColors.textPrimary.value
-                        when (uiState) {
-                            is HandoutsUIState.Loading -> {
+                            val uiState = homeViewModel.uiState.collectAsState().value
+                            if (uiState is org.openedx.course.presentation.home.CourseHomeUIState.CourseData) {
+                                LiveSessionsCardContent(
+                                    uiState = uiState,
+                                    onJoinClick = { session ->
+                                        // Handle join click
+                                    },
+                                    onViewAllLiveSessionsClick = {}
+                                )
+                            } else {
                                 CircularProgress()
                             }
+                        }
 
-                            is HandoutsUIState.HTMLContent -> {
-                                WebContentScreen(
-                                    windowSize = windowSize,
-                                    apiHostUrl = announcementsViewModel.apiHostUrl,
-                                    title = "",
-                                    onBackClick = {},
-                                    htmlBody = announcementsViewModel.injectDarkMode(
-                                        uiState.htmlContent,
-                                        colorBackgroundValue,
-                                        colorTextValue
-                                    )
-                                )
-                            }
-
-                            HandoutsUIState.Error -> {
-                                CourseAnnouncementsEmptyState(
-                                    onReturnToCourseClick = onNavigateToHome
-                                )
-                            }
+                        CourseContentTab.HANDOUTS -> {
+                            val handoutsViewModel: HandoutsViewModel = koinViewModel(
+                                parameters = { parametersOf(courseId, HandoutsType.Handouts.name) }
+                            )
+                            HandoutsContent(handoutsViewModel, windowSize)
                         }
                     }
                 }

@@ -173,7 +173,7 @@ fun CourseHomeScreen(
         onViewProgressClick = viewModel::logViewProgressClick,
         onViewAllAnnouncementsClick = {
             viewModel.logViewAllAnnouncementsClick()
-            onNavigateToContent(CourseContentTab.ANNOUNCEMENTS)
+            onNavigateToContent(CourseContentTab.HANDOUTS)
         },
         onJoinClick = { session ->
             // Handle join click, e.g. open in browser or deep link

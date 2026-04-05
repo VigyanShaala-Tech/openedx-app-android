@@ -35,6 +35,5 @@ enum class CourseContentTab(
     VIDEOS(R.string.course_container_content_tab_video),
     ASSIGNMENTS(R.string.course_container_content_tab_assignment),
     LIVE_SESSIONS(R.string.course_container_content_tab_live_sessions),
-    HANDOUTS(R.string.course_handouts),
-    ANNOUNCEMENTS(R.string.course_announcements)
+    HANDOUTS(R.string.course_handouts)
 }

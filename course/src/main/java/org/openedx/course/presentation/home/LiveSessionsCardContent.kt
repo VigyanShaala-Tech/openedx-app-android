@@ -35,7 +35,9 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.PlatformTextStyle
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import org.openedx.core.data.model.LiveClassModel
@@ -49,6 +51,8 @@ import java.util.Locale
 
 @Composable
 fun LiveSessionsCardContent(
+    modifier: Modifier = Modifier,
+    showTitle: Boolean = true,
     uiState: CourseHomeUIState.CourseData,
     onJoinClick: (LiveClassModel) -> Unit,
     onViewAllLiveSessionsClick: () -> Unit
@@ -63,21 +67,25 @@ fun LiveSessionsCardContent(
     }
 
     Column(
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(16.dp)
+        modifier = modifier.padding(horizontal = 16.dp, vertical = 8.dp),
+        horizontalAlignment = Alignment.CenterHorizontally
     ) {
-        Text(
-            text = stringResource(R.string.course_container_content_tab_live_sessions),
-            style = MaterialTheme.appTypography.titleMedium,
-            color = MaterialTheme.appColors.textPrimary
-        )
-        Spacer(modifier = Modifier.height(16.dp))
+        if (showTitle) {
+            Text(
+                modifier = Modifier.fillMaxWidth(),
+                text = stringResource(R.string.course_container_content_tab_live_sessions),
+                style = MaterialTheme.appTypography.titleMedium,
+                color = MaterialTheme.appColors.textPrimary,
+                textAlign = TextAlign.Center
+            )
+            Spacer(modifier = Modifier.height(16.dp))
+        }
 
         // Tabs
         Row(
             modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.spacedBy(8.dp)
+            horizontalArrangement = Arrangement.Center,
+            verticalAlignment = Alignment.CenterVertically
         ) {
             LiveTabButton(
                 text = stringResource(R.string.course_live_sessions_today),
@@ -85,12 +93,14 @@ fun LiveSessionsCardContent(
                 isSelected = selectedTab == "today",
                 onClick = { selectedTab = "today" }
             )
+            Spacer(modifier = Modifier.width(8.dp))
             LiveTabButton(
                 text = stringResource(R.string.course_live_sessions_upcoming),
                 count = uiState.liveClassesUpcoming.size,
                 isSelected = selectedTab == "upcoming",
                 onClick = { selectedTab = "upcoming" }
             )
+            Spacer(modifier = Modifier.width(8.dp))
             LiveTabButton(
                 text = stringResource(R.string.course_live_sessions_past),
                 count = uiState.liveClassesPast.size,
@@ -99,7 +109,7 @@ fun LiveSessionsCardContent(
             )
         }
 
-        Spacer(modifier = Modifier.height(16.dp))
+        Spacer(modifier = Modifier.height(24.dp))
 
         if (sessions.isEmpty()) {
             Box(
@@ -111,11 +121,12 @@ fun LiveSessionsCardContent(
                 Text(
                     text = "No live sessions found",
                     style = MaterialTheme.appTypography.bodyMedium,
-                    color = MaterialTheme.appColors.textSecondary
+                    color = MaterialTheme.appColors.textSecondary,
+                    textAlign = TextAlign.Center
                 )
             }
         } else {
-            sessions.take(2).forEach { session ->
+            sessions.take(10).forEach { session ->
                 LiveSessionItem(
                     session = session,
                     type = selectedTab,
@@ -125,7 +136,7 @@ fun LiveSessionsCardContent(
             }
         }
 
-        if (sessions.size > 2) {
+        if (sessions.size > 10) {
             ViewAllButton(
                 text = stringResource(R.string.course_view_all_videos), // Reuse for now
                 onClick = onViewAllLiveSessionsClick
@@ -148,12 +159,18 @@ fun LiveTabButton(
                 if (isSelected) MaterialTheme.appColors.primary else MaterialTheme.appColors.cardViewBackground
             )
             .clickable(onClick = onClick)
-            .padding(horizontal = 12.dp, vertical = 8.dp)
+            .padding(horizontal = 12.dp, vertical = 8.dp),
+        contentAlignment = Alignment.Center
     ) {
         Text(
             text = "$text ($count)",
-            style = MaterialTheme.appTypography.labelMedium,
-            color = if (isSelected) MaterialTheme.appColors.primaryButtonText else MaterialTheme.appColors.textPrimary
+            style = MaterialTheme.appTypography.labelMedium.copy(
+                platformStyle = PlatformTextStyle(
+                    includeFontPadding = false
+                )
+            ),
+            color = if (isSelected) MaterialTheme.appColors.primaryButtonText else MaterialTheme.appColors.textPrimary,
+            textAlign = TextAlign.Center
         )
     }
 }
@@ -187,7 +204,7 @@ fun LiveSessionItem(
             )
             .padding(12.dp)
     ) {
-        Column {
+        Column(horizontalAlignment = Alignment.Start) {
             Row(
                 verticalAlignment = Alignment.CenterVertically
             ) {
@@ -230,7 +247,12 @@ fun LiveSessionItem(
                         Text(
                             text = stringResource(R.string.course_live_sessions_join),
                             color = Color.White,
-                            fontSize = 12.sp
+                            fontSize = 12.sp,
+                            style = MaterialTheme.appTypography.labelMedium.copy(
+                                platformStyle = PlatformTextStyle(
+                                    includeFontPadding = false
+                                )
+                            )
                         )
                     }
                 } else if (isPast) {

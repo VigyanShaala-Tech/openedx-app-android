@@ -18,6 +18,7 @@ import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.PagerState
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.Divider
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Scaffold
@@ -34,6 +35,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.PlatformTextStyle
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.fragment.app.FragmentManager
@@ -96,7 +98,7 @@ fun ContentTabScreen(
         ) {
             Row(
                 modifier = Modifier
-                    .padding(16.dp)
+                    .padding(start = 16.dp, top = 16.dp, end = 16.dp, bottom = 4.dp)
                     .then(tabsWidth)
                     .height(40.dp)
                     .clip(MaterialTheme.appShapes.buttonShape)
@@ -146,7 +148,11 @@ fun ContentTabScreen(
                             } else {
                                 MaterialTheme.appColors.primary
                             },
-                            style = MaterialTheme.typography.button,
+                            style = MaterialTheme.typography.button.copy(
+                                platformStyle = PlatformTextStyle(
+                                    includeFontPadding = false
+                                )
+                            ),
                             maxLines = 1
                         )
                     }
@@ -156,7 +162,8 @@ fun ContentTabScreen(
             HorizontalPager(
                 state = pagerState,
                 userScrollEnabled = false,
-                beyondViewportPageCount = CourseContentTab.entries.size
+                beyondViewportPageCount = CourseContentTab.entries.size,
+                modifier = Modifier.fillMaxSize()
             ) { page ->
                 if (page < CourseContentTab.entries.size) {
                     when (CourseContentTab.entries[page]) {
@@ -198,6 +205,10 @@ fun ContentTabScreen(
                             val uiState = homeViewModel.uiState.collectAsState().value
                             if (uiState is org.openedx.course.presentation.home.CourseHomeUIState.CourseData) {
                                 LiveSessionsCardContent(
+                                    modifier = Modifier
+                                        .fillMaxSize()
+                                        .verticalScroll(rememberScrollState())
+                                        .padding(top = 16.dp),
                                     uiState = uiState,
                                     onJoinClick = { session ->
                                         // Handle join click

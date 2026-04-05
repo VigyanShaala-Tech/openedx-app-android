@@ -8,6 +8,7 @@ import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.IntrinsicSize
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
@@ -186,23 +187,20 @@ private fun ContentTabUI(
                 modifier = Modifier
                     .padding(16.dp)
                     .then(tabsWidth)
-                    .height(40.dp)
+                    .height(IntrinsicSize.Min)
                     .clip(MaterialTheme.appShapes.buttonShape)
                     .border(
                         1.dp,
                         MaterialTheme.appColors.primary,
                         MaterialTheme.appShapes.buttonShape
-                    ),
+                    )
+                    .horizontalScroll(rememberScrollState()),
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 CourseContentTab.entries.forEachIndexed { index, tab ->
-
                     val isSelected = pagerState.currentPage == index
-
                     Box(
                         modifier = Modifier
-                            .weight(1f) // 🔥 equal width tabs
-                            .fillMaxHeight()
                             .background(
                                 if (isSelected)
                                     MaterialTheme.appColors.primary
@@ -214,7 +212,8 @@ private fun ContentTabUI(
                                     pagerState.scrollToPage(index)
                                 }
                                 onTabClicked(tab)
-                            },
+                            }
+                            .padding(horizontal = 20.dp, vertical = 10.dp),
                         contentAlignment = Alignment.Center
                     ) {
                         Text(
@@ -232,7 +231,6 @@ private fun ContentTabUI(
                         )
                     }
 
-                    // ✅ Divider BETWEEN tabs (not inside)
                     if (index != CourseContentTab.entries.lastIndex) {
                         Divider(
                             modifier = Modifier
@@ -311,13 +309,13 @@ private fun HandoutsUI(
 }
 
 @Preview(uiMode = Configuration.UI_MODE_NIGHT_NO)
-//@Preview(uiMode = Configuration.UI_MODE_NIGHT_YES)
+@Preview(uiMode = Configuration.UI_MODE_NIGHT_YES)
 @Composable
 private fun ContentTabScreenPreview() {
     OpenEdXTheme {
         ContentTabUI(
             windowSize = WindowSize(WindowType.Compact, WindowType.Compact),
-            pagerState = rememberPagerState { CourseContentTab.entries.size },
+            pagerState = rememberPagerState(initialPage = 3) { CourseContentTab.entries.size },
             content = { page ->
                 Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
                     Text(text = "Page $page Content")

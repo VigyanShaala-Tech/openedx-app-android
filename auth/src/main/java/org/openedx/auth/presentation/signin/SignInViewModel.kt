@@ -134,7 +134,7 @@ class SignInViewModel(
                         UIMessage.SnackBarMessage(resourceManager.getString(CoreRes.string.core_error_no_connection))
                 } else {
                     _uiMessage.value =
-                        UIMessage.SnackBarMessage(resourceManager.getString(CoreRes.string.core_error_unknown_error))
+                        UIMessage.SnackBarMessage(e.message ?: resourceManager.getString(CoreRes.string.core_error_unknown_error))
                 }
             }
             _uiState.update { it.copy(showProgress = false) }
@@ -189,28 +189,24 @@ class SignInViewModel(
                     interactor.sendLoginOtp(formattedPhone)
                 }
 
-                if (resp.success) {
-                    val resendAfter = resp.resend_after_seconds ?: 30
-                    _uiState.update {
-                        it.copy(
-                            otpSent = true,
-                            otpVerificationKey = resp.verification_key.orEmpty(),
-                            otpResendAfterSec = resendAfter,
-                            otpCanResend = false
-                        )
-                    }
-                    startOtpCountdown(resendAfter)
-                    _uiMessage.value = UIMessage.SnackBarMessage(resp.message)
-                } else {
-                    _uiMessage.value = UIMessage.SnackBarMessage(resp.message)
+                val resendAfter = resp.resend_after_seconds ?: 30
+                _uiState.update {
+                    it.copy(
+                        otpSent = true,
+                        otpVerificationKey = resp.verification_key.orEmpty(),
+                        otpResendAfterSec = resendAfter,
+                        otpCanResend = false
+                    )
                 }
+                startOtpCountdown(resendAfter)
+                _uiMessage.value = UIMessage.SnackBarMessage(resp.message)
             } catch (e: Exception) {
                 if (e.isInternetError()) {
                     _uiMessage.value =
                         UIMessage.SnackBarMessage(resourceManager.getString(CoreRes.string.core_error_no_connection))
                 } else {
                     _uiMessage.value =
-                        UIMessage.SnackBarMessage(resourceManager.getString(CoreRes.string.core_error_unknown_error))
+                        UIMessage.SnackBarMessage(e.message ?: resourceManager.getString(CoreRes.string.core_error_unknown_error))
                 }
             }
             _uiState.update { it.copy(showProgress = false) }
@@ -224,17 +220,14 @@ class SignInViewModel(
                 val formattedPhone = validator.formatPhoneNumber(mobile)
                 val key = uiState.value.otpVerificationKey
                 val verify = interactor.verifyOtp(formattedPhone, otp, key)
-                if (verify.success) {
-                    val updatedKey = verify.verification_key ?: key
-                    _uiState.update { it.copy(otpVerificationKey = updatedKey) }
-                    interactor.loginWithOtp(formattedPhone, otp, updatedKey)
-                    _uiState.update { it.copy(loginSuccess = true) }
-                    setUserId()
-                    appNotifier.send(SignInEvent())
-                    _uiMessage.value = UIMessage.SnackBarMessage(verify.message)
-                } else {
-                    _uiMessage.value = UIMessage.SnackBarMessage(verify.message)
-                }
+                
+                val updatedKey = verify.verification_key ?: key
+                _uiState.update { it.copy(otpVerificationKey = updatedKey) }
+                interactor.loginWithOtp(formattedPhone, otp, updatedKey)
+                _uiState.update { it.copy(loginSuccess = true) }
+                setUserId()
+                appNotifier.send(SignInEvent())
+                _uiMessage.value = UIMessage.SnackBarMessage(verify.message)
             } catch (e: Exception) {
                 if (e is EdxError.InvalidGrantException) {
                     _uiMessage.value =
@@ -244,7 +237,7 @@ class SignInViewModel(
                         UIMessage.SnackBarMessage(resourceManager.getString(CoreRes.string.core_error_no_connection))
                 } else {
                     _uiMessage.value =
-                        UIMessage.SnackBarMessage(resourceManager.getString(CoreRes.string.core_error_unknown_error))
+                        UIMessage.SnackBarMessage(e.message ?: resourceManager.getString(CoreRes.string.core_error_unknown_error))
                 }
                 _uiState.update { it.copy(loginFailure = true) }
             }

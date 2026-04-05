@@ -1,5 +1,6 @@
 package org.openedx.auth.data.repository
 
+import com.google.gson.Gson
 import org.openedx.auth.data.api.AuthApi
 import org.openedx.auth.data.api.OtpApi
 import org.openedx.auth.data.api.OtpLoginRequest
@@ -8,12 +9,15 @@ import org.openedx.auth.data.api.OtpVerifyRequest
 import org.openedx.auth.data.model.AuthType
 import org.openedx.auth.data.model.ValidationFields
 import org.openedx.auth.data.model.VsRegisterRequest
+import org.openedx.auth.data.api.OtpSendResponse
+import org.openedx.auth.data.api.OtpVerifyResponse
 import org.openedx.auth.domain.model.AuthResponse
 import org.openedx.core.ApiConstants
 import org.openedx.core.config.Config
 import org.openedx.core.data.storage.CorePreferences
 import org.openedx.core.domain.model.RegistrationField
 import org.openedx.core.system.EdxError
+import retrofit2.Response
 
 class AuthRepository(
     private val config: Config,
@@ -89,21 +93,70 @@ class AuthRepository(
     }
 
     // OTP Sign Up
-    suspend fun sendSignUpOtp(contact: String) = otpApi.sendSignUpOtp(OtpSendRequest(contact))
-    suspend fun resendSignUpOtp(contact: String) = otpApi.resendSignUpOtp(OtpSendRequest(contact))
+    suspend fun sendSignUpOtp(contact: String): OtpSendResponse {
+        return otpApi.sendSignUpOtp(OtpSendRequest(contact)).handleResponse()
+    }
+
+    suspend fun resendSignUpOtp(contact: String): OtpSendResponse {
+        return otpApi.resendSignUpOtp(OtpSendRequest(contact)).handleResponse()
+    }
 
     // OTP Login
-    suspend fun sendLoginOtp(contact: String) = otpApi.sendLoginOtp(OtpSendRequest(contact))
-    suspend fun resendLoginOtp(contact: String) = otpApi.resendLoginOtp(OtpSendRequest(contact))
+    suspend fun sendLoginOtp(contact: String): OtpSendResponse {
+        return otpApi.sendLoginOtp(OtpSendRequest(contact)).handleResponse()
+    }
+
+    suspend fun resendLoginOtp(contact: String): OtpSendResponse {
+        return otpApi.resendLoginOtp(OtpSendRequest(contact)).handleResponse()
+    }
 
     // Common OTP Verify
-    suspend fun verifyOtp(contact: String, otp: String, key: String) =
-        otpApi.verifyOtp(OtpVerifyRequest(contact, otp, key))
+    suspend fun verifyOtp(contact: String, otp: String, key: String): OtpVerifyResponse {
+        return otpApi.verifyOtp(OtpVerifyRequest(contact, otp, key)).handleResponse()
+    }
 
     suspend fun loginWithOtp(contact: String, otp: String, key: String) {
-        otpApi.loginWithOtp(OtpLoginRequest(contact, otp, key))
+        otpApi.loginWithOtp(OtpLoginRequest(contact, otp, key)).handleResponse()
             .mapToDomain()
             .processAuthResponse()
+    }
+
+    private fun <T> Response<T>.handleResponse(): T {
+        if (isSuccessful) {
+            val responseBody = body() ?: throw Exception("Empty response body")
+            try {
+                val jsonTree = Gson().toJsonTree(responseBody)
+                if (jsonTree.isJsonObject) {
+                    val jsonObject = jsonTree.asJsonObject
+                    if (jsonObject.has("success") && jsonObject.get("success").isJsonPrimitive) {
+                        if (!jsonObject.get("success").asBoolean) {
+                            val message = if (jsonObject.has("message") && !jsonObject.get("message").isJsonNull) {
+                                jsonObject.get("message").asString
+                            } else {
+                                "Request failed"
+                            }
+                            throw Exception(message)
+                        }
+                    }
+                }
+            } catch (e: Exception) {
+                if (e.message != null && e.message != "Request failed") throw e
+            }
+            return responseBody
+        } else {
+            val errorBodyStr = errorBody()?.string()
+            val message = try {
+                val map = Gson().fromJson(errorBodyStr, Map::class.java)
+                (map?.get("message") ?: map?.get("error"))?.toString() ?: "Error: ${code()}"
+            } catch (e: Exception) {
+                if (!errorBodyStr.isNullOrBlank()) {
+                    "Error ${code()}: $errorBodyStr"
+                } else {
+                    "Error: ${code()}"
+                }
+            }
+            throw Exception(message)
+        }
     }
 
     private suspend fun AuthResponse.processAuthResponse() {

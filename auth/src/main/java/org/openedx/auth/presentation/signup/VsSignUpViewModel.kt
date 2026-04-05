@@ -78,11 +78,11 @@ class VsSignUpViewModel(
                 e.printStackTrace()
                 _uiState.update { it.copy(isButtonLoading = false) }
                 val errorMessage = if (e.isInternetError()) {
-                    coreR.string.core_error_no_connection
+                    resourceManager.getString(coreR.string.core_error_no_connection)
                 } else {
-                    coreR.string.core_error_unknown_error
+                    e.message ?: resourceManager.getString(coreR.string.core_error_unknown_error)
                 }
-                _uiMessage.emit(UIMessage.SnackBarMessage(resourceManager.getString(errorMessage)))
+                _uiMessage.emit(UIMessage.SnackBarMessage(errorMessage))
             }
         }
     }
@@ -99,22 +99,23 @@ class VsSignUpViewModel(
                     interactor.sendSignUpOtp(formattedPhone)
                 }
 
-                if (response.success) {
-                    _uiState.update {
-                        it.copy(
-                            isOtpSent = true,
-                            verificationKey = response.verification_key,
-                            isOtpLoading = false
-                        )
-                    }
-                    _uiMessage.emit(UIMessage.SnackBarMessage(response.message))
-                } else {
-                    _uiState.update { it.copy(isOtpLoading = false) }
-                    _uiMessage.emit(UIMessage.SnackBarMessage(response.message))
+                val resendAfter = response.resend_after_seconds ?: 30
+                _uiState.update {
+                    it.copy(
+                        isOtpSent = true,
+                        verificationKey = response.verification_key,
+                        isOtpLoading = false
+                    )
                 }
+                _uiMessage.emit(UIMessage.SnackBarMessage(response.message))
             } catch (e: Exception) {
                 _uiState.update { it.copy(isOtpLoading = false) }
-                _uiMessage.emit(UIMessage.SnackBarMessage(e.message ?: "Failed to send OTP"))
+                val errorMessage = if (e.isInternetError()) {
+                    resourceManager.getString(coreR.string.core_error_no_connection)
+                } else {
+                    e.message ?: "Failed to send OTP"
+                }
+                _uiMessage.emit(UIMessage.SnackBarMessage(errorMessage))
             }
         }
     }
@@ -126,22 +127,22 @@ class VsSignUpViewModel(
         viewModelScope.launch {
             try {
                 val response = interactor.verifyOtp(Validator().formatPhoneNumber(phoneNumber), otpCode, verificationKey)
-                if (response.success) {
-                    _uiState.update {
-                        it.copy(
-                            isOtpVerified = true,
-                            verificationKey = response.verification_key,
-                            isOtpLoading = false
-                        )
-                    }
-                    _uiMessage.emit(UIMessage.SnackBarMessage(response.message))
-                } else {
-                    _uiState.update { it.copy(isOtpLoading = false) }
-                    _uiMessage.emit(UIMessage.SnackBarMessage(response.message))
+                _uiState.update {
+                    it.copy(
+                        isOtpVerified = true,
+                        verificationKey = response.verification_key,
+                        isOtpLoading = false
+                    )
                 }
+                _uiMessage.emit(UIMessage.SnackBarMessage(response.message))
             } catch (e: Exception) {
                 _uiState.update { it.copy(isOtpLoading = false) }
-                _uiMessage.emit(UIMessage.SnackBarMessage(e.message ?: "Failed to verify OTP"))
+                val errorMessage = if (e.isInternetError()) {
+                    resourceManager.getString(coreR.string.core_error_no_connection)
+                } else {
+                    e.message ?: "Failed to verify OTP"
+                }
+                _uiMessage.emit(UIMessage.SnackBarMessage(errorMessage))
             }
         }
     }

@@ -16,7 +16,8 @@ data class OtpVerifyRequest(
 data class OtpLoginRequest(
     val phone_number: String,
     val otp_code: String,
-    val verification_key: String
+    val verification_key: String,
+    val client_id: String
 )
 
 data class OtpSendResponse(

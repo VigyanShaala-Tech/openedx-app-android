@@ -116,7 +116,7 @@ class AuthRepository(
     }
 
     suspend fun loginWithOtp(contact: String, otp: String, key: String) {
-        otpApi.loginWithOtp(OtpLoginRequest(contact, otp, key)).handleResponse()
+        otpApi.loginWithOtp(OtpLoginRequest(contact, otp, key,config.getOAuthClientId())).handleResponse()
             .mapToDomain()
             .processAuthResponse()
     }

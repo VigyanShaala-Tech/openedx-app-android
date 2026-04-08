@@ -204,7 +204,7 @@ private fun NewDashboardScreenContent(
         mutableStateOf(
             windowSize.windowSizeValue(
                 expanded = PaddingValues(horizontal = 24.dp, vertical = 24.dp),
-                compact = PaddingValues(horizontal = 16.dp, vertical = 16.dp)
+                compact = PaddingValues(start = 16.dp, end = 16.dp, top = 0.dp, bottom = 16.dp)
             )
         )
     }

@@ -201,10 +201,10 @@ internal fun DashboardListView(
             mutableStateOf(
                 windowSize.windowSizeValue(
                     expanded = PaddingValues(
-                        top = 32.dp,
+                        top = 0.dp,
                         bottom = 40.dp
                     ),
-                    compact = PaddingValues(horizontal = 24.dp, vertical = 24.dp)
+                    compact = PaddingValues(horizontal = 24.dp, vertical = 0.dp)
                 )
             )
         }

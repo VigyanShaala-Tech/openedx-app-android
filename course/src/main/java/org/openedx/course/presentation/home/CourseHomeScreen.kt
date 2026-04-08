@@ -3,10 +3,13 @@ package org.openedx.course.presentation.home
 import android.content.res.Configuration.UI_MODE_NIGHT_NO
 import android.content.res.Configuration.UI_MODE_NIGHT_YES
 import androidx.compose.foundation.BorderStroke
-import androidx.compose.foundation.Image
+import androidx.compose.foundation.background
+import androidx.compose.foundation.border
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -17,6 +20,8 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.pager.PagerState
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.Card
 import androidx.compose.material.Icon
@@ -26,6 +31,7 @@ import androidx.compose.material.Surface
 import androidx.compose.material.Text
 import androidx.compose.material.TextButton
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.KeyboardArrowRight
 import androidx.compose.material.icons.automirrored.filled.List
 import androidx.compose.material.rememberScaffoldState
 import androidx.compose.runtime.Composable
@@ -36,7 +42,8 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.painter.Painter
 import androidx.compose.ui.platform.AndroidUriHandler
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
@@ -46,6 +53,8 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.window.Dialog
+import androidx.compose.ui.window.DialogProperties
 import androidx.fragment.app.FragmentManager
 import org.openedx.core.Mock
 import org.openedx.core.NoContentScreenType
@@ -247,18 +256,6 @@ private fun CourseHomeUI(
                                 .padding(horizontal = 16.dp),
                             verticalArrangement = Arrangement.spacedBy(16.dp)
                         ) {
-                            Spacer(modifier = Modifier.height(8.dp))
-                            
-                            // Vigyan Shaala Logo
-                            Image(
-                                painter = painterResource(id = coreR.drawable.core_logo_white),
-                                contentDescription = "Vigyan Shaala",
-                                modifier = Modifier
-                                    .fillMaxWidth()
-                                    .height(60.dp),
-                                contentScale = ContentScale.Fit
-                            )
-
                             if (uiState.datesBannerInfo.isBannerAvailableForDashboard()) {
                                 if (windowSize.isTablet) {
                                     CourseDatesBannerTablet(
@@ -292,11 +289,18 @@ private fun CourseHomeUI(
                             }
 
                             if (uiState.resumeComponent != null) {
-                                ResumeCourseButton(
-                                    modifier = Modifier.fillMaxWidth(),
-                                    block = uiState.resumeComponent,
+                                ResumeButton(
                                     displayName = uiState.resumeUnitTitle,
-                                    onResumeClick = onResumeClick
+                                    onClick = { onResumeClick(uiState.resumeComponent.id) }
+                                )
+                            }
+
+                            // Live Sessions Card
+                            DashboardCard {
+                                LiveSessionsCardContent(
+                                    uiState = uiState,
+                                    onJoinClick = onJoinClick,
+                                    onViewAllLiveSessionsClick = onViewAllLiveSessionsClick
                                 )
                             }
 
@@ -310,15 +314,6 @@ private fun CourseHomeUI(
                                     },
                                     onDownloadClick = onDownloadClick,
                                     onSubSectionClick = onSubSectionClick
-                                )
-                            }
-
-                            // Live Sessions Card
-                            DashboardCard {
-                                LiveSessionsCardContent(
-                                    uiState = uiState,
-                                    onJoinClick = onJoinClick,
-                                    onViewAllLiveSessionsClick = onViewAllLiveSessionsClick
                                 )
                             }
 
@@ -380,6 +375,186 @@ private fun CourseHomeUI(
 
                     CourseHomeUIState.Waiting -> {}
                 }
+            }
+        }
+    }
+}
+
+@Composable
+fun ResumeButton(
+    displayName: String,
+    onClick: () -> Unit
+) {
+    Card(
+        modifier = Modifier
+            .fillMaxWidth()
+            .height(64.dp)
+            .clickable { onClick() },
+        backgroundColor = Color(0xFF7CB342), // Green color from screenshot
+        shape = RoundedCornerShape(12.dp),
+        elevation = 0.dp
+    ) {
+        Row(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(horizontal = 16.dp),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.SpaceBetween
+        ) {
+            Text(
+                text = displayName,
+                style = MaterialTheme.appTypography.titleSmall,
+                color = Color.White,
+                fontWeight = FontWeight.Bold
+            )
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                Text(
+                    text = "Continue",
+                    style = MaterialTheme.appTypography.labelLarge,
+                    color = Color.White
+                )
+                Icon(
+                    imageVector = Icons.AutoMirrored.Filled.KeyboardArrowRight,
+                    contentDescription = null,
+                    tint = Color.White
+                )
+            }
+        }
+    }
+}
+
+@Composable
+fun ItemsRequiringAttentionDialog(
+    onDismiss: () -> Unit
+) {
+    Dialog(
+        onDismissRequest = onDismiss,
+        properties = DialogProperties(usePlatformDefaultWidth = false)
+    ) {
+        Box(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(24.dp),
+            contentAlignment = Alignment.Center
+        ) {
+            Card(
+                modifier = Modifier.fillMaxWidth(),
+                backgroundColor = MaterialTheme.appColors.cardViewBackground,
+                shape = RoundedCornerShape(16.dp),
+                elevation = 8.dp,
+                border = BorderStroke(1.dp, MaterialTheme.appColors.cardViewBorder)
+            ) {
+                Column(
+                    modifier = Modifier.padding(16.dp),
+                    verticalArrangement = Arrangement.spacedBy(12.dp)
+                ) {
+                    Text(
+                        text = "Items Requiring Attention",
+                        style = MaterialTheme.appTypography.titleMedium,
+                        color = MaterialTheme.appColors.textDark,
+                        fontWeight = FontWeight.Bold
+                    )
+
+                    // Item 1: Last Chance
+                    AttentionItem(
+                        icon = painterResource(id = coreR.drawable.core_ic_warning),
+                        iconTint = Color(0xFFD32F2F),
+                        title = "Last Chance!",
+                        subtitle = "Basic Assessment Tools due tomorrow",
+                        backgroundColor = Color(0xFFFFEBEE),
+                        borderColor = Color(0xFFFFCDD2),
+                        titleColor = Color(0xFFD32F2F)
+                    )
+
+                    // Item 2: Assignment Deadline
+                    AttentionItem(
+                        icon = painterResource(id = coreR.drawable.ic_core_watch_later),
+                        iconTint = Color.DarkGray,
+                        title = "Assignment Deadline",
+                        subtitle = "Intermediate Assessment — Due Mar 20"
+                    )
+
+                    // Item 3: Pending Assignment
+                    AttentionItem(
+                        icon = painterResource(id = R.drawable.course_ic_announcements),
+                        iconTint = Color(0xFF4CAF50),
+                        title = "Pending Assignment",
+                        subtitle = "Advanced Assessment — Due Mar 28",
+                        iconBoxColor = Color(0xFFE8F5E9)
+                    )
+
+                    // Item 4: Course End Date
+                    AttentionItem(
+                        icon = painterResource(id = coreR.drawable.core_ic_calendar),
+                        iconTint = Color(0xFF4CAF50),
+                        title = "Course End Date",
+                        subtitle = "Complete all modules by Apr 15",
+                        iconBoxColor = Color(0xFFE8F5E9)
+                    )
+                }
+            }
+        }
+    }
+}
+
+@Composable
+fun AttentionItem(
+    icon: Painter,
+    iconTint: Color,
+    title: String,
+    subtitle: String,
+    backgroundColor: Color = Color.Transparent,
+    borderColor: Color = MaterialTheme.appColors.cardViewBorder.copy(alpha = 0.5f),
+    titleColor: Color = MaterialTheme.appColors.textDark,
+    iconBoxColor: Color = Color.Transparent
+) {
+    Surface(
+        modifier = Modifier.fillMaxWidth(),
+        color = backgroundColor,
+        shape = RoundedCornerShape(12.dp),
+        border = BorderStroke(1.dp, borderColor)
+    ) {
+        Row(
+            modifier = Modifier.padding(12.dp),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Box(
+                modifier = Modifier
+                    .size(40.dp)
+                    .background(iconBoxColor, CircleShape)
+                    .then(
+                        if (iconBoxColor == Color.Transparent) {
+                            Modifier.border(
+                                1.dp,
+                                MaterialTheme.appColors.cardViewBorder.copy(alpha = 0.5f),
+                                CircleShape
+                            )
+                        } else {
+                            Modifier
+                        }
+                    ),
+                contentAlignment = Alignment.Center
+            ) {
+                Icon(
+                    painter = icon,
+                    contentDescription = null,
+                    tint = iconTint,
+                    modifier = Modifier.size(20.dp)
+                )
+            }
+            Spacer(modifier = Modifier.width(12.dp))
+            Column {
+                Text(
+                    text = title,
+                    style = MaterialTheme.appTypography.titleSmall,
+                    color = titleColor,
+                    fontWeight = FontWeight.Bold
+                )
+                Text(
+                    text = subtitle,
+                    style = MaterialTheme.appTypography.bodySmall,
+                    color = MaterialTheme.appColors.textPrimary
+                )
             }
         }
     }

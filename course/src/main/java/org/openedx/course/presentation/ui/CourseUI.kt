@@ -36,6 +36,7 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.Button
 import androidx.compose.material.ButtonDefaults
 import androidx.compose.material.Card
@@ -89,6 +90,8 @@ import androidx.compose.ui.tooling.preview.Devices
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.window.Dialog
+import androidx.compose.ui.window.DialogProperties
 import androidx.compose.ui.zIndex
 import coil.compose.AsyncImage
 import coil.request.ImageRequest
@@ -1631,6 +1634,143 @@ fun ResumeCourseButton(
             }
         }
     )
+}
+
+@Composable
+fun ItemsRequiringAttentionDialog(
+    onDismiss: () -> Unit
+) {
+    Dialog(
+        onDismissRequest = onDismiss,
+        properties = DialogProperties(usePlatformDefaultWidth = false)
+    ) {
+        Box(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(24.dp),
+            contentAlignment = Alignment.Center
+        ) {
+            Card(
+                modifier = Modifier.fillMaxWidth(),
+                backgroundColor = MaterialTheme.appColors.cardViewBackground,
+                shape = RoundedCornerShape(16.dp),
+                elevation = 8.dp,
+                border = BorderStroke(1.dp, MaterialTheme.appColors.cardViewBorder)
+            ) {
+                Column(
+                    modifier = Modifier.padding(16.dp),
+                    verticalArrangement = Arrangement.spacedBy(12.dp)
+                ) {
+                    Text(
+                        text = "Items Requiring Attention",
+                        style = MaterialTheme.appTypography.titleMedium,
+                        color = MaterialTheme.appColors.textDark,
+                        fontWeight = FontWeight.Bold
+                    )
+
+                    // Item 1: Last Chance
+                    AttentionItem(
+                        icon = painterResource(id = coreR.drawable.core_ic_warning),
+                        iconTint = Color(0xFFD32F2F),
+                        title = "Last Chance!",
+                        subtitle = "Basic Assessment Tools due tomorrow",
+                        backgroundColor = Color(0xFFFFEBEE),
+                        borderColor = Color(0xFFFFCDD2),
+                        titleColor = Color(0xFFD32F2F)
+                    )
+
+                    // Item 2: Assignment Deadline
+                    AttentionItem(
+                        icon = painterResource(id = coreR.drawable.ic_core_watch_later),
+                        iconTint = Color.DarkGray,
+                        title = "Assignment Deadline",
+                        subtitle = "Intermediate Assessment — Due Mar 20"
+                    )
+
+                    // Item 3: Pending Assignment
+                    AttentionItem(
+                        icon = painterResource(id = R.drawable.course_ic_announcements),
+                        iconTint = Color(0xFF4CAF50),
+                        title = "Pending Assignment",
+                        subtitle = "Advanced Assessment — Due Mar 28",
+                        iconBoxColor = Color(0xFFE8F5E9)
+                    )
+
+                    // Item 4: Course End Date
+                    AttentionItem(
+                        icon = painterResource(id = coreR.drawable.core_ic_calendar),
+                        iconTint = Color(0xFF4CAF50),
+                        title = "Course End Date",
+                        subtitle = "Complete all modules by Apr 15",
+                        iconBoxColor = Color(0xFFE8F5E9)
+                    )
+                }
+            }
+        }
+    }
+}
+
+@Composable
+fun AttentionItem(
+    icon: Painter,
+    iconTint: Color,
+    title: String,
+    subtitle: String,
+    backgroundColor: Color = Color.Transparent,
+    borderColor: Color = MaterialTheme.appColors.cardViewBorder.copy(alpha = 0.5f),
+    titleColor: Color = MaterialTheme.appColors.textDark,
+    iconBoxColor: Color = Color.Transparent
+) {
+    Surface(
+        modifier = Modifier.fillMaxWidth(),
+        color = backgroundColor,
+        shape = RoundedCornerShape(12.dp),
+        border = BorderStroke(1.dp, borderColor)
+    ) {
+        Row(
+            modifier = Modifier.padding(12.dp),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Box(
+                modifier = Modifier
+                    .size(40.dp)
+                    .background(iconBoxColor, CircleShape)
+                    .then(
+                        if (iconBoxColor == Color.Transparent) {
+                            Modifier.border(
+                                1.dp,
+                                MaterialTheme.appColors.cardViewBorder.copy(alpha = 0.5f),
+                                CircleShape
+                            )
+                        } else {
+                            Modifier
+                        }
+                    ),
+                contentAlignment = Alignment.Center
+            ) {
+                Icon(
+                    painter = icon,
+                    contentDescription = null,
+                    tint = iconTint,
+                    modifier = Modifier.size(20.dp)
+                )
+            }
+            Spacer(modifier = Modifier.width(12.dp))
+            Column {
+                Text(
+                    text = title,
+                    style = MaterialTheme.appTypography.titleSmall,
+                    color = titleColor,
+                    fontWeight = FontWeight.Bold
+                )
+                Text(
+                    text = subtitle,
+                    style = MaterialTheme.appTypography.bodySmall,
+                    color = MaterialTheme.appColors.textPrimary
+                )
+            }
+        }
+    }
 }
 
 @Preview(uiMode = Configuration.UI_MODE_NIGHT_NO)

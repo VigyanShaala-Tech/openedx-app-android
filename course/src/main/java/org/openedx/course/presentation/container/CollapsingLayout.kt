@@ -18,6 +18,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.pager.rememberPagerState
@@ -29,6 +30,7 @@ import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.Immutable
 import androidx.compose.runtime.MutableState
+import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.mutableFloatStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
@@ -108,9 +110,15 @@ internal fun CollapsingLayout(
     val windowSize = rememberWindowSize()
     val coroutineScope = rememberCoroutineScope()
     val configuration = LocalConfiguration.current
-    val rawFactor = (-imageHeight - offset.value) / -imageHeight
+    val hasImage = imageHeight > 0
+    val imageHeightPx = with(localDensity) { imageHeight.dp.toPx() }
+    val rawFactor = if (hasImage) {
+        (-imageHeightPx - offset.value) / -imageHeightPx
+    } else {
+        1f
+    }
     val factor = if (rawFactor.isNaN() || rawFactor < 0) 0f else rawFactor
-    val blurImagePadding = 40.dp
+    val blurImagePadding = if (hasImage) 40.dp else 0.dp
     val blurImagePaddingPx = with(localDensity) { blurImagePadding.toPx() }
     val toolbarOffset =
         (offset.value + backgroundImageHeight.floatValue - blurImagePaddingPx).roundToInt()
@@ -132,18 +140,17 @@ internal fun CollapsingLayout(
         60.dp
     }
 
+    val minValue = remember {
+        derivedStateOf {
+            (-expandedTopHeight.floatValue - backgroundImageHeight.floatValue + collapsedTopHeight.floatValue).coerceAtMost(0f)
+        }
+    }
+
     fun calculateOffset(delta: Float): Offset {
         val oldOffset = offset.value
         val maxValue = 0f
-        val minValue =
-            (-expandedTopHeight.floatValue - backgroundImageHeight.floatValue + collapsedTopHeight.floatValue).let {
-                if (it >= maxValue) {
-                    0f
-                } else {
-                    it
-                }
-            }
-        val newOffset = (oldOffset + delta).coerceIn(minValue, maxValue)
+        val currentMinValue = minValue.value
+        val newOffset = (oldOffset + delta).coerceIn(currentMinValue, maxValue)
         coroutineScope.launch {
             offset.snapTo(newOffset)
         }
@@ -155,7 +162,7 @@ internal fun CollapsingLayout(
             override fun onPreScroll(available: Offset, source: NestedScrollSource): Offset =
                 when {
                     available.y >= 0 -> Offset.Zero
-                    offset.value == -expandedTopHeight.floatValue -> Offset.Zero
+                    offset.value <= minValue.value -> Offset.Zero
                     else -> calculateOffset(available.y)
                 }
 
@@ -166,7 +173,7 @@ internal fun CollapsingLayout(
             ): Offset =
                 when {
                     available.y <= 0 -> Offset.Zero
-                    offset.value == 0f -> Offset.Zero
+                    offset.value >= 0f -> Offset.Zero
                     else -> calculateOffset(available.y)
                 }
         }
@@ -192,8 +199,7 @@ internal fun CollapsingLayout(
                             val yEnd = change.position.y
                             val yDelta = yEnd - yStart
                             val scrollDown = yDelta > 0
-                            val collapsedOffset = -expandedTopHeight.floatValue - backgroundImageHeight.floatValue +
-                                    collapsedTopHeight.floatValue
+                            val collapsedOffset = minValue.value
                             val expandedOffset = 0f
 
                             launch {
@@ -285,17 +291,19 @@ private fun CollapsingLayoutTablet(
     bodyContent: @Composable BoxScope.() -> Unit,
 ) {
     if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
-        Image(
-            modifier = Modifier
-                .fillMaxWidth()
-                .height(imageHeight.dp)
-                .onSizeChanged { size ->
-                    backgroundImageHeight.value = size.height.toFloat()
-                },
-            bitmap = courseImage.asImageBitmap(),
-            contentDescription = null,
-            contentScale = ContentScale.Crop
-        )
+        if (imageHeight > 0) {
+            Image(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(imageHeight.dp)
+                    .onSizeChanged { size ->
+                        backgroundImageHeight.value = size.height.toFloat()
+                    },
+                bitmap = courseImage.asImageBitmap(),
+                contentDescription = null,
+                contentScale = ContentScale.Crop
+            )
+        }
         Box(
             modifier = Modifier
                 .offset {
@@ -318,15 +326,17 @@ private fun CollapsingLayoutTablet(
                     )
                     .align(Alignment.Center)
             )
-            Image(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .height(blurImagePadding)
+            if (imageHeight > 0) {
+                Image(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(blurImagePadding)
                     .align(Alignment.TopCenter),
-                bitmap = courseImage.asImageBitmap(),
-                contentDescription = null,
-                contentScale = ContentScale.Crop,
-            )
+                    bitmap = courseImage.asImageBitmap(),
+                    contentDescription = null,
+                    contentScale = ContentScale.Crop,
+                )
+            }
             Box(
                 modifier = Modifier
                     .background(MaterialTheme.appColors.courseHomeHeaderShade)
@@ -341,17 +351,19 @@ private fun CollapsingLayoutTablet(
         }
     } else {
         val backgroundColor = MaterialTheme.appColors.background
-        Image(
-            modifier = Modifier
-                .fillMaxWidth()
-                .height(imageHeight.dp)
-                .onSizeChanged { size ->
-                    backgroundImageHeight.value = size.height.toFloat()
-                },
-            bitmap = courseImage.asImageBitmap(),
-            contentDescription = null,
-            contentScale = ContentScale.Crop
-        )
+        if (imageHeight > 0) {
+            Image(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(imageHeight.dp)
+                    .onSizeChanged { size ->
+                        backgroundImageHeight.value = size.height.toFloat()
+                    },
+                bitmap = courseImage.asImageBitmap(),
+                contentDescription = null,
+                contentScale = ContentScale.Crop
+            )
+        }
         Box(
             modifier = Modifier
                 .fillMaxWidth()
@@ -360,18 +372,20 @@ private fun CollapsingLayoutTablet(
                 .background(backgroundColor)
         )
 
-        Box(
-            modifier = Modifier
-                .fillMaxWidth()
-                .height(imageHeight.dp)
-                .background(
-                    brush = Brush.verticalGradient(
-                        colors = listOf(backgroundColor, Color.Transparent),
-                        startY = 500f,
-                        endY = 400f
-                    )
-                ),
-        )
+        if (imageHeight > 0) {
+            Box(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(imageHeight.dp)
+                    .background(
+                        brush = Brush.verticalGradient(
+                            colors = listOf(backgroundColor, Color.Transparent),
+                            startY = 500f,
+                            endY = 400f
+                        )
+                    ),
+            )
+        }
         Box(
             modifier = Modifier
                 .fillMaxWidth()
@@ -496,16 +510,18 @@ private fun CollapsingLayoutMobile(
                         )
                         .align(Alignment.Center)
                 )
-                Image(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .height(blurImagePadding)
-                        .align(Alignment.TopCenter),
-                    bitmap = courseImage.asImageBitmap(),
-                    contentDescription = null,
-                    contentScale = ContentScale.Crop,
-                    alignment = Alignment.Center,
-                )
+                if (imageHeight > 0) {
+                    Image(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .height(blurImagePadding)
+                            .align(Alignment.TopCenter),
+                        bitmap = courseImage.asImageBitmap(),
+                        contentDescription = null,
+                        contentScale = ContentScale.Crop,
+                        alignment = Alignment.Center,
+                    )
+                }
                 Box(
                     modifier = Modifier
                         .background(MaterialTheme.appColors.courseHomeHeaderShade)
@@ -520,17 +536,19 @@ private fun CollapsingLayoutMobile(
             }
         } else {
             val backgroundColor = MaterialTheme.appColors.background
-            Image(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .height(imageHeight.dp)
-                    .onSizeChanged { size ->
-                        backgroundImageHeight.value = size.height.toFloat()
-                    },
-                bitmap = courseImage.asImageBitmap(),
-                contentDescription = null,
-                contentScale = ContentScale.Crop
-            )
+            if (imageHeight > 0) {
+                Image(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(imageHeight.dp)
+                        .onSizeChanged { size ->
+                            backgroundImageHeight.value = size.height.toFloat()
+                        },
+                    bitmap = courseImage.asImageBitmap(),
+                    contentDescription = null,
+                    contentScale = ContentScale.Crop
+                )
+            }
             Box(
                 modifier = Modifier
                     .fillMaxWidth()
@@ -596,17 +614,19 @@ private fun CollapsingLayoutMobile(
         )
     } else {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
-            Image(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .height(imageHeight.dp)
-                    .onSizeChanged { size ->
-                        backgroundImageHeight.value = size.height.toFloat()
-                    },
-                bitmap = courseImage.asImageBitmap(),
-                contentDescription = null,
-                contentScale = ContentScale.Crop
-            )
+            if (imageHeight > 0) {
+                Image(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(imageHeight.dp)
+                        .onSizeChanged { size ->
+                            backgroundImageHeight.value = size.height.toFloat()
+                        },
+                    bitmap = courseImage.asImageBitmap(),
+                    contentDescription = null,
+                    contentScale = ContentScale.Crop
+                )
+            }
             Box(
                 modifier = Modifier
                     .offset { IntOffset(x = 0, y = toolbarBackgroundOffset) }
@@ -625,16 +645,18 @@ private fun CollapsingLayoutMobile(
                         )
                         .align(Alignment.Center)
                 )
-                Image(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .height(blurImagePadding)
-                        .align(Alignment.TopCenter),
-                    bitmap = courseImage.asImageBitmap(),
-                    contentDescription = null,
-                    contentScale = ContentScale.Crop,
-                    alignment = PixelAlignment(0f, blurImageAlignment),
-                )
+                if (imageHeight > 0) {
+                    Image(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .height(blurImagePadding)
+                            .align(Alignment.TopCenter),
+                        bitmap = courseImage.asImageBitmap(),
+                        contentDescription = null,
+                        contentScale = ContentScale.Crop,
+                        alignment = PixelAlignment(0f, blurImageAlignment),
+                    )
+                }
                 Box(
                     modifier = Modifier
                         .background(MaterialTheme.appColors.courseHomeHeaderShade)
@@ -649,17 +671,19 @@ private fun CollapsingLayoutMobile(
             }
         } else {
             val backgroundColor = MaterialTheme.appColors.background
-            Image(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .height(imageHeight.dp)
-                    .onSizeChanged { size ->
-                        backgroundImageHeight.value = size.height.toFloat()
-                    },
-                bitmap = courseImage.asImageBitmap(),
-                contentDescription = null,
-                contentScale = ContentScale.Crop
-            )
+            if (imageHeight > 0) {
+                Image(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(imageHeight.dp)
+                        .onSizeChanged { size ->
+                            backgroundImageHeight.value = size.height.toFloat()
+                        },
+                    bitmap = courseImage.asImageBitmap(),
+                    contentDescription = null,
+                    contentScale = ContentScale.Crop
+                )
+            }
             Box(
                 modifier = Modifier
                     .fillMaxWidth()
@@ -668,18 +692,20 @@ private fun CollapsingLayoutMobile(
                     .background(backgroundColor)
             )
 
-            Box(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .height(imageHeight.dp)
-                    .background(
-                        brush = Brush.verticalGradient(
-                            colors = listOf(backgroundColor, Color.Transparent),
-                            startY = 500f,
-                            endY = 400f
-                        )
-                    ),
-            )
+            if (imageHeight > 0) {
+                Box(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(imageHeight.dp)
+                        .background(
+                            brush = Brush.verticalGradient(
+                                colors = listOf(backgroundColor, Color.Transparent),
+                                startY = 500f,
+                                endY = 400f
+                            )
+                        ),
+                )
+            }
             Box(
                 modifier = Modifier
                     .fillMaxWidth()

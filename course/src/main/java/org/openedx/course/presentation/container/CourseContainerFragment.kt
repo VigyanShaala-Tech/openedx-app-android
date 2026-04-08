@@ -101,6 +101,7 @@ import org.openedx.course.presentation.handouts.HandoutsScreen
 import org.openedx.course.presentation.handouts.HandoutsType
 import org.openedx.course.presentation.home.CourseHomePagerTab
 import org.openedx.course.presentation.home.CourseHomeScreen
+import org.openedx.course.presentation.home.ItemsRequiringAttentionDialog
 import org.openedx.course.presentation.offline.CourseOfflineScreen
 import org.openedx.course.presentation.progress.CourseProgressScreen
 import org.openedx.course.presentation.ui.DatesShiftedSnackBar
@@ -273,6 +274,8 @@ fun CourseDashboard(
     val refreshing by viewModel.refreshing.collectAsState(true)
     val courseImage by viewModel.courseImage.collectAsState()
     val uiMessage by viewModel.uiMessage.collectAsState(null)
+    var showAttentionDialog by remember { mutableStateOf(false) }
+
     val requiredTab = when (openTab.uppercase()) {
         CourseContainerTab.HOME.name -> CourseContainerTab.HOME
         CourseContainerTab.DATES.name -> CourseContainerTab.DATES
@@ -370,11 +373,12 @@ fun CourseDashboard(
                             .padding(paddingValues)
                             .pullRefresh(pullRefreshState),
                         courseImage = courseImage,
-                        imageHeight = 200,
+                        imageHeight = 250,
                         expandedTop = {
                             ExpandedHeaderContent(
                                 courseTitle = viewModel.courseName,
-                                org = viewModel.courseDetails?.courseInfoOverview?.org ?: ""
+                                org = viewModel.courseDetails?.courseInfoOverview?.org ?: "",
+                                onNotificationClick = { showAttentionDialog = true }
                             )
                         },
                         collapsedTop = {
@@ -455,6 +459,9 @@ fun CourseDashboard(
                     }
                 }
             }
+        }
+        if (showAttentionDialog) {
+            ItemsRequiringAttentionDialog(onDismiss = { showAttentionDialog = false })
         }
     }
 }

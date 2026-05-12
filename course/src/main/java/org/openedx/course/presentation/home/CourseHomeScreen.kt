@@ -185,8 +185,7 @@ fun CourseHomeScreen(
             onNavigateToContent(CourseContentTab.HANDOUTS)
         },
         onJoinClick = { session ->
-            // Handle join click, e.g. open in browser or deep link
-            AndroidUriHandler(context).openUri("https://zoom.us/j/${session.id}") // Placeholder
+            viewModel.joinMeeting(fragmentManager, session.joinUrl, session.topic)
         },
         onViewAllLiveSessionsClick = {
             onNavigateToContent(CourseContentTab.LIVE_SESSIONS)

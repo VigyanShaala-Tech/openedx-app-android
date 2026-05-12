@@ -3,6 +3,8 @@ package org.openedx.core.ui
 import android.annotation.SuppressLint
 import android.content.Intent
 import android.net.Uri
+import android.webkit.PermissionRequest
+import android.webkit.WebChromeClient
 import android.webkit.WebResourceRequest
 import android.webkit.WebView
 import android.webkit.WebViewClient
@@ -163,6 +165,11 @@ private fun WebViewContent(
                         }
                     }
                 }
+                webChromeClient = object : WebChromeClient() {
+                    override fun onPermissionRequest(request: PermissionRequest?) {
+                        request?.grant(request.resources)
+                    }
+                }
                 with(settings) {
                     javaScriptEnabled = true
                     loadWithOverviewMode = true
@@ -170,6 +177,9 @@ private fun WebViewContent(
                     setSupportZoom(true)
                     loadsImagesAutomatically = true
                     domStorageEnabled = true
+                    allowFileAccess = true
+                    allowContentAccess = true
+                    mediaPlaybackRequiresUserGesture = false
                 }
                 isVerticalScrollBarEnabled = false
                 isHorizontalScrollBarEnabled = false

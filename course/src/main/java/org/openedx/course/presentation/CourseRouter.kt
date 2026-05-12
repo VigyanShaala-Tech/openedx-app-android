@@ -63,4 +63,6 @@ interface CourseRouter {
     fun navigateToDownloadQueue(fm: FragmentManager, descendants: List<String> = arrayListOf())
 
     fun navigateToDiscover(fm: FragmentManager)
+
+    fun navigateToWebContent(fm: FragmentManager, title: String, url: String)
 }

@@ -279,4 +279,7 @@ class CourseRepository(
 
     suspend fun getLiveClasses(courseId: String, type: String, page: Int) =
         api.getLiveClasses(courseId, type, page)
+
+    suspend fun getJoinMeetingUrl(meetingId: String) =
+        api.getJoinMeetingUrl(meetingId)
 }

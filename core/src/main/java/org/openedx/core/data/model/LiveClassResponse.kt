@@ -29,5 +29,7 @@ data class LiveClassModel(
     @SerializedName("status")
     val status: String,
     @SerializedName("occurrence_internal_id")
-    val occurrenceInternalId: String
+    val occurrenceInternalId: String,
+    @SerializedName("join_url")
+    val joinUrl: String
 )

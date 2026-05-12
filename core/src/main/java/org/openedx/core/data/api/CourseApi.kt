@@ -13,6 +13,7 @@ import org.openedx.core.data.model.CourseStructureModel
 import org.openedx.core.data.model.DownloadCoursePreview
 import org.openedx.core.data.model.EnrollmentStatus
 import org.openedx.core.data.model.HandoutsModel
+import org.openedx.core.data.model.JoinMeetingResponse
 import org.openedx.core.data.model.LiveClassResponse
 import org.openedx.core.data.model.ResetCourseDates
 import retrofit2.http.Body
@@ -123,4 +124,9 @@ interface CourseApi {
         @Query("type") type: String,
         @Query("page") page: Int
     ): LiveClassResponse
+
+    @GET("/api/v1/live-classes/join/{meeting_id}/")
+    suspend fun getJoinMeetingUrl(
+        @Path("meeting_id") meetingId: String
+    ): JoinMeetingResponse
 }

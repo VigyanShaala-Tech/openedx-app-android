@@ -128,7 +128,7 @@ fun ContentTabScreen(
                                     .padding(top = 16.dp),
                                 uiState = uiState,
                                 onJoinClick = { session ->
-                                    // Handle join click
+                                    homeViewModel.joinMeeting(fragmentManager, session.joinUrl, session.topic)
                                 },
                                 onViewAllLiveSessionsClick = {}
                             )

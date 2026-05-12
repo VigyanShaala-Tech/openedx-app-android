@@ -1,5 +1,6 @@
 package org.openedx.course.presentation.home
 
+import android.net.Uri
 import androidx.fragment.app.FragmentManager
 import androidx.lifecycle.viewModelScope
 import kotlinx.coroutines.Dispatchers
@@ -721,6 +722,21 @@ class CourseHomeViewModel(
                     put(CourseAnalyticsKey.COURSE_NAME.key, currentState.courseStructure.name)
                 }
             )
+        }
+    }
+
+    fun joinMeeting(fragmentManager: FragmentManager, meetingUrl: String, topic: String) {
+        try {
+            _uiState.value = CourseHomeUIState.Waiting // To trigger state update back to CourseData
+            getCourseData()
+
+            val joinUrl = Uri.parse(meetingUrl).buildUpon()
+                .appendQueryParameter("isMobile", "true")
+                .build().toString()
+
+            courseRouter.navigateToWebContent(fragmentManager, topic, joinUrl)
+        } catch (e: Exception) {
+            e.printStackTrace()
         }
     }
 }

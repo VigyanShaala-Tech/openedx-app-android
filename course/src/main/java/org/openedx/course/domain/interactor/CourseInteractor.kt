@@ -127,4 +127,7 @@ class CourseInteractor(
 
     suspend fun getLiveClasses(courseId: String, type: String, page: Int) =
         repository.getLiveClasses(courseId, type, page)
+
+    suspend fun getJoinMeetingUrl(meetingId: String) =
+        repository.getJoinMeetingUrl(meetingId)
 }

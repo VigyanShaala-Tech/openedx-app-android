@@ -27,6 +27,7 @@ class DeepLink(params: Map<String, String>) {
 }
 
 enum class DeepLinkType(val type: String) {
+    DASHBOARD("dashboard"),
     DISCOVERY("discovery"),
     DISCOVERY_COURSE_DETAIL("discovery_course_detail"),
     DISCOVERY_PROGRAM_DETAIL("discovery_program_detail"),

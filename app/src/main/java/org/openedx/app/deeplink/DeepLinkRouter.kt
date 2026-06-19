@@ -55,6 +55,7 @@ class DeepLinkRouter(
 
     private fun handleProgramAndProfileNavigation(fm: FragmentManager, deepLink: DeepLink) {
         when (deepLink.type) {
+            DeepLinkType.DASHBOARD -> navigateToDashboard(fm)
             DeepLinkType.PROGRAM -> navigateToProgram(fm, deepLink)
             DeepLinkType.PROFILE, DeepLinkType.USER_PROFILE -> navigateToProfile(fm)
             else -> handleCourseRelatedNavigation(fm, deepLink)

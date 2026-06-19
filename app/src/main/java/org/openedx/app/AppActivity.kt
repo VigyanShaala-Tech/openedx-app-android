@@ -116,6 +116,26 @@ class AppActivity : AppCompatActivity(), InsetHolder, WindowSizeHolder {
         observeDownloadFailedDialog()
 
         calendarSyncScheduler.scheduleDailySync()
+
+        handleDeepLink(intent?.data)
+    }
+
+    private fun handleDeepLink(data: Uri?) {
+        if (data == null) return
+        val isVigyanShaalaDashboard =
+            (data.host == "apps.uat.vigyanshaala.com" && data.path?.contains("learner-dashboard") == true) ||
+                    (data.host == "uat.vigyanshaala.com" && data.path?.contains("dashboard") == true) ||
+                    (data.scheme == BuildConfig.APPLICATION_ID && data.host == "open")
+
+        if (isVigyanShaalaDashboard) {
+            val screen = data.getQueryParameter("scr")
+            if (screen == "Dashboard") {
+                viewModel.makeExternalRoute(
+                    supportFragmentManager,
+                    DeepLink(mapOf(DeepLink.Keys.SCREEN_NAME.value to "dashboard"))
+                )
+            }
+        }
     }
 
     private fun setupWindowInsets(savedInstanceState: Bundle?) {
@@ -222,6 +242,8 @@ class AppActivity : AppCompatActivity(), InsetHolder, WindowSizeHolder {
     override fun onNewIntent(intent: Intent) {
         super.onNewIntent(intent)
         this.intent = intent
+
+        handleDeepLink(intent.data)
 
         if (authCode != null) {
             addFragment(SignInFragment.newInstance(null, null, authCode = authCode))

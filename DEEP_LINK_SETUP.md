@@ -6,6 +6,7 @@ This guide explains how to maintain and update the Deep Linking functionality fo
 The app is currently configured to handle the following URLs:
 - `https://apps.uat.vigyanshaala.com/learner-dashboard/?act=open&scr=Dashboard`
 - `https://uat.vigyanshaala.com/dashboard?act=open&scr=Dashboard`
+- `https://uat.vigyanshaala.com/courses/<course_id>/courseware/?act=open&scr=CourseWare&CId=<course_id>`
 
 ## 2. Play Store Deployment Steps (CRITICAL)
 

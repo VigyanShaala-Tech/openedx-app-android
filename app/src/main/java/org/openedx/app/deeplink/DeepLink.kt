@@ -4,7 +4,7 @@ class DeepLink(params: Map<String, String>) {
 
     private val screenName = params[Keys.SCREEN_NAME.value]
     private val notificationType = params[Keys.NOTIFICATION_TYPE.value]
-    val courseId = params[Keys.COURSE_ID.value]
+    val courseId = params[Keys.COURSE_ID.value] ?: params[Keys.COURSE_ID_ALT.value]
     val pathId = params[Keys.PATH_ID.value]
     val componentId = params[Keys.COMPONENT_ID.value]
     val topicId = params[Keys.TOPIC_ID.value]
@@ -17,6 +17,7 @@ class DeepLink(params: Map<String, String>) {
         SCREEN_NAME("screen_name"),
         NOTIFICATION_TYPE("notification_type"),
         COURSE_ID("course_id"),
+        COURSE_ID_ALT("CId"),
         PATH_ID("path_id"),
         COMPONENT_ID("component_id"),
         TOPIC_ID("topic_id"),
@@ -28,6 +29,7 @@ class DeepLink(params: Map<String, String>) {
 
 enum class DeepLinkType(val type: String) {
     DASHBOARD("dashboard"),
+    COURSE_WARE("CourseWare"),
     DISCOVERY("discovery"),
     DISCOVERY_COURSE_DETAIL("discovery_course_detail"),
     DISCOVERY_PROGRAM_DETAIL("discovery_program_detail"),

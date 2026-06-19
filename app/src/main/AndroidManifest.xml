@@ -100,6 +100,8 @@
                 <data android:host="uat.vigyanshaala.com" />
                 <data android:pathPrefix="/learner-dashboard" />
                 <data android:pathPrefix="/dashboard" />
+                <data android:pathPrefix="/courses" />
+                <data android:pathPrefix="/courses/" />
             </intent-filter>
         </activity>
 

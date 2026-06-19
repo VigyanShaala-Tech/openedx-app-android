@@ -278,9 +278,11 @@ fun CourseDashboard(
 
     val requiredTab = when (openTab.uppercase()) {
         CourseContainerTab.HOME.name -> CourseContainerTab.HOME
+        CourseContainerTab.CONTENT.name -> CourseContainerTab.CONTENT
         CourseContainerTab.DATES.name -> CourseContainerTab.DATES
         CourseContainerTab.DISCUSSIONS.name -> CourseContainerTab.DISCUSSIONS
         CourseContainerTab.PROGRESS.name -> CourseContainerTab.PROGRESS
+        CourseContainerTab.OFFLINE.name -> CourseContainerTab.OFFLINE
         CourseContainerTab.MORE.name -> CourseContainerTab.MORE
         else -> CourseContainerTab.HOME
     }

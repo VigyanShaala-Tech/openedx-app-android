@@ -122,17 +122,38 @@ class AppActivity : AppCompatActivity(), InsetHolder, WindowSizeHolder {
 
     private fun handleDeepLink(data: Uri?) {
         if (data == null) return
-        val isVigyanShaalaDashboard =
+        val isVigyanShaalaDeepLink =
             (data.host == "apps.uat.vigyanshaala.com" && data.path?.contains("learner-dashboard") == true) ||
-                    (data.host == "uat.vigyanshaala.com" && data.path?.contains("dashboard") == true) ||
+                    (data.host == "uat.vigyanshaala.com" && (data.path?.contains("dashboard") == true || data.path?.contains("courses") == true)) ||
                     (data.scheme == BuildConfig.APPLICATION_ID && data.host == "open")
 
-        if (isVigyanShaalaDashboard) {
+        if (isVigyanShaalaDeepLink) {
             val screen = data.getQueryParameter("scr")
-            if (screen == "Dashboard") {
+            if (screen != null) {
+                val params = mutableMapOf<String, String>()
+                params[DeepLink.Keys.SCREEN_NAME.value] = screen
+                data.queryParameterNames.forEach { name ->
+                    data.getQueryParameter(name)?.let { value ->
+                        params[name] = if (name == "CId" || name == "course_id") {
+                            value.replace(" ", "+")
+                        } else {
+                            value
+                        }
+                    }
+                }
+                
+                // Extract courseId from path if missing in query
+                if (!params.containsKey(DeepLink.Keys.COURSE_ID.value) && 
+                    !params.containsKey(DeepLink.Keys.COURSE_ID_ALT.value)) {
+                    val segments = data.pathSegments
+                    if (segments.size >= 2 && segments[0] == "courses") {
+                        params[DeepLink.Keys.COURSE_ID.value] = segments[1].replace(" ", "+")
+                    }
+                }
+
                 viewModel.makeExternalRoute(
                     supportFragmentManager,
-                    DeepLink(mapOf(DeepLink.Keys.SCREEN_NAME.value to "dashboard"))
+                    DeepLink(params)
                 )
             }
         }

@@ -1,5 +1,6 @@
 package org.openedx.app.deeplink
 
+import android.util.Log
 import androidx.fragment.app.FragmentManager
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -37,6 +38,7 @@ class DeepLinkRouter(
         get() = corePreferences.user != null
 
     fun makeRoute(fm: FragmentManager, deepLink: DeepLink) {
+        Log.d("DeepLinkRouter", "makeRoute: type=${deepLink.type}, courseId=${deepLink.courseId}")
         when (deepLink.type) {
             DeepLinkType.DISCOVERY -> navigateToDiscoveryScreen(fm)
             DeepLinkType.DISCOVERY_COURSE_DETAIL -> navigateToCourseDetail(fm, deepLink)
@@ -47,6 +49,7 @@ class DeepLinkRouter(
 
     private fun handleLoggedOutOrUserNavigation(fm: FragmentManager, deepLink: DeepLink) {
         if (!isUserLoggedIn) {
+            Log.d("DeepLinkRouter", "User not logged in, navigating to SignIn")
             navigateToSignIn(fm)
         } else {
             handleProgramAndProfileNavigation(fm, deepLink)
@@ -64,8 +67,16 @@ class DeepLinkRouter(
 
     private fun handleCourseRelatedNavigation(fm: FragmentManager, deepLink: DeepLink) {
         launch(Dispatchers.Main) {
-            val courseId = deepLink.courseId ?: return@launch navigateToDashboard(fm)
-            val course = getCourseDetails(courseId) ?: return@launch navigateToDashboard(fm)
+            val courseId = deepLink.courseId ?: run {
+                Log.d("DeepLinkRouter", "courseId is null, navigating to Dashboard")
+                return@launch navigateToDashboard(fm)
+            }
+            Log.d("DeepLinkRouter", "Fetching course details for: $courseId")
+            val course = getCourseDetails(courseId) ?: run {
+                Log.d("DeepLinkRouter", "Course details not found for: $courseId")
+                return@launch navigateToDashboard(fm)
+            }
+            Log.d("DeepLinkRouter", "Course found: ${course.name}, isEnrolled: ${course.isEnrolled}")
             if (course.isEnrolled != true) return@launch navigateToDashboard(fm)
 
             handleSpecificCourseNavigation(fm, deepLink, course.name.orEmpty())
@@ -73,9 +84,10 @@ class DeepLinkRouter(
     }
 
     private fun handleSpecificCourseNavigation(fm: FragmentManager, deepLink: DeepLink, courseTitle: String) {
+        Log.d("DeepLinkRouter", "handleSpecificCourseNavigation: type=${deepLink.type}")
         navigateToDashboard(fm)
         when (deepLink.type) {
-            DeepLinkType.COURSE_DASHBOARD, DeepLinkType.ENROLL, DeepLinkType.ADD_BETA_TESTER -> {
+            DeepLinkType.COURSE_WARE, DeepLinkType.COURSE_DASHBOARD, DeepLinkType.ENROLL, DeepLinkType.ADD_BETA_TESTER -> {
                 navigateToCourseDashboard(fm, deepLink, courseTitle)
             }
 
@@ -203,6 +215,7 @@ class DeepLinkRouter(
                 fm = fm,
                 courseId = courseId,
                 courseTitle = courseTitle,
+                openTab = ""
             )
         }
     }

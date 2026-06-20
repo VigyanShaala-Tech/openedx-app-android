@@ -133,7 +133,9 @@ val mockAccount = Account(
     mailingAddress = "",
     "example@email.com",
     null,
-    accountPrivacy = Account.Privacy.ALL_USERS
+    accountPrivacy = Account.Privacy.ALL_USERS,
+    whatsappNumber = "",
+    isWhatsappVerified = false
 )
 
 @Preview(uiMode = Configuration.UI_MODE_NIGHT_NO, showBackground = true)

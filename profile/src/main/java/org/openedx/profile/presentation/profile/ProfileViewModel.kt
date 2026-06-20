@@ -41,6 +41,14 @@ class ProfileViewModel(
     val isUpdating: LiveData<Boolean>
         get() = _isUpdating
 
+    private val _isOtpLoading = MutableStateFlow(false)
+    val isOtpLoading = _isOtpLoading.asStateFlow()
+
+    private val _isOtpSent = MutableStateFlow(false)
+    val isOtpSent = _isOtpSent.asStateFlow()
+
+    private val _verificationKey = MutableStateFlow<String?>(null)
+
     init {
         getAccount()
     }
@@ -89,6 +97,48 @@ class ProfileViewModel(
     fun updateAccount() {
         _isUpdating.value = true
         getAccount()
+    }
+
+    fun sendOtp(phoneNumber: String) {
+        if (phoneNumber.isBlank()) return
+        _isOtpLoading.value = true
+        viewModelScope.launch {
+            try {
+                val response = interactor.sendWhatsappOtp(phoneNumber)
+                _verificationKey.value = response.verification_key
+                _isOtpSent.value = true
+                _uiMessage.value = UIMessage.SnackBarMessage(response.message)
+            } catch (e: Exception) {
+                _uiMessage.value = UIMessage.SnackBarMessage(e.message ?: "Failed to send OTP")
+            } finally {
+                _isOtpLoading.value = false
+            }
+        }
+    }
+
+    fun verifyOtp(phoneNumber: String, otp: String) {
+        val key = _verificationKey.value ?: return
+        _isOtpLoading.value = true
+        viewModelScope.launch {
+            try {
+                val response = interactor.verifyWhatsappOtp(phoneNumber, otp, key)
+                if (response.success) {
+                    // Update account with verified WhatsApp number
+                    interactor.updateAccount(mapOf(
+                        "whatsapp_number" to phoneNumber,
+                        "is_whatsapp_verified" to true
+                    ))
+                    getAccount()
+                    _isOtpSent.value = false
+                    _verificationKey.value = null
+                }
+                _uiMessage.value = UIMessage.SnackBarMessage(response.message)
+            } catch (e: Exception) {
+                _uiMessage.value = UIMessage.SnackBarMessage(e.message ?: "Failed to verify OTP")
+            } finally {
+                _isOtpLoading.value = false
+            }
+        }
     }
 
     fun profileEditClicked(fragmentManager: FragmentManager) {

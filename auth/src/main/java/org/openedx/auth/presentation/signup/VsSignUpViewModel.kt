@@ -13,7 +13,6 @@ import org.openedx.auth.domain.interactor.AuthInteractor
 import org.openedx.auth.domain.model.SocialAuthResponse
 import org.openedx.auth.presentation.AuthAnalytics
 import org.openedx.auth.presentation.AuthRouter
-import org.openedx.core.Validator
 import org.openedx.core.data.storage.CorePreferences
 import org.openedx.core.system.notifier.app.AppNotifier
 import org.openedx.foundation.extension.isInternetError
@@ -53,9 +52,8 @@ class VsSignUpViewModel(
         email: String,
         name: String,
         password: String,
-        phoneNumber: String,
         userRole: String,
-        verificationKey: String? = null
+        socialAuth: SocialAuthResponse? = null
     ) {
         _uiState.update { it.copy(isButtonLoading = true) }
         viewModelScope.launch {
@@ -64,11 +62,11 @@ class VsSignUpViewModel(
                     email = email,
                     name = name,
                     password = password,
-                    phoneNumber = Validator().formatPhoneNumber(phoneNumber),
+                    phoneNumber = null,
                     termsOfService = true,
                     userRole = userRole.takeIf { it.isNotBlank() },
                     username = email,
-                    verificationKey = verificationKey ?: uiState.value.verificationKey.takeIf { uiState.value.isOtpVerified }
+                    verificationKey = null
                 )
 
                 interactor.registerVs(body)
@@ -87,66 +85,6 @@ class VsSignUpViewModel(
         }
     }
 
-    fun sendOtp(phoneNumber: String) {
-        if (phoneNumber.isBlank()) return
-        _uiState.update { it.copy(isOtpLoading = true) }
-        viewModelScope.launch {
-            try {
-                val formattedPhone = Validator().formatPhoneNumber(phoneNumber)
-                val response = if (uiState.value.isOtpSent) {
-                    interactor.resendSignUpOtp(formattedPhone)
-                } else {
-                    interactor.sendSignUpOtp(formattedPhone)
-                }
-
-                val resendAfter = response.resend_after_seconds ?: 30
-                _uiState.update {
-                    it.copy(
-                        isOtpSent = true,
-                        verificationKey = response.verification_key,
-                        isOtpLoading = false
-                    )
-                }
-                _uiMessage.emit(UIMessage.SnackBarMessage(response.message))
-            } catch (e: Exception) {
-                _uiState.update { it.copy(isOtpLoading = false) }
-                val errorMessage = if (e.isInternetError()) {
-                    resourceManager.getString(coreR.string.core_error_no_connection)
-                } else {
-                    e.message ?: "Failed to send OTP"
-                }
-                _uiMessage.emit(UIMessage.SnackBarMessage(errorMessage))
-            }
-        }
-    }
-
-
-    fun verifyOtp(phoneNumber: String, otpCode: String) {
-        val verificationKey = uiState.value.verificationKey ?: return
-        _uiState.update { it.copy(isOtpLoading = true) }
-        viewModelScope.launch {
-            try {
-                val response = interactor.verifyOtp(Validator().formatPhoneNumber(phoneNumber), otpCode, verificationKey)
-                _uiState.update {
-                    it.copy(
-                        isOtpVerified = true,
-                        verificationKey = response.verification_key,
-                        isOtpLoading = false
-                    )
-                }
-                _uiMessage.emit(UIMessage.SnackBarMessage(response.message))
-            } catch (e: Exception) {
-                _uiState.update { it.copy(isOtpLoading = false) }
-                val errorMessage = if (e.isInternetError()) {
-                    resourceManager.getString(coreR.string.core_error_no_connection)
-                } else {
-                    e.message ?: "Failed to verify OTP"
-                }
-                _uiMessage.emit(UIMessage.SnackBarMessage(errorMessage))
-            }
-        }
-    }
-
     fun navigateToSignIn() {
         _uiState.update { it.copy(navigateToSignIn = true) }
     }
@@ -159,10 +97,6 @@ class VsSignUpViewModel(
 data class VsSignUpUIState(
     val isButtonLoading: Boolean = false,
     val successLogin: Boolean = false,
-    val isOtpLoading: Boolean = false,
-    val isOtpSent: Boolean = false,
-    val isOtpVerified: Boolean = false,
-    val verificationKey: String? = null,
     val showRegisterSuccessDialog: Boolean = false,
     val navigateToSignIn: Boolean = false,
     val socialAuth: SocialAuthResponse? = null,

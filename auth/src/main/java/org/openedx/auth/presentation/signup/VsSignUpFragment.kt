@@ -57,8 +57,8 @@ class VsSignUpFragment : Fragment() {
                             activity?.supportFragmentManager?.popBackStackImmediate()
                         }
                     },
-                    onRegisterClick = { email, name, password, phone, role, verificationKey ->
-                        viewModel.register(email, name, password, phone, role, verificationKey)
+                    onRegisterClick = { email, name, password, role ->
+                        viewModel.register(email, name, password, role)
                     },
                     onSocialRegisterClick = { authType ->
                         if (authType == AuthType.GOOGLE) {
@@ -73,12 +73,6 @@ class VsSignUpFragment : Fragment() {
                                 viewModel.infoType
                             )
                         }
-                    },
-                    onSendOtpClick = { phone ->
-                        viewModel.sendOtp(phone)
-                    },
-                    onVerifyOtpClick = { phone, code ->
-                        viewModel.verifyOtp(phone, code)
                     },
                     onValidationError = { message ->
                         viewModel.showValidationMessage(message)

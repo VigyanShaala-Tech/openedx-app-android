@@ -84,4 +84,16 @@
     <string name="profile_about_vigyanshaala">About Vigyanshaala</string>
     <string name="profile_faqs">Frequently Asked Questions (FAQs)</string>
     <string name="profile_share_app">Share the Vigyanshaala App</string>
+
+    <string name="profile_whatsapp_number">WhatsApp Number</string>
+    <string name="profile_setup_whatsapp">Setup WhatsApp Number</string>
+    <string name="profile_whatsapp_verified">WhatsApp Verified</string>
+    <string name="profile_enter_whatsapp_number">Enter WhatsApp Number</string>
+    <string name="profile_send_otp">Send OTP</string>
+    <string name="profile_verify_otp">Verify OTP</string>
+    <string name="profile_enter_otp">Enter OTP</string>
+    <string name="profile_whatsapp_number_placeholder">+91 Enter WhatsApp number</string>
+    <string name="profile_otp_sent">OTP sent successfully</string>
+    <string name="profile_otp_verified">WhatsApp number verified successfully</string>
+    <string name="profile_invalid_otp">Invalid OTP. Please try again.</string>
 </resources>

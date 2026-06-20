@@ -1,8 +1,5 @@
 package org.openedx.auth.presentation.signup.compose
 
-import androidx.compose.animation.AnimatedVisibility
-import androidx.compose.animation.fadeIn
-import androidx.compose.animation.fadeOut
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
@@ -18,10 +15,8 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
-import androidx.compose.material.icons.filled.CheckCircle
 import androidx.compose.material.icons.filled.Visibility
 import androidx.compose.material.icons.filled.VisibilityOff
-import androidx.compose.material.icons.outlined.Smartphone
 import androidx.compose.material.rememberScaffoldState
 import androidx.compose.runtime.*
 import androidx.compose.runtime.saveable.rememberSaveable
@@ -45,7 +40,6 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import org.openedx.auth.R
 import org.openedx.auth.data.model.AuthType
 import org.openedx.auth.presentation.signup.VsSignUpUIState
 import org.openedx.auth.presentation.ui.SocialAuthView
@@ -55,8 +49,6 @@ import org.openedx.core.ui.theme.appShapes
 import org.openedx.core.ui.theme.appTypography
 import org.openedx.foundation.presentation.UIMessage
 import org.openedx.foundation.presentation.WindowSize
-import org.openedx.foundation.presentation.WindowType
-import org.openedx.foundation.presentation.windowSizeValue
 import org.openedx.core.R as coreR
 
 @Composable
@@ -65,22 +57,17 @@ fun VsSignUpView(
     uiState: VsSignUpUIState,
     uiMessage: UIMessage?,
     onBackClick: () -> Unit,
-    onRegisterClick: (String, String, String, String, String, String?) -> Unit,
+    onRegisterClick: (String, String, String, String) -> Unit,
     onSocialRegisterClick: (AuthType) -> Unit,
     onSignInClick: () -> Unit,
-    onSendOtpClick: (String) -> Unit,
-    onVerifyOtpClick: (String, String) -> Unit,
     onValidationError: (String) -> Unit,
     onDialogOkClick: () -> Unit = {},
 ) {
     val scaffoldState = rememberScaffoldState()
-    val focusManager = LocalFocusManager.current
     val uriHandler = LocalUriHandler.current
 
     var fullName by rememberSaveable { mutableStateOf("") }
     var email by rememberSaveable { mutableStateOf("") }
-    var mobileNumber by rememberSaveable { mutableStateOf("") }
-    var otpCode by rememberSaveable { mutableStateOf("") }
     var password by rememberSaveable { mutableStateOf("") }
     var confirmPassword by rememberSaveable { mutableStateOf("") }
     var selectedRole by rememberSaveable { mutableStateOf("student") }
@@ -211,162 +198,6 @@ fun VsSignUpView(
                 imeAction = ImeAction.Next
             )
 
-            // Mobile Number with OTP verification logic
-            Column(modifier = Modifier.padding(top = 16.dp)) {
-                Text(
-                    text = "Mobile Number (Optional)",
-                    style = MaterialTheme.appTypography.bodyMedium.copy(fontWeight = FontWeight.Bold),
-                    color = MaterialTheme.appColors.textPrimary
-                )
-                Spacer(modifier = Modifier.height(8.dp))
-                if (uiState.isOtpVerified) {
-                    // Verified State UI
-                    OutlinedTextField(
-                        value = mobileNumber,
-                        onValueChange = {},
-                        modifier = Modifier.fillMaxWidth(),
-                        readOnly = true,
-                        leadingIcon = { Icon(Icons.Outlined.Smartphone, contentDescription = null, tint = MaterialTheme.appColors.textPrimary) },
-                        trailingIcon = { 
-                            Icon(
-                                imageVector = Icons.Default.CheckCircle, 
-                                contentDescription = "Verified", 
-                                tint = MaterialTheme.appColors.primary,
-                                modifier = Modifier.size(24.dp)
-                            ) 
-                        },
-                        shape = MaterialTheme.appShapes.textFieldShape,
-                        colors = TextFieldDefaults.outlinedTextFieldColors(
-                            backgroundColor = MaterialTheme.appColors.textFieldBackground,
-                            unfocusedBorderColor = MaterialTheme.appColors.textFieldBorder,
-                            disabledBorderColor = MaterialTheme.appColors.textFieldBorder,
-                            textColor = MaterialTheme.appColors.textFieldText
-                        )
-                    )
-                } else {
-                    // Normal / Sent state UI
-                    Row(
-                        modifier = Modifier.fillMaxWidth(),
-                        verticalAlignment = Alignment.CenterVertically
-                    ) {
-                        OutlinedTextField(
-                            value = mobileNumber,
-                            onValueChange = { mobileNumber = it },
-                            modifier = Modifier
-                                .weight(1f),
-                            placeholder = { Text("+91 Enter mobile number", color = MaterialTheme.appColors.textSecondary) },
-                            leadingIcon = { Icon(Icons.Outlined.Smartphone, contentDescription = null, tint = MaterialTheme.appColors.textPrimary) },
-                            shape = MaterialTheme.appShapes.textFieldShape,
-                            colors = TextFieldDefaults.outlinedTextFieldColors(
-                                backgroundColor = MaterialTheme.appColors.textFieldBackground,
-                                unfocusedBorderColor = if (uiState.isOtpSent) MaterialTheme.appColors.primary else MaterialTheme.appColors.textFieldBorder,
-                                focusedBorderColor = MaterialTheme.appColors.primary,
-                                textColor = MaterialTheme.appColors.textFieldText
-                            ),
-                            keyboardOptions = KeyboardOptions(
-                                keyboardType = KeyboardType.Phone,
-                                imeAction = if (uiState.isOtpSent) ImeAction.Next else ImeAction.Done
-                            ),
-                            keyboardActions = KeyboardActions(
-                                onNext = { focusManager.moveFocus(FocusDirection.Down) },
-                                onDone = { focusManager.clearFocus() }
-                            )
-                        )
-                        
-                        AnimatedVisibility(
-                            visible = mobileNumber.isNotEmpty() || uiState.isOtpSent,
-                            enter = fadeIn(),
-                            exit = fadeOut()
-                        ) {
-                            Row {
-                                Spacer(modifier = Modifier.width(12.dp))
-                                Button(
-                                    onClick = { onSendOtpClick(mobileNumber) },
-                                    modifier = Modifier
-                                        .height(56.dp)
-                                        .widthIn(min = 100.dp),
-                                    shape = MaterialTheme.appShapes.buttonShape,
-                                    colors = ButtonDefaults.buttonColors(
-                                        backgroundColor = MaterialTheme.appColors.background,
-                                        contentColor = MaterialTheme.appColors.textPrimary
-                                    ),
-                                    elevation = ButtonDefaults.elevation(defaultElevation = 0.dp),
-                                    border = BorderStroke(1.dp, MaterialTheme.appColors.cardViewBorder),
-                                    enabled = !uiState.isOtpLoading
-                                ) {
-                                    if (uiState.isOtpLoading && !uiState.isOtpSent) {
-                                        CircularProgressIndicator(modifier = Modifier.size(20.dp), color = MaterialTheme.appColors.textPrimary)
-                                    } else {
-                                        Text(
-                                            text = if (uiState.isOtpSent) "Sent" else "Send OTP",
-                                            fontSize = 14.sp,
-                                            color = if (uiState.isOtpSent) MaterialTheme.appColors.textSecondary else MaterialTheme.appColors.textPrimary
-                                        )
-                                    }
-                                }
-                            }
-                        }
-                    }
-
-                    if (uiState.isOtpSent) {
-                        Spacer(modifier = Modifier.height(12.dp))
-                        Row(
-                            modifier = Modifier.fillMaxWidth(),
-                            verticalAlignment = Alignment.CenterVertically
-                        ) {
-                            OutlinedTextField(
-                                value = otpCode,
-                                onValueChange = { otpCode = it },
-                                modifier = Modifier.weight(1f),
-                                placeholder = { 
-                                    Box(modifier = Modifier.fillMaxWidth(), contentAlignment = Alignment.Center) {
-                                        Text("Enter OTP", color = MaterialTheme.appColors.textSecondary)
-                                    }
-                                },
-                                shape = MaterialTheme.appShapes.textFieldShape,
-                                colors = TextFieldDefaults.outlinedTextFieldColors(
-                                    backgroundColor = MaterialTheme.appColors.textFieldBackground,
-                                    unfocusedBorderColor = MaterialTheme.appColors.textFieldBorder,
-                                    focusedBorderColor = MaterialTheme.appColors.primary,
-                                    textColor = MaterialTheme.appColors.textFieldText
-                                ),
-                                keyboardOptions = KeyboardOptions(
-                                    keyboardType = KeyboardType.Number,
-                                    imeAction = ImeAction.Next
-                                ),
-                                keyboardActions = KeyboardActions(onNext = { focusManager.moveFocus(FocusDirection.Down) }),
-                                textStyle = LocalTextStyle.current.copy(textAlign = TextAlign.Center)
-                            )
-                            Spacer(modifier = Modifier.width(12.dp))
-                            Button(
-                                onClick = { onVerifyOtpClick(mobileNumber, otpCode) },
-                                modifier = Modifier
-                                    .height(56.dp)
-                                    .widthIn(min = 100.dp),
-                                shape = MaterialTheme.appShapes.buttonShape,
-                                colors = ButtonDefaults.buttonColors(
-                                    backgroundColor = MaterialTheme.appColors.primary,
-                                    contentColor = Color.White
-                                ),
-                                enabled = otpCode.length >= 4 && !uiState.isOtpLoading
-                            ) {
-                                if (uiState.isOtpLoading) {
-                                    CircularProgressIndicator(modifier = Modifier.size(20.dp), color = Color.White)
-                                } else {
-                                    Text("Verify", fontSize = 14.sp, fontWeight = FontWeight.Bold)
-                                }
-                            }
-                        }
-                    }
-                }
-                Text(
-                    text = "Verify your mobile to enable OTP login.",
-                    style = MaterialTheme.appTypography.bodySmall,
-                    color = MaterialTheme.appColors.textSecondary,
-                    modifier = Modifier.padding(top = 4.dp)
-                )
-            }
-
             VsSignUpInputField(
                 label = "Password",
                 value = password,
@@ -482,7 +313,7 @@ fun VsSignUpView(
 
                     if (fullNameError == null && emailError == null && passwordError == null && confirmPasswordError == null) {
                         if (isAgreed) {
-                            onRegisterClick(email, fullName, password, mobileNumber, selectedRole, uiState.verificationKey)
+                            onRegisterClick(email, fullName, password, selectedRole)
                         } else {
                             onValidationError("Please agree to the Terms of Service and Privacy Policy")
                         }

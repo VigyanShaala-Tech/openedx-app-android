@@ -53,6 +53,30 @@ class ProfileRepository(
 
     suspend fun deactivateAccount(password: String) = api.deactivateAccount(password)
 
+    suspend fun sendWhatsappOtp(phoneNumber: String): org.openedx.profile.data.model.OtpSendResponse {
+        val body = mapOf("contact_identifier" to phoneNumber)
+        val response = api.sendWhatsappOtp(body)
+        if (response.isSuccessful) {
+            return response.body() ?: throw Exception("Empty response")
+        } else {
+            throw Exception(response.errorBody()?.string() ?: "Failed to send OTP")
+        }
+    }
+
+    suspend fun verifyWhatsappOtp(phoneNumber: String, otp: String, verificationKey: String): org.openedx.profile.data.model.OtpVerifyResponse {
+        val body = mapOf(
+            "contact_identifier" to phoneNumber,
+            "otp_code" to otp,
+            "verification_key" to verificationKey
+        )
+        val response = api.verifyWhatsappOtp(body)
+        if (response.isSuccessful) {
+            return response.body() ?: throw Exception("Empty response")
+        } else {
+            throw Exception(response.errorBody()?.string() ?: "Failed to verify OTP")
+        }
+    }
+
     suspend fun logout() {
         try {
             api.revokeAccessToken(

@@ -38,7 +38,11 @@ data class Account(
     @SerializedName("date_joined")
     val dateJoined: Date?,
     @SerializedName("account_privacy")
-    val accountPrivacy: Privacy?
+    val accountPrivacy: Privacy?,
+    @SerializedName("whatsapp_number")
+    val whatsappNumber: String?,
+    @SerializedName("is_whatsapp_verified")
+    val isWhatsappVerified: Boolean?
 ) {
 
     enum class Privacy {
@@ -72,7 +76,9 @@ data class Account(
                 DomainAccount.Privacy.PRIVATE
             } else {
                 DomainAccount.Privacy.ALL_USERS
-            }
+            },
+            whatsappNumber = whatsappNumber ?: "",
+            isWhatsappVerified = isWhatsappVerified ?: false
         )
     }
 }

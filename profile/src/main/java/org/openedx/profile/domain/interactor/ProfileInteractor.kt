@@ -19,6 +19,11 @@ class ProfileInteractor(private val repository: ProfileRepository) {
 
     suspend fun deactivateAccount(password: String) = repository.deactivateAccount(password)
 
+    suspend fun sendWhatsappOtp(phoneNumber: String) = repository.sendWhatsappOtp(phoneNumber)
+
+    suspend fun verifyWhatsappOtp(phoneNumber: String, otp: String, verificationKey: String) =
+        repository.verifyWhatsappOtp(phoneNumber, otp, verificationKey)
+
     suspend fun logout() {
         repository.logout()
     }

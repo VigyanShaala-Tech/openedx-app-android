@@ -56,4 +56,10 @@ interface ProfileApi {
     suspend fun deactivateAccount(
         @Field("password") password: String
     ): Response<Unit>
+
+    @POST("/otp/send/")
+    suspend fun sendWhatsappOtp(@Body body: Map<String, String>): Response<org.openedx.profile.data.model.OtpSendResponse>
+
+    @POST("/otp/verify/")
+    suspend fun verifyWhatsappOtp(@Body body: Map<String, String>): Response<org.openedx.profile.data.model.OtpVerifyResponse>
 }

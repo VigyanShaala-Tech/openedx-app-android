@@ -25,7 +25,9 @@ data class Account(
     val mailingAddress: String,
     val email: String?,
     val dateJoined: Date?,
-    val accountPrivacy: Privacy
+    val accountPrivacy: Privacy,
+    val whatsappNumber: String,
+    val isWhatsappVerified: Boolean
 ) : Parcelable {
 
     enum class Privacy {

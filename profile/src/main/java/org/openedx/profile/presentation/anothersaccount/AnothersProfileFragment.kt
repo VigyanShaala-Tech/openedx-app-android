@@ -257,5 +257,7 @@ private val mockAccount = Account(
     mailingAddress = "",
     "",
     null,
-    accountPrivacy = Account.Privacy.ALL_USERS
+    accountPrivacy = Account.Privacy.ALL_USERS,
+    whatsappNumber = "",
+    isWhatsappVerified = false
 )

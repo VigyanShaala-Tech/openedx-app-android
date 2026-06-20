@@ -39,11 +39,13 @@ class DeepLinkRouter(
         get() = corePreferences.user != null
 
     fun makeRoute(fm: FragmentManager, deepLink: DeepLink) {
-        Log.d("DeepLinkRouter", "makeRoute: type=${deepLink.type}, courseId=${deepLink.courseId}")
+        Log.d("DeepLinkRouter", "makeRoute: type=${deepLink.type}, courseId=${deepLink.courseId}, token=${deepLink.token}")
         when (deepLink.type) {
             DeepLinkType.DISCOVERY -> navigateToDiscoveryScreen(fm)
             DeepLinkType.DISCOVERY_COURSE_DETAIL -> navigateToCourseDetail(fm, deepLink)
             DeepLinkType.DISCOVERY_PROGRAM_DETAIL -> navigateToProgramDetail(fm, deepLink)
+            DeepLinkType.PASSWORD_RESET -> navigateToResetPassword(fm, deepLink)
+            DeepLinkType.SIGNUP -> handleLoggedOutOrUserNavigation(fm, deepLink)
             else -> handleLoggedOutOrUserNavigation(fm, deepLink)
         }
     }
@@ -197,6 +199,14 @@ class DeepLinkRouter(
                     infoType = WebViewLink.Authority.PROGRAM_INFO.name
                 )
             }
+        }
+    }
+
+    private fun navigateToResetPassword(fm: FragmentManager, deepLink: DeepLink) {
+        deepLink.token?.let { token ->
+            appRouter.navigateToResetPassword(fm, token)
+        } ?: run {
+            navigateToSignIn(fm)
         }
     }
 

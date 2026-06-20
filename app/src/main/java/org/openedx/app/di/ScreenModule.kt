@@ -170,6 +170,7 @@ val screenModule = module {
     }
 
     viewModel { RestorePasswordViewModel(get(), get(), get(), get()) }
+    viewModel { org.openedx.auth.presentation.restore.ResetPasswordViewModel(get(), get(), get()) }
 
     factory { DashboardRepository(get(), get(), get(), get(), get(), get()) }
     factory { DashboardInteractor(get()) }

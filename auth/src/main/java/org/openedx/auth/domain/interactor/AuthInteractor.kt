@@ -43,6 +43,18 @@ class AuthInteractor(private val repository: AuthRepository) {
         return repository.passwordReset(email)
     }
 
+    suspend fun validatePasswordResetToken(token: String): Boolean {
+        return repository.validatePasswordResetToken(token)
+    }
+
+    suspend fun validatePassword(password: String): ValidationFields {
+        return repository.validatePassword(password)
+    }
+
+    suspend fun resetPasswordConfirm(token: String, password1: String, password2: String) {
+        repository.resetPasswordConfirm(token, password1, password2)
+    }
+
     // OTP Sign Up
     suspend fun sendSignUpOtp(contact: String) = repository.sendSignUpOtp(contact)
     suspend fun resendSignUpOtp(contact: String) = repository.resendSignUpOtp(contact)

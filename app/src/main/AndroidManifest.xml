@@ -103,6 +103,7 @@
                 <data android:pathPrefix="/courses" />
                 <data android:pathPrefix="/courses/" />
                 <data android:pathPrefix="/register" />
+                <data android:pathPrefix="/authn" />
             </intent-filter>
         </activity>
 

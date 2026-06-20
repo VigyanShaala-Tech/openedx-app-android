@@ -92,6 +92,21 @@ class AuthRepository(
         return api.passwordReset(email).success
     }
 
+    suspend fun validatePasswordResetToken(token: String): Boolean {
+        return api.validatePasswordResetToken(org.openedx.auth.data.model.ValidateTokenRequest(token)).isValid
+    }
+
+    suspend fun validatePassword(password: String): ValidationFields {
+        return api.validatePassword(org.openedx.auth.data.model.PasswordValidationRequest(password = password))
+    }
+
+    suspend fun resetPasswordConfirm(token: String, password1: String, password2: String) {
+        api.resetPasswordConfirm(
+            token,
+            org.openedx.auth.data.model.ResetPasswordConfirmRequest(password1, password2)
+        )
+    }
+
     // OTP Sign Up
     suspend fun sendSignUpOtp(contact: String): OtpSendResponse {
         return otpApi.sendSignUpOtp(OtpSendRequest(contact)).handleResponse()

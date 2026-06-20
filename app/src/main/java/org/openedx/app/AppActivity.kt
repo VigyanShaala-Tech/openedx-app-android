@@ -123,7 +123,7 @@ class AppActivity : AppCompatActivity(), InsetHolder, WindowSizeHolder {
     private fun handleDeepLink(data: Uri?) {
         if (data == null) return
         val isVigyanShaalaDeepLink =
-            (data.host == "apps.uat.vigyanshaala.com" && data.path?.contains("learner-dashboard") == true) ||
+            (data.host == "apps.uat.vigyanshaala.com" && (data.path?.contains("learner-dashboard") == true || data.path?.contains("authn") == true)) ||
                     (data.host == "uat.vigyanshaala.com" && (data.path?.contains("dashboard") == true || data.path?.contains("courses") == true || data.path?.contains("register") == true)) ||
                     (data.scheme == BuildConfig.APPLICATION_ID && data.host == "open")
 
@@ -148,6 +148,14 @@ class AppActivity : AppCompatActivity(), InsetHolder, WindowSizeHolder {
                     val segments = data.pathSegments
                     if (segments.size >= 2 && segments[0] == "courses") {
                         params[DeepLink.Keys.COURSE_ID.value] = segments[1].replace(" ", "+")
+                    }
+                }
+
+                // Extract token for PasswordReset from path if missing in query
+                if (screen == "PasswordReset" && !params.containsKey(DeepLink.Keys.TOKEN.value)) {
+                    val segments = data.pathSegments
+                    if (segments.size >= 3 && segments[1] == "password_reset_confirm") {
+                        params[DeepLink.Keys.TOKEN.value] = segments[2]
                     }
                 }
 

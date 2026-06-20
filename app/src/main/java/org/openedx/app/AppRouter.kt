@@ -6,6 +6,7 @@ import androidx.fragment.app.FragmentTransaction
 import org.openedx.app.deeplink.HomeTab
 import org.openedx.auth.presentation.AuthRouter
 import org.openedx.auth.presentation.logistration.LogistrationFragment
+import org.openedx.auth.presentation.restore.ResetPasswordFragment
 import org.openedx.auth.presentation.restore.RestorePasswordFragment
 import org.openedx.auth.presentation.signin.SignInFragment
 import org.openedx.auth.presentation.signup.SignUpFragment
@@ -159,6 +160,10 @@ class AppRouter :
     // region DiscoveryRouter
     override fun navigateToCourseDetail(fm: FragmentManager, courseId: String) {
         replaceFragmentWithBackStack(fm, CourseDetailsFragment.newInstance(courseId))
+    }
+
+    override fun navigateToResetPassword(fm: FragmentManager, token: String) {
+        replaceFragmentWithBackStack(fm, ResetPasswordFragment.newInstance(token))
     }
 
     override fun navigateToCourseSearch(fm: FragmentManager, querySearch: String) {

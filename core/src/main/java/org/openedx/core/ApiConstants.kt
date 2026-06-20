@@ -13,6 +13,8 @@ object ApiConstants {
     const val URL_REGISTER_VS = "/api/user/v2/account/registration/"
     const val URL_REGISTER_BROWSER = "/register"
     const val URL_PASSWORD_RESET = "/password_reset/"
+    const val URL_PASSWORD_RESET_TOKEN_VALIDATE = "/user_api/v1/account/password_reset/token/validate/"
+    const val URL_PASSWORD_RESET_CONFIRM = "/password/reset/{token}/"
 
     const val GRANT_TYPE_PASSWORD = "password"
     const val GRANT_TYPE_CODE = "authorization_code"

@@ -32,4 +32,6 @@ interface AuthRouter {
     fun clearBackStack(fm: FragmentManager)
 
     fun navigateToCourseDetail(fm: FragmentManager, courseId: String)
+
+    fun navigateToResetPassword(fm: FragmentManager, token: String)
 }

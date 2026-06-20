@@ -124,7 +124,7 @@ class AppActivity : AppCompatActivity(), InsetHolder, WindowSizeHolder {
         if (data == null) return
         val isVigyanShaalaDeepLink =
             (data.host == "apps.uat.vigyanshaala.com" && data.path?.contains("learner-dashboard") == true) ||
-                    (data.host == "uat.vigyanshaala.com" && (data.path?.contains("dashboard") == true || data.path?.contains("courses") == true)) ||
+                    (data.host == "uat.vigyanshaala.com" && (data.path?.contains("dashboard") == true || data.path?.contains("courses") == true || data.path?.contains("register") == true)) ||
                     (data.scheme == BuildConfig.APPLICATION_ID && data.host == "open")
 
         if (isVigyanShaalaDeepLink) {

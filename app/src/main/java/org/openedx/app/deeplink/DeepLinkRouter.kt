@@ -9,6 +9,7 @@ import org.openedx.app.AppRouter
 import org.openedx.app.MainFragment
 import org.openedx.app.R
 import org.openedx.auth.presentation.signin.SignInFragment
+import org.openedx.auth.presentation.signup.VsSignUpFragment
 import org.openedx.core.FragmentViewType
 import org.openedx.core.config.Config
 import org.openedx.core.data.storage.CorePreferences
@@ -49,8 +50,12 @@ class DeepLinkRouter(
 
     private fun handleLoggedOutOrUserNavigation(fm: FragmentManager, deepLink: DeepLink) {
         if (!isUserLoggedIn) {
-            Log.d("DeepLinkRouter", "User not logged in, navigating to SignIn")
-            navigateToSignIn(fm)
+            Log.d("DeepLinkRouter", "User not logged in, navigating to SignIn or SignUp")
+            if (deepLink.type == DeepLinkType.SIGNUP) {
+                navigateToSignUp(fm)
+            } else {
+                navigateToSignIn(fm)
+            }
         } else {
             handleProgramAndProfileNavigation(fm, deepLink)
         }
@@ -198,6 +203,16 @@ class DeepLinkRouter(
     private fun navigateToSignIn(fm: FragmentManager) {
         if (appRouter.getVisibleFragment(fm = fm) !is SignInFragment) {
             appRouter.navigateToSignIn(
+                fm = fm,
+                courseId = null,
+                infoType = null
+            )
+        }
+    }
+
+    private fun navigateToSignUp(fm: FragmentManager) {
+        if (appRouter.getVisibleFragment(fm = fm) !is VsSignUpFragment) {
+            appRouter.navigateToSignUp(
                 fm = fm,
                 courseId = null,
                 infoType = null

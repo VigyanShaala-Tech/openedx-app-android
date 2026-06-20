@@ -74,10 +74,11 @@ class DeepLinkRouter(
 
     private fun handleCourseRelatedNavigation(fm: FragmentManager, deepLink: DeepLink) {
         launch(Dispatchers.Main) {
-            val courseId = deepLink.courseId ?: run {
+            val rawCourseId = deepLink.courseId ?: run {
                 Log.d("DeepLinkRouter", "courseId is null, navigating to Dashboard")
                 return@launch navigateToDashboard(fm)
             }
+            val courseId = rawCourseId.replace(" ", "+")
             Log.d("DeepLinkRouter", "Fetching course details for: $courseId")
             val course = getCourseDetails(courseId) ?: run {
                 Log.d("DeepLinkRouter", "Course details not found for: $courseId")

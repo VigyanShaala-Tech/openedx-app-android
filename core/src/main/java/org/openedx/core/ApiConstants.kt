@@ -16,6 +16,10 @@ object ApiConstants {
     const val URL_PASSWORD_RESET_TOKEN_VALIDATE = "/user_api/v1/account/password_reset/token/validate/"
     const val URL_PASSWORD_RESET_CONFIRM = "/password/reset/{token}/"
     const val URL_ACCOUNT_ACTIVATE = "/api/v1/account/activate/{activation_id}/"
+    const val URL_UNIVERSITIES = "/api/v1/options/universities/"
+    const val URL_RANKING_OPTIONS = "/api/v1/options/rankings/"
+    const val URL_COURSE_USER_RANKING = "/api/v1/course/{course_id}/ranking/"
+    const val URL_COURSE_LEADERBOARD = "/api/v1/course/{course_id}/leaderboard/"
 
     const val GRANT_TYPE_PASSWORD = "password"
     const val GRANT_TYPE_CODE = "authorization_code"

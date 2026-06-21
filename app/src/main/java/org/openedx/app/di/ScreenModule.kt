@@ -277,6 +277,9 @@ val screenModule = module {
     factory { CourseInteractor(get()) }
     single<org.openedx.core.domain.interactor.CourseInteractor> { get<CourseInteractor>() }
 
+    factory { org.openedx.course.data.repository.LeaderboardRepository(get()) }
+    factory { org.openedx.course.domain.interactor.LeaderboardInteractor(get()) }
+
     viewModel { (pathId: String, infoType: String) ->
         CourseInfoViewModel(
             pathId,
@@ -366,6 +369,13 @@ val screenModule = module {
             get(),
             get(),
             get(),
+            get(),
+            get()
+        )
+    }
+    viewModel { (courseId: String) ->
+        org.openedx.course.presentation.leaderboard.LeaderboardViewModel(
+            courseId,
             get(),
             get()
         )

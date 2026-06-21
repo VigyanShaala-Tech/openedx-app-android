@@ -279,6 +279,7 @@ fun CourseDashboard(
     val requiredTab = when (openTab.uppercase()) {
         CourseContainerTab.HOME.name -> CourseContainerTab.HOME
         CourseContainerTab.CONTENT.name -> CourseContainerTab.CONTENT
+        CourseContainerTab.LEADERBOARD.name -> CourseContainerTab.LEADERBOARD
         CourseContainerTab.DATES.name -> CourseContainerTab.DATES
         CourseContainerTab.DISCUSSIONS.name -> CourseContainerTab.DISCUSSIONS
         CourseContainerTab.PROGRESS.name -> CourseContainerTab.PROGRESS
@@ -627,6 +628,15 @@ private fun DashboardPager(
                             )
                         }
                     }
+                )
+            }
+
+            CourseContainerTab.LEADERBOARD -> {
+                org.openedx.course.presentation.leaderboard.LeaderboardScreen(
+                    windowSize = windowSize,
+                    viewModel = koinViewModel(
+                        parameters = { parametersOf(viewModel.courseId) }
+                    )
                 )
             }
         }

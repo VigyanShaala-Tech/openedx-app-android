@@ -78,6 +78,10 @@ enum class CourseAnalyticsEvent(val eventName: String, val biValue: String) {
         "Course:Content Tab",
         "edx.bi.app.course.content_tab"
     ),
+    LEADERBOARD_TAB(
+        "Course:Leaderboard Tab",
+        "edx.bi.app.course.leaderboard_tab"
+    ),
     ANNOUNCEMENTS(
         "Course:Announcements",
         "edx.bi.app.course.announcements"

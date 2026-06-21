@@ -44,6 +44,7 @@
     <string name="course_container_nav_dates">Dates</string>
     <string name="course_container_nav_downloads">Downloads</string>
     <string name="course_container_nav_progress">Progress</string>
+    <string name="course_container_nav_leaderboard">Leaderboard</string>
 
     <string name="course_container_content_tab_all">All</string>
     <string name="course_container_content_tab_video">Videos</string>

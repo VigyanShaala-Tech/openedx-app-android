@@ -295,6 +295,10 @@ class CourseContainerViewModel(
                 updateData()
             }
 
+            CourseContainerTab.LEADERBOARD -> {
+                updateData()
+            }
+
             CourseContainerTab.DATES -> {
                 viewModelScope.launch {
                     courseNotifier.send(RefreshDates)
@@ -341,6 +345,7 @@ class CourseContainerViewModel(
             CourseContainerTab.MORE -> moreTabClickedEvent()
             CourseContainerTab.OFFLINE -> offlineTabClickedEvent()
             CourseContainerTab.CONTENT -> contentTabClickedEvent()
+            CourseContainerTab.LEADERBOARD -> leaderboardTabClickedEvent()
         }
     }
 
@@ -398,6 +403,10 @@ class CourseContainerViewModel(
 
     private fun contentTabClickedEvent() {
         logCourseContainerEvent(CourseAnalyticsEvent.CONTENT_TAB)
+    }
+
+    private fun leaderboardTabClickedEvent() {
+        logCourseContainerEvent(CourseAnalyticsEvent.LEADERBOARD_TAB)
     }
     private fun logCourseContainerEvent(event: CourseAnalyticsEvent) {
         courseAnalytics.logScreenEvent(

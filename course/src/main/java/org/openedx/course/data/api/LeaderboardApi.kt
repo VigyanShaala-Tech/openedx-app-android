@@ -1,9 +1,8 @@
 package org.openedx.course.data.api
 
+import okhttp3.ResponseBody
 import org.openedx.core.ApiConstants
 import org.openedx.course.data.model.LeaderboardResponse
-import org.openedx.course.data.model.RankingOptionResponse
-import org.openedx.course.data.model.UniversityResponse
 import org.openedx.course.data.model.UserRanking
 import retrofit2.http.GET
 import retrofit2.http.Path
@@ -11,11 +10,11 @@ import retrofit2.http.Query
 
 interface LeaderboardApi {
 
-    @GET(ApiConstants.URL_UNIVERSITIES)
-    suspend fun getUniversities(): UniversityResponse
+    @GET("https://uat.vigyanshaala.com/api/v1/options/universities/")
+    suspend fun getUniversities(): ResponseBody
 
-    @GET(ApiConstants.URL_RANKING_OPTIONS)
-    suspend fun getRankingOptions(): RankingOptionResponse
+    @GET("https://uat.vigyanshaala.com/api/v1/options/rankings/")
+    suspend fun getRankingOptions(): ResponseBody
 
     @GET(ApiConstants.URL_COURSE_USER_RANKING)
     suspend fun getUserRanking(@Path("course_id") courseId: String): UserRanking

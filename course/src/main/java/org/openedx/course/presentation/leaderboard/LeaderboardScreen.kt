@@ -1,12 +1,15 @@
 package org.openedx.course.presentation.leaderboard
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.ArrowDropDown
 import androidx.compose.material.icons.filled.EmojiEvents
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -17,6 +20,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.compose.ui.window.Dialog
 import org.openedx.core.ui.HandleUIMessage
 import org.openedx.core.ui.theme.appColors
 import org.openedx.core.ui.theme.appTypography
@@ -138,19 +142,21 @@ private fun LeaderboardUI(
 
             // University Filter
             LeaderboardFilter(
-                label = uiState.selectedUniversity?.name ?: "All Colleges",
-                options = listOf(University(0, "All Colleges")) + uiState.universities,
-                labelExtractor = { it.name },
-                onSelected = { if (it.id == 0) onUniversitySelected(null) else onUniversitySelected(it) }
+                label = uiState.selectedUniversity?.let { it.name ?: it.universityName ?: it.universityNameSnake ?: it.collegeName ?: it.collegeNameSnake ?: it.title ?: it.label ?: it.text ?: it.value } ?: "All Colleges",
+                title = "Select College",
+                options = uiState.universities,
+                labelExtractor = { it.name ?: it.universityName ?: it.universityNameSnake ?: it.collegeName ?: it.collegeNameSnake ?: it.title ?: it.label ?: it.text ?: it.value ?: "" },
+                onSelected = onUniversitySelected
             )
 
             Spacer(modifier = Modifier.height(12.dp))
 
             // Ranking Filter
             LeaderboardFilter(
-                label = uiState.selectedRankingOption.name,
-                options = if (uiState.rankingOptions.isEmpty()) listOf(RankingOption("all", "All Students")) else uiState.rankingOptions,
-                labelExtractor = { it.name },
+                label = uiState.selectedRankingOption.let { it.name ?: it.displayName ?: "" },
+                title = "Select Filter",
+                options = uiState.rankingOptions,
+                labelExtractor = { it.name ?: it.displayName ?: "" },
                 onSelected = onRankingOptionSelected
             )
 
@@ -266,46 +272,85 @@ private fun LeaderboardRow(entry: org.openedx.course.data.model.LeaderboardEntry
     }
 }
 
-@OptIn(ExperimentalMaterialApi::class)
 @Composable
 private fun <T> LeaderboardFilter(
-    label: String,
+    label: String?,
+    title: String,
     options: List<T>,
-    labelExtractor: (T) -> String,
+    labelExtractor: (T) -> String?,
     onSelected: (T) -> Unit
 ) {
-    var expanded by remember { mutableStateOf(false) }
+    var showDialog by remember { mutableStateOf(false) }
 
-    ExposedDropdownMenuBox(
-        expanded = expanded,
-        onExpandedChange = { expanded = !expanded },
-        modifier = Modifier.fillMaxWidth()
-    ) {
+    Box(modifier = Modifier.fillMaxWidth()) {
         OutlinedTextField(
-            value = label,
+            value = label ?: "",
             onValueChange = {},
             readOnly = true,
-            trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = expanded) },
             modifier = Modifier.fillMaxWidth(),
             shape = RoundedCornerShape(8.dp),
+            trailingIcon = {
+                Icon(
+                    imageVector = Icons.Default.ArrowDropDown,
+                    contentDescription = null
+                )
+            },
             colors = TextFieldDefaults.outlinedTextFieldColors(
                 focusedBorderColor = Color(0xFF8BC34A),
                 unfocusedBorderColor = Color.LightGray.copy(alpha = 0.5f)
             )
         )
-        ExposedDropdownMenu(
-            expanded = expanded,
-            onDismissRequest = { expanded = false },
-            modifier = Modifier.fillMaxWidth()
-        ) {
-            options.forEach { option ->
-                DropdownMenuItem(
-                    onClick = {
-                        onSelected(option)
-                        expanded = false
+        // Overlay to capture clicks
+        Box(
+            modifier = Modifier
+                .matchParentSize()
+                .clickable { showDialog = true }
+        )
+    }
+
+    if (showDialog) {
+        Dialog(onDismissRequest = { showDialog = false }) {
+            Card(
+                shape = RoundedCornerShape(12.dp),
+                elevation = 8.dp,
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(vertical = 24.dp)
+                    .heightIn(max = 500.dp)
+            ) {
+                Column(modifier = Modifier.padding(16.dp)) {
+                    Text(
+                        text = title,
+                        style = MaterialTheme.appTypography.titleLarge,
+                        fontWeight = FontWeight.Bold,
+                        modifier = Modifier.padding(bottom = 16.dp)
+                    )
+                    Divider()
+                    LazyColumn(modifier = Modifier.weight(1f, fill = false)) {
+                        items(options) { option ->
+                            Box(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .clickable {
+                                        onSelected(option)
+                                        showDialog = false
+                                    }
+                                    .padding(vertical = 12.dp, horizontal = 8.dp)
+                            ) {
+                                Text(
+                                    text = labelExtractor(option) ?: "",
+                                    style = MaterialTheme.appTypography.bodyMedium,
+                                    modifier = Modifier.fillMaxWidth()
+                                )
+                            }
+                            Divider(color = Color.LightGray.copy(alpha = 0.3f))
+                        }
                     }
-                ) {
-                    Text(text = labelExtractor(option) ?: "")
+                    Box(modifier = Modifier.fillMaxWidth(), contentAlignment = Alignment.CenterEnd) {
+                        TextButton(onClick = { showDialog = false }) {
+                            Text("CANCEL", color = MaterialTheme.appColors.primary)
+                        }
+                    }
                 }
             }
         }

@@ -109,7 +109,7 @@ class CourseSearchFragment : Fragment() {
                 val uiMessage by viewModel.uiMessage.observeAsState()
                 val canLoadMore by viewModel.canLoadMore.observeAsState(false)
                 val refreshing by viewModel.isUpdating.observeAsState(false)
-                val querySearch = arguments?.getString(ARG_SEARCH_QUERY, "") ?: ""
+                val querySearch = arguments?.getString(ARG_SEARCH_QUERY) ?: ""
 
                 CourseSearchScreen(
                     windowSize = windowSize,
@@ -192,10 +192,11 @@ private fun CourseSearchScreen(
         rememberPullRefreshState(refreshing = refreshing, onRefresh = { onSwipeRefresh() })
 
     var textFieldValue by rememberSaveable(stateSaver = TextFieldValue.Saver) {
+        val initialText = querySearch ?: ""
         mutableStateOf(
             TextFieldValue(
-                text = querySearch,
-                selection = TextRange(querySearch.length)
+                text = initialText,
+                selection = TextRange(initialText.length)
             )
         )
     }

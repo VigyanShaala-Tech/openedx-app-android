@@ -38,16 +38,38 @@ class LeaderboardViewModel(
         _uiState.update { it.copy(isLoading = true) }
         viewModelScope.launch {
             try {
-                val universities = interactor.getUniversities()
-                val rankingOptions = interactor.getRankingOptions()
-                val userRanking = interactor.getUserRanking(courseId)
+                val fetchedUniversities = try {
+                    interactor.getUniversities()
+                } catch (e: Exception) {
+                    _uiMessage.emit(UIMessage.SnackBarMessage("Failed to load colleges: ${e.message}"))
+                    emptyList()
+                }
+                val universities = listOf(University("0", "All Colleges")) + fetchedUniversities
+
+                val rankingOptions = try {
+                    interactor.getRankingOptions().ifEmpty { listOf(RankingOption("all", "All Students")) }
+                } catch (e: Exception) {
+                    _uiMessage.emit(UIMessage.SnackBarMessage("Failed to load ranking options: ${e.message}"))
+                    listOf(RankingOption("all", "All Students"))
+                }
+
+                val userRanking = try {
+                    interactor.getUserRanking(courseId)
+                } catch (_: Exception) {
+                    null
+                }
                 
                 _uiState.update { 
                     it.copy(
                         universities = universities,
-                        rankingOptions = rankingOptions.ifEmpty { listOf(RankingOption("all", "All Students")) },
+                        rankingOptions = rankingOptions,
                         userRanking = userRanking,
-                        isLoading = false
+                        isLoading = false,
+                        selectedUniversity = it.selectedUniversity ?: universities.first(),
+                        selectedRankingOption = if ((it.selectedRankingOption.id == "all" || it.selectedRankingOption.id == null) && rankingOptions.isNotEmpty() && rankingOptions.first().id != "all")
+                            rankingOptions.first() 
+                        else 
+                            it.selectedRankingOption
                     )
                 }
                 fetchLeaderboard()
@@ -80,8 +102,8 @@ class LeaderboardViewModel(
                     courseId = courseId,
                     page = currentState.page,
                     pageSize = 10,
-                    rangeType = currentState.selectedRankingOption.id,
-                    university = if (currentState.selectedUniversity?.id == 0) null else currentState.selectedUniversity?.name
+                    rangeType = currentState.selectedRankingOption.id ?: "all",
+                    university = if (currentState.selectedUniversity?.id == "0" || currentState.selectedUniversity?.id == null) null else currentState.selectedUniversity?.let { it.name ?: it.universityName ?: it.universityNameSnake ?: it.collegeName ?: it.collegeNameSnake ?: it.title ?: it.label ?: it.text ?: it.value }
                 )
                 
                 _uiState.update { 

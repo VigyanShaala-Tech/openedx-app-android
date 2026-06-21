@@ -4,16 +4,34 @@ import com.google.gson.annotations.SerializedName
 
 data class University(
     @SerializedName("id")
-    val id: Int,
+    val id: String? = null,
     @SerializedName("name")
-    val name: String
+    val name: String? = null,
+    @SerializedName("university")
+    val universityName: String? = null,
+    @SerializedName("university_name")
+    val universityNameSnake: String? = null,
+    @SerializedName("college")
+    val collegeName: String? = null,
+    @SerializedName("college_name")
+    val collegeNameSnake: String? = null,
+    @SerializedName("title")
+    val title: String? = null,
+    @SerializedName("label")
+    val label: String? = null,
+    @SerializedName("text")
+    val text: String? = null,
+    @SerializedName("value")
+    val value: String? = null
 )
 
 data class RankingOption(
     @SerializedName("id")
-    val id: String,
+    val id: String? = null,
     @SerializedName("name")
-    val name: String
+    val name: String? = null,
+    @SerializedName("display_name")
+    val displayName: String? = null
 )
 
 data class UserRanking(
@@ -34,16 +52,6 @@ data class LeaderboardEntry(
     val university: String?,
     @SerializedName("points")
     val points: Int
-)
-
-data class UniversityResponse(
-    @SerializedName("results")
-    val results: List<University>
-)
-
-data class RankingOptionResponse(
-    @SerializedName("results")
-    val results: List<RankingOption>
 )
 
 data class LeaderboardResponse(

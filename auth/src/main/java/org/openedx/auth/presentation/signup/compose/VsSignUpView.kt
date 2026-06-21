@@ -82,8 +82,8 @@ fun VsSignUpView(
 
     LaunchedEffect(uiState.socialAuth) {
         uiState.socialAuth?.let {
-            if (it.name.isNotBlank()) fullName = it.name
-            if (it.email.isNotBlank()) email = it.email
+            if (!it.name.isNullOrBlank()) fullName = it.name
+            if (!it.email.isNullOrBlank()) email = it.email
         }
     }
 

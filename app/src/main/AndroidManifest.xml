@@ -104,6 +104,8 @@
                 <data android:pathPrefix="/courses/" />
                 <data android:pathPrefix="/register" />
                 <data android:pathPrefix="/authn" />
+                <data android:pathPrefix="/activate" />
+                <data android:pathPrefix="/login" />
             </intent-filter>
         </activity>
 

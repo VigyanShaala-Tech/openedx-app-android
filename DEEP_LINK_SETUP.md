@@ -8,7 +8,9 @@ The app is currently configured to handle the following URLs:
 - `https://uat.vigyanshaala.com/dashboard?act=open&scr=Dashboard`
 - `https://uat.vigyanshaala.com/courses/<course_id>/courseware/?act=open&scr=CourseWare&CId=<course_id>`
 - `http://uat.vigyanshaala.com/register?act=open&scr=signup`
+- `http://uat.vigyanshaala.com/login?act=open&scr=signin`
 - `http://apps.uat.vigyanshaala.com/authn/password_reset_confirm/<token>/?act=open&scr=PasswordReset`
+- `https://uat.vigyanshaala.com/activate/<activation_id>?act=open&scr=accActivation`
 
 ## 2. Play Store Deployment Steps (CRITICAL)
 

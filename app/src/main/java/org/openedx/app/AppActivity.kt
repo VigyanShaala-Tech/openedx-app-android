@@ -2,13 +2,45 @@ package org.openedx.app
 
 import android.content.Intent
 import android.content.res.Configuration
-import android.graphics.Color
 import android.net.Uri
 import android.os.Build
 import android.os.Bundle
 import android.view.View
 import android.view.WindowManager
 import androidx.appcompat.app.AppCompatActivity
+import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.widthIn
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.CircularProgressIndicator
+import androidx.compose.material.Icon
+import androidx.compose.material.MaterialTheme
+import androidx.compose.material.Surface
+import androidx.compose.material.Text
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.CheckCircle
+import androidx.compose.material.icons.filled.Error
+import androidx.compose.material.icons.filled.Info
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.ViewCompositionStrategy
+import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.unit.dp
+import androidx.compose.ui.window.Dialog
 import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
 import androidx.core.view.WindowCompat
 import androidx.core.view.WindowInsetsCompat
@@ -24,6 +56,7 @@ import org.koin.android.ext.android.inject
 import org.koin.androidx.viewmodel.ext.android.viewModel
 import org.openedx.app.databinding.ActivityAppBinding
 import org.openedx.app.deeplink.DeepLink
+import org.openedx.auth.data.model.AccountActivationResponse
 import org.openedx.auth.presentation.logistration.LogistrationFragment
 import org.openedx.auth.presentation.signin.SignInFragment
 import org.openedx.core.ApiConstants
@@ -31,9 +64,14 @@ import org.openedx.core.data.storage.CorePreferences
 import org.openedx.core.presentation.dialog.downloaddialog.DownloadDialogManager
 import org.openedx.core.presentation.global.InsetHolder
 import org.openedx.core.presentation.global.WindowSizeHolder
+import org.openedx.core.ui.OpenEdXButton
+import org.openedx.core.ui.theme.OpenEdXTheme
+import org.openedx.core.ui.theme.appColors
+import org.openedx.core.ui.theme.appTypography
 import org.openedx.core.utils.Logger
 import org.openedx.core.worker.CalendarSyncScheduler
 import org.openedx.foundation.extension.requestApplyInsetsWhenAttached
+import org.openedx.foundation.presentation.UIMessage
 import org.openedx.foundation.presentation.WindowSize
 import org.openedx.foundation.presentation.WindowType
 import org.openedx.profile.presentation.ProfileRouter
@@ -114,6 +152,7 @@ class AppActivity : AppCompatActivity(), InsetHolder, WindowSizeHolder {
         setupInitialFragment(savedInstanceState)
         observeLogoutEvent()
         observeDownloadFailedDialog()
+        observeAccountActivation()
 
         calendarSyncScheduler.scheduleDailySync()
 
@@ -123,8 +162,14 @@ class AppActivity : AppCompatActivity(), InsetHolder, WindowSizeHolder {
     private fun handleDeepLink(data: Uri?) {
         if (data == null) return
         val isVigyanShaalaDeepLink =
-            (data.host == "apps.uat.vigyanshaala.com" && (data.path?.contains("learner-dashboard") == true || data.path?.contains("authn") == true)) ||
-                    (data.host == "uat.vigyanshaala.com" && (data.path?.contains("dashboard") == true || data.path?.contains("courses") == true || data.path?.contains("register") == true)) ||
+            (data.host == "apps.uat.vigyanshaala.com" && (data.path?.contains("learner-dashboard") == true || data.path?.contains(
+                "authn"
+            ) == true)) ||
+                    (data.host == "uat.vigyanshaala.com" && (data.path?.contains("dashboard") == true || data.path?.contains(
+                        "courses"
+                    ) == true || data.path?.contains("register") == true || data.path?.contains("activate") == true || data.path?.contains(
+                        "login"
+                    ) == true)) ||
                     (data.scheme == BuildConfig.APPLICATION_ID && data.host == "open")
 
         if (isVigyanShaalaDeepLink) {
@@ -141,10 +186,11 @@ class AppActivity : AppCompatActivity(), InsetHolder, WindowSizeHolder {
                         }
                     }
                 }
-                
+
                 // Extract courseId from path if missing in query
-                if (!params.containsKey(DeepLink.Keys.COURSE_ID.value) && 
-                    !params.containsKey(DeepLink.Keys.COURSE_ID_ALT.value)) {
+                if (!params.containsKey(DeepLink.Keys.COURSE_ID.value) &&
+                    !params.containsKey(DeepLink.Keys.COURSE_ID_ALT.value)
+                ) {
                     val segments = data.pathSegments
                     if (segments.size >= 2 && segments[0] == "courses") {
                         params[DeepLink.Keys.COURSE_ID.value] = segments[1].replace(" ", "+")
@@ -156,6 +202,24 @@ class AppActivity : AppCompatActivity(), InsetHolder, WindowSizeHolder {
                     val segments = data.pathSegments
                     if (segments.size >= 3 && segments[1] == "password_reset_confirm") {
                         params[DeepLink.Keys.TOKEN.value] = segments[2]
+                    }
+                }
+
+                // Extract activationId for accActivation from path if missing in query
+                if (screen == "accActivation") {
+                    val id = if (!params.containsKey(DeepLink.Keys.ACTIVATION_ID.value)) {
+                        val segments = data.pathSegments
+                        if (segments.size >= 2 && segments[0] == "activate") {
+                            segments[1]
+                        } else {
+                            ""
+                        }
+                    } else {
+                        params[DeepLink.Keys.ACTIVATION_ID.value] ?: ""
+                    }
+                    if (id.isNotEmpty()) {
+                        viewModel.activateAccount(id)
+                        return
                     }
                 }
 
@@ -213,7 +277,7 @@ class AppActivity : AppCompatActivity(), InsetHolder, WindowSizeHolder {
                 insetsController.systemBarsBehavior =
                     WindowInsetsControllerCompat.BEHAVIOR_SHOW_TRANSIENT_BARS_BY_SWIPE
             } else {
-                window.statusBarColor = Color.TRANSPARENT
+                window.statusBarColor = android.graphics.Color.TRANSPARENT
             }
         }
     }
@@ -324,6 +388,134 @@ class AppActivity : AppCompatActivity(), InsetHolder, WindowSizeHolder {
             Configuration.UI_MODE_NIGHT_NO -> false
             Configuration.UI_MODE_NIGHT_UNDEFINED -> false
             else -> false
+        }
+    }
+
+    private fun observeAccountActivation() {
+        val composeView = androidx.compose.ui.platform.ComposeView(this).apply {
+            setViewCompositionStrategy(ViewCompositionStrategy.DisposeOnViewTreeLifecycleDestroyed)
+        }
+        binding.rootLayout.addView(composeView)
+
+        composeView.setContent {
+            OpenEdXTheme {
+                val response by viewModel.accountActivationResponse.collectAsState()
+                val isLoading by viewModel.isActivationLoading.collectAsState()
+
+                if (isLoading || response != null) {
+                    ActivationDialog(
+                        response = response,
+                        isLoading = isLoading,
+                        onDismiss = {
+                            viewModel.clearActivationResponse()
+                        },
+                        onLoginClick = {
+                            viewModel.clearActivationResponse()
+                            profileRouter.restartApp(
+                                supportFragmentManager,
+                                viewModel.isLogistrationEnabled
+                            )
+                        }
+                    )
+                }
+            }
+        }
+
+        lifecycleScope.launch {
+            viewModel.uiMessage.collect {
+                if (it is UIMessage.SnackBarMessage) {
+                    com.google.android.material.snackbar.Snackbar.make(
+                        binding.root,
+                        it.message,
+                        com.google.android.material.snackbar.Snackbar.LENGTH_SHORT
+                    ).show()
+                }
+            }
+        }
+    }
+
+    @Composable
+    private fun ActivationDialog(
+        response: AccountActivationResponse?,
+        isLoading: Boolean,
+        onDismiss: () -> Unit,
+        onLoginClick: () -> Unit
+    ) {
+        Dialog(onDismissRequest = onDismiss) {
+            Box(
+                modifier = Modifier
+                    .widthIn(max = 300.dp)
+                    .clip(RoundedCornerShape(16.dp))
+                    .background(MaterialTheme.appColors.background)
+                    .padding(24.dp),
+                contentAlignment = Alignment.Center
+            ) {
+                if (isLoading) {
+                    CircularProgressIndicator(color = MaterialTheme.appColors.primary)
+                } else if (response != null) {
+                    Column(
+                        horizontalAlignment = Alignment.CenterHorizontally,
+                        verticalArrangement = Arrangement.Center
+                    ) {
+                        val icon = when (response.status) {
+                            "success" -> Icons.Default.CheckCircle
+                            "info" -> Icons.Default.Info
+                            else -> Icons.Default.Error
+                        }
+                        val iconColor = when (response.status) {
+                            "success" -> Color(0xFF4CAF50)
+                            "info" -> MaterialTheme.appColors.primary
+                            else -> MaterialTheme.appColors.error
+                        }
+
+                        Surface(
+                            modifier = Modifier.size(64.dp),
+                            shape = androidx.compose.foundation.shape.CircleShape,
+                            color = iconColor.copy(alpha = 0.1f)
+                        ) {
+                            Box(contentAlignment = Alignment.Center) {
+                                Icon(
+                                    imageVector = icon,
+                                    contentDescription = null,
+                                    tint = iconColor,
+                                    modifier = Modifier.size(32.dp)
+                                )
+                            }
+                        }
+
+                        Spacer(modifier = Modifier.height(24.dp))
+
+                        Text(
+                            text = when (response.status) {
+                                "success" -> "Account Activated"
+                                "info" -> "Already Activated"
+                                else -> "Activation Failed"
+                            },
+                            style = MaterialTheme.appTypography.titleMedium,
+                            fontWeight = FontWeight.Bold,
+                            color = MaterialTheme.appColors.textDark,
+                            textAlign = TextAlign.Center
+                        )
+
+                        Spacer(modifier = Modifier.height(12.dp))
+
+                        Text(
+                            text = response.message ?: "",
+                            style = MaterialTheme.appTypography.bodyMedium,
+                            color = MaterialTheme.appColors.textPrimary,
+                            textAlign = TextAlign.Center
+                        )
+
+                        Spacer(modifier = Modifier.height(32.dp))
+
+                        OpenEdXButton(
+                            text = stringResource(id = org.openedx.core.R.string.core_sign_in),
+                            onClick = onLoginClick,
+                            modifier = Modifier.fillMaxWidth()
+                        )
+                    }
+                }
+            }
         }
     }
 

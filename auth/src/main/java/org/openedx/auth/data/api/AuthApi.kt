@@ -103,4 +103,7 @@ interface AuthApi {
         @Path("token") token: String,
         @Body request: org.openedx.auth.data.model.ResetPasswordConfirmRequest
     )
+
+    @GET(ApiConstants.URL_ACCOUNT_ACTIVATE)
+    suspend fun activateAccount(@Path("activation_id") activationId: String): retrofit2.Response<org.openedx.auth.data.model.AccountActivationResponse>
 }

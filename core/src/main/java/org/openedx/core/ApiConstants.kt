@@ -15,6 +15,7 @@ object ApiConstants {
     const val URL_PASSWORD_RESET = "/password_reset/"
     const val URL_PASSWORD_RESET_TOKEN_VALIDATE = "/user_api/v1/account/password_reset/token/validate/"
     const val URL_PASSWORD_RESET_CONFIRM = "/password/reset/{token}/"
+    const val URL_ACCOUNT_ACTIVATE = "/api/v1/account/activate/{activation_id}/"
 
     const val GRANT_TYPE_PASSWORD = "password"
     const val GRANT_TYPE_CODE = "authorization_code"

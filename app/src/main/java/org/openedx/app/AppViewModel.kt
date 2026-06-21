@@ -10,14 +10,18 @@ import androidx.lifecycle.viewModelScope
 import androidx.room.RoomDatabase
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.flow.MutableSharedFlow
+import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.flow.asSharedFlow
+import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import org.openedx.app.deeplink.DeepLink
 import org.openedx.app.deeplink.DeepLinkRouter
 import org.openedx.app.system.push.RefreshFirebaseTokenWorker
 import org.openedx.app.system.push.SyncFirebaseTokenWorker
+import org.openedx.auth.data.model.AccountActivationResponse
+import org.openedx.auth.domain.interactor.AuthInteractor
 import org.openedx.core.config.Config
 import org.openedx.core.data.model.User
 import org.openedx.core.data.storage.CorePreferences
@@ -27,9 +31,13 @@ import org.openedx.core.system.notifier.app.AppNotifier
 import org.openedx.core.system.notifier.app.LogoutEvent
 import org.openedx.core.system.notifier.app.SignInEvent
 import org.openedx.core.utils.Directories
+import org.openedx.foundation.extension.isInternetError
 import org.openedx.foundation.presentation.BaseViewModel
 import org.openedx.foundation.presentation.SingleEventLiveData
+import org.openedx.foundation.presentation.UIMessage
+import org.openedx.foundation.system.ResourceManager
 import org.openedx.foundation.utils.FileUtil
+import org.openedx.core.R as coreR
 
 @SuppressLint("StaticFieldLeak")
 class AppViewModel(
@@ -42,6 +50,8 @@ class AppViewModel(
     private val deepLinkRouter: DeepLinkRouter,
     private val fileUtil: FileUtil,
     private val downloadNotifier: DownloadNotifier,
+    private val authInteractor: AuthInteractor,
+    private val resourceManager: ResourceManager,
     private val context: Context
 ) : BaseViewModel() {
 
@@ -52,6 +62,15 @@ class AppViewModel(
     private val _downloadFailedDialog = MutableSharedFlow<DownloadFailed>()
     val downloadFailedDialog: SharedFlow<DownloadFailed>
         get() = _downloadFailedDialog.asSharedFlow()
+
+    private val _accountActivationResponse = MutableStateFlow<AccountActivationResponse?>(null)
+    val accountActivationResponse = _accountActivationResponse.asStateFlow()
+
+    private val _isActivationLoading = MutableStateFlow(false)
+    val isActivationLoading = _isActivationLoading.asStateFlow()
+
+    private val _uiMessage = MutableSharedFlow<UIMessage>()
+    val uiMessage = _uiMessage.asSharedFlow()
 
     val isLogistrationEnabled get() = config.isPreLoginExperienceEnabled()
 
@@ -109,6 +128,36 @@ class AppViewModel(
 
     fun makeExternalRoute(fm: FragmentManager, deepLink: DeepLink) {
         deepLinkRouter.makeRoute(fm, deepLink)
+    }
+
+    fun activateAccount(activationId: String) {
+        _isActivationLoading.value = true
+        viewModelScope.launch {
+            try {
+                val response = authInteractor.activateAccount(activationId)
+                _accountActivationResponse.value = response
+            } catch (e: Exception) {
+                // If it's a raw exception, try to wrap it in a response so the dialog can show it
+                val errorMessage = if (e.isInternetError()) {
+                    resourceManager.getString(coreR.string.core_error_no_connection)
+                } else {
+                    e.message ?: resourceManager.getString(coreR.string.core_error_unknown_error)
+                }
+                _accountActivationResponse.value = AccountActivationResponse(
+                    success = false,
+                    status = "error",
+                    message = errorMessage,
+                    isAuthenticated = false,
+                    supportUrl = ""
+                )
+            } finally {
+                _isActivationLoading.value = false
+            }
+        }
+    }
+
+    fun clearActivationResponse() {
+        _accountActivationResponse.value = null
     }
 
     private fun setUserId(user: User?) {

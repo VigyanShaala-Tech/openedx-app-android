@@ -107,6 +107,30 @@ class AuthRepository(
         )
     }
 
+    suspend fun activateAccount(activationId: String): org.openedx.auth.data.model.AccountActivationResponse {
+        val response = api.activateAccount(activationId)
+        val body = response.body()
+        if (response.isSuccessful && body != null) {
+            return body
+        } else {
+            val errorBodyStr = response.errorBody()?.string()
+            return try {
+                Gson().fromJson(
+                    errorBodyStr,
+                    org.openedx.auth.data.model.AccountActivationResponse::class.java
+                ) ?: throw Exception("Failed to parse error response")
+            } catch (e: Exception) {
+                org.openedx.auth.data.model.AccountActivationResponse(
+                    success = false,
+                    status = "error",
+                    message = errorBodyStr ?: "Error: ${response.code()}",
+                    isAuthenticated = false,
+                    supportUrl = ""
+                )
+            }
+        }
+    }
+
     // OTP Sign Up
     suspend fun sendSignUpOtp(contact: String): OtpSendResponse {
         return otpApi.sendSignUpOtp(OtpSendRequest(contact)).handleResponse()

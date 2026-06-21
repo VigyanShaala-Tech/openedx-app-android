@@ -1,5 +1,6 @@
 package org.openedx.auth.domain.interactor
 
+import org.openedx.auth.data.model.AccountActivationResponse
 import org.openedx.auth.data.model.AuthType
 import org.openedx.auth.data.model.ValidationFields
 import org.openedx.auth.data.model.VsRegisterRequest
@@ -53,6 +54,10 @@ class AuthInteractor(private val repository: AuthRepository) {
 
     suspend fun resetPasswordConfirm(token: String, password1: String, password2: String) {
         repository.resetPasswordConfirm(token, password1, password2)
+    }
+
+    suspend fun activateAccount(activationId: String): AccountActivationResponse {
+        return repository.activateAccount(activationId)
     }
 
     // OTP Sign Up

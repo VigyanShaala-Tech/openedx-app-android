@@ -67,7 +67,7 @@ class LeaderboardRepository(
                     val value = obj.get("value")?.takeIf { it.isJsonPrimitive }?.asString
 
                     University(
-                        id = id ?: name ?: university ?: college ?: "unknown",
+                        id = id ?: name ?: university ?: college ?: value ?: "unknown",
                         name = name,
                         universityName = university,
                         universityNameSnake = universityNameSnake,
@@ -123,11 +123,15 @@ class LeaderboardRepository(
                 if (element.isJsonObject) {
                     val obj = element.asJsonObject
                     val id = obj.get("id")?.takeIf { it.isJsonPrimitive }?.asString
+                    val value = obj.get("value")?.takeIf { it.isJsonPrimitive }?.asString
+                    val label = obj.get("label")?.takeIf { it.isJsonPrimitive }?.asString
                     val name = obj.get("name")?.takeIf { it.isJsonPrimitive }?.asString
                     val displayName = obj.get("display_name")?.takeIf { it.isJsonPrimitive }?.asString
                     
                     RankingOption(
-                        id = id ?: name ?: displayName ?: "unknown",
+                        id = id ?: value ?: name ?: displayName ?: "unknown",
+                        value = value,
+                        label = label,
                         name = name,
                         displayName = displayName
                     )

@@ -44,7 +44,15 @@ class LeaderboardViewModel(
                     _uiMessage.emit(UIMessage.SnackBarMessage("Failed to load colleges: ${e.message}"))
                     emptyList()
                 }
-                val universities = listOf(University("0", "All Colleges")) + fetchedUniversities
+                
+                // Filter out if "All Colleges" or similar already exists in fetched list to avoid duplicates
+                val filteredFetched = fetchedUniversities.filter {
+                    val name = (it.name ?: it.universityName ?: it.collegeName ?: it.label ?: it.text ?: "").trim()
+                    !name.equals("All Colleges", ignoreCase = true) && 
+                    !name.equals("All Students", ignoreCase = true) &&
+                    it.id != "0"
+                }
+                val universities = listOf(University("0", "All Colleges")) + filteredFetched
 
                 val rankingOptions = try {
                     interactor.getRankingOptions().ifEmpty { listOf(RankingOption("all", "All Students")) }
@@ -102,7 +110,7 @@ class LeaderboardViewModel(
                     courseId = courseId,
                     page = currentState.page,
                     pageSize = 10,
-                    rangeType = currentState.selectedRankingOption.id ?: "all",
+                    rangeType = currentState.selectedRankingOption.value ?: currentState.selectedRankingOption.id ?: "all",
                     university = if (currentState.selectedUniversity?.id == "0" || currentState.selectedUniversity?.id == null) null else currentState.selectedUniversity?.let { it.name ?: it.universityName ?: it.universityNameSnake ?: it.collegeName ?: it.collegeNameSnake ?: it.title ?: it.label ?: it.text ?: it.value }
                 )
                 
@@ -110,7 +118,7 @@ class LeaderboardViewModel(
                     val newEntries = if (currentState.page == 1) response.results else it.leaderboardEntries + response.results
                     it.copy(
                         leaderboardEntries = newEntries,
-                        hasMore = response.next != null && response.results.isNotEmpty(),
+                        hasMore = response.pagination?.next != null && response.results.isNotEmpty(),
                         isLoading = false
                     )
                 }

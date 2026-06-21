@@ -28,6 +28,10 @@ data class University(
 data class RankingOption(
     @SerializedName("id")
     val id: String? = null,
+    @SerializedName("value")
+    val value: String? = null,
+    @SerializedName("label")
+    val label: String? = null,
     @SerializedName("name")
     val name: String? = null,
     @SerializedName("display_name")
@@ -45,10 +49,10 @@ data class LeaderboardEntry(
     @SerializedName("rank")
     val rank: Int,
     @SerializedName("username")
-    val username: String,
-    @SerializedName("name")
+    val username: String? = null,
+    @SerializedName("user")
     val name: String,
-    @SerializedName("university")
+    @SerializedName("college")
     val university: String?,
     @SerializedName("points")
     val points: Int
@@ -57,10 +61,17 @@ data class LeaderboardEntry(
 data class LeaderboardResponse(
     @SerializedName("results")
     val results: List<LeaderboardEntry>,
-    @SerializedName("count")
-    val count: Int,
+    @SerializedName("pagination")
+    val pagination: LeaderboardPagination? = null
+)
+
+data class LeaderboardPagination(
     @SerializedName("next")
     val next: String?,
     @SerializedName("previous")
-    val previous: String?
+    val previous: String?,
+    @SerializedName("count")
+    val count: Int,
+    @SerializedName("num_pages")
+    val numPages: Int
 )

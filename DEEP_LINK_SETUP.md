@@ -11,6 +11,7 @@ The app is currently configured to handle the following URLs:
 - `http://uat.vigyanshaala.com/login?act=open&scr=signin`
 - `http://apps.uat.vigyanshaala.com/authn/password_reset_confirm/<token>/?act=open&scr=PasswordReset`
 - `https://uat.vigyanshaala.com/activate/<activation_id>?act=open&scr=accActivation`
+- `https://apps.uat.vigyanshaala.com/learning/course/<course_id>/live-session/join/<meeting_id>??act=open&scr=meeting&CId=<course_id>&mId=<meeting_id>`
 
 ## 2. Play Store Deployment Steps (CRITICAL)
 

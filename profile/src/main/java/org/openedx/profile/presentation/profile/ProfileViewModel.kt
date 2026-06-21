@@ -125,7 +125,7 @@ class ProfileViewModel(
                 if (response.success) {
                     // Update account with verified WhatsApp number
                     interactor.updateAccount(mapOf(
-                        "whatsapp_number" to phoneNumber,
+                        "phone_number" to phoneNumber,
                         "is_whatsapp_verified" to true
                     ))
                     getAccount()

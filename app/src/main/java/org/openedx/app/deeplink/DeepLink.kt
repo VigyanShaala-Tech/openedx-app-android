@@ -13,6 +13,7 @@ class DeepLink(params: Map<String, String>) {
     val parentId = params[Keys.PARENT_ID.value]
     val token = params[Keys.TOKEN.value]
     val activationId = params[Keys.ACTIVATION_ID.value]
+    val meetingId = params[Keys.MEETING_ID.value]
     val type = DeepLinkType.typeOf(screenName ?: notificationType ?: "")
 
     enum class Keys(val value: String) {
@@ -28,12 +29,14 @@ class DeepLink(params: Map<String, String>) {
         PARENT_ID("parent_id"),
         TOKEN("token"),
         ACTIVATION_ID("activationId"),
+        MEETING_ID("mId"),
     }
 }
 
 enum class DeepLinkType(val type: String) {
     DASHBOARD("dashboard"),
     COURSE_WARE("CourseWare"),
+    MEETING("meeting"),
     SIGNUP("signup"),
     SIGNIN("signin"),
     PASSWORD_RESET("PasswordReset"),

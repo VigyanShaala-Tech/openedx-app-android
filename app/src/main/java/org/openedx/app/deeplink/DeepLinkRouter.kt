@@ -1,5 +1,6 @@
 package org.openedx.app.deeplink
 
+import android.net.Uri
 import android.util.Log
 import androidx.fragment.app.FragmentManager
 import kotlinx.coroutines.CoroutineScope
@@ -46,6 +47,7 @@ class DeepLinkRouter(
             DeepLinkType.DISCOVERY_PROGRAM_DETAIL -> navigateToProgramDetail(fm, deepLink)
             DeepLinkType.PASSWORD_RESET -> navigateToResetPassword(fm, deepLink)
             DeepLinkType.SIGNUP -> handleLoggedOutOrUserNavigation(fm, deepLink)
+            DeepLinkType.SIGNIN -> handleLoggedOutOrUserNavigation(fm, deepLink)
             else -> handleLoggedOutOrUserNavigation(fm, deepLink)
         }
     }
@@ -85,6 +87,12 @@ class DeepLinkRouter(
                 return@launch navigateToDashboard(fm)
             }
             Log.d("DeepLinkRouter", "Course found: ${course.name}, isEnrolled: ${course.isEnrolled}")
+            
+            if (deepLink.type == DeepLinkType.MEETING) {
+                navigateToMeeting(fm, deepLink)
+                return@launch
+            }
+
             if (course.isEnrolled != true) return@launch navigateToDashboard(fm)
 
             handleSpecificCourseNavigation(fm, deepLink, course.name.orEmpty())
@@ -208,6 +216,35 @@ class DeepLinkRouter(
             appRouter.navigateToResetPassword(fm, token)
         } ?: run {
             navigateToSignIn(fm)
+        }
+    }
+
+    private fun navigateToMeeting(fm: FragmentManager, deepLink: DeepLink) {
+        val courseId = deepLink.courseId ?: return
+        val meetingId = deepLink.meetingId ?: return
+        Log.d("DeepLinkRouter", "navigateToMeeting: courseId=$courseId, meetingId=$meetingId")
+        launch {
+            try {
+                val liveClassesToday = courseInteractor.getLiveClasses(courseId, "today", 1).results
+                val liveClassesUpcoming = courseInteractor.getLiveClasses(courseId, "upcoming", 1).results
+                val allLiveClasses = liveClassesToday + liveClassesUpcoming
+                Log.d("DeepLinkRouter", "Found ${allLiveClasses.size} live classes")
+                val meeting = allLiveClasses.find { it.id == meetingId }
+                
+                if (meeting != null) {
+                    Log.d("DeepLinkRouter", "Meeting found: ${meeting.topic}, navigating...")
+                    launch(Dispatchers.Main) {
+                        val joinUrl = Uri.parse(meeting.joinUrl).buildUpon()
+                            .appendQueryParameter("isMobile", "true")
+                            .build().toString()
+                        appRouter.navigateToWebContent(fm, meeting.topic, joinUrl)
+                    }
+                } else {
+                    Log.d("DeepLinkRouter", "Meeting NOT found in live classes list")
+                }
+            } catch (e: Exception) {
+                Log.e("DeepLinkRouter", "Error fetching live classes", e)
+            }
         }
     }
 
@@ -537,9 +574,11 @@ class DeepLinkRouter(
 
     private suspend fun getCourseDetails(courseId: String): Course? {
         return try {
-            discoveryInteractor.getCourseDetails(courseId)
+            val details = discoveryInteractor.getCourseDetails(courseId)
+            Log.d("DeepLinkRouter", "getCourseDetails success for $courseId")
+            details
         } catch (e: Exception) {
-            e.printStackTrace()
+            Log.e("DeepLinkRouter", "getCourseDetails failed for $courseId", e)
             null
         }
     }

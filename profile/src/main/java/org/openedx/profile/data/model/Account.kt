@@ -39,7 +39,7 @@ data class Account(
     val dateJoined: Date?,
     @SerializedName("account_privacy")
     val accountPrivacy: Privacy?,
-    @SerializedName("whatsapp_number")
+    @SerializedName("phone_number")
     val whatsappNumber: String?,
     @SerializedName("is_whatsapp_verified")
     val isWhatsappVerified: Boolean?

@@ -137,8 +137,9 @@ class AppViewModel(
                 val response = authInteractor.activateAccount(activationId)
                 _accountActivationResponse.value = response
             } catch (e: Exception) {
-                // If it's a raw exception, try to wrap it in a response so the dialog can show it
-                val errorMessage = if (e.isInternetError()) {
+                val errorMessage = if (e.isInternetError() || 
+                    e is java.net.SocketException || 
+                    e.message?.contains("closed", ignoreCase = true) == true) {
                     resourceManager.getString(coreR.string.core_error_no_connection)
                 } else {
                     e.message ?: resourceManager.getString(coreR.string.core_error_unknown_error)

@@ -12,11 +12,26 @@ class HandleErrorInterceptor(
     private val gson: Gson
 ) : Interceptor {
     override fun intercept(chain: Interceptor.Chain): Response {
-        val response = chain.proceed(chain.request())
+        val request = chain.request()
+        val response = chain.proceed(request)
 
-        return if (isErrorResponse(response)) {
-            val jsonStr = response.body?.string()
-            if (jsonStr != null) handleErrorResponse(response, jsonStr) else response
+        if (!isErrorResponse(response)) {
+            return response
+        }
+
+        val body = response.body
+        val source = body?.source()
+        source?.request(Long.MAX_VALUE)
+        val buffer = source?.buffer
+        val jsonStr = buffer?.clone()?.readString(Charsets.UTF_8)
+
+        return if (jsonStr != null) {
+            try {
+                handleErrorResponse(response, jsonStr)
+            } catch (e: Exception) {
+                if (e is EdxError) throw e
+                response
+            }
         } else {
             response
         }

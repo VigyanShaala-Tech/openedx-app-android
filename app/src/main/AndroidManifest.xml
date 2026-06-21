@@ -106,6 +106,7 @@
                 <data android:pathPrefix="/authn" />
                 <data android:pathPrefix="/activate" />
                 <data android:pathPrefix="/login" />
+                <data android:pathPrefix="/learning" />
             </intent-filter>
         </activity>
 

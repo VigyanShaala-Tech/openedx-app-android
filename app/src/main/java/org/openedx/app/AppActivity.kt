@@ -164,7 +164,7 @@ class AppActivity : AppCompatActivity(), InsetHolder, WindowSizeHolder {
         val isVigyanShaalaDeepLink =
             (data.host == "apps.uat.vigyanshaala.com" && (data.path?.contains("learner-dashboard") == true || data.path?.contains(
                 "authn"
-            ) == true)) ||
+            ) == true || data.path?.contains("learning") == true)) ||
                     (data.host == "uat.vigyanshaala.com" && (data.path?.contains("dashboard") == true || data.path?.contains(
                         "courses"
                     ) == true || data.path?.contains("register") == true || data.path?.contains("activate") == true || data.path?.contains(
@@ -220,6 +220,20 @@ class AppActivity : AppCompatActivity(), InsetHolder, WindowSizeHolder {
                     if (id.isNotEmpty()) {
                         viewModel.activateAccount(id)
                         return
+                    }
+                }
+
+                // Extract meetingId from path if missing in query
+                if (screen == "meeting") {
+                    val segments = data.pathSegments
+                    if (segments.size >= 6 && segments[4] == "join") {
+                        if (!params.containsKey(DeepLink.Keys.MEETING_ID.value)) {
+                            params[DeepLink.Keys.MEETING_ID.value] = segments[5]
+                        }
+                        // For meeting links, path course ID is often more reliable than CId query param
+                        if (segments[1] == "course" && segments[2].startsWith("course-v1:")) {
+                            params[DeepLink.Keys.COURSE_ID.value] = segments[2].replace(" ", "+")
+                        }
                     }
                 }
 

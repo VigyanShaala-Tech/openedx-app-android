@@ -148,7 +148,7 @@ class LeaderboardRepository(
     }
 
     suspend fun getUserRanking(courseId: String): UserRanking {
-        return api.getUserRanking(courseId)
+        return api.getUserRanking(courseId).result
     }
 
     suspend fun getLeaderboard(

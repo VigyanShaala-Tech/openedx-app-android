@@ -38,6 +38,11 @@ data class RankingOption(
     val displayName: String? = null
 )
 
+data class UserRankingResponse(
+    @SerializedName("result")
+    val result: UserRanking
+)
+
 data class UserRanking(
     @SerializedName("rank")
     val rank: Int,

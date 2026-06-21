@@ -163,7 +163,7 @@ fun StaticSearchBar(
 @Composable
 fun Toolbar(
     modifier: Modifier = Modifier,
-    label: String,
+    label: String?,
     canShowBackBtn: Boolean = false,
     canShowSettingsIcon: Boolean = false,
     labelTint: Color = MaterialTheme.appColors.textPrimary,
@@ -189,7 +189,7 @@ fun Toolbar(
                 .testTag("txt_toolbar_title")
                 .align(Alignment.Center)
                 .padding(horizontal = 48.dp),
-            text = label,
+            text = label ?: "",
             color = labelTint,
             style = MaterialTheme.appTypography.titleMedium,
             maxLines = 1,
@@ -217,7 +217,7 @@ fun Toolbar(
 @Composable
 fun MainToolbar(
     modifier: Modifier = Modifier,
-    label: String,
+    label: String?,
     onSettingsClick: () -> Unit,
 ) {
     Box(
@@ -227,7 +227,7 @@ fun MainToolbar(
             modifier = Modifier
                 .align(Alignment.CenterStart)
                 .padding(start = 16.dp),
-            text = label,
+            text = label ?: "",
             color = MaterialTheme.appColors.textDark,
             style = MaterialTheme.appTypography.titleLarge
         )

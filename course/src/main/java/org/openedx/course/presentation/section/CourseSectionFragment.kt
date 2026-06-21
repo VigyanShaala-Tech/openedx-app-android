@@ -321,7 +321,7 @@ private fun CourseSubsectionItem(
             Spacer(modifier = Modifier.width(16.dp))
             Text(
                 modifier = Modifier.weight(1f),
-                text = block.displayName,
+                text = block.displayName ?: "",
                 style = MaterialTheme.appTypography.titleSmall,
                 color = MaterialTheme.appColors.textPrimary,
                 overflow = TextOverflow.Ellipsis,

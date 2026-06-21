@@ -492,7 +492,7 @@ private fun AssignmentDetails(
                     )
                     Text(
                         modifier = Modifier.padding(top = 4.dp),
-                        text = assignment.displayName,
+                        text = assignment.displayName ?: "",
                         style = MaterialTheme.appTypography.bodyLarge,
                         color = MaterialTheme.appColors.textDark
                     )

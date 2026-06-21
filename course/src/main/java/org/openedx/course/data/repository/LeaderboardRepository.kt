@@ -11,11 +11,11 @@ class LeaderboardRepository(
 ) {
 
     suspend fun getUniversities(): List<University> {
-        return api.getUniversities()
+        return api.getUniversities().results
     }
 
     suspend fun getRankingOptions(): List<RankingOption> {
-        return api.getRankingOptions()
+        return api.getRankingOptions().results
     }
 
     suspend fun getUserRanking(courseId: String): UserRanking {

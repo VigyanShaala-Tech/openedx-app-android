@@ -36,6 +36,16 @@ data class LeaderboardEntry(
     val points: Int
 )
 
+data class UniversityResponse(
+    @SerializedName("results")
+    val results: List<University>
+)
+
+data class RankingOptionResponse(
+    @SerializedName("results")
+    val results: List<RankingOption>
+)
+
 data class LeaderboardResponse(
     @SerializedName("results")
     val results: List<LeaderboardEntry>,

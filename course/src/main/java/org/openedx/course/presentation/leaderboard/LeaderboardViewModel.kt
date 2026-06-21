@@ -70,23 +70,30 @@ class LeaderboardViewModel(
 
     private fun fetchLeaderboard() {
         val currentState = _uiState.value
+        if (currentState.isLoading && currentState.page > 1) return
+        
+        _uiState.update { it.copy(isLoading = true) }
+        
         viewModelScope.launch {
             try {
                 val response = interactor.getLeaderboard(
                     courseId = courseId,
                     page = currentState.page,
-                    pageSize = 20,
+                    pageSize = 10,
                     rangeType = currentState.selectedRankingOption.id,
-                    university = currentState.selectedUniversity?.name
+                    university = if (currentState.selectedUniversity?.id == 0) null else currentState.selectedUniversity?.name
                 )
                 
                 _uiState.update { 
+                    val newEntries = if (currentState.page == 1) response.results else it.leaderboardEntries + response.results
                     it.copy(
-                        leaderboardEntries = if (currentState.page == 1) response.results else currentState.leaderboardEntries + response.results,
-                        hasMore = response.next != null
+                        leaderboardEntries = newEntries,
+                        hasMore = response.next != null && response.results.isNotEmpty(),
+                        isLoading = false
                     )
                 }
             } catch (e: Exception) {
+                _uiState.update { it.copy(isLoading = false) }
                 handleError(e)
             }
         }

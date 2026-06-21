@@ -363,7 +363,7 @@ private fun AssignmentTypeRow(
             .semantics(mergeDescendants = true) {}
     ) {
         Text(
-            text = policy.type,
+            text = policy.type ?: "",
             style = MaterialTheme.appTypography.labelLarge,
             color = MaterialTheme.appColors.textPrimary,
         )
@@ -428,7 +428,7 @@ fun CourseCompletionCircularProgress(
     modifier: Modifier = Modifier,
     progress: Float,
     progressPercent: Int,
-    completedText: String
+    completedText: String?
 ) {
     Box(
         modifier = modifier
@@ -459,7 +459,7 @@ fun CourseCompletionCircularProgress(
                 color = MaterialTheme.appColors.primary,
             )
             Text(
-                text = completedText,
+                text = completedText ?: "",
                 style = MaterialTheme.appTypography.labelSmall,
                 color = MaterialTheme.appColors.textPrimaryVariant,
             )

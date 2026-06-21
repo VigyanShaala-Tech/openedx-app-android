@@ -131,7 +131,7 @@ private fun GradeCard(
         ) {
             // Assignment type title
             Text(
-                text = policy.type,
+                text = policy.type ?: "",
                 style = MaterialTheme.appTypography.labelLarge,
                 color = MaterialTheme.appColors.textPrimary,
                 fontWeight = FontWeight.Medium,

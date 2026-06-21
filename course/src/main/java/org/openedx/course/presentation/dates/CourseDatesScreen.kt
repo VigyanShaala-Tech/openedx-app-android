@@ -584,9 +584,9 @@ private fun CourseDateItem(
                     .align(Alignment.CenterVertically),
                 // append assignment type if available with title
                 text = if (dateBlock.assignmentType.isNullOrEmpty().not()) {
-                    "${dateBlock.assignmentType}: ${dateBlock.title}"
+                    "${dateBlock.assignmentType}: ${dateBlock.title ?: ""}"
                 } else {
-                    dateBlock.title
+                    dateBlock.title ?: ""
                 },
                 style = MaterialTheme.appTypography.titleMedium,
                 color = MaterialTheme.appColors.textDark,
@@ -611,7 +611,7 @@ private fun CourseDateItem(
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(top = 4.dp),
-                text = dateBlock.description,
+                text = dateBlock.description ?: "",
                 style = MaterialTheme.appTypography.labelMedium,
             )
         }

@@ -51,7 +51,7 @@ import java.nio.charset.StandardCharsets
 fun WebContentScreen(
     windowSize: WindowSize,
     apiHostUrl: String? = null,
-    title: String,
+    title: String?,
     onBackClick: () -> Unit,
     htmlBody: String? = null,
     contentUrl: String? = null,
@@ -92,7 +92,7 @@ fun WebContentScreen(
                     contentAlignment = Alignment.CenterStart
                 ) {
                     Toolbar(
-                        label = title,
+                        label = title ?: "",
                         canShowBackBtn = true,
                         onBackClick = onBackClick
                     )

@@ -325,7 +325,7 @@ private fun DownloadItem(
                 modifier = Modifier.weight(1f)
             ) {
                 Text(
-                    text = downloadModel.title,
+                    text = downloadModel.title ?: "",
                     style = MaterialTheme.appTypography.labelLarge,
                     color = MaterialTheme.appColors.textDark
                 )
@@ -365,12 +365,12 @@ private fun DownloadProgress(
             horizontalArrangement = Arrangement.SpaceBetween
         ) {
             Text(
-                text = uiState.downloadedSize,
+                text = uiState.downloadedSize ?: "",
                 style = MaterialTheme.appTypography.titleLarge,
                 color = MaterialTheme.appColors.successGreen
             )
             Text(
-                text = uiState.readyToDownloadSize,
+                text = uiState.readyToDownloadSize ?: "",
                 style = MaterialTheme.appTypography.titleLarge,
                 color = MaterialTheme.appColors.textDark
             )

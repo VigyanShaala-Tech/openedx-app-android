@@ -140,6 +140,7 @@ private fun LeaderboardUI(
             LeaderboardFilter(
                 label = uiState.selectedUniversity?.name ?: "All Colleges",
                 options = listOf(University(0, "All Colleges")) + uiState.universities,
+                labelExtractor = { it.name },
                 onSelected = { if (it.id == 0) onUniversitySelected(null) else onUniversitySelected(it) }
             )
 
@@ -148,7 +149,8 @@ private fun LeaderboardUI(
             // Ranking Filter
             LeaderboardFilter(
                 label = uiState.selectedRankingOption.name,
-                options = uiState.rankingOptions,
+                options = if (uiState.rankingOptions.isEmpty()) listOf(RankingOption("all", "All Students")) else uiState.rankingOptions,
+                labelExtractor = { it.name },
                 onSelected = onRankingOptionSelected
             )
 
@@ -177,14 +179,46 @@ private fun LeaderboardUI(
                     }
                     Divider(color = Color.LightGray.copy(alpha = 0.5f))
 
-                    LazyColumn(modifier = Modifier.fillMaxSize()) {
-                        itemsIndexed(uiState.leaderboardEntries) { index, entry ->
-                            LeaderboardRow(entry)
-                            Divider(color = Color.LightGray.copy(alpha = 0.3f))
-                            
-                            if (index == uiState.leaderboardEntries.size - 1 && uiState.hasMore) {
-                                LaunchedEffect(Unit) {
-                                    onLoadMore()
+                    Box(modifier = Modifier.fillMaxSize()) {
+                        if (uiState.isLoading && uiState.leaderboardEntries.isEmpty()) {
+                            CircularProgressIndicator(
+                                modifier = Modifier.align(Alignment.Center),
+                                color = MaterialTheme.appColors.primary
+                            )
+                        } else if (uiState.leaderboardEntries.isEmpty()) {
+                            Text(
+                                text = "No rankings available",
+                                modifier = Modifier.align(Alignment.Center),
+                                style = MaterialTheme.appTypography.bodyMedium,
+                                color = MaterialTheme.appColors.textSecondary
+                            )
+                        } else {
+                            LazyColumn(modifier = Modifier.fillMaxSize()) {
+                                itemsIndexed(uiState.leaderboardEntries) { index, entry ->
+                                    LeaderboardRow(entry)
+                                    Divider(color = Color.LightGray.copy(alpha = 0.3f))
+
+                                    if (index == uiState.leaderboardEntries.size - 1 && uiState.hasMore) {
+                                        LaunchedEffect(Unit) {
+                                            onLoadMore()
+                                        }
+                                    }
+                                }
+                                if (uiState.isLoading) {
+                                    item {
+                                        Box(
+                                            modifier = Modifier
+                                                .fillMaxWidth()
+                                                .padding(16.dp),
+                                            contentAlignment = Alignment.Center
+                                        ) {
+                                            CircularProgressIndicator(
+                                                modifier = Modifier.size(24.dp),
+                                                color = MaterialTheme.appColors.primary,
+                                                strokeWidth = 2.dp
+                                            )
+                                        }
+                                    }
                                 }
                             }
                         }
@@ -211,7 +245,7 @@ private fun LeaderboardRow(entry: org.openedx.course.data.model.LeaderboardEntry
             color = MaterialTheme.appColors.textDark
         )
         Text(
-            text = entry.name,
+            text = entry.name ?: "",
             modifier = Modifier.weight(1f),
             style = MaterialTheme.appTypography.bodyMedium.copy(fontWeight = FontWeight.Medium),
             color = MaterialTheme.appColors.textDark
@@ -237,6 +271,7 @@ private fun LeaderboardRow(entry: org.openedx.course.data.model.LeaderboardEntry
 private fun <T> LeaderboardFilter(
     label: String,
     options: List<T>,
+    labelExtractor: (T) -> String,
     onSelected: (T) -> Unit
 ) {
     var expanded by remember { mutableStateOf(false) }
@@ -260,7 +295,8 @@ private fun <T> LeaderboardFilter(
         )
         ExposedDropdownMenu(
             expanded = expanded,
-            onDismissRequest = { expanded = false }
+            onDismissRequest = { expanded = false },
+            modifier = Modifier.fillMaxWidth()
         ) {
             options.forEach { option ->
                 DropdownMenuItem(
@@ -269,12 +305,7 @@ private fun <T> LeaderboardFilter(
                         expanded = false
                     }
                 ) {
-                    val text = when (option) {
-                        is University -> option.name
-                        is RankingOption -> option.name
-                        else -> option.toString()
-                    }
-                    Text(text = text)
+                    Text(text = labelExtractor(option) ?: "")
                 }
             }
         }

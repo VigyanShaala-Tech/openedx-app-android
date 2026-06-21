@@ -381,7 +381,7 @@ private fun CourseHomeUI(
 
 @Composable
 fun ResumeButton(
-    displayName: String,
+    displayName: String?,
     onClick: () -> Unit
 ) {
     Card(
@@ -401,7 +401,7 @@ fun ResumeButton(
             horizontalArrangement = Arrangement.SpaceBetween
         ) {
             Text(
-                text = displayName,
+                text = displayName ?: "",
                 style = MaterialTheme.appTypography.titleSmall,
                 color = Color.White,
                 fontWeight = FontWeight.Bold
@@ -577,7 +577,7 @@ private fun DashboardCard(content: @Composable () -> Unit) {
 
 @Composable
 fun ViewAllButton(
-    text: String,
+    text: String?,
     onClick: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
@@ -593,7 +593,7 @@ fun ViewAllButton(
         )
         Spacer(modifier = Modifier.width(8.dp))
         Text(
-            text = text,
+            text = text ?: "",
             style = MaterialTheme.appTypography.labelLarge,
             color = MaterialTheme.appColors.textAccent
         )

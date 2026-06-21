@@ -651,7 +651,7 @@ class CourseUnitContainerFragment : Fragment(R.layout.fragment_course_unit_conta
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(horizontal = 24.dp),
-                text = hierarchyPath,
+                text = hierarchyPath ?: "",
                 style = MaterialTheme.appTypography.bodySmall,
                 color = MaterialTheme.appColors.textDark,
                 maxLines = 2,

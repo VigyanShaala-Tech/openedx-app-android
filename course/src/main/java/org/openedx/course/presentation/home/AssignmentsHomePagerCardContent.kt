@@ -255,7 +255,7 @@ private fun AssignmentCard(
 
                     // Assignment and section name
                     Text(
-                        text = assignment.displayName,
+                        text = assignment.displayName ?: "",
                         style = MaterialTheme.appTypography.titleSmall,
                         color = MaterialTheme.appColors.textPrimary,
                         fontWeight = FontWeight.Bold

@@ -32,8 +32,8 @@ import org.openedx.core.R as coreR
 @Composable
 internal fun ExpandedHeaderContent(
     modifier: Modifier = Modifier,
-    org: String,
-    courseTitle: String,
+    org: String?,
+    courseTitle: String?,
     onNotificationClick: () -> Unit = {}
 ) {
     val windowSize = rememberWindowSize()
@@ -55,12 +55,12 @@ internal fun ExpandedHeaderContent(
         ) {
             Column(modifier = Modifier.weight(1f)) {
                 Text(
-                    text = org,
+                    text = org ?: "",
                     color = MaterialTheme.appColors.textSecondary,
                     style = MaterialTheme.appTypography.labelMedium
                 )
                 Text(
-                    text = courseTitle,
+                    text = courseTitle ?: "",
                     color = MaterialTheme.appColors.textDark,
                     style = MaterialTheme.appTypography.titleLarge,
                     overflow = TextOverflow.Ellipsis,
@@ -96,13 +96,13 @@ internal fun ExpandedHeaderContent(
 @Composable
 internal fun CollapsedHeaderContent(
     modifier: Modifier = Modifier,
-    courseTitle: String
+    courseTitle: String?
 ) {
     Text(
         modifier = modifier
             .fillMaxWidth()
             .padding(bottom = 3.dp),
-        text = courseTitle,
+        text = courseTitle ?: "",
         color = MaterialTheme.appColors.textDark,
         overflow = TextOverflow.Ellipsis,
         style = MaterialTheme.appTypography.titleSmall,

@@ -127,7 +127,7 @@ fun HappeningNowItem(
             Spacer(modifier = Modifier.width(12.dp))
             Column(modifier = Modifier.weight(1f)) {
                 Text(
-                    text = session.topic,
+                    text = session.topic ?: "",
                     style = MaterialTheme.appTypography.bodyMedium,
                     color = MaterialTheme.appColors.textDark,
                     fontWeight = FontWeight.Bold,
@@ -282,7 +282,7 @@ fun LiveSessionItem(
         Spacer(modifier = Modifier.width(12.dp))
         Column(modifier = Modifier.weight(1f)) {
             Text(
-                text = session.topic,
+                text = session.topic ?: "",
                 style = MaterialTheme.appTypography.bodySmall,
                 color = MaterialTheme.appColors.textDark,
                 fontWeight = FontWeight.Bold

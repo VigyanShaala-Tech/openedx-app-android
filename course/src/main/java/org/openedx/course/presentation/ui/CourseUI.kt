@@ -623,7 +623,7 @@ fun VideoSubtitles(
                                 .noRippleClickable {
                                     onTranscriptClick(item)
                                 },
-                            text = Jsoup.parse(item.content).text(),
+                            text = Jsoup.parse(item.content ?: "").text(),
                             color = textColor,
                             style = MaterialTheme.appTypography.bodyMedium,
                             fontWeight = fontWeight,
@@ -782,7 +782,7 @@ fun CourseVideoItem(
 
             // Title (top-left)
             Text(
-                text = videoBlock.displayName,
+                text = videoBlock.displayName ?: "",
                 color = Color.White,
                 style = titleStyle,
                 modifier = Modifier
@@ -853,7 +853,7 @@ fun CourseVideoSectionHeader(
             modifier = Modifier.weight(1f),
         ) {
             Text(
-                text = block.displayName,
+                text = block.displayName ?: "",
                 style = MaterialTheme.appTypography.titleSmall,
                 color = MaterialTheme.appColors.textPrimary,
                 maxLines = 1,
@@ -1063,7 +1063,7 @@ fun CourseExpandableChapterCard(
         }
         Text(
             modifier = Modifier.weight(1f),
-            text = block.displayName,
+            text = block.displayName ?: "",
             style = MaterialTheme.appTypography.titleMedium,
             color = MaterialTheme.appColors.textPrimary,
             maxLines = 1,
@@ -1118,7 +1118,7 @@ fun CourseSubSectionItem(
             Spacer(modifier = Modifier.width(4.dp))
             Text(
                 modifier = Modifier.weight(1f),
-                text = block.displayName,
+                text = block.displayName ?: "",
                 style = MaterialTheme.appTypography.titleSmall,
                 color = MaterialTheme.appColors.textPrimary,
                 overflow = TextOverflow.Ellipsis,
@@ -1166,7 +1166,7 @@ fun CourseSubSectionItem(
 
 @Composable
 fun CourseUnitToolbar(
-    title: String,
+    title: String?,
     onBackClick: () -> Unit,
 ) {
     OpenEdXTheme {
@@ -1182,7 +1182,7 @@ fun CourseUnitToolbar(
                 modifier = Modifier
                     .padding(horizontal = 56.dp)
                     .align(Alignment.Center),
-                text = title,
+                text = title ?: "",
                 color = MaterialTheme.appColors.textPrimary,
                 style = MaterialTheme.appTypography.titleSmall,
                 maxLines = 1,
@@ -1281,7 +1281,7 @@ fun SubSectionUnitsList(
                             modifier = Modifier
                                 .padding(start = 8.dp, end = 8.dp)
                                 .weight(1f),
-                            text = unit.displayName,
+                            text = unit.displayName ?: "",
                             color = MaterialTheme.appColors.textPrimary,
                             style = MaterialTheme.appTypography.labelMedium,
                             maxLines = 2,
@@ -1571,7 +1571,7 @@ fun CourseProgress(
             horizontalArrangement = Arrangement.SpaceBetween
         ) {
             Text(
-                text = description,
+                text = description ?: "",
                 color = MaterialTheme.appColors.textDark,
                 style = MaterialTheme.appTypography.labelSmall
             )
@@ -1602,7 +1602,7 @@ fun CourseProgress(
 fun ResumeCourseButton(
     modifier: Modifier = Modifier,
     block: Block,
-    displayName: String,
+    displayName: String?,
     onResumeClick: (String) -> Unit,
 ) {
     OpenEdXButton(
@@ -1620,7 +1620,7 @@ fun ResumeCourseButton(
             ) {
                 Text(
                     modifier = Modifier.weight(1f),
-                    text = displayName,
+                    text = displayName ?: "",
                     color = MaterialTheme.appColors.primaryButtonText,
                     style = MaterialTheme.appTypography.titleMedium,
                     fontWeight = FontWeight.W600

@@ -85,14 +85,14 @@ private fun AnnouncementItem(announcement: AnnouncementModel) {
                 .padding(12.dp)
         ) {
             Text(
-                text = announcement.date,
+                text = announcement.date ?: "",
                 style = MaterialTheme.appTypography.labelSmall,
                 color = MaterialTheme.appColors.textSecondary
             )
             Spacer(modifier = Modifier.height(4.dp))
             // Basic HTML stripping if needed, or just display content
             val plainText = androidx.core.text.HtmlCompat.fromHtml(
-                announcement.content,
+                announcement.content ?: "",
                 androidx.core.text.HtmlCompat.FROM_HTML_MODE_LEGACY
             ).toString().trim()
             

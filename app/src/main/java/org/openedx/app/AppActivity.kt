@@ -187,16 +187,6 @@ class AppActivity : AppCompatActivity(), InsetHolder, WindowSizeHolder {
                     }
                 }
 
-                // Extract courseId from path if missing in query
-                if (!params.containsKey(DeepLink.Keys.COURSE_ID.value) &&
-                    !params.containsKey(DeepLink.Keys.COURSE_ID_ALT.value)
-                ) {
-                    val segments = data.pathSegments
-                    if (segments.size >= 2 && segments[0] == "courses") {
-                        params[DeepLink.Keys.COURSE_ID.value] = segments[1].replace(" ", "+")
-                    }
-                }
-
                 // Extract token for PasswordReset from path if missing in query
                 if (screen == "PasswordReset" && !params.containsKey(DeepLink.Keys.TOKEN.value)) {
                     val segments = data.pathSegments
@@ -220,20 +210,6 @@ class AppActivity : AppCompatActivity(), InsetHolder, WindowSizeHolder {
                     if (id.isNotEmpty()) {
                         viewModel.activateAccount(id)
                         return
-                    }
-                }
-
-                // Extract meetingId from path if missing in query
-                if (screen == "meeting") {
-                    val segments = data.pathSegments
-                    if (segments.size >= 6 && segments[4] == "join") {
-                        if (!params.containsKey(DeepLink.Keys.MEETING_ID.value)) {
-                            params[DeepLink.Keys.MEETING_ID.value] = segments[5]
-                        }
-                        // For meeting links, path course ID is often more reliable than CId query param
-                        if (segments[1] == "course" && segments[2].startsWith("course-v1:")) {
-                            params[DeepLink.Keys.COURSE_ID.value] = segments[2].replace(" ", "+")
-                        }
                     }
                 }
 

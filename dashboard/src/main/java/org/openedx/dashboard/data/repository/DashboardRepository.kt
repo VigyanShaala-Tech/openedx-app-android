@@ -6,17 +6,9 @@ import org.openedx.core.domain.model.CourseEnrollments
 import org.openedx.core.domain.model.DashboardCourseList
 import org.openedx.core.domain.model.EnrolledCourse
 import org.openedx.dashboard.data.api.DashboardApi
-import org.openedx.dashboard.data.model.AchievementDto
-import org.openedx.dashboard.data.model.CourseItemDto
-import org.openedx.dashboard.data.model.PaginatedDto
-import org.openedx.dashboard.data.model.RecommendationDto
-import org.openedx.dashboard.data.model.SummaryCardDto
-import org.openedx.dashboard.data.model.AchievementsAllDto
-import org.openedx.dashboard.data.model.WishlistItemData
+import org.openedx.dashboard.data.model.*
 import org.openedx.core.data.model.room.WishlistEntity
 import org.openedx.dashboard.data.DashboardDao
-import org.openedx.dashboard.data.model.WishlistRequest
-import org.openedx.dashboard.data.model.WishlistResponse
 import org.openedx.dashboard.domain.CourseStatusFilter
 import org.openedx.foundation.utils.FileUtil
 
@@ -136,5 +128,9 @@ class DashboardRepository(
 
     suspend fun addToWishlist(courseId: String): WishlistResponse {
         return wishlistApi.add(WishlistRequest(courseId))
+    }
+
+    suspend fun getNotifications(checkedoutnewNotification: Boolean): NotificationResponse {
+        return dashboardApi.getNotifications(NotificationRequest(checkedoutnewNotification))
     }
 }

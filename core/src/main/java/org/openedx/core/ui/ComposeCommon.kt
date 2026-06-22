@@ -7,27 +7,8 @@ import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.isSystemInDarkTheme
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.PaddingValues
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.RowScope
-import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.sizeIn
-import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.layout.widthIn
-import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.LazyListState
-import androidx.compose.foundation.lazy.LazyRow
-import androidx.compose.foundation.lazy.items
-import androidx.compose.foundation.lazy.itemsIndexed
-import androidx.compose.foundation.lazy.rememberLazyListState
+import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.lazy.*
 import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.PagerState
 import androidx.compose.foundation.pager.rememberPagerState
@@ -37,43 +18,17 @@ import androidx.compose.foundation.text.BasicText
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material.Button
-import androidx.compose.material.ButtonDefaults
-import androidx.compose.material.CircularProgressIndicator
-import androidx.compose.material.Divider
-import androidx.compose.material.Icon
-import androidx.compose.material.IconButton
-import androidx.compose.material.MaterialTheme
-import androidx.compose.material.OutlinedButton
-import androidx.compose.material.OutlinedTextField
-import androidx.compose.material.ScaffoldState
-import androidx.compose.material.Text
-import androidx.compose.material.TextFieldDefaults
+import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
-import androidx.compose.material.icons.filled.AccountCircle
-import androidx.compose.material.icons.filled.Close
-import androidx.compose.material.icons.filled.Info
-import androidx.compose.material.icons.filled.ManageAccounts
-import androidx.compose.material.icons.filled.Search
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.NonRestartableComposable
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.material.icons.filled.*
+import androidx.compose.runtime.*
 import androidx.compose.runtime.saveable.rememberSaveable
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.drawWithContent
-import androidx.compose.ui.focus.FocusDirection
-import androidx.compose.ui.focus.FocusManager
-import androidx.compose.ui.focus.FocusRequester
-import androidx.compose.ui.focus.focusRequester
-import androidx.compose.ui.focus.onFocusChanged
+import androidx.compose.ui.focus.*
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.painter.Painter
 import androidx.compose.ui.graphics.vector.ImageVector
@@ -98,14 +53,16 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.text.withStyle
-import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.TextUnit
-import androidx.compose.ui.unit.dp
 import androidx.compose.ui.zIndex
+import androidx.compose.ui.tooling.preview.Preview
 import kotlinx.coroutines.launch
 import org.openedx.core.NoContentScreenType
 import org.openedx.core.R
+import org.openedx.core.domain.model.NotificationModel
 import org.openedx.core.domain.model.RegistrationField
 import org.openedx.core.presentation.global.ErrorType
 import org.openedx.core.ui.theme.OpenEdXTheme
@@ -157,6 +114,26 @@ fun StaticSearchBar(
                 color = MaterialTheme.appColors.textFieldHint
             )
         }
+    }
+}
+
+@Composable
+fun BackBtn(
+    modifier: Modifier = Modifier,
+    tint: Color = MaterialTheme.appColors.primary,
+    onBackClick: () -> Unit,
+) {
+    IconButton(
+        modifier = modifier.testTag("ib_back"),
+        onClick = {
+            onBackClick()
+        }
+    ) {
+        Icon(
+            imageVector = Icons.AutoMirrored.Filled.ArrowBack,
+            contentDescription = null,
+            tint = tint
+        )
     }
 }
 
@@ -219,7 +196,12 @@ fun MainToolbar(
     modifier: Modifier = Modifier,
     label: String?,
     onSettingsClick: () -> Unit,
+    notifications: List<NotificationModel> = emptyList(),
+    haveNewNotification: Boolean = false,
+    onNotificationClick: () -> Unit = {}
 ) {
+    var expanded by remember { mutableStateOf(false) }
+
     Box(
         modifier = modifier.fillMaxWidth()
     ) {
@@ -231,19 +213,89 @@ fun MainToolbar(
             color = MaterialTheme.appColors.textDark,
             style = MaterialTheme.appTypography.titleLarge
         )
-        IconButton(
+        Row(
             modifier = Modifier
                 .align(Alignment.CenterEnd)
                 .padding(end = 12.dp),
-            onClick = {
-                onSettingsClick()
-            }
+            verticalAlignment = Alignment.CenterVertically
         ) {
-            Icon(
-                imageVector = Icons.Default.ManageAccounts,
-                tint = MaterialTheme.appColors.textAccent,
-                contentDescription = stringResource(id = R.string.core_accessibility_settings)
-            )
+            IconButton(
+                onClick = {
+                    onSettingsClick()
+                }
+            ) {
+                Icon(
+                    imageVector = Icons.Default.ManageAccounts,
+                    tint = MaterialTheme.appColors.textAccent,
+                    contentDescription = stringResource(id = R.string.core_accessibility_settings)
+                )
+            }
+
+            Box {
+                IconButton(
+                    onClick = {
+                        expanded = true
+                        onNotificationClick()
+                    }
+                ) {
+                    Icon(
+                        imageVector = Icons.Default.Notifications,
+                        tint = MaterialTheme.appColors.textAccent,
+                        contentDescription = "Notifications"
+                    )
+                    if (haveNewNotification) {
+                        Box(
+                            modifier = Modifier
+                                .padding(top = 8.dp, end = 8.dp)
+                                .size(10.dp)
+                                .background(Color.Red, CircleShape)
+                                .align(Alignment.TopEnd)
+                        )
+                    }
+                }
+
+                DropdownMenu(
+                    expanded = expanded,
+                    onDismissRequest = { expanded = false },
+                    modifier = Modifier
+                        .width(300.dp)
+                        .background(MaterialTheme.appColors.background)
+                ) {
+                    if (notifications.isEmpty()) {
+                        DropdownMenuItem(onClick = { expanded = false }) {
+                            Text(
+                                text = "No notifications",
+                                style = MaterialTheme.appTypography.bodyMedium,
+                                color = MaterialTheme.appColors.textPrimary
+                            )
+                        }
+                    } else {
+                        notifications.forEach { notification ->
+                            DropdownMenuItem(
+                                onClick = { expanded = false },
+                                modifier = Modifier.padding(vertical = 4.dp)
+                            ) {
+                                Column(modifier = Modifier.fillMaxWidth()) {
+                                    Text(
+                                        text = notification.title,
+                                        style = MaterialTheme.appTypography.labelLarge.copy(fontWeight = FontWeight.Bold),
+                                        color = MaterialTheme.appColors.textDark
+                                    )
+                                    Text(
+                                        text = notification.description,
+                                        style = MaterialTheme.appTypography.bodySmall,
+                                        color = MaterialTheme.appColors.textSecondary
+                                    )
+                                    Divider(
+                                        modifier = Modifier.padding(top = 8.dp),
+                                        color = MaterialTheme.appColors.divider
+                                    )
+                                }
+                            }
+                        }
+                    }
+                }
+            }
         }
     }
 }
@@ -1054,26 +1106,6 @@ fun OpenEdXOutlinedButton(
 }
 
 @Composable
-fun BackBtn(
-    modifier: Modifier = Modifier,
-    tint: Color = MaterialTheme.appColors.primary,
-    onBackClick: () -> Unit,
-) {
-    IconButton(
-        modifier = modifier.testTag("ib_back"),
-        onClick = {
-            onBackClick()
-        }
-    ) {
-        Icon(
-            imageVector = Icons.AutoMirrored.Filled.ArrowBack,
-            contentDescription = stringResource(id = R.string.core_accessibility_btn_back),
-            tint = tint
-        )
-    }
-}
-
-@Composable
 fun ConnectionErrorView(onReloadClick: () -> Unit) {
     FullScreenErrorView(errorType = ErrorType.CONNECTION_ERROR, onReloadClick = onReloadClick)
 }
@@ -1286,7 +1318,7 @@ fun CircularProgress() {
 }
 
 @Composable
-private fun RoundTab(
+fun RoundTab(
     modifier: Modifier = Modifier,
     item: TabItem,
     contentColor: Color

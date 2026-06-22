@@ -131,3 +131,30 @@ data class BadgeProgressDto(
 
 data class WishlistRequest(val course_id: String)
 data class WishlistResponse(val success: Boolean, val message: String?)
+
+data class NotificationDto(
+    @SerializedName("id")
+    val id: Int,
+    @SerializedName("title")
+    val title: String,
+    @SerializedName("description")
+    val description: String,
+    @SerializedName("type")
+    val type: String,
+    @SerializedName("is_read")
+    val is_read: Boolean,
+    @SerializedName("created_at")
+    val created_at: String
+)
+
+data class NotificationResponse(
+    @SerializedName("haveNewNotification")
+    val haveNewNotification: Boolean,
+    @SerializedName("notifications")
+    val notifications: List<NotificationDto>
+)
+
+data class NotificationRequest(
+    @SerializedName("checkedoutnewNotification")
+    val checkedoutnewNotification: Boolean
+)

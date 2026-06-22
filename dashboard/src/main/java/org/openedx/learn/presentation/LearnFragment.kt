@@ -81,6 +81,7 @@ class LearnFragment : Fragment(R.layout.fragment_learn) {
                     onUpdateLearnType = { learnType ->
                         viewModel.updateLearnType(learnType)
                     },
+                    viewModel = viewModel
                 )
             }
         }
@@ -116,10 +117,12 @@ class LearnFragment : Fragment(R.layout.fragment_learn) {
 private fun Header(
     fragmentManager: FragmentManager,
     selectedLearnType: LearnType,
-    onUpdateLearnType: (LearnType) -> Unit
+    onUpdateLearnType: (LearnType) -> Unit,
+    viewModel: LearnViewModel
 ) {
-    val viewModel: LearnViewModel = koinViewModel()
     val windowSize = rememberWindowSize()
+    val notifications by viewModel.notifications.collectAsState()
+    val haveNewNotification by viewModel.haveNewNotification.collectAsState()
     val contentWidth by remember(key1 = windowSize) {
         mutableStateOf(
             windowSize.windowSizeValue(
@@ -141,6 +144,11 @@ private fun Header(
             label = stringResource(id = R.string.dashboard_welcome_back, viewModel.userName),
             onSettingsClick = {
                 viewModel.onSettingsClick(fragmentManager)
+            },
+            notifications = notifications,
+            haveNewNotification = haveNewNotification,
+            onNotificationClick = {
+                viewModel.markNotificationsRead()
             }
         )
         if (viewModel.isProgramTypeWebView) {

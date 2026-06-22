@@ -14,6 +14,9 @@ import org.openedx.dashboard.presentation.DashboardAnalyticsEvent
 import org.openedx.dashboard.presentation.DashboardAnalyticsKey
 import org.openedx.dashboard.presentation.DashboardRouter
 import org.openedx.core.data.storage.CorePreferences
+import org.openedx.core.domain.model.NotificationModel
+import org.openedx.dashboard.data.model.NotificationDto
+import org.openedx.dashboard.domain.interactor.DashboardInteractor
 import org.openedx.foundation.presentation.BaseViewModel
 import org.openedx.learn.LearnType
 
@@ -23,6 +26,7 @@ class LearnViewModel(
     private val dashboardRouter: DashboardRouter,
     private val analytics: DashboardAnalytics,
     private val corePreferences: CorePreferences,
+    private val dashboardInteractor: DashboardInteractor
 ) : BaseViewModel() {
     private val _uiState = MutableStateFlow(
         LearnUIState(
@@ -36,6 +40,12 @@ class LearnViewModel(
 
     val uiState: StateFlow<LearnUIState>
         get() = _uiState.asStateFlow()
+
+    private val _notifications = MutableStateFlow<List<NotificationModel>>(emptyList())
+    val notifications = _notifications.asStateFlow()
+
+    private val _haveNewNotification = MutableStateFlow(false)
+    val haveNewNotification = _haveNewNotification.asStateFlow()
 
     private val dashboardType get() = config.getDashboardConfig().getType()
     val isProgramTypeWebView get() = config.getProgramConfig().isViewTypeWebView()
@@ -52,6 +62,7 @@ class LearnViewModel(
         get() = corePreferences.user?.name ?: ""
 
     init {
+        fetchNotifications()
         viewModelScope.launch {
             _uiState.collect { uiState ->
                 if (uiState.learnType == LearnType.COURSES) {
@@ -66,6 +77,38 @@ class LearnViewModel(
     fun updateLearnType(learnType: LearnType) {
         viewModelScope.launch {
             _uiState.update { it.copy(learnType = learnType) }
+        }
+    }
+
+    fun fetchNotifications() {
+        viewModelScope.launch {
+            try {
+                val response = dashboardInteractor.getNotifications(false)
+                _notifications.value = response.notifications.map {
+                    NotificationModel(
+                        id = it.id,
+                        title = it.title,
+                        description = it.description,
+                        type = it.type,
+                        isRead = it.is_read,
+                        createdAt = it.created_at
+                    )
+                }
+                _haveNewNotification.value = response.haveNewNotification
+            } catch (e: Exception) {
+                // Handle error
+            }
+        }
+    }
+
+    fun markNotificationsRead() {
+        viewModelScope.launch {
+            try {
+                dashboardInteractor.getNotifications(true)
+                _haveNewNotification.value = false
+            } catch (e: Exception) {
+                // Handle error
+            }
         }
     }
 

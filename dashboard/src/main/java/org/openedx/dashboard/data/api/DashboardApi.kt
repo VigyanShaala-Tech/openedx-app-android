@@ -1,13 +1,9 @@
 package org.openedx.dashboard.data.api
 
-import org.openedx.dashboard.data.model.AchievementDto
-import org.openedx.dashboard.data.model.CourseItemDto
-import org.openedx.dashboard.data.model.PaginatedDto
-import org.openedx.dashboard.data.model.RecommendationDto
-import org.openedx.dashboard.data.model.SummaryCardDto
-import org.openedx.dashboard.data.model.AchievementsAllDto
-import org.openedx.dashboard.data.model.WishlistItemData
+import org.openedx.dashboard.data.model.*
+import retrofit2.http.Body
 import retrofit2.http.GET
+import retrofit2.http.POST
 
 interface DashboardApi {
 
@@ -34,4 +30,7 @@ interface DashboardApi {
 
     @GET("/api/v1/achievements/all/")
     suspend fun getAllAchievements(): AchievementsAllDto
+
+    @POST("/api/v1/get/my/notifications/")
+    suspend fun getNotifications(@Body request: NotificationRequest): NotificationResponse
 }

@@ -44,4 +44,6 @@ class DashboardInteractor(
 
     suspend fun addToWishlist(courseId: String) = repository.addToWishlist(courseId)
     suspend fun removeFromWishlist(courseId: String) = repository.removeFromWishlist(courseId)
+
+    suspend fun getNotifications(checkedoutnewNotification: Boolean) = repository.getNotifications(checkedoutnewNotification)
 }

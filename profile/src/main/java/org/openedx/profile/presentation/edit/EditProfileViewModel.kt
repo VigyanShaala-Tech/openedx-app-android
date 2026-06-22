@@ -4,6 +4,8 @@ import android.net.Uri
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.viewModelScope
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 import org.openedx.core.R
 import org.openedx.core.config.Config
@@ -49,6 +51,15 @@ class EditProfileViewModel(
         get() = _deleteImage
 
     var profileDataChanged = false
+
+    private val _isOtpLoading = MutableStateFlow(false)
+    val isOtpLoading = _isOtpLoading.asStateFlow()
+
+    private val _isOtpSent = MutableStateFlow(false)
+    val isOtpSent = _isOtpSent.asStateFlow()
+
+    private val _verificationKey = MutableStateFlow<String?>(null)
+
     var isLimitedProfile: Boolean = account.isLimited()
         set(value) {
             field = value
@@ -141,6 +152,49 @@ class EditProfileViewModel(
 
     fun setShowLeaveDialog(value: Boolean) {
         _showLeaveDialog.value = value
+    }
+
+    fun sendOtp(phoneNumber: String) {
+        if (phoneNumber.isBlank()) return
+        _isOtpLoading.value = true
+        viewModelScope.launch {
+            try {
+                val response = interactor.sendWhatsappOtp(phoneNumber)
+                _verificationKey.value = response.verification_key
+                _isOtpSent.value = true
+                _uiMessage.value = UIMessage.SnackBarMessage(response.message)
+            } catch (e: Exception) {
+                _uiMessage.value = UIMessage.SnackBarMessage(e.message ?: "Failed to send OTP")
+            } finally {
+                _isOtpLoading.value = false
+            }
+        }
+    }
+
+    fun verifyOtp(phoneNumber: String, otp: String) {
+        val key = _verificationKey.value ?: return
+        _isOtpLoading.value = true
+        viewModelScope.launch {
+            try {
+                val response = interactor.verifyWhatsappOtp(phoneNumber, otp, key)
+                if (response.success) {
+                    val updatedAccount = interactor.updateAccount(mapOf(
+                        "phone_number" to phoneNumber,
+                        "is_whatsapp_verified" to true
+                    ))
+                    account = updatedAccount
+                    _uiState.value = EditProfileUIState(updatedAccount, isUpdating = false, isLimitedProfile)
+                    sendAccountUpdated()
+                    _isOtpSent.value = false
+                    _verificationKey.value = null
+                }
+                _uiMessage.value = UIMessage.SnackBarMessage(response.message)
+            } catch (e: Exception) {
+                _uiMessage.value = UIMessage.SnackBarMessage(e.message ?: "Failed to verify OTP")
+            } finally {
+                _isOtpLoading.value = false
+            }
+        }
     }
 
     private suspend fun sendAccountUpdated() {

@@ -39,8 +39,10 @@ import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.Card
+import androidx.compose.material.CircularProgressIndicator
 import androidx.compose.material.Divider
 import androidx.compose.material.Icon
+import androidx.compose.material.IconButton
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.ModalBottomSheetLayout
 import androidx.compose.material.ModalBottomSheetValue
@@ -48,8 +50,10 @@ import androidx.compose.material.OutlinedTextField
 import androidx.compose.material.Scaffold
 import androidx.compose.material.Surface
 import androidx.compose.material.Text
+import androidx.compose.material.TextButton
 import androidx.compose.material.TextFieldDefaults
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.CheckCircle
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.Done
 import androidx.compose.material.icons.filled.ExpandMore
@@ -58,6 +62,7 @@ import androidx.compose.material.rememberModalBottomSheetState
 import androidx.compose.material.rememberScaffoldState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.runtime.mutableStateMapOf
@@ -71,6 +76,7 @@ import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.shadow
+import androidx.compose.ui.focus.FocusDirection
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.ComposeView
@@ -176,6 +182,8 @@ class EditProfileFragment : Fragment() {
                 val selectedImageUri by viewModel.selectedImageUri.observeAsState()
                 val isImageDeleted by viewModel.deleteImage.observeAsState(false)
                 val leaveDialog by viewModel.showLeaveDialog.observeAsState(false)
+                val isOtpLoading by viewModel.isOtpLoading.collectAsState()
+                val isOtpSent by viewModel.isOtpSent.collectAsState()
 
                 EditProfileScreen(
                     windowSize = windowSize,
@@ -184,6 +192,8 @@ class EditProfileFragment : Fragment() {
                     selectedImageUri = selectedImageUri,
                     isImageDeleted = isImageDeleted,
                     leaveDialog = leaveDialog,
+                    isOtpLoading = isOtpLoading,
+                    isOtpSent = isOtpSent,
                     onBackClick = {
                         if (it) {
                             viewModel.setShowLeaveDialog(true)
@@ -226,6 +236,12 @@ class EditProfileFragment : Fragment() {
                     },
                     onLimitedProfileChange = {
                         viewModel.isLimitedProfile = it
+                    },
+                    onSendOtp = {
+                        viewModel.sendOtp(it)
+                    },
+                    onVerifyOtp = { phone, otp ->
+                        viewModel.verifyOtp(phone, otp)
                     }
                 )
             }
@@ -295,6 +311,8 @@ private fun EditProfileScreen(
     selectedImageUri: Uri?,
     isImageDeleted: Boolean,
     leaveDialog: Boolean,
+    isOtpLoading: Boolean,
+    isOtpSent: Boolean,
     onKeepEdit: () -> Unit,
     onDataChanged: (Boolean) -> Unit,
     onLimitedProfileChange: (Boolean) -> Unit,
@@ -302,6 +320,8 @@ private fun EditProfileScreen(
     onSaveClick: (Map<String, Any?>) -> Unit,
     onSelectImageClick: () -> Unit,
     onDeleteImageClick: () -> Unit,
+    onSendOtp: (String) -> Unit,
+    onVerifyOtp: (String, String) -> Unit,
 ) {
     val scaffoldState = rememberScaffoldState()
     val coroutine = rememberCoroutineScope()
@@ -324,6 +344,11 @@ private fun EditProfileScreen(
         mutableStateOf("")
     }
 
+    var phoneNumber by rememberSaveable {
+        mutableStateOf(uiState.account.whatsappNumber)
+    }
+    var otpCode by rememberSaveable { mutableStateOf("") }
+
     var searchValue by rememberSaveable(stateSaver = TextFieldValue.Saver) {
         mutableStateOf(TextFieldValue())
     }
@@ -337,12 +362,16 @@ private fun EditProfileScreen(
             Pair(LANGUAGE, uiState.account.languageProficiencies),
             Pair(COUNTRY, uiState.account.country),
             Pair(BIO, uiState.account.bio),
+            Pair(GENDER, uiState.account.gender),
+            Pair(WHATSAPP, uiState.account.whatsappNumber),
             Pair(ACCOUNT_PRIVACY, uiState.account.accountPrivacy.name.lowercase())
         )
     }
 
     val saveButtonEnabled = !(
             uiState.account.yearOfBirth.toString() == mapFields[YEAR_OF_BIRTH] &&
+                    uiState.account.gender == mapFields[GENDER] &&
+                    uiState.account.whatsappNumber == mapFields[WHATSAPP] &&
                     uiState.account.languageProficiencies == mapFields[LANGUAGE] &&
                     uiState.account.country == mapFields[COUNTRY] &&
                     uiState.account.bio == mapFields[BIO] &&
@@ -685,6 +714,15 @@ private fun EditProfileScreen(
                                             expandedList = LocaleUtils.getCountries()
                                         }
 
+                                        GENDER -> {
+                                            serverFieldName.value = GENDER
+                                            expandedList = listOf(
+                                                RegistrationField.Option("male", "Male", ""),
+                                                RegistrationField.Option("female", "Female", ""),
+                                                RegistrationField.Option("other", "Other", "")
+                                            )
+                                        }
+
                                         LANGUAGE -> {
                                             serverFieldName.value = LANGUAGE
                                             expandedList = LocaleUtils.getLanguages()
@@ -710,11 +748,20 @@ private fun EditProfileScreen(
                                         }
                                     }
                                 },
-                                onValueChanged = {
-                                    mapFields[BIO] = it
+                                onValueChanged = { field, value ->
+                                    mapFields[field] = value
                                 },
                                 mapFields = mapFields,
-                                onDoneClick = { onSaveClick(mapFields.toMap()) }
+                                onDoneClick = { onSaveClick(mapFields.toMap()) },
+                                account = uiState.account,
+                                isOtpLoading = isOtpLoading,
+                                isOtpSent = isOtpSent,
+                                onSendOtp = onSendOtp,
+                                onVerifyOtp = onVerifyOtp,
+                                phoneNumber = phoneNumber,
+                                onPhoneChange = { phoneNumber = it },
+                                otpCode = otpCode,
+                                onOtpChange = { otpCode = it }
                             )
                             Spacer(Modifier.height(52.dp))
                         }
@@ -873,10 +920,21 @@ private fun ProfileFields(
     disabled: Boolean,
     mapFields: MutableMap<String, Any?>,
     onFieldClick: (String, String) -> Unit,
-    onValueChanged: (String) -> Unit,
-    onDoneClick: () -> Unit
+    onValueChanged: (String, String) -> Unit,
+    onDoneClick: () -> Unit,
+    account: Account,
+    isOtpLoading: Boolean,
+    isOtpSent: Boolean,
+    onSendOtp: (String) -> Unit,
+    onVerifyOtp: (String, String) -> Unit,
+    phoneNumber: String,
+    onPhoneChange: (String) -> Unit,
+    otpCode: String,
+    onOtpChange: (String) -> Unit
 ) {
     val context = LocalContext.current
+    val focusManager = LocalFocusManager.current
+
     val languageProficiency = (mapFields[LANGUAGE] as List<LanguageProficiency>)
     val lang = if (languageProficiency.isNotEmpty()) {
         LocaleUtils.getLanguageByLanguageCode(languageProficiency[0].code)
@@ -886,6 +944,119 @@ private fun ProfileFields(
     Column(
         verticalArrangement = Arrangement.spacedBy(20.dp)
     ) {
+        Column {
+            Text(
+                modifier = Modifier
+                    .fillMaxWidth(),
+                text = stringResource(id = R.string.profile_whatsapp_number),
+                style = MaterialTheme.appTypography.labelLarge,
+                color = MaterialTheme.appColors.textPrimary
+            )
+            Spacer(modifier = Modifier.height(8.dp))
+            OutlinedTextField(
+                value = phoneNumber,
+                onValueChange = { onPhoneChange(it) },
+                modifier = Modifier.fillMaxWidth(),
+                placeholder = { Text(stringResource(id = R.string.profile_whatsapp_number_placeholder)) },
+                enabled = !isOtpSent && !isOtpLoading && !account.isWhatsappVerified,
+                keyboardOptions = KeyboardOptions(
+                    keyboardType = KeyboardType.Phone,
+                    imeAction = if (isOtpSent) ImeAction.Next else ImeAction.Done
+                ),
+                keyboardActions = KeyboardActions(
+                    onNext = { focusManager.moveFocus(FocusDirection.Down) },
+                    onDone = { focusManager.clearFocus() }
+                ),
+                colors = TextFieldDefaults.outlinedTextFieldColors(
+                    textColor = MaterialTheme.appColors.textFieldText,
+                    backgroundColor = MaterialTheme.appColors.textFieldBackground,
+                    unfocusedBorderColor = MaterialTheme.appColors.textFieldBorder,
+                    focusedBorderColor = MaterialTheme.appColors.primary
+                ),
+                shape = MaterialTheme.appShapes.textFieldShape,
+                trailingIcon = {
+                    if (account.isWhatsappVerified) {
+                        Icon(
+                            imageVector = Icons.Filled.CheckCircle,
+                            contentDescription = null,
+                            tint = Color(0xFF4CAF50)
+                        )
+                    }
+                }
+            )
+
+            if (!account.isWhatsappVerified) {
+                if (isOtpSent) {
+                    Spacer(Modifier.height(16.dp))
+                    OutlinedTextField(
+                        value = otpCode,
+                        onValueChange = { onOtpChange(it) },
+                        modifier = Modifier.fillMaxWidth(),
+                        label = { Text(stringResource(id = R.string.profile_enter_otp)) },
+                        enabled = !isOtpLoading,
+                        keyboardOptions = KeyboardOptions(
+                            keyboardType = KeyboardType.Number,
+                            imeAction = ImeAction.Done
+                        ),
+                        keyboardActions = KeyboardActions(onDone = { focusManager.clearFocus() }),
+                        colors = TextFieldDefaults.outlinedTextFieldColors(
+                            textColor = MaterialTheme.appColors.textFieldText,
+                            backgroundColor = MaterialTheme.appColors.textFieldBackground,
+                            unfocusedBorderColor = MaterialTheme.appColors.textFieldBorder,
+                            focusedBorderColor = MaterialTheme.appColors.primary
+                        ),
+                        shape = MaterialTheme.appShapes.textFieldShape
+                    )
+                }
+
+                Spacer(Modifier.height(12.dp))
+
+                OpenEdXButton(
+                    text = if (isOtpSent) stringResource(id = R.string.profile_verify_otp) else stringResource(
+                        id = R.string.profile_send_otp
+                    ),
+                    onClick = {
+                        if (isOtpSent) {
+                            onVerifyOtp(phoneNumber, otpCode)
+                        } else {
+                            onSendOtp(phoneNumber)
+                        }
+                    },
+                    enabled = !isOtpLoading && (if (isOtpSent) otpCode.length >= 4 else phoneNumber.length >= 10),
+                    modifier = Modifier.fillMaxWidth()
+                ) {
+                    if (isOtpLoading) {
+                        CircularProgressIndicator(
+                            modifier = Modifier.size(24.dp),
+                            color = Color.White
+                        )
+                    } else {
+                        Text(
+                            text = if (isOtpSent) stringResource(id = R.string.profile_verify_otp) else stringResource(
+                                id = R.string.profile_send_otp
+                            ),
+                            color = Color.White,
+                            style = MaterialTheme.appTypography.labelLarge
+                        )
+                    }
+                }
+
+                if (isOtpSent) {
+                    TextButton(
+                        onClick = { onSendOtp(phoneNumber) },
+                        enabled = !isOtpLoading,
+                        modifier = Modifier.align(Alignment.End)
+                    ) {
+                        Text(
+                            text = "Resend OTP",
+                            color = MaterialTheme.appColors.primary,
+                            style = MaterialTheme.appTypography.labelMedium
+                        )
+                    }
+                }
+            }
+        }
+
         SelectableField(
             name = stringResource(id = R.string.profile_year),
             initialValue = mapFields[YEAR_OF_BIRTH].toString(),
@@ -911,6 +1082,13 @@ private fun ProfileFields(
                     )
                 }
             )
+            SelectableField(
+                name = "Gender",
+                initialValue = mapFields[GENDER].toString().replaceFirstChar { it.uppercase() },
+                onClick = {
+                    onFieldClick(GENDER, "Gender")
+                }
+            )
             InputEditField(
                 modifier = Modifier
                     .fillMaxWidth()
@@ -918,7 +1096,7 @@ private fun ProfileFields(
                 name = stringResource(id = R.string.profile_about_me),
                 initialValue = mapFields[BIO].toString(),
                 onValueChanged = {
-                    onValueChanged(it.take(BIO_TEXT_FIELD_LIMIT))
+                    onValueChanged(BIO, it.take(BIO_TEXT_FIELD_LIMIT))
                 },
                 onDoneClick = onDoneClick
             )
@@ -1047,6 +1225,62 @@ private fun InputEditField(
             },
             textStyle = MaterialTheme.appTypography.bodyMedium,
             modifier = modifier.testTag("tf_input_${name.tagId()}")
+        )
+    }
+}
+
+@Preview(uiMode = Configuration.UI_MODE_NIGHT_NO)
+@Preview(uiMode = UI_MODE_NIGHT_YES)
+@Preview(name = "NEXUS_5_Light", device = Devices.NEXUS_5, uiMode = Configuration.UI_MODE_NIGHT_NO)
+@Preview(name = "NEXUS_5_Dark", device = Devices.NEXUS_5, uiMode = UI_MODE_NIGHT_YES)
+@Composable
+private fun EditProfileScreenPreview() {
+    OpenEdXTheme {
+        EditProfileScreen(
+            windowSize = WindowSize(WindowType.Compact, WindowType.Compact),
+            uiState = EditProfileUIState(account = mockAccount, isUpdating = false, false),
+            selectedImageUri = null,
+            uiMessage = null,
+            isImageDeleted = true,
+            leaveDialog = false,
+            onBackClick = {},
+            onSaveClick = {},
+            onSelectImageClick = {},
+            onDeleteImageClick = {},
+            onDataChanged = {},
+            onKeepEdit = {},
+            onLimitedProfileChange = {},
+            isOtpLoading = false,
+            isOtpSent = false,
+            onSendOtp = {},
+            onVerifyOtp = { _, _ -> }
+        )
+    }
+}
+
+@Preview(name = "NEXUS_9_Light", device = Devices.NEXUS_9, uiMode = Configuration.UI_MODE_NIGHT_NO)
+@Preview(name = "NEXUS_9_Dark", device = Devices.NEXUS_9, uiMode = UI_MODE_NIGHT_YES)
+@Composable
+private fun EditProfileScreenTabletPreview() {
+    OpenEdXTheme {
+        EditProfileScreen(
+            windowSize = WindowSize(WindowType.Medium, WindowType.Medium),
+            uiState = EditProfileUIState(account = mockAccount, isUpdating = false, false),
+            selectedImageUri = null,
+            uiMessage = null,
+            isImageDeleted = true,
+            leaveDialog = false,
+            onBackClick = {},
+            onSaveClick = {},
+            onSelectImageClick = {},
+            onDeleteImageClick = {},
+            onDataChanged = {},
+            onKeepEdit = {},
+            onLimitedProfileChange = {},
+            isOtpLoading = false,
+            isOtpSent = false,
+            onSendOtp = {},
+            onVerifyOtp = { _, _ -> }
         )
     }
 }
@@ -1273,54 +1507,6 @@ fun LimitedProfilePreview() {
         modifier = Modifier,
         onCloseClick = {}
     )
-}
-
-@Preview(uiMode = Configuration.UI_MODE_NIGHT_NO)
-@Preview(uiMode = UI_MODE_NIGHT_YES)
-@Preview(name = "NEXUS_5_Light", device = Devices.NEXUS_5, uiMode = Configuration.UI_MODE_NIGHT_NO)
-@Preview(name = "NEXUS_5_Dark", device = Devices.NEXUS_5, uiMode = UI_MODE_NIGHT_YES)
-@Composable
-private fun EditProfileScreenPreview() {
-    OpenEdXTheme {
-        EditProfileScreen(
-            windowSize = WindowSize(WindowType.Compact, WindowType.Compact),
-            uiState = EditProfileUIState(account = mockAccount, isUpdating = false, false),
-            selectedImageUri = null,
-            uiMessage = null,
-            isImageDeleted = true,
-            leaveDialog = false,
-            onBackClick = {},
-            onSaveClick = {},
-            onSelectImageClick = {},
-            onDeleteImageClick = {},
-            onDataChanged = {},
-            onKeepEdit = {},
-            onLimitedProfileChange = {}
-        )
-    }
-}
-
-@Preview(name = "NEXUS_9_Light", device = Devices.NEXUS_9, uiMode = Configuration.UI_MODE_NIGHT_NO)
-@Preview(name = "NEXUS_9_Dark", device = Devices.NEXUS_9, uiMode = UI_MODE_NIGHT_YES)
-@Composable
-private fun EditProfileScreenTabletPreview() {
-    OpenEdXTheme {
-        EditProfileScreen(
-            windowSize = WindowSize(WindowType.Medium, WindowType.Medium),
-            uiState = EditProfileUIState(account = mockAccount, isUpdating = false, false),
-            selectedImageUri = null,
-            uiMessage = null,
-            isImageDeleted = true,
-            leaveDialog = false,
-            onBackClick = {},
-            onSaveClick = {},
-            onSelectImageClick = {},
-            onDeleteImageClick = {},
-            onDataChanged = {},
-            onKeepEdit = {},
-            onLimitedProfileChange = {}
-        )
-    }
 }
 
 private val mockAccount = Account(

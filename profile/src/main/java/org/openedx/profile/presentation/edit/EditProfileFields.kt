@@ -1,6 +1,8 @@
 package org.openedx.profile.presentation.edit
 
 const val YEAR_OF_BIRTH = "year_of_birth"
+const val WHATSAPP = "whatsapp_number"
+const val GENDER = "gender"
 const val LANGUAGE = "language_proficiencies"
 const val COUNTRY = "country"
 const val BIO = "bio"

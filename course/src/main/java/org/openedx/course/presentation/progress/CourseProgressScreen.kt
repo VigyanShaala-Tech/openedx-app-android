@@ -22,15 +22,24 @@ import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.Card
 import androidx.compose.material.CircularProgressIndicator
 import androidx.compose.material.Divider
 import androidx.compose.material.Icon
+import androidx.compose.material.LinearProgressIndicator
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Scaffold
 import androidx.compose.material.Surface
 import androidx.compose.material.Text
+import androidx.compose.foundation.Canvas
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.outlined.InsertDriveFile
+import androidx.compose.material.icons.filled.AccessTime
+import androidx.compose.material.icons.filled.AssignmentTurnedIn
+import androidx.compose.material.icons.filled.Description
+import androidx.compose.material.icons.filled.Videocam
+import androidx.compose.material.icons.automirrored.outlined.TrendingUp
 import androidx.compose.material.rememberScaffoldState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
@@ -40,8 +49,10 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.geometry.center
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.StrokeCap
+import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.clearAndSetSemantics
@@ -53,8 +64,11 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
+import androidx.core.graphics.toColorInt
 import org.openedx.core.NoContentScreenType
 import org.openedx.core.domain.model.CourseProgress
+import org.openedx.core.domain.model.DashboardProgress
 import org.openedx.core.ui.CircularProgress
 import org.openedx.core.ui.HandleUIMessage
 import org.openedx.core.ui.NoContentScreen
@@ -128,6 +142,25 @@ private fun CourseProgressContent(
                     verticalArrangement = Arrangement.spacedBy(16.dp),
                     contentPadding = PaddingValues(vertical = 16.dp)
                 ) {
+                    uiState.dashboardProgress?.let { dashboard ->
+                        item {
+                            DashboardHeader()
+                        }
+                        item {
+                            SummaryCardsGrid(dashboard.summaryCards)
+                        }
+                        if (dashboard.quizScores.isNotEmpty()) {
+                            item {
+                                QuizScoreChart(dashboard.quizScores)
+                            }
+                        }
+                        item {
+                            OverallPerformanceView(dashboard.overallPerformance)
+                        }
+                        item {
+                            Divider(modifier = Modifier.padding(vertical = 16.dp))
+                        }
+                    }
                     item {
                         CourseCompletionView(
                             progress = uiState.progress
@@ -586,4 +619,311 @@ fun CurrentOverallGradeText(
         },
         style = MaterialTheme.appTypography.labelMedium,
     )
+}
+
+@Composable
+private fun DashboardHeader() {
+    Column {
+        Text(
+            text = "Your progress",
+            style = MaterialTheme.appTypography.headlineSmall.copy(
+                fontWeight = FontWeight.Bold,
+                color = MaterialTheme.appColors.textDark,
+                fontSize = 24.sp
+            )
+        )
+        Spacer(modifier = Modifier.height(8.dp))
+        Text(
+            text = "Track live sessions, quizzes, assignments and watch time at a glance.",
+            style = MaterialTheme.appTypography.bodyMedium,
+            color = MaterialTheme.appColors.textSecondary
+        )
+        Spacer(modifier = Modifier.height(24.dp))
+    }
+}
+
+@Composable
+private fun SummaryCardsGrid(cards: List<DashboardProgress.SummaryCard>) {
+    val rows = cards.chunked(2)
+    Column(verticalArrangement = Arrangement.spacedBy(16.dp)) {
+        rows.forEach { rowCards ->
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.spacedBy(16.dp)
+            ) {
+                rowCards.forEach { card ->
+                    SummaryCardView(
+                        modifier = Modifier.weight(1f),
+                        card = card
+                    )
+                }
+                if (rowCards.size == 1) {
+                    Spacer(modifier = Modifier.weight(1f))
+                }
+            }
+        }
+    }
+}
+
+@Composable
+private fun SummaryCardView(modifier: Modifier = Modifier, card: DashboardProgress.SummaryCard) {
+    Card(
+        modifier = modifier.height(140.dp),
+        shape = RoundedCornerShape(12.dp),
+        elevation = 2.dp,
+        backgroundColor = MaterialTheme.appColors.background,
+        border = BorderStroke(1.dp, Color.LightGray.copy(alpha = 0.5f))
+    ) {
+        Column(
+            modifier = Modifier.padding(16.dp),
+            verticalArrangement = Arrangement.SpaceBetween
+        ) {
+            Surface(
+                modifier = Modifier.size(40.dp),
+                shape = RoundedCornerShape(8.dp),
+                color = try { Color(card.color.toColorInt()).copy(alpha = 0.1f) } catch (_: Exception) { Color.Gray.copy(alpha = 0.1f) }
+            ) {
+                Box(contentAlignment = Alignment.Center) {
+                    Icon(
+                        imageVector = when (card.icon) {
+                            "video" -> Icons.Default.Videocam
+                            "clipboardCheck" -> Icons.Default.AssignmentTurnedIn
+                            "fileText" -> Icons.Default.Description
+                            "clock" -> Icons.Default.AccessTime
+                            else -> Icons.Default.Description
+                        },
+                        contentDescription = null,
+                        tint = try { Color(card.color.toColorInt()) } catch (_: Exception) { Color.Gray },
+                        modifier = Modifier.size(24.dp)
+                    )
+                }
+            }
+            Column {
+                Text(
+                    text = card.value,
+                    style = MaterialTheme.appTypography.titleLarge.copy(
+                        fontWeight = FontWeight.Bold,
+                        color = MaterialTheme.appColors.textDark
+                    )
+                )
+                Text(
+                    text = card.name,
+                    style = MaterialTheme.appTypography.bodySmall,
+                    color = MaterialTheme.appColors.textSecondary
+                )
+            }
+        }
+    }
+}
+
+@Composable
+private fun QuizScoreChart(quizScores: List<DashboardProgress.QuizScoreData>) {
+    Card(
+        modifier = Modifier.fillMaxWidth(),
+        shape = RoundedCornerShape(12.dp),
+        elevation = 2.dp,
+        backgroundColor = MaterialTheme.appColors.background,
+        border = BorderStroke(1.dp, Color.LightGray.copy(alpha = 0.5f))
+    ) {
+        Column(modifier = Modifier.padding(16.dp)) {
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                Icon(
+                    imageVector = Icons.Default.AssignmentTurnedIn,
+                    contentDescription = null,
+                    tint = MaterialTheme.appColors.textDark,
+                    modifier = Modifier.size(20.dp)
+                )
+                Spacer(modifier = Modifier.width(8.dp))
+                Text(
+                    text = "Quiz score",
+                    style = MaterialTheme.appTypography.titleMedium.copy(fontWeight = FontWeight.Bold),
+                    color = MaterialTheme.appColors.textDark
+                )
+            }
+            Text(
+                text = "Score across quizzes",
+                style = MaterialTheme.appTypography.bodySmall,
+                color = MaterialTheme.appColors.textSecondary
+            )
+            Spacer(modifier = Modifier.height(24.dp))
+            
+            Box(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(200.dp)
+                    .padding(bottom = 24.dp)
+            ) {
+                Canvas(modifier = Modifier.fillMaxSize()) {
+                    val width = size.width
+                    val height = size.height
+                    val barWidth = 40.dp.toPx()
+                    val spacing = (width - (barWidth * quizScores.size)) / (quizScores.size + 1)
+                    
+                    for (i in 0..4) {
+                        val y = height - (height * i / 4)
+                        drawLine(
+                            color = Color.LightGray.copy(alpha = 0.5f),
+                            start = androidx.compose.ui.geometry.Offset(0f, y),
+                            end = androidx.compose.ui.geometry.Offset(width, y),
+                            strokeWidth = 1.dp.toPx()
+                        )
+                    }
+
+                    quizScores.forEachIndexed { index, quiz ->
+                        val x = spacing + (index * (barWidth + spacing))
+                        val barHeight = if (quiz.max > 0) (height * (quiz.score / quiz.max)).toFloat() else 0f
+                        
+                        drawRect(
+                            color = Color(0xFF2C4869),
+                            topLeft = androidx.compose.ui.geometry.Offset(x, height - barHeight),
+                            size = androidx.compose.ui.geometry.Size(barWidth, barHeight)
+                        )
+                    }
+                }
+            }
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceAround
+            ) {
+                quizScores.forEach { quiz ->
+                    Text(
+                        text = quiz.name,
+                        style = MaterialTheme.appTypography.bodySmall,
+                        color = MaterialTheme.appColors.textSecondary,
+                        modifier = Modifier.width(60.dp),
+                        textAlign = TextAlign.Center,
+                        maxLines = 2
+                    )
+                }
+            }
+        }
+    }
+}
+
+@Composable
+private fun OverallPerformanceView(performance: DashboardProgress.OverallPerformance) {
+    Card(
+        modifier = Modifier.fillMaxWidth(),
+        shape = RoundedCornerShape(12.dp),
+        elevation = 2.dp,
+        backgroundColor = MaterialTheme.appColors.background,
+        border = BorderStroke(1.dp, Color.LightGray.copy(alpha = 0.5f))
+    ) {
+        Column(modifier = Modifier.padding(16.dp)) {
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                Icon(
+                    imageVector = Icons.AutoMirrored.Outlined.TrendingUp,
+                    contentDescription = null,
+                    tint = MaterialTheme.appColors.textDark,
+                    modifier = Modifier.size(20.dp)
+                )
+                Spacer(modifier = Modifier.width(8.dp))
+                Text(
+                    text = "Overall performance",
+                    style = MaterialTheme.appTypography.titleMedium.copy(fontWeight = FontWeight.Bold),
+                    color = MaterialTheme.appColors.textDark
+                )
+            }
+            Spacer(modifier = Modifier.height(24.dp))
+            
+            Box(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(200.dp),
+                contentAlignment = Alignment.Center
+            ) {
+                Canvas(modifier = Modifier.size(180.dp)) {
+                    val center = size.center
+                    val maxRadius = size.minDimension / 2
+                    val strokeWidth = 15.dp.toPx()
+                    
+                    performance.radialData.forEachIndexed { index, data ->
+                        val radius = maxRadius - (index * (strokeWidth + 10.dp.toPx()))
+                        drawCircle(
+                            color = Color.LightGray.copy(alpha = 0.2f),
+                            radius = radius,
+                            style = Stroke(width = strokeWidth)
+                        )
+                        drawArc(
+                            color = when (index) {
+                                0 -> Color(0xFF69AB4A)
+                                1 -> Color(0xFF2C4869)
+                                2 -> Color(0xFFFFCC29)
+                                else -> Color.Gray
+                            },
+                            startAngle = -90f,
+                            sweepAngle = (data.value * 3.6).toFloat(),
+                            useCenter = false,
+                            style = Stroke(width = strokeWidth, cap = StrokeCap.Round),
+                            size = androidx.compose.ui.geometry.Size(radius * 2, radius * 2),
+                            topLeft = androidx.compose.ui.geometry.Offset(center.x - radius, center.y - radius)
+                        )
+                    }
+                }
+            }
+            
+            Spacer(modifier = Modifier.height(24.dp))
+            
+            performance.progressBars.forEachIndexed { index, bar ->
+                Column(modifier = Modifier.padding(vertical = 8.dp)) {
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.SpaceBetween
+                    ) {
+                        Text(
+                            text = bar.name,
+                            style = MaterialTheme.appTypography.bodyMedium,
+                            color = MaterialTheme.appColors.textSecondary
+                        )
+                        Text(
+                            text = "${bar.value.toInt()}%",
+                            style = MaterialTheme.appTypography.bodyMedium.copy(fontWeight = FontWeight.Bold),
+                            color = MaterialTheme.appColors.textDark
+                        )
+                    }
+                    Spacer(modifier = Modifier.height(4.dp))
+                    LinearProgressIndicator(
+                        progress = (bar.value / 100).toFloat(),
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .height(8.dp)
+                            .clip(CircleShape),
+                        color = when (index) {
+                            0 -> Color(0xFF69AB4A)
+                            1 -> Color(0xFF2C4869)
+                            2 -> Color(0xFFFFCC29)
+                            else -> MaterialTheme.appColors.primary
+                        },
+                        backgroundColor = Color.LightGray.copy(alpha = 0.2f)
+                    )
+                }
+            }
+            
+            if (performance.encouragementMessage.isNotEmpty()) {
+                Spacer(modifier = Modifier.height(16.dp))
+                Surface(
+                    color = Color(0xFFF1F8E9),
+                    shape = RoundedCornerShape(8.dp)
+                ) {
+                    Row(
+                        modifier = Modifier.padding(12.dp),
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Icon(
+                            painter = painterResource(id = R.drawable.ic_course_marker),
+                            contentDescription = null,
+                            tint = Color(0xFF69AB4A),
+                            modifier = Modifier.size(16.dp)
+                        )
+                        Spacer(modifier = Modifier.width(8.dp))
+                        Text(
+                            text = performance.encouragementMessage,
+                            style = MaterialTheme.appTypography.bodySmall.copy(fontWeight = FontWeight.Medium),
+                            color = Color(0xFF69AB4A)
+                        )
+                    }
+                }
+            }
+        }
+    }
 }

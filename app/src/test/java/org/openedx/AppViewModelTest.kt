@@ -32,6 +32,8 @@ import org.openedx.core.data.model.User
 import org.openedx.core.system.notifier.DownloadNotifier
 import org.openedx.core.system.notifier.app.AppNotifier
 import org.openedx.core.system.notifier.app.LogoutEvent
+import org.openedx.auth.domain.interactor.AuthInteractor
+import org.openedx.foundation.system.ResourceManager
 import org.openedx.foundation.utils.FileUtil
 
 @ExperimentalCoroutinesApi
@@ -51,6 +53,8 @@ class AppViewModelTest {
     private val deepLinkRouter = mockk<DeepLinkRouter>()
     private val context = mockk<Context>()
     private val downloadNotifier = mockk<DownloadNotifier>()
+    private val authInteractor = mockk<AuthInteractor>()
+    private val resourceManager = mockk<ResourceManager>()
 
     private val user = User(0, "", "", "")
 
@@ -83,6 +87,8 @@ class AppViewModelTest {
             deepLinkRouter,
             fileUtil,
             downloadNotifier,
+            authInteractor,
+            resourceManager,
             context,
         )
 
@@ -119,6 +125,8 @@ class AppViewModelTest {
             deepLinkRouter,
             fileUtil,
             downloadNotifier,
+            authInteractor,
+            resourceManager,
             context,
         )
 
@@ -157,6 +165,8 @@ class AppViewModelTest {
             deepLinkRouter,
             fileUtil,
             downloadNotifier,
+            authInteractor,
+            resourceManager,
             context,
         )
 

@@ -17,6 +17,7 @@ import org.openedx.core.domain.model.CourseDatesBannerInfo
 import org.openedx.core.domain.model.CourseDatesResult
 import org.openedx.core.domain.model.CourseEnrollmentDetails
 import org.openedx.core.domain.model.CourseProgress
+import org.openedx.core.domain.model.DashboardProgress
 import org.openedx.core.domain.model.CourseStructure
 import org.openedx.core.exception.NoCachedDataException
 import org.openedx.core.extension.channelFlowWithAwait
@@ -273,6 +274,16 @@ class CourseRepository(
             if (networkConnection.isOnline() && (!getOnlyCacheIfExist || courseProgress == null)) {
                 val response = api.getCourseProgress(courseId)
                 courseDao.insertCourseProgressEntity(response.mapToRoomEntity(courseId))
+                trySend(response.mapToDomain())
+            }
+        }
+
+    fun getDashboardProgress(
+        courseId: String
+    ): Flow<DashboardProgress> =
+        channelFlowWithAwait {
+            if (networkConnection.isOnline()) {
+                val response = api.getDashboardProgress(courseId)
                 trySend(response.mapToDomain())
             }
         }

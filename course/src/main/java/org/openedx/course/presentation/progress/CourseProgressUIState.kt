@@ -1,6 +1,7 @@
 package org.openedx.course.presentation.progress
 
 import org.openedx.core.domain.model.CourseProgress
+import org.openedx.core.domain.model.DashboardProgress
 import org.openedx.core.domain.model.CourseStructure
 
 sealed class CourseProgressUIState {
@@ -9,5 +10,6 @@ sealed class CourseProgressUIState {
     data class Data(
         val progress: CourseProgress,
         val courseStructure: CourseStructure?,
+        val dashboardProgress: DashboardProgress? = null
     ) : CourseProgressUIState()
 }

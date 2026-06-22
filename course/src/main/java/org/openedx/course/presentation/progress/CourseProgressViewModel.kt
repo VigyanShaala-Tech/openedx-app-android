@@ -42,21 +42,24 @@ class CourseProgressViewModel(
         viewModelScope.launch {
             val courseProgressFlow = interactor.getCourseProgress(courseId, isRefresh, false)
             val courseStructureFlow = interactor.getCourseStructureFlow(courseId)
+            val dashboardProgressFlow = interactor.getDashboardProgress(courseId)
 
             combine(
                 courseProgressFlow,
-                courseStructureFlow
-            ) { courseProgress, courseStructure ->
-                courseProgress to courseStructure
+                courseStructureFlow,
+                dashboardProgressFlow
+            ) { courseProgress, courseStructure, dashboardProgress ->
+                Triple(courseProgress, courseStructure, dashboardProgress)
             }.catch { e ->
                 if (_uiState.value !is CourseProgressUIState.Data) {
                     _uiState.value = CourseProgressUIState.Error
                 }
                 courseNotifier.send(CourseLoading(false))
-            }.collect { (courseProgress, courseStructure) ->
+            }.collect { (courseProgress, courseStructure, dashboardProgress) ->
                 _uiState.value = CourseProgressUIState.Data(
                     courseProgress,
-                    courseStructure
+                    courseStructure,
+                    dashboardProgress
                 )
                 courseNotifier.send(CourseLoading(false))
                 courseNotifier.send(CourseProgressLoaded)

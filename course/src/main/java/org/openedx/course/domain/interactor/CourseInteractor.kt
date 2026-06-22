@@ -123,6 +123,9 @@ class CourseInteractor(
     fun getCourseProgress(courseId: String, isRefresh: Boolean, getOnlyCacheIfExist: Boolean) =
         repository.getCourseProgress(courseId, isRefresh, getOnlyCacheIfExist)
 
+    fun getDashboardProgress(courseId: String) =
+        repository.getDashboardProgress(courseId)
+
     suspend fun getVideoProgress(blockId: String) = repository.getVideoProgress(blockId)
 
     suspend fun getLiveClasses(courseId: String, type: String, page: Int) =

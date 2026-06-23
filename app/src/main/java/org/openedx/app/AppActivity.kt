@@ -56,6 +56,7 @@ import org.koin.android.ext.android.inject
 import org.koin.androidx.viewmodel.ext.android.viewModel
 import org.openedx.app.databinding.ActivityAppBinding
 import org.openedx.app.deeplink.DeepLink
+import org.openedx.auth.presentation.AuthRouter
 import org.openedx.auth.data.model.AccountActivationResponse
 import org.openedx.auth.presentation.logistration.LogistrationFragment
 import org.openedx.auth.presentation.signin.SignInFragment
@@ -95,6 +96,7 @@ class AppActivity : AppCompatActivity(), InsetHolder, WindowSizeHolder {
     private val whatsNewManager by inject<WhatsNewManager>()
     private val corePreferencesManager by inject<CorePreferences>()
     private val profileRouter by inject<ProfileRouter>()
+    private val authRouter by inject<AuthRouter>()
     private val downloadDialogManager by inject<DownloadDialogManager>()
     private val calendarSyncScheduler by inject<CalendarSyncScheduler>()
 
@@ -105,6 +107,8 @@ class AppActivity : AppCompatActivity(), InsetHolder, WindowSizeHolder {
     private var _insetCutout = 0
 
     private var _windowSize = WindowSize(WindowType.Compact, WindowType.Compact)
+    private var activationComposeView: androidx.compose.ui.platform.ComposeView? = null
+
     private val authCode: String?
         get() {
             val data = intent?.data
@@ -382,12 +386,14 @@ class AppActivity : AppCompatActivity(), InsetHolder, WindowSizeHolder {
     }
 
     private fun observeAccountActivation() {
-        val composeView = androidx.compose.ui.platform.ComposeView(this).apply {
-            setViewCompositionStrategy(ViewCompositionStrategy.DisposeOnViewTreeLifecycleDestroyed)
+        if (activationComposeView == null) {
+            activationComposeView = androidx.compose.ui.platform.ComposeView(this).apply {
+                setViewCompositionStrategy(ViewCompositionStrategy.DisposeOnViewTreeLifecycleDestroyed)
+            }
+            binding.rootLayout.addView(activationComposeView)
         }
-        binding.rootLayout.addView(composeView)
 
-        composeView.setContent {
+        activationComposeView?.setContent {
             OpenEdXTheme {
                 val response by viewModel.accountActivationResponse.collectAsState()
                 val isLoading by viewModel.isActivationLoading.collectAsState()
@@ -401,10 +407,7 @@ class AppActivity : AppCompatActivity(), InsetHolder, WindowSizeHolder {
                         },
                         onLoginClick = {
                             viewModel.clearActivationResponse()
-                            profileRouter.restartApp(
-                                supportFragmentManager,
-                                viewModel.isLogistrationEnabled
-                            )
+                            authRouter.navigateToSignIn(supportFragmentManager, null, null)
                         }
                     )
                 }

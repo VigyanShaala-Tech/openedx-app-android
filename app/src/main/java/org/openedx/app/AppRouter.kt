@@ -147,10 +147,14 @@ class AppRouter :
     override fun clearBackStack(fm: FragmentManager) {
         fm.apply {
             try {
-                for (fragment in fragments) {
-                    beginTransaction().remove(fragment).commit()
-                }
                 popBackStack(null, FragmentManager.POP_BACK_STACK_INCLUSIVE)
+                if (fragments.isNotEmpty()) {
+                    val transaction = beginTransaction()
+                    for (fragment in fragments) {
+                        transaction.remove(fragment)
+                    }
+                    transaction.commit()
+                }
             } catch (e: Exception) {
                 e.printStackTrace()
             }

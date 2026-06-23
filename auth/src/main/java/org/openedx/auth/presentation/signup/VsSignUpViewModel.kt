@@ -13,12 +13,14 @@ import org.openedx.auth.domain.interactor.AuthInteractor
 import org.openedx.auth.domain.model.SocialAuthResponse
 import org.openedx.auth.presentation.AuthAnalytics
 import org.openedx.auth.presentation.AuthRouter
+import org.openedx.core.config.Config
 import org.openedx.core.data.storage.CorePreferences
 import org.openedx.core.system.notifier.app.AppNotifier
 import org.openedx.foundation.extension.isInternetError
 import org.openedx.foundation.presentation.BaseViewModel
 import org.openedx.foundation.presentation.UIMessage
 import org.openedx.foundation.system.ResourceManager
+import java.util.Locale
 import org.openedx.core.R as coreR
 
 class VsSignUpViewModel(
@@ -28,11 +30,14 @@ class VsSignUpViewModel(
     private val preferencesManager: CorePreferences,
     private val appNotifier: AppNotifier,
     private val router: AuthRouter,
+    private val config: Config,
     val courseId: String?,
     val infoType: String?,
 ) : BaseViewModel() {
 
-    private val _uiState = MutableStateFlow(VsSignUpUIState())
+    private val _uiState = MutableStateFlow(VsSignUpUIState(
+        tosUrl = config.getAgreement(Locale.getDefault().language).tosUrl
+    ))
     val uiState = _uiState.asStateFlow()
 
     private val _uiMessage = MutableSharedFlow<UIMessage>(
@@ -100,4 +105,5 @@ data class VsSignUpUIState(
     val showRegisterSuccessDialog: Boolean = false,
     val navigateToSignIn: Boolean = false,
     val socialAuth: SocialAuthResponse? = null,
+    val tosUrl: String = "",
 )

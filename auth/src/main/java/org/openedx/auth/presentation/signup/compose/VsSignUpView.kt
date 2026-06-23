@@ -6,8 +6,8 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.text.ClickableText
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
@@ -17,18 +17,17 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Visibility
 import androidx.compose.material.icons.filled.VisibilityOff
-import androidx.compose.material.rememberScaffoldState
 import androidx.compose.runtime.*
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.focus.FocusDirection
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.platform.LocalUriHandler
 import androidx.compose.ui.res.painterResource
-import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.font.FontWeight
@@ -36,16 +35,14 @@ import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.input.VisualTransformation
-import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import org.openedx.auth.R
 import org.openedx.auth.data.model.AuthType
 import org.openedx.auth.presentation.signup.VsSignUpUIState
-import org.openedx.auth.presentation.ui.SocialAuthView
 import org.openedx.core.ui.HandleUIMessage
 import org.openedx.core.ui.theme.appColors
-import org.openedx.core.ui.theme.appShapes
 import org.openedx.core.ui.theme.appTypography
 import org.openedx.foundation.presentation.UIMessage
 import org.openedx.foundation.presentation.WindowSize
@@ -82,8 +79,8 @@ fun VsSignUpView(
 
     LaunchedEffect(uiState.socialAuth) {
         uiState.socialAuth?.let {
-            if (!it.name.isNullOrBlank()) fullName = it.name
-            if (!it.email.isNullOrBlank()) email = it.email
+            if (!it.name.isNullOrEmpty()) fullName = it.name!!
+            if (!it.email.isNullOrEmpty()) email = it.email!!
         }
     }
 
@@ -93,19 +90,16 @@ fun VsSignUpView(
             Box(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .height(140.dp)
+                    .height(160.dp)
+                    .background(MaterialTheme.appColors.primary) // Brand Green background
+                    .clip(RoundedCornerShape(bottomStart = 32.dp, bottomEnd = 32.dp))
             ) {
-                Image(
-                    painter = painterResource(id = coreR.drawable.core_green_gradient_rect),
-                    contentDescription = null,
-                    modifier = Modifier.fillMaxSize(),
-                    contentScale = ContentScale.FillBounds
-                )
                 IconButton(
                     onClick = onBackClick,
                     modifier = Modifier
                         .statusBarsPadding()
-                        .padding(top = 16.dp, start = 8.dp)
+                        .padding(top = 16.dp, start = 16.dp)
+                        .size(32.dp)
                 ) {
                     Icon(
                         Icons.AutoMirrored.Filled.ArrowBack,
@@ -119,12 +113,13 @@ fun VsSignUpView(
                     modifier = Modifier
                         .statusBarsPadding()
                         .align(Alignment.Center)
-                        .height(60.dp),
+                        .height(70.dp)
+                        .padding(top = 16.dp),
                     contentScale = ContentScale.Fit
                 )
             }
         },
-        backgroundColor = MaterialTheme.appColors.background
+        backgroundColor = Color.White
     ) { paddingValues ->
         HandleUIMessage(uiMessage = uiMessage, scaffoldState = scaffoldState)
 
@@ -140,34 +135,63 @@ fun VsSignUpView(
                 text = "Create Account",
                 style = MaterialTheme.appTypography.headlineSmall.copy(
                     fontWeight = FontWeight.Bold,
-                    color = MaterialTheme.appColors.textDark,
-                    fontSize = 28.sp
+                    color = Color(0xFF263238),
+                    fontSize = 32.sp
                 )
             )
+            Spacer(modifier = Modifier.height(8.dp))
             Text(
                 text = "Join VigyanShaala and start learning today!",
-                style = MaterialTheme.appTypography.bodyMedium.copy(color = MaterialTheme.appColors.textSecondary)
+                style = MaterialTheme.appTypography.bodyMedium.copy(
+                    color = Color(0xFF78909C),
+                    fontSize = 16.sp
+                )
             )
 
+            Spacer(modifier = Modifier.height(32.dp))
+
+            // Google Sign Up Button
+            Surface(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(56.dp)
+                    .clickable { onSocialRegisterClick(AuthType.GOOGLE) },
+                shape = RoundedCornerShape(12.dp),
+                border = BorderStroke(1.dp, Color(0xFFECEFF1)),
+                color = Color(0xFFFAFAFA)
+            ) {
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.Center
+                ) {
+                    Image(
+                        painter = painterResource(id = R.drawable.auth_ic_google),
+                        contentDescription = null,
+                        modifier = Modifier.size(24.dp)
+                    )
+                    Spacer(modifier = Modifier.width(12.dp))
+                    Text(
+                        text = "Sign up with Google",
+                        style = MaterialTheme.appTypography.bodyLarge.copy(
+                            fontWeight = FontWeight.Medium,
+                            color = Color(0xFF455A64)
+                        )
+                    )
+                }
+            }
+
             Spacer(modifier = Modifier.height(24.dp))
-
-            SocialAuthView(
-                modifier = Modifier.fillMaxWidth(),
-                isGoogleAuthEnabled = true,
-                isFacebookAuthEnabled = false,
-                isMicrosoftAuthEnabled = false,
-                isSignIn = false
-            ) { authType ->
-                onSocialRegisterClick(authType)
-            }
-
-            Spacer(modifier = Modifier.height(16.dp))
             Row(verticalAlignment = Alignment.CenterVertically) {
-                Divider(modifier = Modifier.weight(1f), color = MaterialTheme.appColors.cardViewBorder)
-                Text(" or ", modifier = Modifier.padding(horizontal = 8.dp), color = MaterialTheme.appColors.textSecondary)
-                Divider(modifier = Modifier.weight(1f), color = MaterialTheme.appColors.cardViewBorder)
+                Divider(modifier = Modifier.weight(1f), color = Color(0xFFECEFF1))
+                Text(
+                    " or ",
+                    modifier = Modifier.padding(horizontal = 16.dp),
+                    color = Color(0xFFB0BEC5),
+                    fontSize = 14.sp
+                )
+                Divider(modifier = Modifier.weight(1f), color = Color(0xFFECEFF1))
             }
-            Spacer(modifier = Modifier.height(16.dp))
+            Spacer(modifier = Modifier.height(24.dp))
 
             VsSignUpInputField(
                 label = "Full Name",
@@ -176,9 +200,8 @@ fun VsSignUpView(
                     fullName = it
                     fullNameError = null
                 },
-                placeholder = "Enter your full name",
+                placeholder = "Kalpna Chawla",
                 isRequired = true,
-                helperText = "This name will be used on any certificates you earn.",
                 errorText = fullNameError,
                 imeAction = ImeAction.Next
             )
@@ -190,9 +213,8 @@ fun VsSignUpView(
                     email = it
                     emailError = null
                 },
-                placeholder = "Enter your email",
+                placeholder = "kalpna.chawla@example.com",
                 isRequired = true,
-                helperText = "This is what you will use to login.",
                 errorText = emailError,
                 keyboardType = KeyboardType.Email,
                 imeAction = ImeAction.Next
@@ -205,12 +227,11 @@ fun VsSignUpView(
                     password = it
                     passwordError = null
                 },
-                placeholder = "Create a password",
+                placeholder = "Create password",
                 isRequired = true,
                 isPassword = true,
                 passwordVisible = passwordVisible,
                 onPasswordToggle = { passwordVisible = !passwordVisible },
-                helperText = "Password must be at least 8 characters.",
                 errorText = passwordError,
                 keyboardType = KeyboardType.Password,
                 imeAction = ImeAction.Next
@@ -223,7 +244,7 @@ fun VsSignUpView(
                     confirmPassword = it
                     confirmPasswordError = null
                 },
-                placeholder = "Confirm your password",
+                placeholder = "Confirm password",
                 isRequired = true,
                 isPassword = true,
                 passwordVisible = confirmPasswordVisible,
@@ -236,12 +257,15 @@ fun VsSignUpView(
             Text(
                 text = buildAnnotatedString {
                     append("I am a ")
-                    withStyle(style = SpanStyle(color = MaterialTheme.appColors.error)) { append("*") }
+                    withStyle(style = SpanStyle(color = Color.Red)) { append("*") }
                 },
-                style = MaterialTheme.appTypography.bodyMedium.copy(fontWeight = FontWeight.Bold),
-                modifier = Modifier.padding(top = 16.dp)
+                style = MaterialTheme.appTypography.bodyMedium.copy(
+                    fontWeight = FontWeight.SemiBold,
+                    color = Color(0xFF455A64)
+                ),
+                modifier = Modifier.padding(top = 24.dp)
             )
-            Row(modifier = Modifier.padding(top = 8.dp)) {
+            Row(modifier = Modifier.padding(top = 12.dp)) {
                 VsRoleButton(
                     text = "Student",
                     isSelected = selectedRole == "student",
@@ -263,42 +287,41 @@ fun VsSignUpView(
                 verticalAlignment = Alignment.CenterVertically,
                 modifier = Modifier.padding(top = 24.dp)
             ) {
-                Checkbox(
-                    checked = isAgreed,
-                    onCheckedChange = { isAgreed = it },
-                    colors = CheckboxDefaults.colors(checkedColor = MaterialTheme.appColors.primary)
-                )
+                Box(
+                    modifier = Modifier
+                        .size(24.dp)
+                        .border(1.dp, if (isAgreed) MaterialTheme.appColors.primary else Color(0xFFB0BEC5), CircleShape)
+                        .clip(CircleShape)
+                        .clickable { isAgreed = !isAgreed }
+                        .padding(4.dp)
+                ) {
+                    if (isAgreed) {
+                        Box(modifier = Modifier.fillMaxSize().background(MaterialTheme.appColors.primary, CircleShape))
+                    }
+                }
+                Spacer(modifier = Modifier.width(12.dp))
                 val annotatedText = buildAnnotatedString {
-                    append("I agree to the ")
-                    pushStringAnnotation(tag = "TOS", annotation = "https://vigyanshaala.com/terms-of-service/")
+                    append("I agree to the VigyanShaala International ")
                     withStyle(style = SpanStyle(color = MaterialTheme.appColors.primary, fontWeight = FontWeight.Bold)) {
                         append("Terms of Service")
                     }
-                    pop()
-                    append(" and ")
-                    pushStringAnnotation(tag = "PRIVACY", annotation = "https://vigyanshaala.com/privacy-policy/")
-                    withStyle(style = SpanStyle(color = MaterialTheme.appColors.primary, fontWeight = FontWeight.Bold)) {
-                        append("Privacy Policy")
-                    }
-                    pop()
                 }
-                Spacer(Modifier.width(8.dp))
-                ClickableText(
+                Text(
                     text = annotatedText,
-                    style = MaterialTheme.appTypography.bodySmall,
-                    modifier = Modifier.weight(1f),
-                    onClick = { offset ->
-                        annotatedText.getStringAnnotations(tag = "TOS", start = offset, end = offset).firstOrNull()?.let {
-                            uriHandler.openUri(it.item)
+                    style = MaterialTheme.appTypography.bodySmall.copy(color = Color(0xFF78909C)),
+                    modifier = Modifier
+                        .weight(1f)
+                        .clickable { 
+                            if (uiState.tosUrl.isNotBlank()) {
+                                uriHandler.openUri(uiState.tosUrl)
+                            } else {
+                                uriHandler.openUri("https://vigyanshaala.com/terms-of-service/")
+                            }
                         }
-                        annotatedText.getStringAnnotations(tag = "PRIVACY", start = offset, end = offset).firstOrNull()?.let {
-                            uriHandler.openUri(it.item)
-                        }
-                    }
                 )
             }
 
-            Spacer(modifier = Modifier.height(24.dp))
+            Spacer(modifier = Modifier.height(32.dp))
 
             Button(
                 onClick = {
@@ -315,40 +338,50 @@ fun VsSignUpView(
                         if (isAgreed) {
                             onRegisterClick(email, fullName, password, selectedRole)
                         } else {
-                            onValidationError("Please agree to the Terms of Service and Privacy Policy")
+                            onValidationError("Please agree to the Terms of Service")
                         }
                     }
                 },
                 modifier = Modifier
                     .fillMaxWidth()
                     .height(56.dp),
-                shape = MaterialTheme.appShapes.buttonShape,
+                shape = RoundedCornerShape(12.dp),
                 colors = ButtonDefaults.buttonColors(
-                    backgroundColor = MaterialTheme.appColors.primary,
-                    disabledBackgroundColor = MaterialTheme.appColors.inactiveButtonBackground
+                    backgroundColor = Color(0xFFC5E1A5), // Light green
+                    disabledBackgroundColor = Color(0xFFE0E0E0)
                 ),
-                enabled = !uiState.isButtonLoading && isAgreed
+                enabled = !uiState.isButtonLoading
             ) {
                 if (uiState.isButtonLoading) {
                     CircularProgressIndicator(color = Color.White, modifier = Modifier.size(24.dp))
                 } else {
-                    Text("Create Account", color = Color.White, fontWeight = FontWeight.Bold)
+                    Text(
+                        text = "Create Account",
+                        color = Color.White,
+                        fontWeight = FontWeight.Bold,
+                        fontSize = 18.sp
+                    )
                 }
             }
 
-            Spacer(modifier = Modifier.height(16.dp))
+            Spacer(modifier = Modifier.height(24.dp))
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(bottom = 32.dp),
+                    .padding(bottom = 40.dp),
                 horizontalArrangement = Arrangement.Center
             ) {
-                Text("Already have an account? ", color = MaterialTheme.appColors.textSecondary)
+                Text(
+                    "Already have an account? ",
+                    color = Color(0xFF78909C),
+                    fontSize = 16.sp
+                )
                 Text(
                     "Sign in",
                     color = MaterialTheme.appColors.primary,
                     modifier = Modifier.clickable { onSignInClick() },
-                    fontWeight = FontWeight.Bold
+                    fontWeight = FontWeight.Bold,
+                    fontSize = 16.sp
                 )
             }
         }
@@ -394,7 +427,6 @@ fun VsSignUpInputField(
     isPassword: Boolean = false,
     passwordVisible: Boolean = false,
     onPasswordToggle: (() -> Unit)? = null,
-    helperText: String? = null,
     errorText: String? = null,
     keyboardType: KeyboardType = KeyboardType.Text,
     imeAction: ImeAction = ImeAction.Default
@@ -405,23 +437,37 @@ fun VsSignUpInputField(
             text = buildAnnotatedString {
                 append(label)
                 if (isRequired) {
-                    withStyle(style = SpanStyle(color = MaterialTheme.appColors.error)) { append(" *") }
+                    withStyle(style = SpanStyle(color = Color.Red)) { append(" *") }
                 }
             },
-            style = MaterialTheme.appTypography.bodyMedium.copy(fontWeight = FontWeight.Bold),
-            color = MaterialTheme.appColors.textPrimary
+            style = MaterialTheme.appTypography.bodyMedium.copy(
+                fontWeight = FontWeight.SemiBold,
+                color = Color(0xFF455A64)
+            )
         )
         Spacer(modifier = Modifier.height(8.dp))
         OutlinedTextField(
             value = value,
             onValueChange = onValueChange,
-            modifier = Modifier.fillMaxWidth(),
-            placeholder = { Text(placeholder, color = MaterialTheme.appColors.textSecondary) },
+            modifier = Modifier
+                .fillMaxWidth()
+                .height(56.dp),
+            placeholder = { 
+                Text(
+                    text = placeholder, 
+                    color = Color(0xFFB0BEC5),
+                    fontSize = 15.sp
+                ) 
+            },
             trailingIcon = if (isPassword) {
                 {
                     val icon = if (passwordVisible) Icons.Default.Visibility else Icons.Default.VisibilityOff
                     IconButton(onClick = { onPasswordToggle?.invoke() }) {
-                        Icon(icon, contentDescription = null)
+                        Icon(
+                            icon, 
+                            contentDescription = null,
+                            tint = Color(0xFF455A64)
+                        )
                     }
                 }
             } else null,
@@ -434,29 +480,23 @@ fun VsSignUpInputField(
                 onNext = { focusManager.moveFocus(FocusDirection.Down) },
                 onDone = { focusManager.clearFocus() }
             ),
-            shape = MaterialTheme.appShapes.textFieldShape,
+            shape = RoundedCornerShape(12.dp),
             colors = TextFieldDefaults.outlinedTextFieldColors(
-                textColor = MaterialTheme.appColors.textFieldText,
-                backgroundColor = MaterialTheme.appColors.textFieldBackground,
-                unfocusedBorderColor = MaterialTheme.appColors.textFieldBorder,
+                textColor = Color(0xFF263238),
+                backgroundColor = Color(0xFFF1F4F6),
+                unfocusedBorderColor = Color.Transparent,
                 focusedBorderColor = MaterialTheme.appColors.primary,
-                cursorColor = MaterialTheme.appColors.textFieldText,
-                errorBorderColor = MaterialTheme.appColors.error
+                cursorColor = Color(0xFF263238),
+                errorBorderColor = Color.Red
             ),
-            isError = errorText != null
+            isError = errorText != null,
+            singleLine = true
         )
         if (errorText != null) {
             Text(
                 text = errorText,
                 style = MaterialTheme.appTypography.bodySmall,
-                color = MaterialTheme.appColors.error,
-                modifier = Modifier.padding(top = 4.dp)
-            )
-        } else if (helperText != null) {
-            Text(
-                text = helperText,
-                style = MaterialTheme.appTypography.bodySmall,
-                color = MaterialTheme.appColors.textSecondary,
+                color = Color.Red,
                 modifier = Modifier.padding(top = 4.dp)
             )
         }
@@ -475,15 +515,16 @@ fun VsRoleButton(
         modifier = modifier
             .height(56.dp)
             .clickable { onClick() },
-        shape = MaterialTheme.appShapes.buttonShape,
-        color = if (isSelected) selectedColor.copy(alpha = 0.1f) else MaterialTheme.appColors.textFieldBackground,
+        shape = RoundedCornerShape(12.dp),
+        color = if (isSelected) selectedColor.copy(alpha = 0.1f) else Color(0xFFF1F4F6),
         border = if (isSelected) BorderStroke(1.dp, selectedColor) else null
     ) {
         Box(contentAlignment = Alignment.Center) {
             Text(
                 text = text,
-                color = if (isSelected) selectedColor else MaterialTheme.appColors.textSecondary,
-                fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Normal
+                color = if (isSelected) selectedColor else Color(0xFF455A64),
+                fontWeight = if (isSelected) FontWeight.SemiBold else FontWeight.Normal,
+                fontSize = 16.sp
             )
         }
     }

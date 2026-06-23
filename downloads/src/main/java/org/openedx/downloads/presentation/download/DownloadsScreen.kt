@@ -136,6 +136,9 @@ fun DownloadsScreen(
                 label = stringResource(id = R.string.downloads),
                 onSettingsClick = {
                     onAction(DownloadsViewActions.OpenSettings)
+                },
+                onNotificationClick = {
+                    onAction(DownloadsViewActions.OpenNotifications)
                 }
             )
         },

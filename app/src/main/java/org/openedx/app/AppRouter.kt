@@ -64,6 +64,7 @@ import org.openedx.whatsnew.WhatsNewRouter
 import org.openedx.whatsnew.presentation.whatsnew.WhatsNewFragment
 import org.openedx.dashboard.presentation.wishlist.WishlistFragment
 import org.openedx.dashboard.presentation.achievements.AchievementsFragment
+import org.openedx.dashboard.presentation.notifications.NotificationsFragment
 
 class AppRouter :
     AuthRouter,
@@ -187,6 +188,10 @@ class AppRouter :
 
     override fun navigateToAchievements(fm: FragmentManager) {
         replaceFragmentWithBackStack(fm, AchievementsFragment())
+    }
+
+    override fun navigateToNotifications(fm: FragmentManager) {
+        replaceFragmentWithBackStack(fm, NotificationsFragment())
     }
 
     override fun getProgramFragment(): Fragment {

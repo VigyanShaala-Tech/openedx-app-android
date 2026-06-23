@@ -54,6 +54,10 @@ class LearnViewModel(
         dashboardRouter.navigateToSettings(fragmentManager)
     }
 
+    fun onNotificationsClick(fragmentManager: FragmentManager) {
+        dashboardRouter.navigateToNotifications(fragmentManager)
+    }
+
     val getDashboardFragment get() = DashboardNavigator(dashboardType).getDashboardFragment()
 
     val getProgramFragment get() = dashboardRouter.getProgramFragment()

@@ -200,8 +200,6 @@ fun MainToolbar(
     haveNewNotification: Boolean = false,
     onNotificationClick: () -> Unit = {}
 ) {
-    var expanded by remember { mutableStateOf(false) }
-
     Box(
         modifier = modifier.fillMaxWidth()
     ) {
@@ -219,22 +217,9 @@ fun MainToolbar(
                 .padding(end = 12.dp),
             verticalAlignment = Alignment.CenterVertically
         ) {
-//            IconButton(
-//                onClick = {
-//                    onSettingsClick()
-//                }
-//            ) {
-//                Icon(
-//                    imageVector = Icons.Default.ManageAccounts,
-//                    tint = MaterialTheme.appColors.textAccent,
-//                    contentDescription = stringResource(id = R.string.core_accessibility_settings)
-//                )
-//            }
-
             Box {
                 IconButton(
                     onClick = {
-                        expanded = true
                         onNotificationClick()
                     }
                 ) {
@@ -251,48 +236,6 @@ fun MainToolbar(
                                 .background(Color.Red, CircleShape)
                                 .align(Alignment.TopEnd)
                         )
-                    }
-                }
-
-                DropdownMenu(
-                    expanded = expanded,
-                    onDismissRequest = { expanded = false },
-                    modifier = Modifier
-                        .width(300.dp)
-                        .background(MaterialTheme.appColors.background)
-                ) {
-                    if (notifications.isEmpty()) {
-                        DropdownMenuItem(onClick = { expanded = false }) {
-                            Text(
-                                text = "No notifications",
-                                style = MaterialTheme.appTypography.bodyMedium,
-                                color = MaterialTheme.appColors.textPrimary
-                            )
-                        }
-                    } else {
-                        notifications.forEach { notification ->
-                            DropdownMenuItem(
-                                onClick = { expanded = false },
-                                modifier = Modifier.padding(vertical = 4.dp)
-                            ) {
-                                Column(modifier = Modifier.fillMaxWidth()) {
-                                    Text(
-                                        text = notification.title,
-                                        style = MaterialTheme.appTypography.labelLarge.copy(fontWeight = FontWeight.Bold),
-                                        color = MaterialTheme.appColors.textDark
-                                    )
-                                    Text(
-                                        text = notification.description,
-                                        style = MaterialTheme.appTypography.bodySmall,
-                                        color = MaterialTheme.appColors.textSecondary
-                                    )
-                                    Divider(
-                                        modifier = Modifier.padding(top = 8.dp),
-                                        color = MaterialTheme.appColors.divider
-                                    )
-                                }
-                            }
-                        }
                     }
                 }
             }

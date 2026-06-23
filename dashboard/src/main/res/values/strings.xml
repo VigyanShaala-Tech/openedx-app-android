@@ -20,6 +20,7 @@
     <string name="dashboard_no_status_courses">No %1$s Courses</string>
     <string name="dashboard_pull_to_refresh">Swipe down to refresh</string>
     <string name="dashboard_welcome_back">Welcome back, %1$s</string>
+    <string name="dashboard_notifications">Notifications</string>
     <string name="dashboard_my_achievements">My Achievements</string>
     <string name="dashboard_earned_badges">Earned Badges</string>
     <string name="dashboard_badges_in_progress">Badges in Progress</string>

@@ -179,7 +179,7 @@ class EditProfileViewModel(
                 val response = interactor.verifyWhatsappOtp(phoneNumber, otp, key)
                 if (response.success) {
                     val updatedAccount = interactor.updateAccount(mapOf(
-                        "phone_number" to phoneNumber,
+                        WHATSAPP to phoneNumber,
                         "is_whatsapp_verified" to true
                     ))
                     account = updatedAccount

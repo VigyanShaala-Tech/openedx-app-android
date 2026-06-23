@@ -44,6 +44,7 @@ import org.openedx.dashboard.data.repository.DashboardRepository
 import org.openedx.dashboard.domain.interactor.DashboardInteractor
 import org.openedx.dashboard.presentation.DashboardListViewModel
 import org.openedx.dashboard.presentation.NewDashboardViewModel
+import org.openedx.dashboard.presentation.notifications.NotificationsViewModel
 import org.openedx.discovery.data.repository.DiscoveryRepository
 import org.openedx.discovery.domain.interactor.DiscoveryInteractor
 import org.openedx.discovery.presentation.NativeDiscoveryViewModel
@@ -204,6 +205,7 @@ val screenModule = module {
     }
     viewModel { org.openedx.dashboard.presentation.wishlist.WishlistViewModel(get(), get(), get(), get(), get()) }
     viewModel { org.openedx.dashboard.presentation.achievements.AchievementsViewModel(get(), get(), get(), get()) }
+    viewModel { NotificationsViewModel(get()) }
     viewModel { (initialFilter: org.openedx.dashboard.domain.CourseStatusFilter) -> AllEnrolledCoursesViewModel(get(), get(), get(), get(), get(), get(), get(), initialFilter) }
     viewModel { (openTab: String) ->
         LearnViewModel(openTab, get(), get(), get(), get(), get())

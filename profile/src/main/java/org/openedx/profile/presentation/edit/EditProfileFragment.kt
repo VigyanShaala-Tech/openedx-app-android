@@ -717,9 +717,9 @@ private fun EditProfileScreen(
                                         GENDER -> {
                                             serverFieldName.value = GENDER
                                             expandedList = listOf(
-                                                RegistrationField.Option("male", "Male", ""),
-                                                RegistrationField.Option("female", "Female", ""),
-                                                RegistrationField.Option("other", "Other", "")
+                                                RegistrationField.Option("m", "Male", ""),
+                                                RegistrationField.Option("f", "Female", ""),
+                                                RegistrationField.Option("o", "Other", "")
                                             )
                                         }
 
@@ -759,7 +759,10 @@ private fun EditProfileScreen(
                                 onSendOtp = onSendOtp,
                                 onVerifyOtp = onVerifyOtp,
                                 phoneNumber = phoneNumber,
-                                onPhoneChange = { phoneNumber = it },
+                                onPhoneChange = {
+                                    phoneNumber = it
+                                    mapFields[WHATSAPP] = it
+                                },
                                 otpCode = otpCode,
                                 onOtpChange = { otpCode = it }
                             )
@@ -958,7 +961,7 @@ private fun ProfileFields(
                 onValueChange = { onPhoneChange(it) },
                 modifier = Modifier.fillMaxWidth(),
                 placeholder = { Text(stringResource(id = R.string.profile_whatsapp_number_placeholder)) },
-                enabled = !isOtpSent && !isOtpLoading && !account.isWhatsappVerified,
+                enabled = !isOtpSent && !isOtpLoading,
                 keyboardOptions = KeyboardOptions(
                     keyboardType = KeyboardType.Phone,
                     imeAction = if (isOtpSent) ImeAction.Next else ImeAction.Done
@@ -975,7 +978,7 @@ private fun ProfileFields(
                 ),
                 shape = MaterialTheme.appShapes.textFieldShape,
                 trailingIcon = {
-                    if (account.isWhatsappVerified) {
+                    if (account.isWhatsappVerified && phoneNumber == account.whatsappNumber) {
                         Icon(
                             imageVector = Icons.Filled.CheckCircle,
                             contentDescription = null,
@@ -985,7 +988,7 @@ private fun ProfileFields(
                 }
             )
 
-            if (!account.isWhatsappVerified) {
+            if (!account.isWhatsappVerified || phoneNumber != account.whatsappNumber) {
                 if (isOtpSent) {
                     Spacer(Modifier.height(16.dp))
                     OutlinedTextField(
@@ -1022,7 +1025,7 @@ private fun ProfileFields(
                             onSendOtp(phoneNumber)
                         }
                     },
-                    enabled = !isOtpLoading && (if (isOtpSent) otpCode.length >= 4 else phoneNumber.length >= 10),
+                    enabled = !isOtpLoading && (if (isOtpSent) otpCode.length >= 4 else (phoneNumber.length >= 10 && phoneNumber != account.whatsappNumber)),
                     modifier = Modifier.fillMaxWidth()
                 ) {
                     if (isOtpLoading) {
@@ -1082,9 +1085,15 @@ private fun ProfileFields(
                     )
                 }
             )
+            val genderLabel = when (mapFields[GENDER].toString().lowercase()) {
+                "m" -> "Male"
+                "f" -> "Female"
+                "o" -> "Other"
+                else -> mapFields[GENDER].toString().replaceFirstChar { it.uppercase() }
+            }
             SelectableField(
                 name = "Gender",
-                initialValue = mapFields[GENDER].toString().replaceFirstChar { it.uppercase() },
+                initialValue = genderLabel,
                 onClick = {
                     onFieldClick(GENDER, "Gender")
                 }

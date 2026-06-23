@@ -149,6 +149,7 @@ private fun Header(
             haveNewNotification = haveNewNotification,
             onNotificationClick = {
                 viewModel.markNotificationsRead()
+                viewModel.onNotificationsClick(fragmentManager)
             }
         )
         if (viewModel.isProgramTypeWebView) {

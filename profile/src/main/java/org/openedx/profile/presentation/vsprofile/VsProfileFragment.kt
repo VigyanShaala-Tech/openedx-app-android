@@ -204,6 +204,7 @@ private fun VsProfileScreen(
 
         if (showWhatsappDialog) {
             WhatsappDialog(
+                initialPhoneNumber = account?.whatsappNumber ?: "",
                 isOtpSent = isOtpSent,
                 isOtpLoading = isOtpLoading,
                 onDismissRequest = { showWhatsappDialog = false },
@@ -520,13 +521,14 @@ private fun LogoutDialog(
 @OptIn(ExperimentalComposeUiApi::class)
 @Composable
 private fun WhatsappDialog(
+    initialPhoneNumber: String,
     isOtpSent: Boolean,
     isOtpLoading: Boolean,
     onDismissRequest: () -> Unit,
     onSendOtp: (String) -> Unit,
     onVerifyOtp: (String, String) -> Unit,
 ) {
-    var phoneNumber by rememberSaveable { mutableStateOf("") }
+    var phoneNumber by rememberSaveable { mutableStateOf(initialPhoneNumber) }
     var otpCode by rememberSaveable { mutableStateOf("") }
     val focusManager = LocalFocusManager.current
 
@@ -631,7 +633,7 @@ private fun WhatsappDialog(
                             onSendOtp(phoneNumber)
                         }
                     },
-                    enabled = !isOtpLoading && (if (isOtpSent) otpCode.length >= 4 else phoneNumber.length >= 10)
+                    enabled = !isOtpLoading && (if (isOtpSent) otpCode.length >= 4 else (phoneNumber.length >= 10 && phoneNumber != initialPhoneNumber))
                 ) {
                     if (isOtpLoading) {
                         CircularProgressIndicator(modifier = Modifier.size(24.dp), color = Color.White)

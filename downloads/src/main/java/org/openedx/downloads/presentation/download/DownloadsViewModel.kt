@@ -226,6 +226,10 @@ class DownloadsViewModel(
         downloadsRouter.navigateToSettings(fragmentManager)
     }
 
+    fun onNotificationsClick(fragmentManager: FragmentManager) {
+        router.navigateToNotifications(fragmentManager)
+    }
+
     fun downloadCourse(fragmentManager: FragmentManager, courseId: String) {
         logEvent(DownloadsAnalyticsEvent.DOWNLOAD_COURSE_CLICKED)
         try {
@@ -377,6 +381,7 @@ class DownloadsViewModel(
 
 interface DownloadsViewActions {
     object OpenSettings : DownloadsViewActions
+    object OpenNotifications : DownloadsViewActions
     object SwipeRefresh : DownloadsViewActions
     data class OpenCourse(val courseId: String) : DownloadsViewActions
     data class DownloadCourse(val courseId: String) : DownloadsViewActions

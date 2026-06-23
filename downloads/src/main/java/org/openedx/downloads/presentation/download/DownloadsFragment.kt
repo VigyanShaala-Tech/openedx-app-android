@@ -41,6 +41,10 @@ class DownloadsFragment : Fragment() {
                                 viewModel.onSettingsClick(requireActivity().supportFragmentManager)
                             }
 
+                            DownloadsViewActions.OpenNotifications -> {
+                                viewModel.onNotificationsClick(requireActivity().supportFragmentManager)
+                            }
+
                             DownloadsViewActions.SwipeRefresh -> {
                                 viewModel.refreshData()
                             }

@@ -11,4 +11,6 @@ interface DownloadsRouter {
         courseId: String,
         courseTitle: String,
     )
+
+    fun navigateToNotifications(fm: FragmentManager)
 }

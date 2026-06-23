@@ -108,13 +108,12 @@ fun DiscoveryCourseItem(
             .testTag("btn_course_card")
             .fillMaxWidth()
             .clickable { onClick(course.courseId.orEmpty()) }
-            .padding(vertical = 12.dp)
-            .background(MaterialTheme.appColors.background),
+            .padding(vertical = 12.dp),
+        color = MaterialTheme.appColors.background
     ) {
         Row(
             modifier = Modifier
-                .fillMaxWidth()
-                .background(MaterialTheme.appColors.background),
+                .fillMaxWidth(),
             horizontalArrangement = Arrangement.spacedBy(16.dp),
             verticalAlignment = Alignment.Top
         ) {

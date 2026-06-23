@@ -40,6 +40,7 @@ import androidx.compose.ui.focus.FocusDirection
 import androidx.compose.ui.focus.FocusManager
 import androidx.compose.ui.focus.focusTarget
 import androidx.compose.ui.focus.onFocusChanged
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
@@ -236,6 +237,7 @@ fun LoginTextField(
     description: String,
     isError: Boolean = false,
     errorMessages: String = "",
+    leadingIcon: androidx.compose.ui.graphics.vector.ImageVector? = null,
     onValueChanged: (String) -> Unit,
     imeAction: ImeAction = ImeAction.Next,
     keyboardActions: (FocusManager) -> Unit = { it.moveFocus(FocusDirection.Down) },
@@ -246,6 +248,8 @@ fun LoginTextField(
         )
     }
     val focusManager = LocalFocusManager.current
+    var isFocused by remember { mutableStateOf(false) }
+
     Text(
         modifier = Modifier
             .testTag("txt_email_label")
@@ -265,6 +269,7 @@ fun LoginTextField(
             textColor = MaterialTheme.appColors.textFieldText,
             backgroundColor = MaterialTheme.appColors.textFieldBackground,
             unfocusedBorderColor = MaterialTheme.appColors.textFieldBorder,
+            focusedBorderColor = MaterialTheme.appColors.primary,
             cursorColor = MaterialTheme.appColors.textFieldText,
         ),
         shape = MaterialTheme.appShapes.textFieldShape,
@@ -276,6 +281,15 @@ fun LoginTextField(
                 style = MaterialTheme.appTypography.bodyMedium
             )
         },
+        leadingIcon = leadingIcon?.let {
+            {
+                Icon(
+                    imageVector = it,
+                    contentDescription = null,
+                    tint = if (isFocused) MaterialTheme.appColors.primary else Color(0xFFB0BEC5)
+                )
+            }
+        },
         keyboardOptions = KeyboardOptions.Default.copy(
             keyboardType = KeyboardType.Text,
             imeAction = imeAction
@@ -285,7 +299,9 @@ fun LoginTextField(
         },
         textStyle = MaterialTheme.appTypography.bodyMedium,
         singleLine = true,
-        modifier = modifier.testTag("tf_email"),
+        modifier = modifier
+            .testTag("tf_email")
+            .onFocusChanged { isFocused = it.isFocused },
         isError = isError
     )
     if (isError) {

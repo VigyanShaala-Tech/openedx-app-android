@@ -312,7 +312,7 @@ private fun CollapsingLayoutTablet(
                         y = (backgroundImageHeight.value - blurImagePaddingPx).roundToInt()
                     )
                 }
-                .background(Color.White)
+                .background(MaterialTheme.appColors.background)
                 .blur(100.dp)
         ) {
             Box(
@@ -496,7 +496,7 @@ private fun CollapsingLayoutMobile(
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
             Box(
                 modifier = Modifier
-                    .background(Color.White)
+                    .background(MaterialTheme.appColors.background)
                     .blur(100.dp)
             ) {
                 Box(
@@ -630,13 +630,13 @@ private fun CollapsingLayoutMobile(
             Box(
                 modifier = Modifier
                     .offset { IntOffset(x = 0, y = toolbarBackgroundOffset) }
-                    .background(Color.White)
+                    .background(MaterialTheme.appColors.background)
                     .blur(100.dp)
             ) {
                 val adaptiveBlurImagePadding = blurImagePadding.value * (BLUR_PADDING_FACTOR - rawFactor)
                 Box(
                     modifier = Modifier
-                        .background(Color.White)
+                        .background(MaterialTheme.appColors.background)
                         .fillMaxWidth()
                         .height(
                             with(localDensity) {

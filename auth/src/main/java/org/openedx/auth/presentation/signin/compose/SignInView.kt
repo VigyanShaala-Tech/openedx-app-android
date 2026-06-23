@@ -108,7 +108,7 @@ internal fun LoginScreen(
                 )
             }
         },
-        backgroundColor = Color.White
+        backgroundColor = MaterialTheme.appColors.background
     ) { paddingValues ->
         HandleUIMessage(uiMessage = uiMessage, scaffoldState = scaffoldState)
 
@@ -124,7 +124,7 @@ internal fun LoginScreen(
                 text = "Sign in",
                 style = MaterialTheme.appTypography.headlineSmall.copy(
                     fontWeight = FontWeight.Bold,
-                    color = Color(0xFF263238),
+                    color = MaterialTheme.appColors.textDark,
                     fontSize = 32.sp
                 )
             )
@@ -132,7 +132,7 @@ internal fun LoginScreen(
             Text(
                 text = "Welcome back! Sign in to access your courses.",
                 style = MaterialTheme.appTypography.bodyMedium.copy(
-                    color = Color(0xFF78909C),
+                    color = MaterialTheme.appColors.textSecondary,
                     fontSize = 16.sp
                 )
             )
@@ -146,8 +146,8 @@ internal fun LoginScreen(
                     .height(56.dp)
                     .clickable { onEvent(AuthEvent.SocialSignIn(AuthType.GOOGLE)) },
                 shape = RoundedCornerShape(12.dp),
-                border = BorderStroke(1.dp, Color(0xFFECEFF1)),
-                color = Color(0xFFFAFAFA)
+                border = BorderStroke(1.dp, MaterialTheme.appColors.textFieldBorder),
+                color = MaterialTheme.appColors.textFieldBackgroundVariant
             ) {
                 Row(
                     verticalAlignment = Alignment.CenterVertically,
@@ -163,7 +163,7 @@ internal fun LoginScreen(
                         text = "Sign in with Google",
                         style = MaterialTheme.appTypography.bodyLarge.copy(
                             fontWeight = FontWeight.Medium,
-                            color = Color(0xFF455A64)
+                            color = MaterialTheme.appColors.textDark
                         )
                     )
                 }
@@ -182,9 +182,9 @@ internal fun LoginScreen(
                     .padding(bottom = 40.dp),
                 horizontalArrangement = Arrangement.Center
             ) {
-                Text(
+            Text(
                     "Don't have an account? ",
-                    color = Color(0xFF78909C),
+                    color = MaterialTheme.appColors.textSecondary,
                     fontSize = 16.sp
                 )
                 Text(
@@ -358,7 +358,7 @@ private fun AuthMethodTabs(
     Box(
         modifier = Modifier
             .fillMaxWidth()
-            .background(Color(0xFFF1F4F6), shape = RoundedCornerShape(12.dp))
+            .background(MaterialTheme.appColors.tabUnselectedBtnBackground, shape = RoundedCornerShape(12.dp))
             .padding(4.dp)
     ) {
         Row(modifier = Modifier.fillMaxWidth().height(44.dp)) {
@@ -388,8 +388,8 @@ private fun ToggleItem(
     modifier: Modifier = Modifier,
     onClick: () -> Unit,
 ) {
-    val bg = if (isSelected) Color.White else Color.Transparent
-    val tint = if (isSelected) Color(0xFF455A64) else Color(0xFF90A4AE)
+    val bg = if (isSelected) MaterialTheme.appColors.background else Color.Transparent
+    val tint = if (isSelected) MaterialTheme.appColors.tabSelectedBtnContent else MaterialTheme.appColors.tabUnselectedBtnContent
     Row(
         modifier = modifier
             .background(bg, shape = RoundedCornerShape(8.dp))
@@ -435,7 +435,7 @@ private fun SignInInputField(
             text = label,
             style = MaterialTheme.appTypography.bodyMedium.copy(
                 fontWeight = FontWeight.SemiBold,
-                color = Color(0xFF455A64)
+                color = MaterialTheme.appColors.textDark
             )
         )
         Spacer(modifier = Modifier.height(8.dp))
@@ -449,7 +449,7 @@ private fun SignInInputField(
             placeholder = {
                 Text(
                     text = placeholder,
-                    color = Color(0xFFB0BEC5),
+                    color = MaterialTheme.appColors.textFieldHint,
                     fontSize = 15.sp
                 )
             },
@@ -458,7 +458,7 @@ private fun SignInInputField(
                     Icon(
                         imageVector = it,
                         contentDescription = null,
-                        tint = if (isFocused) MaterialTheme.appColors.primary else Color(0xFFB0BEC5)
+                        tint = if (isFocused) MaterialTheme.appColors.primary else MaterialTheme.appColors.textFieldHint
                     )
                 }
             },
@@ -469,7 +469,7 @@ private fun SignInInputField(
                         Icon(
                             icon,
                             contentDescription = null,
-                            tint = Color(0xFF455A64)
+                            tint = MaterialTheme.appColors.textDark
                         )
                     }
                 }
@@ -488,12 +488,12 @@ private fun SignInInputField(
             ),
             shape = RoundedCornerShape(12.dp),
             colors = TextFieldDefaults.outlinedTextFieldColors(
-                textColor = Color(0xFF263238),
-                backgroundColor = Color(0xFFF1F4F6),
+                textColor = MaterialTheme.appColors.textFieldText,
+                backgroundColor = MaterialTheme.appColors.textFieldBackground,
                 unfocusedBorderColor = Color.Transparent,
                 focusedBorderColor = MaterialTheme.appColors.primary,
-                cursorColor = Color(0xFF263238),
-                errorBorderColor = Color.Red
+                cursorColor = MaterialTheme.appColors.textFieldText,
+                errorBorderColor = MaterialTheme.appColors.error
             ),
             isError = errorText != null,
             singleLine = true
@@ -555,7 +555,7 @@ private fun MobileOtpSection(
             ) {
                 Text(
                     text = stringResource(id = R.string.auth_otp_sent_to),
-                    color = Color(0xFF78909C),
+                    color = MaterialTheme.appColors.textSecondary,
                     style = MaterialTheme.appTypography.bodySmall
                 )
                 Spacer(modifier = Modifier.weight(1f))
@@ -579,14 +579,14 @@ private fun DividerWithOrLabel() {
         modifier = Modifier.fillMaxWidth(),
         verticalAlignment = Alignment.CenterVertically
     ) {
-        Divider(modifier = Modifier.weight(1f), color = Color(0xFFECEFF1))
+        Divider(modifier = Modifier.weight(1f), color = MaterialTheme.appColors.divider)
         Text(
             text = stringResource(id = R.string.auth_or),
-            color = Color(0xFFB0BEC5),
+            color = MaterialTheme.appColors.textFieldHint,
             modifier = Modifier.padding(horizontal = 16.dp),
             fontSize = 14.sp
         )
-        Divider(modifier = Modifier.weight(1f), color = Color(0xFFECEFF1))
+        Divider(modifier = Modifier.weight(1f), color = MaterialTheme.appColors.divider)
     }
 }
 

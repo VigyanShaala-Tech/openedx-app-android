@@ -6,7 +6,6 @@ import android.view.LayoutInflater
 import android.view.ViewGroup
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
-import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
@@ -47,12 +46,16 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.semantics.testTagsAsResourceId
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Devices
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Email
 import androidx.fragment.app.Fragment
 import org.koin.androidx.viewmodel.ext.android.viewModel
 import org.openedx.auth.presentation.ui.LoginTextField
@@ -211,7 +214,7 @@ private fun RestorePasswordScreen(
                     modifier = Modifier
                         .testTag("txt_screen_title")
                         .fillMaxWidth(),
-                    text = stringResource(id = authR.string.auth_forgot_your_password),
+                    text = "Forgot password",
                     color = Color.White,
                     textAlign = TextAlign.Center,
                     style = MaterialTheme.appTypography.titleMedium
@@ -250,24 +253,30 @@ private fun RestorePasswordScreen(
                                     modifier = Modifier
                                         .testTag("txt_forgot_password_title")
                                         .fillMaxWidth(),
-                                    text = stringResource(id = authR.string.auth_forgot_your_password),
-                                    style = MaterialTheme.appTypography.displaySmall,
-                                    color = MaterialTheme.appColors.textPrimary
+                                    text = "Forgot password",
+                                    style = MaterialTheme.appTypography.headlineSmall.copy(
+                                        fontWeight = FontWeight.Bold,
+                                        color = Color(0xFF263238),
+                                        fontSize = 32.sp
+                                    )
                                 )
-                                Spacer(Modifier.height(2.dp))
+                                Spacer(Modifier.height(8.dp))
                                 Text(
                                     modifier = Modifier
                                         .testTag("txt_forgot_password_description")
                                         .fillMaxWidth(),
-                                    text = stringResource(id = authR.string.auth_please_enter_your_log_in),
-                                    style = MaterialTheme.appTypography.titleSmall,
-                                    color = MaterialTheme.appColors.textPrimary
+                                    text = "Enter your email address and we will send you a link to reset your password.",
+                                    style = MaterialTheme.appTypography.bodyMedium.copy(
+                                        color = Color(0xFF78909C),
+                                        fontSize = 16.sp
+                                    )
                                 )
                                 Spacer(modifier = Modifier.height(32.dp))
                                 LoginTextField(
                                     modifier = Modifier.fillMaxWidth(),
-                                    title = stringResource(id = authR.string.auth_email),
-                                    description = stringResource(id = authR.string.auth_example_email),
+                                    title = "Email Address",
+                                    description = "kalpna.chawla@example.com",
+                                    leadingIcon = Icons.Default.Email,
                                     onValueChanged = {
                                         email = it
                                         isEmailError = false
@@ -299,7 +308,7 @@ private fun RestorePasswordScreen(
                                 } else {
                                     OpenEdXButton(
                                         modifier = buttonWidth.testTag("btn_reset_password"),
-                                        text = stringResource(id = authR.string.auth_reset_password),
+                                        text = "Send Reset Link",
                                         onClick = {
                                             keyboardController?.hide()
                                             if (email.isNotEmpty()) {
@@ -319,40 +328,43 @@ private fun RestorePasswordScreen(
                                     .then(contentPaddings)
                                     .displayCutoutForLandscape()
                                     .fillMaxSize(),
-                                verticalArrangement = Arrangement.Center,
                                 horizontalAlignment = Alignment.CenterHorizontally
                             ) {
+                                Spacer(Modifier.height(40.dp))
                                 Icon(
-                                    modifier = Modifier.size(100.dp),
+                                    modifier = Modifier.size(120.dp),
                                     painter = painterResource(id = authR.drawable.auth_ic_email),
                                     contentDescription = null,
-                                    tint = MaterialTheme.appColors.textPrimary
+                                    tint = Color(0xFF263238)
                                 )
-                                Spacer(Modifier.height(48.dp))
+                                Spacer(Modifier.height(40.dp))
                                 Text(
                                     modifier = Modifier
                                         .fillMaxWidth(),
                                     textAlign = TextAlign.Center,
-                                    text = stringResource(id = authR.string.auth_check_your_email),
-                                    style = MaterialTheme.appTypography.titleLarge,
-                                    color = MaterialTheme.appColors.textPrimary
+                                    text = "Check your email",
+                                    style = MaterialTheme.appTypography.headlineSmall.copy(
+                                        fontWeight = FontWeight.Bold,
+                                        color = Color(0xFF263238),
+                                        fontSize = 28.sp
+                                    )
                                 )
                                 Spacer(Modifier.height(16.dp))
                                 Text(
                                     modifier = Modifier
-                                        .fillMaxWidth(),
+                                        .fillMaxWidth()
+                                        .padding(horizontal = 16.dp),
                                     textAlign = TextAlign.Center,
-                                    text = stringResource(
-                                        authR.string.auth_restore_password_success,
-                                        uiState.email
-                                    ),
-                                    style = MaterialTheme.appTypography.bodyMedium,
-                                    color = MaterialTheme.appColors.textPrimary
+                                    text = "We have sent a password recover instructions to your email ${uiState.email}",
+                                    style = MaterialTheme.appTypography.bodyMedium.copy(
+                                        color = Color(0xFF78909C),
+                                        fontSize = 16.sp
+                                    )
                                 )
                                 Spacer(Modifier.height(48.dp))
                                 OpenEdXButton(
                                     modifier = buttonWidth,
-                                    text = stringResource(id = R.string.core_sign_in),
+                                    text = "Sign in",
                                     onClick = {
                                         onBackClick()
                                     }

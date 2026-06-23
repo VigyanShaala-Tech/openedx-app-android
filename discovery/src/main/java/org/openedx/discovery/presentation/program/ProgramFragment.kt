@@ -311,7 +311,7 @@ private fun ProgramInfoScreen(
                 Box(
                     modifier = modifierScreenWidth
                         .fillMaxHeight()
-                        .background(Color.White),
+                        .background(MaterialTheme.appColors.background),
                     contentAlignment = Alignment.TopCenter
                 ) {
                     if ((uiState is ProgramUIState.Error).not()) {

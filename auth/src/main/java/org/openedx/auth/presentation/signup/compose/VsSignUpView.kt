@@ -119,7 +119,7 @@ fun VsSignUpView(
                 )
             }
         },
-        backgroundColor = Color.White
+        backgroundColor = MaterialTheme.appColors.background
     ) { paddingValues ->
         HandleUIMessage(uiMessage = uiMessage, scaffoldState = scaffoldState)
 
@@ -135,7 +135,7 @@ fun VsSignUpView(
                 text = "Create Account",
                 style = MaterialTheme.appTypography.headlineSmall.copy(
                     fontWeight = FontWeight.Bold,
-                    color = Color(0xFF263238),
+                    color = MaterialTheme.appColors.textDark,
                     fontSize = 32.sp
                 )
             )
@@ -143,7 +143,7 @@ fun VsSignUpView(
             Text(
                 text = "Join VigyanShaala and start learning today!",
                 style = MaterialTheme.appTypography.bodyMedium.copy(
-                    color = Color(0xFF78909C),
+                    color = MaterialTheme.appColors.textSecondary,
                     fontSize = 16.sp
                 )
             )
@@ -157,8 +157,8 @@ fun VsSignUpView(
                     .height(56.dp)
                     .clickable { onSocialRegisterClick(AuthType.GOOGLE) },
                 shape = RoundedCornerShape(12.dp),
-                border = BorderStroke(1.dp, Color(0xFFECEFF1)),
-                color = Color(0xFFFAFAFA)
+                border = BorderStroke(1.dp, MaterialTheme.appColors.textFieldBorder),
+                color = MaterialTheme.appColors.textFieldBackgroundVariant
             ) {
                 Row(
                     verticalAlignment = Alignment.CenterVertically,
@@ -174,7 +174,7 @@ fun VsSignUpView(
                         text = "Sign up with Google",
                         style = MaterialTheme.appTypography.bodyLarge.copy(
                             fontWeight = FontWeight.Medium,
-                            color = Color(0xFF455A64)
+                            color = MaterialTheme.appColors.textDark
                         )
                     )
                 }
@@ -182,14 +182,14 @@ fun VsSignUpView(
 
             Spacer(modifier = Modifier.height(24.dp))
             Row(verticalAlignment = Alignment.CenterVertically) {
-                Divider(modifier = Modifier.weight(1f), color = Color(0xFFECEFF1))
+                Divider(modifier = Modifier.weight(1f), color = MaterialTheme.appColors.divider)
                 Text(
                     " or ",
                     modifier = Modifier.padding(horizontal = 16.dp),
-                    color = Color(0xFFB0BEC5),
+                    color = MaterialTheme.appColors.textFieldHint,
                     fontSize = 14.sp
                 )
-                Divider(modifier = Modifier.weight(1f), color = Color(0xFFECEFF1))
+                Divider(modifier = Modifier.weight(1f), color = MaterialTheme.appColors.divider)
             }
             Spacer(modifier = Modifier.height(24.dp))
 
@@ -257,11 +257,11 @@ fun VsSignUpView(
             Text(
                 text = buildAnnotatedString {
                     append("I am a ")
-                    withStyle(style = SpanStyle(color = Color.Red)) { append("*") }
+                    withStyle(style = SpanStyle(color = MaterialTheme.appColors.error)) { append("*") }
                 },
                 style = MaterialTheme.appTypography.bodyMedium.copy(
                     fontWeight = FontWeight.SemiBold,
-                    color = Color(0xFF455A64)
+                    color = MaterialTheme.appColors.textDark
                 ),
                 modifier = Modifier.padding(top = 24.dp)
             )
@@ -290,7 +290,7 @@ fun VsSignUpView(
                 Box(
                     modifier = Modifier
                         .size(24.dp)
-                        .border(1.dp, if (isAgreed) MaterialTheme.appColors.primary else Color(0xFFB0BEC5), CircleShape)
+                        .border(1.dp, if (isAgreed) MaterialTheme.appColors.primary else MaterialTheme.appColors.textFieldBorder, CircleShape)
                         .clip(CircleShape)
                         .clickable { isAgreed = !isAgreed }
                         .padding(4.dp)
@@ -308,7 +308,7 @@ fun VsSignUpView(
                 }
                 Text(
                     text = annotatedText,
-                    style = MaterialTheme.appTypography.bodySmall.copy(color = Color(0xFF78909C)),
+                    style = MaterialTheme.appTypography.bodySmall.copy(color = MaterialTheme.appColors.textSecondary),
                     modifier = Modifier
                         .weight(1f)
                         .clickable { 
@@ -378,7 +378,7 @@ fun VsSignUpView(
             ) {
                 Text(
                     "Already have an account? ",
-                    color = Color(0xFF78909C),
+                    color = MaterialTheme.appColors.textSecondary,
                     fontSize = 16.sp
                 )
                 Text(
@@ -442,12 +442,12 @@ fun VsSignUpInputField(
             text = buildAnnotatedString {
                 append(label)
                 if (isRequired) {
-                    withStyle(style = SpanStyle(color = Color.Red)) { append(" *") }
+                    withStyle(style = SpanStyle(color = MaterialTheme.appColors.error)) { append(" *") }
                 }
             },
             style = MaterialTheme.appTypography.bodyMedium.copy(
                 fontWeight = FontWeight.SemiBold,
-                color = Color(0xFF455A64)
+                color = MaterialTheme.appColors.textDark
             )
         )
         Spacer(modifier = Modifier.height(8.dp))
@@ -460,7 +460,7 @@ fun VsSignUpInputField(
             placeholder = { 
                 Text(
                     text = placeholder, 
-                    color = Color(0xFFB0BEC5),
+                    color = MaterialTheme.appColors.textFieldHint,
                     fontSize = 15.sp
                 ) 
             },
@@ -471,7 +471,7 @@ fun VsSignUpInputField(
                         Icon(
                             icon, 
                             contentDescription = null,
-                            tint = Color(0xFF455A64)
+                            tint = MaterialTheme.appColors.textDark
                         )
                     }
                 }
@@ -487,12 +487,12 @@ fun VsSignUpInputField(
             ),
             shape = RoundedCornerShape(12.dp),
             colors = TextFieldDefaults.outlinedTextFieldColors(
-                textColor = Color(0xFF263238),
-                backgroundColor = Color(0xFFF1F4F6),
+                textColor = MaterialTheme.appColors.textFieldText,
+                backgroundColor = MaterialTheme.appColors.textFieldBackground,
                 unfocusedBorderColor = Color.Transparent,
                 focusedBorderColor = MaterialTheme.appColors.primary,
-                cursorColor = Color(0xFF263238),
-                errorBorderColor = Color.Red
+                cursorColor = MaterialTheme.appColors.textFieldText,
+                errorBorderColor = MaterialTheme.appColors.error
             ),
             isError = errorText != null,
             singleLine = true
@@ -501,7 +501,7 @@ fun VsSignUpInputField(
             Text(
                 text = errorText,
                 style = MaterialTheme.appTypography.bodySmall,
-                color = Color.Red,
+                color = MaterialTheme.appColors.error,
                 modifier = Modifier.padding(top = 4.dp)
             )
         }
@@ -521,13 +521,13 @@ fun VsRoleButton(
             .height(56.dp)
             .clickable { onClick() },
         shape = RoundedCornerShape(12.dp),
-        color = if (isSelected) selectedColor.copy(alpha = 0.1f) else Color(0xFFF1F4F6),
+        color = if (isSelected) selectedColor.copy(alpha = 0.1f) else MaterialTheme.appColors.textFieldBackground,
         border = if (isSelected) BorderStroke(1.dp, selectedColor) else null
     ) {
         Box(contentAlignment = Alignment.Center) {
             Text(
                 text = text,
-                color = if (isSelected) selectedColor else Color(0xFF455A64),
+                color = if (isSelected) selectedColor else MaterialTheme.appColors.textSecondary,
                 fontWeight = if (isSelected) FontWeight.SemiBold else FontWeight.Normal,
                 fontSize = 16.sp
             )

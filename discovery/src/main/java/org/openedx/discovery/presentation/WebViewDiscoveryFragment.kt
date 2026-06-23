@@ -269,7 +269,7 @@ private fun WebViewDiscoveryScreen(
                 Box(
                     modifier = modifierScreenWidth
                         .fillMaxHeight()
-                        .background(Color.White),
+                        .background(MaterialTheme.appColors.background),
                     contentAlignment = Alignment.TopCenter
                 ) {
                     if ((uiState is WebViewUIState.Error).not()) {

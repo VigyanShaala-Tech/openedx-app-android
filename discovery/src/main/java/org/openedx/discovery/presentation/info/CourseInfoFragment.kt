@@ -310,7 +310,7 @@ private fun CourseInfoScreen(
                 Box(
                     modifier = modifierScreenWidth
                         .fillMaxHeight()
-                        .background(Color.White)
+                        .background(MaterialTheme.appColors.background)
                         .navigationBarsPadding(),
                     contentAlignment = Alignment.TopCenter
                 ) {

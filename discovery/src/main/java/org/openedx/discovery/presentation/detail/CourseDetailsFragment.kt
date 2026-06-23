@@ -542,15 +542,16 @@ private fun CourseDetailNativeContent(
             var selectedTab by rememberSaveable { mutableStateOf(0) }
             val tabs = listOf("Overview", "Curriculum", "Instructor", "Reviews")
 
-            Row(
+            LazyRow(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.spacedBy(24.dp)
             ) {
-                tabs.forEachIndexed { index, label ->
+                items(tabs.size) { index ->
+                    val label = tabs[index]
                     Column(
                         modifier = Modifier
                             .clickable { selectedTab = index }
-                            .width(IntrinsicSize.Min), // ✅ FIX
+                            .width(IntrinsicSize.Min),
                         horizontalAlignment = Alignment.Start
                     ) {
                         Text(
@@ -566,7 +567,7 @@ private fun CourseDetailNativeContent(
 
                         Box(
                             modifier = Modifier
-                                .fillMaxWidth() // now matches text width
+                                .fillMaxWidth()
                                 .height(2.dp)
                                 .background(
                                     if (selectedTab == index)

@@ -219,17 +219,17 @@ fun MainToolbar(
                 .padding(end = 12.dp),
             verticalAlignment = Alignment.CenterVertically
         ) {
-            IconButton(
-                onClick = {
-                    onSettingsClick()
-                }
-            ) {
-                Icon(
-                    imageVector = Icons.Default.ManageAccounts,
-                    tint = MaterialTheme.appColors.textAccent,
-                    contentDescription = stringResource(id = R.string.core_accessibility_settings)
-                )
-            }
+//            IconButton(
+//                onClick = {
+//                    onSettingsClick()
+//                }
+//            ) {
+//                Icon(
+//                    imageVector = Icons.Default.ManageAccounts,
+//                    tint = MaterialTheme.appColors.textAccent,
+//                    contentDescription = stringResource(id = R.string.core_accessibility_settings)
+//                )
+//            }
 
             Box {
                 IconButton(

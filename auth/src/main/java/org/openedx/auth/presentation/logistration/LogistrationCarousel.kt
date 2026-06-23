@@ -14,6 +14,8 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.rememberPagerState
+import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
@@ -21,6 +23,7 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
@@ -76,34 +79,36 @@ fun LogistrationCarousel(
                 Image(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .height(130.dp) // Reduced height
-                        .clip(MaterialTheme.appShapes.cardShape),
+                        .height(200.dp)
+                        .clip(RoundedCornerShape(12.dp)),
                     painter = painterResource(id = item.imageResId),
                     contentDescription = null,
-                    contentScale = ContentScale.Crop
+                    contentScale = ContentScale.FillBounds
                 )
-                Spacer(Modifier.height(16.dp))
+                Spacer(Modifier.height(24.dp))
                 Text(
                     text = item.title,
-                    style = MaterialTheme.appTypography.titleMedium.copy(
-                        fontWeight = FontWeight.Bold,
-                        fontSize = 16.sp // Slightly reduced font size
+                    style = MaterialTheme.appTypography.titleLarge.copy(
+                        fontWeight = FontWeight.ExtraBold,
+                        fontSize = 20.sp,
+                        textAlign = TextAlign.Center,
+                        fontFamily = MaterialTheme.appTypography.defaultFontFamily
                     ),
-                    color = MaterialTheme.appColors.textDark,
-                    textAlign = TextAlign.Center,
+                    color = Color(0xFF263238),
                     modifier = Modifier.padding(horizontal = 16.dp)
                 )
-                Spacer(Modifier.height(4.dp))
+                Spacer(Modifier.height(8.dp))
                 Text(
                     text = item.subtitle,
                     style = MaterialTheme.appTypography.bodyMedium.copy(
-                        lineHeight = 16.sp,
-                        fontSize = 11.sp // Reduced font size for sub-tag line
+                        lineHeight = 20.sp,
+                        fontSize = 13.sp,
+                        textAlign = TextAlign.Center,
+                        fontFamily = MaterialTheme.appTypography.defaultFontFamily
                     ),
-                    color = MaterialTheme.appColors.textPrimaryLight,
-                    textAlign = TextAlign.Center,
-                    modifier = Modifier.padding(horizontal = 24.dp),
-                    maxLines = 4, // Adjusted to 4 lines
+                    color = Color(0xFF78909C),
+                    modifier = Modifier.padding(horizontal = 32.dp),
+                    maxLines = 4,
                     overflow = TextOverflow.Ellipsis
                 )
             }
@@ -119,11 +124,11 @@ fun LogistrationCarousel(
                 val selected = pagerState.currentPage == index
                 Box(
                     modifier = Modifier
-                        .size(8.dp)
-                        .clip(androidx.compose.foundation.shape.CircleShape)
+                        .size(10.dp)
+                        .clip(CircleShape)
                         .background(
-                            if (selected) MaterialTheme.appColors.primary
-                            else MaterialTheme.appColors.textFieldBorder.copy(alpha = 0.5f)
+                            if (selected) Color(0xFF37474F) 
+                            else Color(0xFFCFD8DC)
                         )
                 )
             }

@@ -4,9 +4,14 @@ import android.content.res.Configuration
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.ViewGroup
+import androidx.compose.foundation.background
+import androidx.compose.foundation.border
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
@@ -14,15 +19,19 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.Card
 import androidx.compose.material.CircularProgressIndicator
-import androidx.compose.material.Divider
 import androidx.compose.material.ExperimentalMaterialApi
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Scaffold
+import androidx.compose.material.Surface
 import androidx.compose.material.Text
 import androidx.compose.material.pullrefresh.PullRefreshIndicator
 import androidx.compose.material.pullrefresh.pullRefresh
@@ -39,26 +48,39 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.focus.onFocusChanged
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.ComposeView
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.platform.ViewCompositionStrategy
 import androidx.compose.ui.platform.testTag
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.semantics.testTagsAsResourceId
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.TextFieldValue
+import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Devices
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.core.os.bundleOf
 import androidx.fragment.app.Fragment
+import coil.compose.AsyncImage
+import coil.request.ImageRequest
 import org.koin.androidx.viewmodel.ext.android.viewModel
 import org.koin.core.parameter.parametersOf
 import org.openedx.auth.R
 import org.openedx.core.ApiConstants
 import org.openedx.core.domain.model.Media
-import org.openedx.core.ui.AuthButtonsPanel
 import org.openedx.core.ui.HandleUIMessage
 import org.openedx.core.ui.OfflineModeDialog
+import org.openedx.core.ui.OpenEdXButton
+import org.openedx.core.ui.OpenEdXOutlinedButton
 import org.openedx.core.ui.SearchBar
 import org.openedx.core.ui.Toolbar
 import org.openedx.core.ui.displayCutoutForLandscape
@@ -66,17 +88,19 @@ import org.openedx.core.ui.shouldLoadMore
 import org.openedx.core.ui.statusBarsInset
 import org.openedx.core.ui.theme.OpenEdXTheme
 import org.openedx.core.ui.theme.appColors
+import org.openedx.core.ui.theme.appShapes
 import org.openedx.core.ui.theme.appTypography
 import org.openedx.core.ui.theme.compose.LogistrationLogoView
 import org.openedx.discovery.domain.model.Course
 import org.openedx.discovery.presentation.DiscoveryUIState
-import org.openedx.discovery.presentation.ui.DiscoveryCourseItem
+import org.openedx.foundation.extension.toImageLink
 import org.openedx.foundation.presentation.UIMessage
 import org.openedx.foundation.presentation.WindowSize
 import org.openedx.foundation.presentation.WindowType
 import org.openedx.foundation.presentation.rememberWindowSize
 import org.openedx.foundation.presentation.windowSizeValue
 import org.openedx.foundation.utils.UrlUtils
+import org.openedx.core.R as CoreR
 
 class LogistrationFragment : Fragment() {
 
@@ -234,19 +258,38 @@ private fun LogistrationScreen(
         backgroundColor = MaterialTheme.appColors.background,
         bottomBar = {
             if (!origin.equals("RECOMMENDED", true)) {
-                Box(
-                    modifier = Modifier
-                        .padding(
-                            horizontal = 16.dp,
-                            vertical = 32.dp,
-                        )
-                        .navigationBarsPadding()
+                Surface(
+                    elevation = 8.dp,
+                    color = Color.White,
+                    modifier = Modifier.fillMaxWidth()
                 ) {
-                    AuthButtonsPanel(
-                        onRegisterClick = onRegisterClick,
-                        onSignInClick = onSignInClick,
-                        showRegisterButton = isRegistrationEnabled
-                    )
+                    Row(
+                        modifier = Modifier
+                            .padding(horizontal = 24.dp, vertical = 16.dp)
+                            .navigationBarsPadding(),
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        OpenEdXOutlinedButton(
+                            modifier = Modifier
+                                .weight(1f)
+                                .height(48.dp),
+                            text = stringResource(id = CoreR.string.core_sign_in),
+                            onClick = onSignInClick,
+                            borderColor = Color.Transparent, 
+                            textColor = Color(0xFF37474F)
+                        )
+                        if (isRegistrationEnabled) {
+                            Spacer(Modifier.width(16.dp))
+                            OpenEdXButton(
+                                modifier = Modifier
+                                    .weight(1.2f)
+                                    .height(48.dp),
+                                text = stringResource(id = CoreR.string.core_register),
+                                onClick = onRegisterClick,
+                                backgroundColor = Color(0xFF8BC34A) 
+                            )
+                        }
+                    }
                 }
             }
         }
@@ -263,11 +306,8 @@ private fun LogistrationScreen(
         val contentPaddings by remember(key1 = windowSize) {
             mutableStateOf(
                 windowSize.windowSizeValue(
-                    expanded = PaddingValues(
-                        top = 32.dp,
-                        bottom = 40.dp
-                    ),
-                    compact = PaddingValues(horizontal = 24.dp, vertical = 20.dp)
+                    expanded = PaddingValues(top = 24.dp, bottom = 24.dp),
+                    compact = PaddingValues(horizontal = 20.dp, vertical = 16.dp)
                 )
             )
         }
@@ -288,12 +328,14 @@ private fun LogistrationScreen(
                     .align(Alignment.TopCenter)
                     .then(contentWidth),
                 contentPadding = contentPaddings,
-                state = scrollState
+                state = scrollState,
+                verticalArrangement = Arrangement.spacedBy(16.dp)
             ) {
                 item {
-                    Column {
+                    Column(horizontalAlignment = Alignment.CenterHorizontally) {
                         if (!origin.equals("RECOMMENDED", true)) {
                             LogistrationLogoView()
+                            Spacer(Modifier.height(24.dp))
                             val carouselItems = listOf(
                                 LogistrationCarouselItem(
                                     imageResId = R.drawable.onboarding_1,
@@ -302,13 +344,13 @@ private fun LogistrationScreen(
                                 ),
                                 LogistrationCarouselItem(
                                     imageResId = R.drawable.onboarding_2,
-                                    title = "Learn from Industry Experts",
-                                    subtitle = "Access world-class education from renowned instructors and gain practical knowledge that sets you apart."
+                                    title = "Empowering Women in STEM",
+                                    subtitle = "Join an inspiring global community of women pursuing Science, Technology, Engineering, and Mathematics to break barriers."
                                 ),
                                 LogistrationCarouselItem(
                                     imageResId = R.drawable.onboarding_3,
-                                    title = "Creating Job Opportunities in Science and Technology",
-                                    subtitle = "Discover the latest job opportunities in Science and Technology and apply for the ones that match your skills and interests."
+                                    title = "Global Mentorship & Experts",
+                                    subtitle = "Access world-class education and personalized guidance from mentors at leading global universities and industries."
                                 )
                             )
                             LogistrationCarousel(items = carouselItems)
@@ -326,21 +368,24 @@ private fun LogistrationScreen(
                                 color = MaterialTheme.appColors.textDark
                             )
                         }
-//                        Text(
-//                            text = stringResource(id = R.string.pre_auth_title),
-//                            style = MaterialTheme.appTypography.headlineSmall,
-//                            modifier = Modifier
-//                                .testTag("txt_screen_title")
-//                                .padding(bottom = 40.dp)
-//                        )
+
                         val focusManager = LocalFocusManager.current
-                        Column(Modifier.padding(bottom = 8.dp)) {
-                            Spacer(Modifier.height(16.dp))
+                        var isSearchFocused by remember { mutableStateOf(false) }
+                        Column {
+                            Spacer(Modifier.height(24.dp))
                             SearchBar(
                                 modifier = Modifier
                                     .testTag("tf_discovery_search")
                                     .fillMaxWidth()
-                                    .height(48.dp),
+                                    .height(48.dp)
+                                    .onFocusChanged { isSearchFocused = it.isFocused }
+                                    .clip(RoundedCornerShape(8.dp))
+                                    .border(
+                                        width = if (isSearchFocused) 2.dp else 1.dp,
+                                        color = if (isSearchFocused) MaterialTheme.appColors.primary else Color.Transparent,
+                                        shape = RoundedCornerShape(8.dp)
+                                    )
+                                    .background(Color(0xFFF1F4F6)),
                                 label = "Search courses...",
                                 requestFocus = false,
                                 searchValue = textFieldValue,
@@ -362,27 +407,19 @@ private fun LogistrationScreen(
                             )
                         }
 
+                        Spacer(Modifier.height(16.dp))
                         if (state is DiscoveryUIState.Courses) {
                             Text(
                                 text = "Showing ${state.courses.size} of ${state.courses.size} courses",
-                                style = MaterialTheme.appTypography.bodySmall,
-                                color = MaterialTheme.appColors.primary,
-                                modifier = Modifier.padding(bottom = 16.dp)
+                                style = MaterialTheme.appTypography.bodySmall.copy(
+                                    fontWeight = FontWeight.SemiBold,
+                                    fontSize = 12.sp
+                                ),
+                                color = Color(0xFF8BC34A),
+                                modifier = Modifier.fillMaxWidth(),
+                                textAlign = TextAlign.Start
                             )
                         }
-
-//                        Text(
-//                            modifier = Modifier
-//                                .testTag("txt_explore_all_courses")
-//                                .padding(bottom = 32.dp)
-//                                .noRippleClickable {
-//                                    onSearchClick("")
-//                                },
-//                            text = stringResource(id = R.string.pre_auth_explore_all_courses),
-//                            color = MaterialTheme.appColors.primary,
-//                            style = MaterialTheme.appTypography.labelLarge,
-//                            textDecoration = TextDecoration.Underline
-//                        )
                     }
                 }
 
@@ -402,15 +439,13 @@ private fun LogistrationScreen(
 
                     is DiscoveryUIState.Courses -> {
                         items(state.courses) { course ->
-                            DiscoveryCourseItem(
+                            LogistrationCourseItem(
                                 apiHostUrl = apiHostUrl,
                                 course = course,
-                                windowSize = windowSize,
                                 onClick = {
                                     onItemClick(course)
                                 }
                             )
-                            Divider()
                         }
                         item {
                             if (canLoadMore) {
@@ -461,6 +496,91 @@ private fun LogistrationScreen(
     }
 }
 
+@Composable
+private fun LogistrationCourseItem(
+    apiHostUrl: String,
+    course: Course,
+    onClick: (Course) -> Unit
+) {
+    Card(
+        backgroundColor = Color.White,
+        elevation = 1.dp,
+        shape = RoundedCornerShape(12.dp),
+        modifier = Modifier
+            .fillMaxWidth()
+            .clickable { onClick(course) }
+    ) {
+        Row(
+            modifier = Modifier.padding(10.dp),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            AsyncImage(
+                modifier = Modifier
+                    .size(85.dp)
+                    .clip(RoundedCornerShape(10.dp)),
+                contentScale = ContentScale.Crop,
+                model = ImageRequest.Builder(LocalContext.current)
+                    .data(course.media?.courseImage?.uri?.toImageLink(apiHostUrl) ?: "")
+                    .error(CoreR.drawable.core_no_image_course)
+                    .placeholder(CoreR.drawable.core_no_image_course)
+                    .crossfade(true)
+                    .build(),
+                contentDescription = null,
+            )
+            Spacer(Modifier.width(14.dp))
+            Column(modifier = Modifier.weight(1f)) {
+                Text(
+                    text = course.name.orEmpty(),
+                    style = MaterialTheme.appTypography.titleMedium.copy(
+                        fontWeight = FontWeight.Bold,
+                        fontSize = 14.sp,
+                        lineHeight = 18.sp
+                    ),
+                    color = Color(0xFF263238),
+                    maxLines = 2,
+                    overflow = TextOverflow.Ellipsis
+                )
+                Spacer(Modifier.height(6.dp))
+                Row(horizontalArrangement = Arrangement.spacedBy(6.dp)) {
+                    if (course.level?.isNotEmpty() == true) {
+                        CourseTag(text = course.level.orEmpty())
+                    }
+                    if (course.category?.isNotEmpty() == true) {
+                        CourseTag(text = course.category.orEmpty())
+                    }
+                }
+                Spacer(Modifier.height(6.dp))
+                Text(
+                    text = course.instructorName.orEmpty(),
+                    style = MaterialTheme.appTypography.labelSmall.copy(fontSize = 11.sp),
+                    color = Color(0xFF78909C) 
+                )
+            }
+        }
+    }
+}
+
+@Composable
+fun CourseTag(text: String) {
+    Box(
+        modifier = Modifier
+            .background(
+                Color(0xFF8BC34A).copy(alpha = 0.1f),
+                RoundedCornerShape(4.dp)
+            )
+            .padding(horizontal = 8.dp, vertical = 2.dp)
+    ) {
+        Text(
+            text = text,
+            style = MaterialTheme.appTypography.labelSmall.copy(
+                fontWeight = FontWeight.Bold,
+                fontSize = 10.sp
+            ),
+            color = Color(0xFF8BC34A)
+        )
+    }
+}
+
 @Preview(uiMode = Configuration.UI_MODE_NIGHT_NO)
 @Preview(uiMode = Configuration.UI_MODE_NIGHT_YES)
 @Preview(name = "NEXUS_9_Light", device = Devices.NEXUS_9, uiMode = Configuration.UI_MODE_NIGHT_NO)
@@ -479,10 +599,6 @@ private fun LogistrationPreview() {
             windowSize = WindowSize(WindowType.Medium, WindowType.Medium),
             state = DiscoveryUIState.Courses(
                 listOf(
-                    mockCourse,
-                    mockCourse,
-                    mockCourse,
-                    mockCourse,
                     mockCourse,
                     mockCourse,
                     mockCourse,
@@ -527,10 +643,6 @@ private fun LogistrationRegistrationDisabledPreview() {
                     mockCourse,
                     mockCourse,
                     mockCourse,
-                    mockCourse,
-                    mockCourse,
-                    mockCourse,
-                    mockCourse,
                 )
             ),
             uiMessage = null,
@@ -558,7 +670,7 @@ private val mockCourse = Course(
     invitationOnly = false,
     media = Media(),
     mobileAvailable = true,
-    name = "Test course",
+    name = "Vigyanshaala Rural STEM Champion - Workshops",
     number = "number",
     org = "EdX",
     pacing = "pacing",
@@ -573,7 +685,7 @@ private val mockCourse = Course(
     noOfReviews = "100",
     enrollments = "0",
     isWishlisted = false,
-    level = "level",
-    category = "category",
-    instructorName = "instructorName",
+    level = "Beginner",
+    category = "STEM",
+    instructorName = "Dr. Priya Sharma",
 )

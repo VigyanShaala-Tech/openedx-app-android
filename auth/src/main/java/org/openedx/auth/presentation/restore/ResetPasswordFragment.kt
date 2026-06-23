@@ -382,10 +382,10 @@ private fun ResetPasswordScreen(
                                 }
                                 Spacer(Modifier.height(24.dp))
                                 val annotatedString = buildAnnotatedString {
-                                    withStyle(style = SpanStyle(color = MaterialTheme.appColors.textPrimary, fontSize = 14.sp)) {
+                                    withStyle(style = SpanStyle(color = MaterialTheme.appColors.textPrimary, fontSize = MaterialTheme.appTypography.bodyMedium.fontSize)) {
                                         append("Remember your password? ")
                                     }
-                                    withStyle(style = SpanStyle(color = MaterialTheme.appColors.primary, fontWeight = FontWeight.SemiBold, fontSize = 14.sp)) {
+                                    withStyle(style = SpanStyle(color = MaterialTheme.appColors.primary, fontWeight = FontWeight.SemiBold, fontSize = MaterialTheme.appTypography.bodyMedium.fontSize)) {
                                         append("Sign In")
                                     }
                                 }

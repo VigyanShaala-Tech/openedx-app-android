@@ -41,6 +41,7 @@ import androidx.compose.material.icons.filled.Alarm
 import androidx.compose.material.icons.filled.Book
 import androidx.compose.material.icons.filled.CheckCircle
 import androidx.compose.material.icons.filled.EmojiEvents
+import androidx.compose.material.icons.filled.Notifications
 import androidx.compose.material.icons.filled.Star
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.ImportContacts
@@ -152,6 +153,9 @@ class NewDashboardFragment : Fragment() {
                             requireActivity().supportFragmentManager,
                             "COMPLETED"
                         )
+                    },
+                    onNotificationClick = {
+                        dashboardRouter.navigateToNotifications(requireActivity().supportFragmentManager)
                     }
                 )
             }
@@ -168,7 +172,8 @@ private fun NewDashboardScreen(
     onRecommendationClick: (String) -> Unit,
     onCourseClick: (String, String) -> Unit,
     onContinueViewAllClick: () -> Unit,
-    onCompletedViewAllClick: () -> Unit
+    onCompletedViewAllClick: () -> Unit,
+    onNotificationClick: () -> Unit
 ) {
     val uiState by viewModel.state.collectAsState(NewDashboardState())
     NewDashboardScreenContent(
@@ -181,6 +186,7 @@ private fun NewDashboardScreen(
         onCourseClick,
         onContinueViewAllClick,
         onCompletedViewAllClick,
+        onNotificationClick,
         onRemoveWishlist = { id -> viewModel.removeFromWishlist(id) }
     )
 }
@@ -197,6 +203,7 @@ private fun NewDashboardScreenContent(
     onCourseClick: (String, String) -> Unit,
     onContinueViewAllClick: () -> Unit,
     onCompletedViewAllClick: () -> Unit,
+    onNotificationClick: () -> Unit,
     onRemoveWishlist: (String) -> Unit
 ) {
     val windowSize = rememberWindowSize()
@@ -274,35 +281,6 @@ private fun NewDashboardScreenContent(
                 contentPadding = contentPadding,
                 verticalArrangement = Arrangement.spacedBy(16.dp)
             ) {
-//            item {
-//                Row(
-//                    modifier = Modifier.fillMaxWidth(),
-//                    horizontalArrangement = Arrangement.SpaceBetween,
-//                    verticalAlignment = Alignment.CenterVertically
-//                ) {
-//                    Column {
-//                        Text(
-//                            text = "Welcome back, $displayName",
-//                            style = MaterialTheme.appTypography.titleLarge,
-//                            color = MaterialTheme.appColors.textDark
-//                        )
-//                    }
-//                    Card(
-//                        modifier = Modifier.size(36.dp),
-//                        shape = CircleShape,
-//                        elevation = 0.dp,
-//                        backgroundColor = MaterialTheme.appColors.surface
-//                    ) {
-//                        Box(contentAlignment = Alignment.Center) {
-//                            Icon(
-//                                imageVector = Icons.Filled.EmojiEvents,
-//                                contentDescription = null,
-//                                tint = MaterialTheme.appColors.primary
-//                            )
-//                        }
-//                    }
-//                }
-//            }
 
             if (statCards.isNotEmpty()) {
                 item {
@@ -351,7 +329,7 @@ private fun NewDashboardScreenContent(
                                     Spacer(Modifier.height(4.dp))
                                     Text(
                                         text = item.label,
-                                        style = MaterialTheme.appTypography.labelSmall.copy(lineHeight = 14.sp),
+                                        style = MaterialTheme.appTypography.labelSmall,
                                         color = MaterialTheme.appColors.textPrimary,
                                         textAlign = TextAlign.Center,
                                         maxLines = 2,
@@ -1002,6 +980,7 @@ private fun NewDashboardScreenPreview() {
             onCourseClick = { _, _ -> },
             onContinueViewAllClick = {},
             onCompletedViewAllClick = {},
+            onNotificationClick = {},
             onRemoveWishlist = {}
         )
     }
@@ -1021,6 +1000,7 @@ private fun NewDashboardScreenLoadingPreview() {
             onCourseClick = { _, _ -> },
             onContinueViewAllClick = {},
             onCompletedViewAllClick = {},
+            onNotificationClick = {},
             onRemoveWishlist = {}
         )
     }
@@ -1040,6 +1020,7 @@ private fun NewDashboardScreenEmptyPreview() {
             onCourseClick = { _, _ -> },
             onContinueViewAllClick = {},
             onCompletedViewAllClick = {},
+            onNotificationClick = {},
             onRemoveWishlist = {}
         )
     }

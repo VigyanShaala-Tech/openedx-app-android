@@ -179,8 +179,7 @@ private fun NotificationItem(notification: NotificationModel) {
                     Text(
                         text = notification.title,
                         style = MaterialTheme.appTypography.titleSmall.copy(
-                            fontWeight = FontWeight.Bold,
-                            fontSize = 15.sp
+                            fontWeight = FontWeight.Bold
                         ),
                         color = MaterialTheme.appColors.textPrimary
                     )
@@ -198,8 +197,7 @@ private fun NotificationItem(notification: NotificationModel) {
                 Text(
                     text = notification.description,
                     style = MaterialTheme.appTypography.bodySmall,
-                    color = MaterialTheme.appColors.textSecondary,
-                    lineHeight = 18.sp
+                    color = MaterialTheme.appColors.textSecondary
                 )
                 Spacer(modifier = Modifier.height(8.dp))
                 Text(

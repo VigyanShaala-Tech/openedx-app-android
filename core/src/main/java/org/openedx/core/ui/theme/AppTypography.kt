@@ -95,22 +95,22 @@ internal val LocalTypography = staticCompositionLocalOf {
             fontFamily = fontFamily
         ),
         titleLarge = TextStyle(
-            fontSize = 22.sp,
-            lineHeight = 28.sp,
+            fontSize = 24.sp,
+            lineHeight = 32.sp,
             fontWeight = FontWeight.Bold,
             letterSpacing = 0.sp,
             fontFamily = fontFamily
         ),
         titleMedium = TextStyle(
-            fontSize = 16.sp,
-            lineHeight = 24.sp,
+            fontSize = 18.sp,
+            lineHeight = 26.sp,
             fontWeight = FontWeight.SemiBold,
             letterSpacing = 0.1.sp,
             fontFamily = fontFamily
         ),
         titleSmall = TextStyle(
             fontSize = 14.sp,
-            lineHeight = 20.sp,
+            lineHeight = 22.sp,
             fontWeight = FontWeight.Medium,
             letterSpacing = 0.1.sp,
             fontFamily = fontFamily
@@ -123,15 +123,15 @@ internal val LocalTypography = staticCompositionLocalOf {
             fontFamily = fontFamily
         ),
         bodyMedium = TextStyle(
-            fontSize = 14.sp,
-            lineHeight = 20.sp,
+            fontSize = 15.sp,
+            lineHeight = 22.sp,
             fontWeight = FontWeight.Normal,
             letterSpacing = 0.25.sp,
             fontFamily = fontFamily
         ),
         bodySmall = TextStyle(
-            fontSize = 12.sp,
-            lineHeight = 16.sp,
+            fontSize = 14.sp,
+            lineHeight = 20.sp,
             fontWeight = FontWeight.Normal,
             letterSpacing = 0.4.sp,
             fontFamily = fontFamily
@@ -151,7 +151,7 @@ internal val LocalTypography = staticCompositionLocalOf {
             fontFamily = fontFamily
         ),
         labelSmall = TextStyle(
-            fontSize = 10.sp,
+            fontSize = 12.sp,
             lineHeight = 16.sp,
             fontWeight = FontWeight.Normal,
             letterSpacing = 0.sp,

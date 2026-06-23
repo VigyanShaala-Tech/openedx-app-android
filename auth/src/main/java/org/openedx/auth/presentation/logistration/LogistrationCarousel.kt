@@ -26,9 +26,12 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.text.SpanStyle
+import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import org.openedx.core.ui.theme.appColors
@@ -39,6 +42,7 @@ import kotlinx.coroutines.delay
 data class LogistrationCarouselItem(
     val imageResId: Int,
     val title: String,
+    val titleColored: String,
     val subtitle: String
 )
 
@@ -83,32 +87,43 @@ fun LogistrationCarousel(
                         .clip(RoundedCornerShape(12.dp)),
                     painter = painterResource(id = item.imageResId),
                     contentDescription = null,
-                    contentScale = ContentScale.FillBounds
+                    contentScale = ContentScale.FillBounds,
+                    alignment = Alignment.Center
                 )
                 Spacer(Modifier.height(24.dp))
                 Text(
-                    text = item.title,
+                    text = buildAnnotatedString {
+                        withStyle(style = SpanStyle(color = Color(0xFF263238))) {
+                            append(item.title)
+                        }
+                        if (item.titleColored.isNotEmpty()) {
+                            append("\n")
+                            withStyle(style = SpanStyle(color = Color(0xFF8BC34A))) {
+                                append(item.titleColored)
+                            }
+                        }
+                    },
                     style = MaterialTheme.appTypography.titleLarge.copy(
                         fontWeight = FontWeight.ExtraBold,
-                        fontSize = 20.sp,
+                        fontSize = 24.sp,
                         textAlign = TextAlign.Center,
+                        lineHeight = 32.sp,
                         fontFamily = MaterialTheme.appTypography.defaultFontFamily
                     ),
-                    color = Color(0xFF263238),
                     modifier = Modifier.padding(horizontal = 16.dp)
                 )
-                Spacer(Modifier.height(8.dp))
+                Spacer(Modifier.height(12.dp))
                 Text(
                     text = item.subtitle,
                     style = MaterialTheme.appTypography.bodyMedium.copy(
-                        lineHeight = 20.sp,
-                        fontSize = 13.sp,
+                        lineHeight = 22.sp,
+                        fontSize = 14.sp,
                         textAlign = TextAlign.Center,
                         fontFamily = MaterialTheme.appTypography.defaultFontFamily
                     ),
                     color = Color(0xFF78909C),
                     modifier = Modifier.padding(horizontal = 32.dp),
-                    maxLines = 4,
+                    maxLines = 5,
                     overflow = TextOverflow.Ellipsis
                 )
             }

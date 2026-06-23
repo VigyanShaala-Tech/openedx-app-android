@@ -335,22 +335,25 @@ private fun LogistrationScreen(
                     Column(horizontalAlignment = Alignment.CenterHorizontally) {
                         if (!origin.equals("RECOMMENDED", true)) {
                             LogistrationLogoView()
-                            Spacer(Modifier.height(24.dp))
+                            Spacer(Modifier.height(8.dp))
                             val carouselItems = listOf(
                                 LogistrationCarouselItem(
                                     imageResId = R.drawable.onboarding_1,
-                                    title = "Grow your career IN STEM",
-                                    subtitle = "Calling EVERY Woman pursuing STEM - Science, Technology, Engineering, Maths Degree to be part of an inspiring global community and make your next leap into higher education or job."
+                                    title = "Grow your career",
+                                    titleColored = "START HERE",
+                                    subtitle = "If you are pursuing a Science and Tech. degree, connect with experts learn from the best and do Hands-On research projects and take your next leap with as part of a global community."
                                 ),
                                 LogistrationCarouselItem(
                                     imageResId = R.drawable.onboarding_2,
-                                    title = "Empowering Women in STEM",
-                                    subtitle = "Join an inspiring global community of women pursuing Science, Technology, Engineering, and Mathematics to break barriers."
+                                    title = "Learn from Global",
+                                    titleColored = "Instructors and Mentors",
+                                    subtitle = "Our mentors across bring global industrial and academic experience across STEM disciplines that will set you apart"
                                 ),
                                 LogistrationCarouselItem(
                                     imageResId = R.drawable.onboarding_3,
-                                    title = "Global Mentorship & Experts",
-                                    subtitle = "Access world-class education and personalized guidance from mentors at leading global universities and industries."
+                                    title = "Creating Job Opportunities in",
+                                    titleColored = "Science and Technology",
+                                    subtitle = "Discover the latest job opportunities in Science and Technology and apply for the ones that match your skills and interests."
                                 )
                             )
                             LogistrationCarousel(items = carouselItems)

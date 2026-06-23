@@ -9,6 +9,8 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.Divider
 import androidx.compose.material.Icon
 import androidx.compose.material.LinearProgressIndicator
 import androidx.compose.material.MaterialTheme
@@ -19,6 +21,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.font.FontWeight
@@ -59,14 +62,17 @@ fun VideosHomePagerCardContent(
             .fillMaxWidth()
             .padding(16.dp)
     ) {
-        // Header with progress
+        // Header
         Text(
-            text = stringResource(R.string.course_container_content_tab_video),
+            text = "Videos",
             style = MaterialTheme.appTypography.titleLarge,
-            color = MaterialTheme.appColors.textPrimary,
-            fontWeight = FontWeight.SemiBold
+            color = MaterialTheme.appColors.textDark,
+            fontWeight = FontWeight.Bold
         )
-        Spacer(modifier = Modifier.height(12.dp))
+
+        Spacer(modifier = Modifier.height(16.dp))
+
+        // Progress row
         Row(
             modifier = Modifier
                 .fillMaxWidth()
@@ -76,73 +82,70 @@ fun VideosHomePagerCardContent(
             Icon(
                 imageVector = Icons.Filled.Videocam,
                 contentDescription = null,
-                tint = MaterialTheme.appColors.textPrimary,
-                modifier = Modifier.size(32.dp)
+                tint = MaterialTheme.appColors.textDark,
+                modifier = Modifier.size(24.dp)
             )
-            Spacer(modifier = Modifier.width(8.dp))
+            Spacer(modifier = Modifier.width(12.dp))
             Text(
                 text = "$completedVideos/$totalVideos",
                 style = MaterialTheme.appTypography.displaySmall,
-                color = MaterialTheme.appColors.textPrimary,
+                color = MaterialTheme.appColors.textDark,
                 fontWeight = FontWeight.Bold
             )
-            Spacer(modifier = Modifier.width(8.dp))
-            Text(
-                text = stringResource(R.string.course_videos_completed),
-                style = MaterialTheme.appTypography.labelLarge,
-                color = MaterialTheme.appColors.textPrimaryVariant,
-                fontWeight = FontWeight.Medium
-            )
+            Spacer(modifier = Modifier.width(12.dp))
+            Column {
+                Text(
+                    text = "Videos",
+                    style = MaterialTheme.appTypography.bodySmall,
+                    color = MaterialTheme.appColors.textSecondary,
+                )
+                Text(
+                    text = "completed",
+                    style = MaterialTheme.appTypography.bodySmall,
+                    color = MaterialTheme.appColors.textSecondary,
+                )
+            }
         }
 
-        Spacer(modifier = Modifier.height(8.dp))
+        Spacer(modifier = Modifier.height(16.dp))
 
-        // Progress bar
-        LinearProgressIndicator(
-            modifier = Modifier
-                .fillMaxWidth()
-                .height(4.dp)
-                .clip(CircleShape),
-            progress = if (totalVideos > 0) completedVideos.toFloat() / totalVideos else 0f,
-            color = MaterialTheme.appColors.progressBarColor,
-            backgroundColor = MaterialTheme.appColors.progressBarBackgroundColor
-        )
+        Divider(modifier = Modifier.fillMaxWidth(), color = MaterialTheme.appColors.cardViewBorder.copy(alpha = 0.5f))
 
-        Spacer(modifier = Modifier.height(20.dp))
+        Spacer(modifier = Modifier.height(16.dp))
 
         // Continue Watching section
         if (firstIncompleteVideo != null) {
-            val title = if (videoProgress > 0) {
-                stringResource(R.string.course_continue_watching)
-            } else {
-                stringResource(R.string.course_next_video)
-            }
             Text(
-                text = title,
-                style = MaterialTheme.appTypography.titleMedium,
-                color = MaterialTheme.appColors.textPrimary,
-                fontWeight = FontWeight.SemiBold
+                text = "Next Video",
+                style = MaterialTheme.appTypography.bodySmall,
+                color = MaterialTheme.appColors.textSecondary,
             )
 
-            Spacer(modifier = Modifier.height(8.dp))
+            Spacer(modifier = Modifier.height(12.dp))
 
             // Video card using CourseVideoItem
             CourseVideoItem(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .height(180.dp),
+                    .height(200.dp)
+                    .clip(RoundedCornerShape(16.dp)),
                 videoBlock = firstIncompleteVideo,
                 preview = uiState.videoPreview,
                 progress = videoProgress,
                 onClick = {
                     onVideoClick(firstIncompleteVideo)
                 },
-                titleStyle = MaterialTheme.appTypography.titleMedium,
-                contentModifier = Modifier
-                    .padding(horizontal = 16.dp, vertical = 8.dp),
-                progressModifier = Modifier.height(8.dp),
+                titleStyle = MaterialTheme.appTypography.bodySmall.copy(
+                    fontWeight = FontWeight.Bold,
+                    background = Color.Black.copy(alpha = 0.4f),
+                ),
+                contentModifier = Modifier.padding(0.dp),
+                progressModifier = Modifier.height(0.dp),
+                playButtonSize = 48.dp,
+                borderColor = Color.Transparent
             )
-        } else {
+        }
+else {
             CaughtUpMessage(
                 message = stringResource(R.string.course_videos_caught_up)
             )

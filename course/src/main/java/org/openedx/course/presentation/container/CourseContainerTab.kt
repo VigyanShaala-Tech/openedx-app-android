@@ -21,8 +21,8 @@ enum class CourseContainerTab(
 ) : TabItem {
     HOME(R.string.course_container_nav_home, Icons.Default.Home),
     CONTENT(R.string.course_container_nav_content, Icons.AutoMirrored.Filled.List),
-    LEADERBOARD(R.string.course_container_nav_leaderboard, Icons.Default.EmojiEvents),
     PROGRESS(R.string.course_container_nav_progress, Icons.Default.Moving),
+    LEADERBOARD(R.string.course_container_nav_leaderboard, Icons.Default.EmojiEvents),
     DATES(R.string.course_container_nav_dates, Icons.Outlined.CalendarMonth),
     OFFLINE(R.string.course_container_nav_downloads, Icons.Filled.CloudDownload),
     DISCUSSIONS(R.string.course_container_nav_discussions, Icons.AutoMirrored.Filled.Chat),

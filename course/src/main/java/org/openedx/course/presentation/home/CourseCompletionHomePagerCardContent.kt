@@ -47,10 +47,11 @@ fun CourseCompletionHomePagerCardContent(
         Text(
             text = stringResource(R.string.course_completion_title),
             style = MaterialTheme.appTypography.titleLarge,
-            color = MaterialTheme.appColors.textDark
+            color = MaterialTheme.appColors.textDark,
+            fontWeight = FontWeight.Bold
         )
 
-        Spacer(modifier = Modifier.height(12.dp))
+        Spacer(modifier = Modifier.height(16.dp))
 
         // Progress Section
         Row(
@@ -62,11 +63,11 @@ fun CourseCompletionHomePagerCardContent(
                 modifier = Modifier
                     .weight(1f)
                     .semantics(mergeDescendants = true) {},
-                verticalArrangement = Arrangement.spacedBy(8.dp)
+                verticalArrangement = Arrangement.spacedBy(4.dp)
             ) {
                 Text(
                     text = stringResource(R.string.course_completion_progress_label),
-                    style = MaterialTheme.appTypography.labelLarge,
+                    style = MaterialTheme.appTypography.titleSmall,
                     color = MaterialTheme.appColors.textDark,
                     fontWeight = FontWeight.Bold
                 )
@@ -75,8 +76,8 @@ fun CourseCompletionHomePagerCardContent(
                         R.string.course_completion_progress_description,
                         courseProgressPercent
                     ),
-                    style = MaterialTheme.appTypography.bodyMedium,
-                    color = MaterialTheme.appColors.textDark
+                    style = MaterialTheme.appTypography.bodySmall,
+                    color = MaterialTheme.appColors.textSecondary
                 )
             }
 
@@ -88,7 +89,7 @@ fun CourseCompletionHomePagerCardContent(
             )
         }
 
-        Spacer(modifier = Modifier.height(16.dp))
+        Spacer(modifier = Modifier.height(24.dp))
 
         uiState.next?.let { (chapter, subsection) ->
             // Section progress

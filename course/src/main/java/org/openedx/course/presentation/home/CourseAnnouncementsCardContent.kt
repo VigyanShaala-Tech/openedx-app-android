@@ -33,15 +33,15 @@ fun CourseAnnouncementsCardContent(
             Icon(
                 imageVector = Icons.AutoMirrored.Filled.Announcement,
                 contentDescription = null,
-                tint = MaterialTheme.appColors.textPrimary,
+                tint = MaterialTheme.appColors.textDark,
                 modifier = Modifier.size(24.dp)
             )
             Spacer(modifier = Modifier.width(8.dp))
             Text(
                 text = stringResource(R.string.course_announcements),
                 style = MaterialTheme.appTypography.titleLarge,
-                color = MaterialTheme.appColors.textPrimary,
-                fontWeight = FontWeight.SemiBold
+                color = MaterialTheme.appColors.textDark,
+                fontWeight = FontWeight.Bold
             )
         }
 
@@ -75,14 +75,14 @@ private fun AnnouncementItem(announcement: AnnouncementModel) {
     Card(
         modifier = Modifier.fillMaxWidth(),
         backgroundColor = MaterialTheme.appColors.background,
-        border = BorderStroke(1.dp, MaterialTheme.appColors.cardViewBorder),
-        shape = RoundedCornerShape(8.dp),
+        border = BorderStroke(1.dp, MaterialTheme.appColors.cardViewBorder.copy(alpha = 0.5f)),
+        shape = RoundedCornerShape(12.dp),
         elevation = 0.dp
     ) {
         Column(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(12.dp)
+                .padding(16.dp)
         ) {
             Text(
                 text = announcement.date ?: "",
@@ -90,20 +90,36 @@ private fun AnnouncementItem(announcement: AnnouncementModel) {
                 color = MaterialTheme.appColors.textSecondary
             )
             Spacer(modifier = Modifier.height(4.dp))
-            // Basic HTML stripping if needed, or just display content
+            // Basic HTML stripping
             val plainText = androidx.core.text.HtmlCompat.fromHtml(
                 announcement.content ?: "",
                 androidx.core.text.HtmlCompat.FROM_HTML_MODE_LEGACY
             ).toString().trim()
-            
+
+            // Try to split title and body if possible, or just show as in image
+            val lines = plainText.lines().filter { it.isNotBlank() }
+            val title = lines.getOrNull(0) ?: ""
+            val body = lines.drop(1).joinToString(" ")
+
             Text(
-                text = plainText,
+                text = title,
                 style = MaterialTheme.appTypography.bodyMedium,
-                color = MaterialTheme.appColors.textPrimary,
-                maxLines = 3,
-                overflow = TextOverflow.Ellipsis,
-                lineHeight = 20.sp
+                color = MaterialTheme.appColors.textDark,
+                fontWeight = FontWeight.Bold,
+                maxLines = 2,
+                overflow = TextOverflow.Ellipsis
             )
+            if (body.isNotEmpty()) {
+                Spacer(modifier = Modifier.height(4.dp))
+                Text(
+                    text = body,
+                    style = MaterialTheme.appTypography.bodySmall,
+                    color = MaterialTheme.appColors.textSecondary,
+                    maxLines = 2,
+                    overflow = TextOverflow.Ellipsis,
+                    lineHeight = 18.sp
+                )
+            }
         }
     }
 }

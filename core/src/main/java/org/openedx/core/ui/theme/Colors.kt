@@ -7,7 +7,7 @@ val light_primary_variant = Color(0x9ADEFAFF)
 val light_secondary = Color(0xFF94D3DD)
 val light_secondary_variant = Color(0xFF94D3DD)
 val light_background = Color.White
-val light_surface = Color(0xFFF7F7F8)
+val light_surface = Color(0xFFF3F5F7)
 val light_error = Color(0xFFE8174F)
 val light_onPrimary = Color.White
 val light_onSecondary = Color.White
@@ -43,7 +43,7 @@ val light_secondary_button_bordered_background = Color.White
 val light_secondary_button_bordered_text = light_primary_button_bordered_text
 
 val light_tab_bg_color = Color(0xFFFFFFFF)
-val light_card_view_background = Color(0xFFF9FAFB)
+val light_card_view_background = Color.White
 val light_card_view_border = Color(0xFFCCD4E0)
 val light_divider = Color(0xFFCCD4E0)
 val light_certificate_foreground = Color(0xD94BD191)

@@ -1209,21 +1209,12 @@ fun RoundTabsBar(
             val backgroundColor = if (isSelected) {
                 MaterialTheme.appColors.primary
             } else {
-                MaterialTheme.appColors.tabUnselectedBtnBackground
+                Color(0xFFE0E0E0) // Light grey for unselected as in image
             }
             val contentColor = if (isSelected) {
                 MaterialTheme.appColors.tabSelectedBtnContent
             } else {
-                MaterialTheme.appColors.tabUnselectedBtnContent
-            }
-            val border = if (!isSystemInDarkTheme()) {
-                Modifier.border(
-                    1.dp,
-                    MaterialTheme.appColors.primary,
-                    CircleShape
-                )
-            } else {
-                Modifier
+                Color.Black // Black for unselected as in image
             }
 
             RoundTab(
@@ -1231,7 +1222,6 @@ fun RoundTabsBar(
                     .height(40.dp)
                     .clip(CircleShape)
                     .background(backgroundColor)
-                    .then(border)
                     .clickable {
                         scope.launch {
                             onTabClicked(index)

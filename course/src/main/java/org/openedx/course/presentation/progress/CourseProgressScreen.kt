@@ -465,36 +465,38 @@ fun CourseCompletionCircularProgress(
 ) {
     Box(
         modifier = modifier
-            .semantics(mergeDescendants = true) {}
+            .semantics(mergeDescendants = true) {},
+        contentAlignment = Alignment.Center
     ) {
         CircularProgressIndicator(
             modifier = Modifier
-                .size(100.dp)
-                .border(
-                    width = 1.dp,
-                    color = MaterialTheme.appColors.progressBarBackgroundColor,
-                    shape = CircleShape
-                )
-                .padding(3.dp),
+                .size(80.dp),
+            progress = 1f,
+            color = MaterialTheme.appColors.progressBarBackgroundColor,
+            strokeWidth = 4.dp,
+        )
+        CircularProgressIndicator(
+            modifier = Modifier
+                .size(80.dp),
             progress = progress,
-            color = MaterialTheme.appColors.primary,
-            backgroundColor = MaterialTheme.appColors.progressBarBackgroundColor,
-            strokeWidth = 10.dp,
+            color = Color(0xFF4CAF50), // Green as in image
+            strokeWidth = 4.dp,
             strokeCap = StrokeCap.Round
         )
         Column(
-            modifier = Modifier.align(Alignment.Center),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
             Text(
                 text = "$progressPercent%",
-                style = MaterialTheme.appTypography.headlineSmall,
-                color = MaterialTheme.appColors.primary,
+                style = MaterialTheme.appTypography.titleMedium,
+                fontWeight = FontWeight.Bold,
+                color = MaterialTheme.appColors.textDark,
             )
             Text(
                 text = completedText ?: "",
                 style = MaterialTheme.appTypography.labelSmall,
-                color = MaterialTheme.appColors.textPrimaryVariant,
+                color = MaterialTheme.appColors.textSecondary,
+                fontSize = 10.sp
             )
         }
     }

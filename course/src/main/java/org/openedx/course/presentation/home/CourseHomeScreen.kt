@@ -222,7 +222,7 @@ private fun CourseHomeUI(
         modifier = Modifier
             .fillMaxSize(),
         scaffoldState = scaffoldState,
-        backgroundColor = MaterialTheme.appColors.background
+        backgroundColor = MaterialTheme.appColors.surface
     ) {
         val screenWidth by remember(key1 = windowSize) {
             mutableStateOf(
@@ -566,9 +566,9 @@ private fun DashboardCard(content: @Composable () -> Unit) {
         backgroundColor = MaterialTheme.appColors.cardViewBackground,
         border = BorderStroke(
             1.dp,
-            MaterialTheme.appColors.cardViewBorder
+            MaterialTheme.appColors.cardViewBorder.copy(alpha = 0.5f)
         ),
-        shape = MaterialTheme.appShapes.cardShape,
+        shape = RoundedCornerShape(16.dp),
         elevation = 0.dp,
     ) {
         content()
@@ -588,14 +588,15 @@ fun ViewAllButton(
         Icon(
             imageVector = Icons.AutoMirrored.Filled.List,
             contentDescription = null,
-            tint = MaterialTheme.appColors.textAccent,
+            tint = Color(0xFF4CAF50), // Green color as in image
             modifier = Modifier.size(20.dp)
         )
         Spacer(modifier = Modifier.width(8.dp))
         Text(
             text = text ?: "",
-            style = MaterialTheme.appTypography.labelLarge,
-            color = MaterialTheme.appColors.textAccent
+            style = MaterialTheme.appTypography.bodyMedium,
+            color = Color(0xFF4CAF50), // Green color as in image
+            fontWeight = FontWeight.SemiBold
         )
     }
 }

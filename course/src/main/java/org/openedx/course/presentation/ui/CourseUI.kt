@@ -780,16 +780,22 @@ fun CourseVideoItem(
                 contentDescription = null,
             )
 
-            // Title (top-left)
-            Text(
-                text = videoBlock.displayName ?: "",
-                color = Color.White,
-                style = titleStyle,
+            // Title (top-left) with background box as in image
+            Box(
                 modifier = Modifier
-                    .align(Alignment.TopStart),
-                maxLines = 1,
-                overflow = TextOverflow.Ellipsis
-            )
+                    .align(Alignment.TopStart)
+                    .padding(12.dp)
+                    .background(Color.Black.copy(alpha = 0.5f), RoundedCornerShape(4.dp))
+                    .padding(horizontal = 8.dp, vertical = 4.dp)
+            ) {
+                Text(
+                    text = videoBlock.displayName ?: "",
+                    color = Color.White,
+                    style = titleStyle,
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis
+                )
+            }
 
             // Progress bar (bottom)
             Box(
@@ -820,13 +826,6 @@ fun CourseVideoItem(
                             .offset(x = 1.dp),
                         painter = painterResource(id = coreR.drawable.ic_core_check),
                         contentDescription = stringResource(R.string.course_accessibility_video_watched),
-                    )
-                } else {
-                    Box(
-                        modifier = Modifier
-                            .align(Alignment.BottomEnd)
-                            .size(16.dp)
-                            .offset(x = 1.dp),
                     )
                 }
             }
@@ -1088,12 +1087,12 @@ fun CourseSubSectionItem(
     val icon = if (block.isCompleted()) {
         painterResource(R.drawable.course_ic_task_alt)
     } else {
-        painterResource(coreR.drawable.core_ic_chapter_icon)
+        painterResource(coreR.drawable.core_ic_assignment)
     }
     val iconColor = if (block.isCompleted()) {
         MaterialTheme.appColors.successGreen
     } else {
-        MaterialTheme.appColors.onSurface
+        MaterialTheme.appColors.textSecondary
     }
     val due by rememberSaveable {
         mutableStateOf(

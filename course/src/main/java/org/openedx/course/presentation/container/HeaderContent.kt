@@ -1,11 +1,14 @@
 package org.openedx.course.presentation.container
 
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
@@ -18,7 +21,9 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Devices
 import androidx.compose.ui.tooling.preview.Preview
@@ -45,7 +50,7 @@ internal fun ExpandedHeaderContent(
     Column(
         modifier
             .fillMaxWidth()
-            .padding(horizontal = horizontalPadding),
+            .padding(start = horizontalPadding, end = horizontalPadding, bottom = 12.dp, top = 12.dp),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
         Row(
@@ -64,12 +69,13 @@ internal fun ExpandedHeaderContent(
                     color = MaterialTheme.appColors.textDark,
                     style = MaterialTheme.appTypography.titleLarge,
                     overflow = TextOverflow.Ellipsis,
-                    maxLines = 2
+                    maxLines = 2,
+                    fontWeight = FontWeight.Bold
                 )
             }
             IconButton(
                 onClick = onNotificationClick,
-                modifier = Modifier.size(32.dp)
+                modifier = Modifier.size(32.dp).align(Alignment.Top)
             ) {
                 Box {
                     Icon(

@@ -79,7 +79,7 @@ private const val FLING_DELAY = 50L
 private const val SCROLL_UP_THRESHOLD = 0.15f
 private const val SCROLL_DOWN_THRESHOLD = 0.85f
 private const val SHADE_HEIGHT_MULTIPLIER = 0.1f
-private const val BLUR_PADDING_FACTOR = 3
+private const val BLUR_PADDING_FACTOR = 2
 
 @Composable
 internal fun CollapsingLayout(
@@ -636,7 +636,7 @@ private fun CollapsingLayoutMobile(
                 val adaptiveBlurImagePadding = blurImagePadding.value * (BLUR_PADDING_FACTOR - rawFactor)
                 Box(
                     modifier = Modifier
-                        .background(MaterialTheme.appColors.surface)
+                        .background(Color.White)
                         .fillMaxWidth()
                         .height(
                             with(localDensity) {

@@ -16,6 +16,7 @@ import org.openedx.auth.presentation.AuthRouter
 import org.openedx.core.config.Config
 import org.openedx.core.data.storage.CorePreferences
 import org.openedx.core.system.notifier.app.AppNotifier
+import org.openedx.core.system.notifier.app.SignInEvent
 import org.openedx.foundation.extension.isInternetError
 import org.openedx.foundation.presentation.BaseViewModel
 import org.openedx.foundation.presentation.UIMessage
@@ -76,7 +77,19 @@ class VsSignUpViewModel(
 
                 interactor.registerVs(body)
 
-                _uiState.update { it.copy(showRegisterSuccessDialog = true, isButtonLoading = false) }
+                if (socialAuth != null) {
+                    interactor.loginSocial(socialAuth.accessToken, socialAuth.authType)
+                    setUserId()
+                    _uiState.update { it.copy(successLogin = true, isButtonLoading = false) }
+                    appNotifier.send(SignInEvent())
+                } else {
+                    _uiState.update {
+                        it.copy(
+                            showRegisterSuccessDialog = true,
+                            isButtonLoading = false
+                        )
+                    }
+                }
             } catch (e: Exception) {
                 e.printStackTrace()
                 _uiState.update { it.copy(isButtonLoading = false) }
@@ -87,6 +100,12 @@ class VsSignUpViewModel(
                 }
                 _uiMessage.emit(UIMessage.SnackBarMessage(errorMessage))
             }
+        }
+    }
+
+    private fun setUserId() {
+        preferencesManager.user?.let {
+            analytics.setUserIdForSession(it.id)
         }
     }
 

@@ -58,7 +58,7 @@ class VsSignUpFragment : Fragment() {
                         }
                     },
                     onRegisterClick = { email, name, password, role ->
-                        viewModel.register(email, name, password, role)
+                        viewModel.register(email, name, password, role, signUpUiState.socialAuth)
                     },
                     onSocialRegisterClick = { authType ->
                         if (authType == AuthType.GOOGLE) {
@@ -90,6 +90,20 @@ class VsSignUpFragment : Fragment() {
 
                 LaunchedEffect(uiState.successLogin) {
                     if (uiState.successLogin && isAdded) {
+                        val fragmentManager = parentFragmentManager
+                        activity?.supportFragmentManager?.let {
+                            router.clearBackStack(it)
+                        }
+                        router.navigateToMain(
+                            fragmentManager,
+                            viewModel.courseId,
+                            viewModel.infoType
+                        )
+                    }
+                }
+
+                LaunchedEffect(signUpUiState.successLogin) {
+                    if (signUpUiState.successLogin && isAdded) {
                         val fragmentManager = parentFragmentManager
                         activity?.supportFragmentManager?.let {
                             router.clearBackStack(it)

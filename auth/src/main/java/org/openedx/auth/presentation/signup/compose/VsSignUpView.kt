@@ -347,10 +347,15 @@ fun VsSignUpView(
                     .height(56.dp),
                 shape = RoundedCornerShape(12.dp),
                 colors = ButtonDefaults.buttonColors(
-                    backgroundColor = Color(0xFFC5E1A5), // Light green
+                    backgroundColor = MaterialTheme.appColors.primary,
                     disabledBackgroundColor = Color(0xFFE0E0E0)
                 ),
-                enabled = !uiState.isButtonLoading
+                enabled = !uiState.isButtonLoading &&
+                        fullName.isNotBlank() &&
+                        email.isNotBlank() &&
+                        password.isNotBlank() &&
+                        confirmPassword.isNotBlank() &&
+                        isAgreed
             ) {
                 if (uiState.isButtonLoading) {
                     CircularProgressIndicator(color = Color.White, modifier = Modifier.size(24.dp))

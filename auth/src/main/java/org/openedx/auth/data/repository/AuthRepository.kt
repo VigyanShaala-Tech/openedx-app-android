@@ -1,6 +1,7 @@
 package org.openedx.auth.data.repository
 
 import com.google.gson.Gson
+import com.google.gson.JsonObject
 import org.openedx.auth.data.api.AuthApi
 import org.openedx.auth.data.api.OtpApi
 import org.openedx.auth.data.api.OtpLoginRequest
@@ -72,7 +73,7 @@ class AuthRepository(
     }
 
     suspend fun registerVs(body: VsRegisterRequest) {
-        return api.registerUserVs(
+        val response = api.registerUserVs(
             email = body.email,
             name = body.name,
             password = body.password,
@@ -82,6 +83,49 @@ class AuthRepository(
             username = body.username,
             verification_key = body.verificationKey,
         )
+        if (!response.isSuccessful) {
+            val errorBodyStr = response.errorBody()?.string()
+            val message = try {
+                val jsonObject = Gson().fromJson(errorBodyStr, JsonObject::class.java)
+                val errorMessage = StringBuilder()
+                
+                // Try to get email error
+                if (jsonObject.has("email") && jsonObject.get("email").isJsonArray) {
+                    val emailErrors = jsonObject.getAsJsonArray("email")
+                    if (emailErrors.size() > 0 && emailErrors.get(0).isJsonObject) {
+                        val firstError = emailErrors.get(0).asJsonObject
+                        if (firstError.has("user_message")) {
+                            errorMessage.append(firstError.get("user_message").asString)
+                        }
+                    }
+                }
+                
+                // Try to get username error if email error not found or to append it
+                if (jsonObject.has("username") && jsonObject.get("username").isJsonArray) {
+                    val usernameErrors = jsonObject.getAsJsonArray("username")
+                    if (usernameErrors.size() > 0 && usernameErrors.get(0).isJsonObject) {
+                        val firstError = usernameErrors.get(0).asJsonObject
+                        if (firstError.has("user_message")) {
+                            if (errorMessage.isNotEmpty()) errorMessage.append("\n")
+                            errorMessage.append(firstError.get("user_message").asString)
+                        }
+                    }
+                }
+
+                if (errorMessage.isEmpty() && jsonObject.has("message")) {
+                    errorMessage.append(jsonObject.get("message").asString)
+                }
+
+                if (errorMessage.isEmpty()) {
+                    "Error: ${response.code()}"
+                } else {
+                    errorMessage.toString()
+                }
+            } catch (e: Exception) {
+                errorBodyStr ?: "Error: ${response.code()}"
+            }
+            throw Exception(message)
+        }
     }
 
     suspend fun validateRegistrationFields(mapFields: Map<String, String>): ValidationFields {

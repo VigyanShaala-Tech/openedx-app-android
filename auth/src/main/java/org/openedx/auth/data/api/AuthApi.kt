@@ -92,16 +92,23 @@ interface AuthApi {
     @POST(ApiConstants.URL_PASSWORD_RESET)
     suspend fun passwordReset(@Field("email") email: String): PasswordResetResponse
 
+    @FormUrlEncoded
     @POST(ApiConstants.URL_PASSWORD_RESET_TOKEN_VALIDATE)
-    suspend fun validatePasswordResetToken(@Body request: org.openedx.auth.data.model.ValidateTokenRequest): org.openedx.auth.data.model.ValidateTokenResponse
+    suspend fun validatePasswordResetToken(@Field("token") token: String): org.openedx.auth.data.model.ValidateTokenResponse
 
+    @FormUrlEncoded
     @POST(ApiConstants.URL_VALIDATE_REGISTRATION_FIELDS)
-    suspend fun validatePassword(@Body request: org.openedx.auth.data.model.PasswordValidationRequest): ValidationFields
+    suspend fun validatePassword(
+        @Field("reset_password_page") resetPasswordPage: Boolean = true,
+        @Field("password") password: String
+    ): ValidationFields
 
+    @FormUrlEncoded
     @POST(ApiConstants.URL_PASSWORD_RESET_CONFIRM)
     suspend fun resetPasswordConfirm(
         @Path("token") token: String,
-        @Body request: org.openedx.auth.data.model.ResetPasswordConfirmRequest
+        @Field("new_password1") newPassword1: String,
+        @Field("new_password2") newPassword2: String
     )
 
     @GET(ApiConstants.URL_ACCOUNT_ACTIVATE)

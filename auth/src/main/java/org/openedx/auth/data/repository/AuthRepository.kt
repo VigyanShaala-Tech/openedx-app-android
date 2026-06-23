@@ -93,18 +93,15 @@ class AuthRepository(
     }
 
     suspend fun validatePasswordResetToken(token: String): Boolean {
-        return api.validatePasswordResetToken(org.openedx.auth.data.model.ValidateTokenRequest(token)).isValid
+        return api.validatePasswordResetToken(token).isValid
     }
 
     suspend fun validatePassword(password: String): ValidationFields {
-        return api.validatePassword(org.openedx.auth.data.model.PasswordValidationRequest(password = password))
+        return api.validatePassword(password = password)
     }
 
     suspend fun resetPasswordConfirm(token: String, password1: String, password2: String) {
-        api.resetPasswordConfirm(
-            token,
-            org.openedx.auth.data.model.ResetPasswordConfirmRequest(password1, password2)
-        )
+        api.resetPasswordConfirm(token, password1, password2)
     }
 
     suspend fun activateAccount(activationId: String): org.openedx.auth.data.model.AccountActivationResponse {

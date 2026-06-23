@@ -22,9 +22,25 @@ class LogistrationFiltersRepository(
         } catch (e: Exception) {
             emptyMap()
         }
-        val normalized = map.mapValues { (key, values) ->
-            val allLabel = "All ${key.replaceFirstChar { if (it.isLowerCase()) it.titlecase() else it.toString() }}"
-            listOf(allLabel) + values
+        val keys = listOf("categories", "levels", "subjects", "sortby")
+        val orderedMap = mutableMapOf<String, List<String>>()
+        keys.forEach { key ->
+            map[key]?.let { orderedMap[key] = it }
+        }
+        // Add any other keys from API not in our list
+        map.keys.forEach { key ->
+            if (key !in keys) orderedMap[key] = map[key]!!
+        }
+
+        val normalized = orderedMap.mapValues { (key, values) ->
+            val firstLabel = when (key.lowercase()) {
+                "categories" -> "All Categories"
+                "levels" -> "Tags"
+                "subjects" -> "All Topics"
+                "sortby" -> "Sort By"
+                else -> "All ${key.replaceFirstChar { if (it.isLowerCase()) it.titlecase() else it.toString() }}"
+            }
+            listOf(firstLabel) + values
         }
         return FilterOptions(options = normalized)
     }

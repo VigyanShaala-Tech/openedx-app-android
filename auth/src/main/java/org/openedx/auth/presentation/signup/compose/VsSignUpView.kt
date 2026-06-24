@@ -260,7 +260,7 @@ fun VsSignUpView(
                     withStyle(style = SpanStyle(color = MaterialTheme.appColors.error)) { append("*") }
                 },
                 style = MaterialTheme.appTypography.bodyMedium.copy(
-                    fontWeight = FontWeight.SemiBold,
+                    fontWeight = FontWeight.Medium,
                     color = MaterialTheme.appColors.textDark
                 ),
                 modifier = Modifier.padding(top = 24.dp)
@@ -446,7 +446,7 @@ fun VsSignUpInputField(
                 }
             },
             style = MaterialTheme.appTypography.bodyMedium.copy(
-                fontWeight = FontWeight.SemiBold,
+                fontWeight = FontWeight.Medium,
                 color = MaterialTheme.appColors.textDark
             )
         )

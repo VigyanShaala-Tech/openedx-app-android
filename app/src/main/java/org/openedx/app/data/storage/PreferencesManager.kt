@@ -17,7 +17,7 @@ import org.openedx.profile.data.model.Account
 import org.openedx.profile.data.storage.ProfilePreferences
 import org.openedx.whatsnew.data.storage.WhatsNewPreferences
 
-class PreferencesManager(context: Context) :
+class PreferencesManager(context: Context, private val gson: Gson) :
     CorePreferences,
     ProfilePreferences,
     WhatsNewPreferences,
@@ -106,22 +106,30 @@ class PreferencesManager(context: Context) :
 
     override var user: User?
         set(value) {
-            val userJson = Gson().toJson(value)
+            val userJson = gson.toJson(value)
             saveString(USER, userJson)
         }
         get() {
             val userString = getString(USER)
-            return Gson().fromJson(userString, User::class.java)
+            return try {
+                gson.fromJson(userString, User::class.java)
+            } catch (e: Exception) {
+                null
+            }
         }
 
     override var profile: Account?
         set(value) {
-            val accountJson = Gson().toJson(value)
+            val accountJson = gson.toJson(value)
             saveString(ACCOUNT, accountJson)
         }
         get() {
             val accountString = getString(ACCOUNT)
-            return Gson().fromJson(accountString, Account::class.java)
+            return try {
+                gson.fromJson(accountString, Account::class.java)
+            } catch (e: Exception) {
+                null
+            }
         }
 
     override var videoSettings: VideoSettings
@@ -146,15 +154,19 @@ class PreferencesManager(context: Context) :
 
     override var appConfig: AppConfig
         set(value) {
-            val appConfigJson = Gson().toJson(value)
+            val appConfigJson = gson.toJson(value)
             saveString(APP_CONFIG, appConfigJson)
         }
         get() {
             val appConfigString = getString(APP_CONFIG, getDefaultAppConfig())
-            return Gson().fromJson(appConfigString, AppConfig::class.java)
+            return try {
+                gson.fromJson(appConfigString, AppConfig::class.java)
+            } catch (e: Exception) {
+                AppConfig()
+            }
         }
 
-    private fun getDefaultAppConfig() = Gson().toJson(AppConfig())
+    private fun getDefaultAppConfig() = gson.toJson(AppConfig())
 
     override var lastWhatsNewVersion: String
         set(value) {
@@ -164,16 +176,19 @@ class PreferencesManager(context: Context) :
 
     override var lastReviewVersion: InAppReviewPreferences.VersionName
         set(value) {
-            val versionNameJson = Gson().toJson(value)
+            val versionNameJson = gson.toJson(value)
             saveString(LAST_REVIEW_VERSION, versionNameJson)
         }
         get() {
             val versionNameString = getString(LAST_REVIEW_VERSION)
-            return Gson().fromJson(
-                versionNameString,
-                InAppReviewPreferences.VersionName::class.java
-            )
-                ?: InAppReviewPreferences.VersionName.default
+            return try {
+                gson.fromJson(
+                    versionNameString,
+                    InAppReviewPreferences.VersionName::class.java
+                ) ?: InAppReviewPreferences.VersionName.default
+            } catch (e: Exception) {
+                InAppReviewPreferences.VersionName.default
+            }
         }
 
     override var wasPositiveRated: Boolean

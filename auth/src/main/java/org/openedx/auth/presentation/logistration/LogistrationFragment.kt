@@ -286,7 +286,7 @@ private fun LogistrationScreen(
                                     .height(48.dp),
                                 text = stringResource(id = CoreR.string.core_register),
                                 onClick = onRegisterClick,
-                                backgroundColor = Color(0xFF8BC34A) 
+                                backgroundColor = MaterialTheme.appColors.primary
                             )
                         }
                     }
@@ -418,7 +418,7 @@ private fun LogistrationScreen(
                                     fontWeight = FontWeight.SemiBold,
                                     fontSize = 12.sp
                                 ),
-                                color = Color(0xFF8BC34A),
+                                color = MaterialTheme.appColors.primary,
                                 modifier = Modifier.fillMaxWidth(),
                                 textAlign = TextAlign.Start
                             )
@@ -568,7 +568,7 @@ fun CourseTag(text: String) {
     Box(
         modifier = Modifier
             .background(
-                Color(0xFF8BC34A).copy(alpha = 0.1f),
+                MaterialTheme.appColors.primary.copy(alpha = 0.1f),
                 RoundedCornerShape(4.dp)
             )
             .padding(horizontal = 8.dp, vertical = 2.dp)
@@ -579,7 +579,7 @@ fun CourseTag(text: String) {
                 fontWeight = FontWeight.Bold,
                 fontSize = 10.sp
             ),
-            color = Color(0xFF8BC34A)
+            color = MaterialTheme.appColors.primary
         )
     }
 }

@@ -102,7 +102,7 @@ private fun LeaderboardUI(
                                 Icon(
                                     imageVector = Icons.Default.EmojiEvents,
                                     contentDescription = null,
-                                    tint = Color(0xFF8BC34A),
+                                    tint = MaterialTheme.appColors.primary,
                                     modifier = Modifier.size(32.dp)
                                 )
                             }
@@ -130,7 +130,7 @@ private fun LeaderboardUI(
                                 Text(
                                     text = "${uiState.userRanking?.points ?: 0} points",
                                     style = MaterialTheme.appTypography.bodyMedium.copy(fontWeight = FontWeight.Bold),
-                                    color = Color(0xFF8BC34A),
+                                    color = MaterialTheme.appColors.primary,
                                     modifier = Modifier.padding(bottom = 2.dp)
                                 )
                             }
@@ -290,7 +290,7 @@ private fun LeaderboardRow(entry: org.openedx.course.data.model.LeaderboardEntry
                 modifier = Modifier.width(60.dp),
                 textAlign = TextAlign.End,
                 style = MaterialTheme.appTypography.bodyMedium.copy(fontWeight = FontWeight.Bold),
-                color = Color(0xFF8BC34A)
+                color = MaterialTheme.appColors.primary
             )
         }
     }
@@ -320,7 +320,7 @@ private fun <T> LeaderboardFilter(
                 )
             },
             colors = TextFieldDefaults.outlinedTextFieldColors(
-                focusedBorderColor = Color(0xFF8BC34A),
+                focusedBorderColor = MaterialTheme.appColors.primary,
                 unfocusedBorderColor = Color.LightGray.copy(alpha = 0.5f)
             )
         )

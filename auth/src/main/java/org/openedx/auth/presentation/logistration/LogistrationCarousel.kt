@@ -98,7 +98,7 @@ fun LogistrationCarousel(
                         }
                         if (item.titleColored.isNotEmpty()) {
                             append("\n")
-                            withStyle(style = SpanStyle(color = Color(0xFF8BC34A))) {
+                            withStyle(style = SpanStyle(color = MaterialTheme.appColors.primary)) {
                                 append(item.titleColored)
                             }
                         }

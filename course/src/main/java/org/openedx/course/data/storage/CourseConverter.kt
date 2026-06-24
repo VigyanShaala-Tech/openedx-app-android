@@ -31,7 +31,11 @@ class CourseConverter {
     fun toListOfString(value: String?): List<String> {
         if (value.isNullOrBlank() || value == "null") return emptyList()
         val type = object : TypeToken<List<String>>() {}.type
-        return Gson().fromJson<List<String>>(value, type) ?: emptyList()
+        return try {
+            Gson().fromJson<List<String>>(value, type) ?: emptyList()
+        } catch (e: Exception) {
+            emptyList()
+        }
     }
 
     @TypeConverter
@@ -44,7 +48,11 @@ class CourseConverter {
     fun toListOfBlockDbEntity(value: String?): List<BlockDb> {
         if (value.isNullOrBlank() || value == "null") return emptyList()
         val type = object : TypeToken<List<BlockDb>>() {}.type
-        return Gson().fromJson<List<BlockDb>>(value, type) ?: emptyList()
+        return try {
+            Gson().fromJson<List<BlockDb>>(value, type) ?: emptyList()
+        } catch (e: Exception) {
+            emptyList()
+        }
     }
 
     @TypeConverter
@@ -57,7 +65,11 @@ class CourseConverter {
     fun toListOfCourseDateBlockDb(value: String?): List<CourseDateBlockDb> {
         if (value.isNullOrBlank() || value == "null") return emptyList()
         val type = object : TypeToken<List<CourseDateBlockDb>>() {}.type
-        return Gson().fromJson<List<CourseDateBlockDb>>(value, type) ?: emptyList()
+        return try {
+            Gson().fromJson<List<CourseDateBlockDb>>(value, type) ?: emptyList()
+        } catch (e: Exception) {
+            emptyList()
+        }
     }
 
     @TypeConverter
@@ -66,7 +78,18 @@ class CourseConverter {
 
     @TypeConverter
     fun toSectionScoreDbList(value: String?): List<SectionScoreDb> =
-        if (value.isNullOrBlank() || value == "null") emptyList() else Gson().fromJson<List<SectionScoreDb>>(value, object : TypeToken<List<SectionScoreDb>>() {}.type) ?: emptyList()
+        if (value.isNullOrBlank() || value == "null") {
+            emptyList()
+        } else {
+            try {
+                Gson().fromJson<List<SectionScoreDb>>(
+                    value,
+                    object : TypeToken<List<SectionScoreDb>>() {}.type
+                ) ?: emptyList()
+            } catch (e: Exception) {
+                emptyList()
+            }
+        }
 
     @TypeConverter
     fun fromAssignmentPolicyDbList(value: List<GradingPolicyDb.AssignmentPolicyDb>?): String =
@@ -74,7 +97,18 @@ class CourseConverter {
 
     @TypeConverter
     fun toAssignmentPolicyDbList(value: String?): List<GradingPolicyDb.AssignmentPolicyDb> =
-        if (value.isNullOrBlank() || value == "null") emptyList() else Gson().fromJson<List<GradingPolicyDb.AssignmentPolicyDb>>(value, object : TypeToken<List<GradingPolicyDb.AssignmentPolicyDb>>() {}.type) ?: emptyList()
+        if (value.isNullOrBlank() || value == "null") {
+            emptyList()
+        } else {
+            try {
+                Gson().fromJson<List<GradingPolicyDb.AssignmentPolicyDb>>(
+                    value,
+                    object : TypeToken<List<GradingPolicyDb.AssignmentPolicyDb>>() {}.type
+                ) ?: emptyList()
+            } catch (e: Exception) {
+                emptyList()
+            }
+        }
 
     @TypeConverter
     fun fromGradeRangeMap(value: Map<String, Float>?): String =
@@ -82,5 +116,16 @@ class CourseConverter {
 
     @TypeConverter
     fun toGradeRangeMap(value: String?): Map<String, Float> =
-        if (value.isNullOrBlank() || value == "null") emptyMap() else Gson().fromJson<Map<String, Float>>(value, object : TypeToken<Map<String, Float>>() {}.type) ?: emptyMap()
+        if (value.isNullOrBlank() || value == "null") {
+            emptyMap()
+        } else {
+            try {
+                Gson().fromJson<Map<String, Float>>(
+                    value,
+                    object : TypeToken<Map<String, Float>>() {}.type
+                ) ?: emptyMap()
+            } catch (e: Exception) {
+                emptyMap()
+            }
+        }
 }

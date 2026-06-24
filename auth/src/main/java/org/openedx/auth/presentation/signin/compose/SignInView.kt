@@ -317,7 +317,7 @@ private fun AuthForm(
                 text = if (isEmailTab) stringResource(id = coreR.string.core_sign_in)
                        else if (!isOtpSent) "Send OTP"
                        else stringResource(id = R.string.auth_verify_and_sign_in),
-                backgroundColor = Color(0xFF8BC34A),
+                backgroundColor = MaterialTheme.appColors.primary,
                 onClick = {
                     keyboardController?.hide()
                     if (isEmailTab) {
@@ -389,7 +389,8 @@ private fun ToggleItem(
     onClick: () -> Unit,
 ) {
     val bg = if (isSelected) MaterialTheme.appColors.background else Color.Transparent
-    val tint = if (isSelected) MaterialTheme.appColors.tabSelectedBtnContent else MaterialTheme.appColors.tabUnselectedBtnContent
+    val tint = if (isSelected) Color(0xFF455A64) else Color(0xFF90A4AE)
+//    val tint = if (isSelected) MaterialTheme.appColors.tabSelectedBtnContent else MaterialTheme.appColors.tabUnselectedBtnContent
     Row(
         modifier = modifier
             .background(bg, shape = RoundedCornerShape(8.dp))
@@ -434,7 +435,7 @@ private fun SignInInputField(
         Text(
             text = label,
             style = MaterialTheme.appTypography.bodyMedium.copy(
-                fontWeight = FontWeight.SemiBold,
+                fontWeight = FontWeight.Medium,
                 color = MaterialTheme.appColors.textDark
             )
         )

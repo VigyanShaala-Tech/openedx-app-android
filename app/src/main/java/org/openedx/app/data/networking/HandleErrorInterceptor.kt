@@ -30,15 +30,15 @@ class HandleErrorInterceptor(
                 handleErrorResponse(response, jsonStr)
             } catch (e: Exception) {
                 if (e is EdxError) throw e
-                response
+                throw IOException("HTTP ${response.code}: $jsonStr", e)
             }
         } else {
-            response
+            throw IOException("HTTP ${response.code}")
         }
     }
 
     private fun isErrorResponse(response: Response): Boolean {
-        return response.code in 400..500 && response.body != null
+        return response.code in 400..599 && response.body != null
     }
 
     private fun handleErrorResponse(response: Response, jsonStr: String): Response {

@@ -18,8 +18,12 @@ class WhatsNewManager(
         val jsonString = context.resources.openRawResource(R.raw.whats_new)
             .bufferedReader()
             .use { it.readText() }
-        val whatsNewListData = Gson().fromJson(jsonString, Array<WhatsNewItem>::class.java)
-        return whatsNewListData[0].mapToDomain(context)
+        return try {
+            val whatsNewListData = Gson().fromJson(jsonString, Array<WhatsNewItem>::class.java)
+            whatsNewListData[0].mapToDomain(context)
+        } catch (e: Exception) {
+            org.openedx.whatsnew.domain.model.WhatsNewItem("", emptyList())
+        }
     }
 
     override fun shouldShowWhatsNew(): Boolean {

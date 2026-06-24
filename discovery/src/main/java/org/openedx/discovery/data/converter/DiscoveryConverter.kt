@@ -19,7 +19,11 @@ class DiscoveryConverter {
     @TypeConverter
     fun toImageDb(value: String): ImageDb? {
         if (value.isEmpty()) return null
-        return Gson().fromJson(value, ImageDb::class.java)
+        return try {
+            Gson().fromJson(value, ImageDb::class.java)
+        } catch (e: Exception) {
+            null
+        }
     }
 
     @TypeConverter
@@ -32,7 +36,11 @@ class DiscoveryConverter {
     @TypeConverter
     fun toBannerImageDb(value: String): BannerImageDb? {
         if (value.isEmpty()) return null
-        return Gson().fromJson(value, BannerImageDb::class.java)
+        return try {
+            Gson().fromJson(value, BannerImageDb::class.java)
+        } catch (e: Exception) {
+            null
+        }
     }
 
     @TypeConverter
@@ -45,7 +53,11 @@ class DiscoveryConverter {
     @TypeConverter
     fun toCourseImageDb(value: String): CourseImageDb? {
         if (value.isEmpty()) return null
-        return Gson().fromJson(value, CourseImageDb::class.java)
+        return try {
+            Gson().fromJson(value, CourseImageDb::class.java)
+        } catch (e: Exception) {
+            null
+        }
     }
 
     @TypeConverter
@@ -58,6 +70,10 @@ class DiscoveryConverter {
     @TypeConverter
     fun toCourseVideoDb(value: String): CourseVideoDb? {
         if (value.isEmpty()) return null
-        return Gson().fromJson(value, CourseVideoDb::class.java)
+        return try {
+            Gson().fromJson(value, CourseVideoDb::class.java)
+        } catch (e: Exception) {
+            null
+        }
     }
 }

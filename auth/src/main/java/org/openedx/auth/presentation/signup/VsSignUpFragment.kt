@@ -47,11 +47,12 @@ class VsSignUpFragment : Fragment() {
                 val uiState by viewModel.uiState.collectAsState()
                 val signUpUiState by signUpViewModel.uiState.collectAsState()
                 val uiMessage by viewModel.uiMessage.collectAsState(initial = null)
+                val signUpUiMessage by signUpViewModel.uiMessage.collectAsState(initial = null)
 
                 VsSignUpView(
                     windowSize = windowSize,
-                    uiState = uiState,
-                    uiMessage = uiMessage,
+                    uiState = uiState.copy(isButtonLoading = uiState.isButtonLoading || signUpUiState.isLoading),
+                    uiMessage = uiMessage ?: signUpUiMessage,
                     onBackClick = {
                         if (isAdded) {
                             activity?.supportFragmentManager?.popBackStackImmediate()
@@ -61,9 +62,7 @@ class VsSignUpFragment : Fragment() {
                         viewModel.register(email, name, password, role, signUpUiState.socialAuth)
                     },
                     onSocialRegisterClick = { authType ->
-                        if (authType == AuthType.GOOGLE) {
-                            signUpViewModel.socialAuth(this@VsSignUpFragment, authType)
-                        }
+                        signUpViewModel.socialAuth(this@VsSignUpFragment, authType)
                     },
                     onSignInClick = {
                         if (isAdded) {
@@ -79,7 +78,11 @@ class VsSignUpFragment : Fragment() {
                     },
                     onDialogOkClick = {
                         viewModel.navigateToSignIn()
-                    }
+                    },
+                    isSocialAuthEnabled = signUpUiState.isSocialAuthEnabled,
+                    isGoogleAuthEnabled = signUpUiState.isGoogleAuthEnabled,
+                    isFacebookAuthEnabled = signUpUiState.isFacebookAuthEnabled,
+                    isMicrosoftAuthEnabled = signUpUiState.isMicrosoftAuthEnabled,
                 )
 
                 LaunchedEffect(signUpUiState.socialAuth) {

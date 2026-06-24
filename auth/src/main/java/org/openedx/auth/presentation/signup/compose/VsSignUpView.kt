@@ -41,6 +41,8 @@ import androidx.compose.ui.unit.sp
 import org.openedx.auth.R
 import org.openedx.auth.data.model.AuthType
 import org.openedx.auth.presentation.signup.VsSignUpUIState
+import org.openedx.auth.presentation.signup.compose.SocialSignedView
+import org.openedx.auth.presentation.ui.SocialAuthView
 import org.openedx.core.ui.HandleUIMessage
 import org.openedx.core.ui.theme.appColors
 import org.openedx.core.ui.theme.appTypography
@@ -59,6 +61,10 @@ fun VsSignUpView(
     onSignInClick: () -> Unit,
     onValidationError: (String) -> Unit,
     onDialogOkClick: () -> Unit = {},
+    isSocialAuthEnabled: Boolean = false,
+    isGoogleAuthEnabled: Boolean = false,
+    isFacebookAuthEnabled: Boolean = false,
+    isMicrosoftAuthEnabled: Boolean = false,
 ) {
     val scaffoldState = rememberScaffoldState()
     val uriHandler = LocalUriHandler.current
@@ -150,53 +156,15 @@ fun VsSignUpView(
 
             Spacer(modifier = Modifier.height(32.dp))
 
-            // Google Sign Up Button
-            Surface(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .height(56.dp)
-                    .clickable { onSocialRegisterClick(AuthType.GOOGLE) },
-                shape = RoundedCornerShape(12.dp),
-                border = BorderStroke(1.dp, MaterialTheme.appColors.textFieldBorder),
-                color = MaterialTheme.appColors.textFieldBackgroundVariant
-            ) {
-                Row(
-                    verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.Center
-                ) {
-                    Image(
-                        painter = painterResource(id = R.drawable.auth_ic_google),
-                        contentDescription = null,
-                        modifier = Modifier.size(24.dp)
-                    )
-                    Spacer(modifier = Modifier.width(12.dp))
-                    Text(
-                        text = "Sign up with Google",
-                        style = MaterialTheme.appTypography.bodyLarge.copy(
-                            fontWeight = FontWeight.Medium,
-                            color = MaterialTheme.appColors.textDark
-                        )
-                    )
-                }
+            if (uiState.socialAuth != null) {
+                SocialSignedView(uiState.socialAuth.authType)
+                Spacer(modifier = Modifier.height(24.dp))
             }
-
-            Spacer(modifier = Modifier.height(24.dp))
-            Row(verticalAlignment = Alignment.CenterVertically) {
-                Divider(modifier = Modifier.weight(1f), color = MaterialTheme.appColors.divider)
-                Text(
-                    " or ",
-                    modifier = Modifier.padding(horizontal = 16.dp),
-                    color = MaterialTheme.appColors.textFieldHint,
-                    fontSize = 14.sp
-                )
-                Divider(modifier = Modifier.weight(1f), color = MaterialTheme.appColors.divider)
-            }
-            Spacer(modifier = Modifier.height(24.dp))
 
             VsSignUpInputField(
                 label = "Full Name",
                 value = fullName,
-                onValueChange = { 
+                onValueChange = {
                     fullName = it
                     fullNameError = null
                 },
@@ -209,7 +177,7 @@ fun VsSignUpView(
             VsSignUpInputField(
                 label = "Email",
                 value = email,
-                onValueChange = { 
+                onValueChange = {
                     email = it
                     emailError = null
                 },
@@ -217,42 +185,44 @@ fun VsSignUpView(
                 isRequired = true,
                 errorText = emailError,
                 keyboardType = KeyboardType.Email,
-                imeAction = ImeAction.Next
+                imeAction = if (uiState.socialAuth == null) ImeAction.Next else ImeAction.Done
             )
 
-            VsSignUpInputField(
-                label = "Password",
-                value = password,
-                onValueChange = { 
-                    password = it
-                    passwordError = null
-                },
-                placeholder = "Create password",
-                isRequired = true,
-                isPassword = true,
-                passwordVisible = passwordVisible,
-                onPasswordToggle = { passwordVisible = !passwordVisible },
-                errorText = passwordError,
-                keyboardType = KeyboardType.Password,
-                imeAction = ImeAction.Next
-            )
+            if (uiState.socialAuth == null) {
+                VsSignUpInputField(
+                    label = "Password",
+                    value = password,
+                    onValueChange = {
+                        password = it
+                        passwordError = null
+                    },
+                    placeholder = "Create password",
+                    isRequired = true,
+                    isPassword = true,
+                    passwordVisible = passwordVisible,
+                    onPasswordToggle = { passwordVisible = !passwordVisible },
+                    errorText = passwordError,
+                    keyboardType = KeyboardType.Password,
+                    imeAction = ImeAction.Next
+                )
 
-            VsSignUpInputField(
-                label = "Confirm Password",
-                value = confirmPassword,
-                onValueChange = { 
-                    confirmPassword = it
-                    confirmPasswordError = null
-                },
-                placeholder = "Confirm password",
-                isRequired = true,
-                isPassword = true,
-                passwordVisible = confirmPasswordVisible,
-                onPasswordToggle = { confirmPasswordVisible = !confirmPasswordVisible },
-                errorText = confirmPasswordError,
-                keyboardType = KeyboardType.Password,
-                imeAction = ImeAction.Done
-            )
+                VsSignUpInputField(
+                    label = "Confirm Password",
+                    value = confirmPassword,
+                    onValueChange = {
+                        confirmPassword = it
+                        confirmPasswordError = null
+                    },
+                    placeholder = "Confirm password",
+                    isRequired = true,
+                    isPassword = true,
+                    passwordVisible = confirmPasswordVisible,
+                    onPasswordToggle = { confirmPasswordVisible = !confirmPasswordVisible },
+                    errorText = confirmPasswordError,
+                    keyboardType = KeyboardType.Password,
+                    imeAction = ImeAction.Done
+                )
+            }
 
             Text(
                 text = buildAnnotatedString {
@@ -311,7 +281,7 @@ fun VsSignUpView(
                     style = MaterialTheme.appTypography.bodySmall.copy(color = MaterialTheme.appColors.textSecondary),
                     modifier = Modifier
                         .weight(1f)
-                        .clickable { 
+                        .clickable {
                             if (uiState.tosUrl.isNotBlank()) {
                                 uriHandler.openUri(uiState.tosUrl)
                             } else {
@@ -369,6 +339,29 @@ fun VsSignUpView(
                 }
             }
 
+            Spacer(modifier = Modifier.height(24.dp))
+            if (isSocialAuthEnabled && uiState.socialAuth == null) {
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    Divider(modifier = Modifier.weight(1f), color = MaterialTheme.appColors.divider)
+                    Text(
+                        " or ",
+                        modifier = Modifier.padding(horizontal = 16.dp),
+                        color = MaterialTheme.appColors.textFieldHint,
+                        fontSize = 14.sp
+                    )
+                    Divider(modifier = Modifier.weight(1f), color = MaterialTheme.appColors.divider)
+                }
+                SocialAuthView(
+                    modifier = Modifier.fillMaxWidth(),
+                    isGoogleAuthEnabled = isGoogleAuthEnabled,
+                    isFacebookAuthEnabled = isFacebookAuthEnabled,
+                    isMicrosoftAuthEnabled = isMicrosoftAuthEnabled,
+                    isSignIn = false,
+                    onEvent = {
+                        onSocialRegisterClick(it)
+                    }
+                )
+            }
             Spacer(modifier = Modifier.height(24.dp))
             Row(
                 modifier = Modifier
@@ -457,19 +450,19 @@ fun VsSignUpInputField(
             modifier = Modifier
                 .fillMaxWidth()
                 .height(56.dp),
-            placeholder = { 
+            placeholder = {
                 Text(
-                    text = placeholder, 
+                    text = placeholder,
                     color = MaterialTheme.appColors.textFieldHint,
                     fontSize = 15.sp
-                ) 
+                )
             },
             trailingIcon = if (isPassword) {
                 {
                     val icon = if (passwordVisible) Icons.Default.Visibility else Icons.Default.VisibilityOff
                     IconButton(onClick = { onPasswordToggle?.invoke() }) {
                         Icon(
-                            icon, 
+                            icon,
                             contentDescription = null,
                             tint = MaterialTheme.appColors.textDark
                         )

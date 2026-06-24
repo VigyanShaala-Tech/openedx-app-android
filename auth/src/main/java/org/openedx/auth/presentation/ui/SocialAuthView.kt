@@ -1,12 +1,22 @@
 package org.openedx.auth.presentation.ui
 
 import android.content.res.Configuration
+import androidx.compose.foundation.BorderStroke
+import androidx.compose.foundation.Image
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.Icon
 import androidx.compose.material.MaterialTheme
+import androidx.compose.material.Surface
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
@@ -15,6 +25,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import org.openedx.auth.R
@@ -23,6 +34,7 @@ import org.openedx.core.ui.OpenEdXButton
 import org.openedx.core.ui.OpenEdXOutlinedButton
 import org.openedx.core.ui.theme.OpenEdXTheme
 import org.openedx.core.ui.theme.appColors
+import org.openedx.core.ui.theme.appTypography
 
 @Composable
 internal fun SocialAuthView(
@@ -40,33 +52,61 @@ internal fun SocialAuthView(
             } else {
                 R.string.auth_continue_google
             }
-            OpenEdXOutlinedButton(
+            Surface(
                 modifier = Modifier
-                    .testTag("btn_google_auth")
-                    .padding(top = 24.dp)
-                    .fillMaxWidth(),
-                backgroundColor = MaterialTheme.appColors.authGoogleButtonBackground,
-                borderColor = MaterialTheme.appColors.primary,
-                textColor = Color.Unspecified,
-                onClick = {
-                    onEvent(AuthType.GOOGLE)
-                }
+                    .fillMaxWidth()
+                    .height(56.dp)
+                    .clickable { onEvent(AuthType.GOOGLE)},
+                shape = RoundedCornerShape(12.dp),
+                border = BorderStroke(1.dp, MaterialTheme.appColors.textFieldBorder),
+                color = MaterialTheme.appColors.textFieldBackgroundVariant
             ) {
-                Row(verticalAlignment = Alignment.CenterVertically) {
-                    Icon(
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.Center
+                ) {
+                    Image(
                         painter = painterResource(id = R.drawable.auth_ic_google),
                         contentDescription = null,
-                        tint = Color.Unspecified,
+                        modifier = Modifier.size(24.dp)
                     )
+                    Spacer(modifier = Modifier.width(12.dp))
                     Text(
-                        modifier = Modifier
-                            .testTag("txt_google_auth")
-                            .padding(start = 10.dp),
                         text = stringResource(id = stringRes),
-                        color = MaterialTheme.appColors.primaryButtonBorderedText,
+                        style = MaterialTheme.appTypography.bodyLarge.copy(
+                            fontWeight = FontWeight.Medium,
+                            color = MaterialTheme.appColors.textDark
+                        )
                     )
                 }
             }
+//            OpenEdXOutlinedButton(
+//                modifier = Modifier
+//                    .testTag("btn_google_auth")
+//                    .padding(top = 24.dp)
+//                    .fillMaxWidth(),
+//                backgroundColor = MaterialTheme.appColors.authGoogleButtonBackground,
+//                borderColor = MaterialTheme.appColors.primary,
+//                textColor = Color.Unspecified,
+//                onClick = {
+//                    onEvent(AuthType.GOOGLE)
+//                }
+//            ) {
+//                Row(verticalAlignment = Alignment.CenterVertically) {
+//                    Icon(
+//                        painter = painterResource(id = R.drawable.auth_ic_google),
+//                        contentDescription = null,
+//                        tint = Color.Unspecified,
+//                    )
+//                    Text(
+//                        modifier = Modifier
+//                            .testTag("txt_google_auth")
+//                            .padding(start = 10.dp),
+//                        text = stringResource(id = stringRes),
+//                        color = MaterialTheme.appColors.primaryButtonBorderedText,
+//                    )
+//                }
+//            }
         }
         if (isFacebookAuthEnabled) {
             val stringRes = if (isSignIn) {

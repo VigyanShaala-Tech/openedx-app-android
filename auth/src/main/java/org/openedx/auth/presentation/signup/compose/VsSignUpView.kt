@@ -154,17 +154,69 @@ fun VsSignUpView(
                 )
             )
 
-            Spacer(modifier = Modifier.height(32.dp))
+//            Spacer(modifier = Modifier.height(32.dp))
+//
+//            // Google Sign Up Button
+//            Surface(
+//                modifier = Modifier
+//                    .fillMaxWidth()
+//                    .height(56.dp)
+//                    .clickable { onSocialRegisterClick(AuthType.GOOGLE) },
+//                shape = RoundedCornerShape(12.dp),
+//                border = BorderStroke(1.dp, MaterialTheme.appColors.textFieldBorder),
+//                color = MaterialTheme.appColors.textFieldBackgroundVariant
+//            ) {
+//                Row(
+//                    verticalAlignment = Alignment.CenterVertically,
+//                    horizontalArrangement = Arrangement.Center
+//                ) {
+//                    Image(
+//                        painter = painterResource(id = R.drawable.auth_ic_google),
+//                        contentDescription = null,
+//                        modifier = Modifier.size(24.dp)
+//                    )
+//                    Spacer(modifier = Modifier.width(12.dp))
+//                    Text(
+//                        text = "Sign up with Google",
+//                        style = MaterialTheme.appTypography.bodyLarge.copy(
+//                            fontWeight = FontWeight.Medium,
+//                            color = MaterialTheme.appColors.textDark
+//                        )
+//                    )
+//                }
+//            }
 
-            if (uiState.socialAuth != null) {
-                SocialSignedView(uiState.socialAuth.authType)
-                Spacer(modifier = Modifier.height(24.dp))
+            Spacer(modifier = Modifier.height(24.dp))
+            if (isSocialAuthEnabled && uiState.socialAuth == null) {
+                SocialAuthView(
+                    modifier = Modifier.fillMaxWidth(),
+                    isGoogleAuthEnabled = isGoogleAuthEnabled,
+                    isFacebookAuthEnabled = isFacebookAuthEnabled,
+                    isMicrosoftAuthEnabled = isMicrosoftAuthEnabled,
+                    isSignIn = false,
+                    onEvent = {
+                        onSocialRegisterClick(it)
+                    }
+                )
             }
+            Spacer(modifier = Modifier.height(24.dp))
+
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                Divider(modifier = Modifier.weight(1f), color = MaterialTheme.appColors.divider)
+                Text(
+                    " or ",
+                    modifier = Modifier.padding(horizontal = 16.dp),
+                    color = MaterialTheme.appColors.textFieldHint,
+                    fontSize = 14.sp
+                )
+                Divider(modifier = Modifier.weight(1f), color = MaterialTheme.appColors.divider)
+            }
+            Spacer(modifier = Modifier.height(24.dp))
 
             VsSignUpInputField(
                 label = "Full Name",
                 value = fullName,
-                onValueChange = {
+                onValueChange = { 
                     fullName = it
                     fullNameError = null
                 },
@@ -177,7 +229,7 @@ fun VsSignUpView(
             VsSignUpInputField(
                 label = "Email",
                 value = email,
-                onValueChange = {
+                onValueChange = { 
                     email = it
                     emailError = null
                 },
@@ -339,30 +391,6 @@ fun VsSignUpView(
                 }
             }
 
-            Spacer(modifier = Modifier.height(24.dp))
-            if (isSocialAuthEnabled && uiState.socialAuth == null) {
-                Row(verticalAlignment = Alignment.CenterVertically) {
-                    Divider(modifier = Modifier.weight(1f), color = MaterialTheme.appColors.divider)
-                    Text(
-                        " or ",
-                        modifier = Modifier.padding(horizontal = 16.dp),
-                        color = MaterialTheme.appColors.textFieldHint,
-                        fontSize = 14.sp
-                    )
-                    Divider(modifier = Modifier.weight(1f), color = MaterialTheme.appColors.divider)
-                }
-                SocialAuthView(
-                    modifier = Modifier.fillMaxWidth(),
-                    isGoogleAuthEnabled = isGoogleAuthEnabled,
-                    isFacebookAuthEnabled = isFacebookAuthEnabled,
-                    isMicrosoftAuthEnabled = isMicrosoftAuthEnabled,
-                    isSignIn = false,
-                    onEvent = {
-                        onSocialRegisterClick(it)
-                    }
-                )
-            }
-            Spacer(modifier = Modifier.height(24.dp))
             Row(
                 modifier = Modifier
                     .fillMaxWidth()

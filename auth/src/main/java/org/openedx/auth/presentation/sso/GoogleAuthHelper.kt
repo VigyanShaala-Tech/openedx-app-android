@@ -34,10 +34,12 @@ class GoogleAuthHelper(private val config: Config) {
     }
 
     private suspend fun getCredentials(activityContext: Activity): GoogleIdTokenCredential? {
+        val clientId = config.getGoogleConfig().clientId
+        logger.d { "getCredentials with clientId: $clientId" }
         return runCatching {
             val credentialManager = CredentialManager.create(activityContext)
             val googleIdOption =
-                GetSignInWithGoogleOption.Builder(config.getGoogleConfig().clientId).build()
+                GetSignInWithGoogleOption.Builder(clientId).build()
             val request: GetCredentialRequest = GetCredentialRequest.Builder()
                 .addCredentialOption(googleIdOption)
                 .build()
@@ -50,9 +52,10 @@ class GoogleAuthHelper(private val config: Config) {
             if (it is GetCredentialCancellationException &&
                 it.type == GetCredentialException.TYPE_USER_CANCELED
             ) {
+                logger.e { "GetCredentials canceled by user or configuration issue. Check if SHA-1 and Package Name are correct in Google Console." }
                 return null
             }
-            logger.e { "GetCredentials error: ${it.message}" }
+            logger.e { "GetCredentials error: ${it.javaClass.simpleName} - ${it.message}" }
         }.getOrNull()
     }
 

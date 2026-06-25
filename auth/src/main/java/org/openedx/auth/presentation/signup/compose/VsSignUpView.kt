@@ -377,7 +377,8 @@ fun VsSignUpView(
                         email.isNotBlank() &&
                         password.isNotBlank() &&
                         confirmPassword.isNotBlank() &&
-                        isAgreed
+                        isAgreed ||
+                        (uiState.socialAuth != null  && isAgreed)
             ) {
                 if (uiState.isButtonLoading) {
                     CircularProgressIndicator(color = Color.White, modifier = Modifier.size(24.dp))

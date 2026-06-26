@@ -231,7 +231,7 @@ fun MainToolbar(
                 ) {
                     Box(contentAlignment = Alignment.Center) {
                         Icon(
-                            imageVector = Icons.Default.NotificationsNone,
+                            painter = painterResource(id = R.drawable.core_ic_notifications),
                             tint = MaterialTheme.appColors.textDark,
                             contentDescription = "Notifications",
                             modifier = Modifier.size(28.dp)

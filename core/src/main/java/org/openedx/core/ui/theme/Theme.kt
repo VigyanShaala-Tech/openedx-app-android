@@ -102,6 +102,7 @@ private val DarkColorPalette = AppColors(
     gradeProgressBarBorder = dark_grade_progress_bar_color,
     gradeProgressBarBackground = dark_grade_progress_bar_background,
     assignmentCardBorder = dark_assignment_card_border,
+    dashboardBackground = dark_dashboard_background,
 )
 
 private val LightColorPalette = AppColors(
@@ -196,6 +197,7 @@ private val LightColorPalette = AppColors(
     gradeProgressBarBorder = light_grade_progress_bar_color,
     gradeProgressBarBackground = light_grade_progress_bar_background,
     assignmentCardBorder = light_assignment_card_border,
+    dashboardBackground = light_dashboard_background,
 )
 
 val MaterialTheme.appColors: AppColors

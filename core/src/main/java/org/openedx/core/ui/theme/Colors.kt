@@ -156,3 +156,6 @@ val dark_progress_bar_background_color = Color(0xFF8E9BAE)
 val dark_grade_progress_bar_color = Color.Transparent
 val dark_grade_progress_bar_background = Color(0xFF8E9BAE)
 val dark_assignment_card_border = Color(0xFF8E9BAE)
+
+val light_dashboard_background = Color(0xFFFAFAFA)
+val dark_dashboard_background = Color(0xFF19212F)

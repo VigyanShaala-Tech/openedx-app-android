@@ -3,8 +3,10 @@ package org.openedx.dashboard.presentation
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.ViewGroup
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -29,7 +31,9 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.Card
 import androidx.compose.material.CircularProgressIndicator
+import androidx.compose.material.Divider
 import androidx.compose.material.Icon
+import androidx.compose.material.IconButton
 import androidx.compose.material.LinearProgressIndicator
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Scaffold
@@ -42,6 +46,7 @@ import androidx.compose.material.icons.filled.Book
 import androidx.compose.material.icons.filled.CheckCircle
 import androidx.compose.material.icons.filled.EmojiEvents
 import androidx.compose.material.icons.filled.Notifications
+import androidx.compose.material.icons.filled.NotificationsNone
 import androidx.compose.material.icons.filled.Star
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.ImportContacts
@@ -211,7 +216,7 @@ private fun NewDashboardScreenContent(
         mutableStateOf(
             windowSize.windowSizeValue(
                 expanded = PaddingValues(horizontal = 24.dp, vertical = 24.dp),
-                compact = PaddingValues(start = 16.dp, end = 16.dp, top = 0.dp, bottom = 16.dp)
+                compact = PaddingValues(start = 16.dp, end = 16.dp, top = 16.dp, bottom = 16.dp)
             )
         )
     }
@@ -224,14 +229,14 @@ private fun NewDashboardScreenContent(
     }
 
     val statCards = uiState.summary.map {
-        val icon = when (it.icon) {
-            "faBookOpen" -> Icons.Filled.ImportContacts
-            "faCheckCircle" -> Icons.Filled.CheckCircle
-            "faChartLine" -> Icons.Filled.Alarm
-            "faAward" -> Icons.Filled.EmojiEvents
-            else -> Icons.Filled.Book
+        val (icon, color) = when (it.icon) {
+            "faBookOpen" -> Icons.Filled.ImportContacts to Color(0xFF69AB4A)
+            "faCheckCircle" -> Icons.Filled.CheckCircle to Color(0xFF4CAF50)
+            "faChartLine" -> Icons.Filled.Alarm to Color(0xFF3F51B5)
+            "faAward" -> Icons.Filled.EmojiEvents to Color(0xFFFFA000)
+            else -> Icons.Filled.Book to MaterialTheme.appColors.primary
         }
-        StatCardData(icon, it.number.toString(), it.label)
+        StatCardData(icon, it.number.toString(), it.label, color)
     }
 
     val continueCourses = uiState.continueLearning.map { course ->
@@ -299,8 +304,8 @@ private fun NewDashboardScreenContent(
                             ) {
                                 Column(
                                     modifier = Modifier
-                                        .fillMaxSize()
-                                        .padding(12.dp),
+                                        .fillMaxWidth()
+                                        .padding(vertical = 16.dp, horizontal = 4.dp),
                                     horizontalAlignment = Alignment.CenterHorizontally,
                                     verticalArrangement = Arrangement.Center
                                 ) {
@@ -308,7 +313,7 @@ private fun NewDashboardScreenContent(
                                         modifier = Modifier
                                             .size(36.dp)
                                             .background(
-                                                MaterialTheme.appColors.primary.copy(alpha = 0.12f),
+                                                item.color.copy(alpha = 0.1f),
                                                 CircleShape
                                             ),
                                         contentAlignment = Alignment.Center
@@ -316,21 +321,24 @@ private fun NewDashboardScreenContent(
                                         Icon(
                                             imageVector = item.icon,
                                             contentDescription = null,
-                                            tint = MaterialTheme.appColors.primary,
+                                            tint = item.color,
                                             modifier = Modifier.size(20.dp)
                                         )
                                     }
-                                    Spacer(Modifier.height(8.dp))
+                                    Spacer(Modifier.height(12.dp))
                                     Text(
                                         text = item.value,
-                                        style = MaterialTheme.appTypography.titleMedium.copy(fontWeight = FontWeight.Bold),
+                                        style = MaterialTheme.appTypography.titleLarge.copy(
+                                            fontWeight = FontWeight.Bold,
+                                            fontSize = 22.sp
+                                        ),
                                         color = MaterialTheme.appColors.textDark
                                     )
                                     Spacer(Modifier.height(4.dp))
                                     Text(
                                         text = item.label,
-                                        style = MaterialTheme.appTypography.labelSmall,
-                                        color = MaterialTheme.appColors.textPrimary,
+                                        style = MaterialTheme.appTypography.labelSmall.copy(fontSize = 10.sp),
+                                        color = Color(0xFF90A4AE),
                                         textAlign = TextAlign.Center,
                                         maxLines = 2,
                                         overflow = TextOverflow.Visible
@@ -352,8 +360,16 @@ private fun NewDashboardScreenContent(
             }
 
             item {
-                SectionHeader(title = androidx.compose.ui.res.stringResource(org.openedx.dashboard.R.string.dashboard_my_courses))
-                Spacer(Modifier.height(8.dp))
+                Text(
+                    text = "My Courses",
+                    style = MaterialTheme.appTypography.headlineSmall.copy(
+                        fontWeight = FontWeight.Bold,
+                        color = MaterialTheme.appColors.textDark,
+                        fontSize = 24.sp
+                    ),
+                    modifier = Modifier.padding(top = 8.dp)
+                )
+                Spacer(Modifier.height(12.dp))
                 CoursesTabs(
                     continueCourses = continueCourses,
                     wishlistItems = wishlistItems,
@@ -460,7 +476,7 @@ private fun SectionHeader(
     ) {
         Text(
             text = title,
-            style = MaterialTheme.appTypography.titleMedium,
+            style = MaterialTheme.appTypography.titleMedium.copy(fontWeight = FontWeight.Bold),
             color = MaterialTheme.appColors.textDark
         )
         if (showViewAll) {
@@ -504,8 +520,7 @@ private fun CoursesTabs(
     Row(
         modifier = Modifier
             .fillMaxWidth()
-            .background(MaterialTheme.appColors.surface, MaterialTheme.appShapes.textFieldShape)
-            .clip(MaterialTheme.appShapes.textFieldShape)
+            .background(Color(0xFFF3F5F7), RoundedCornerShape(24.dp))
             .padding(6.dp),
         horizontalArrangement = Arrangement.spacedBy(8.dp)
     ) {
@@ -514,9 +529,13 @@ private fun CoursesTabs(
             Box(
                 modifier = Modifier
                     .weight(1f)
-                    .clip(MaterialTheme.appShapes.textFieldShape)
-                    .background(
-                        if (selected) MaterialTheme.appColors.primary else Color.Transparent
+                    .clip(RoundedCornerShape(20.dp))
+                    .then(
+                        if (selected) {
+                            Modifier.background(MaterialTheme.appColors.primary)
+                        } else {
+                            Modifier
+                        }
                     )
                     .clickable { selectedTab = index }
                     .padding(vertical = 10.dp),
@@ -524,8 +543,10 @@ private fun CoursesTabs(
             ) {
                 Text(
                     text = label,
-                    style = MaterialTheme.appTypography.labelSmall,
-                    color = if (selected) MaterialTheme.appColors.primaryButtonText else Color.Black,
+                    style = MaterialTheme.appTypography.labelSmall.copy(
+                        fontWeight = if (selected) FontWeight.Medium else FontWeight.Normal
+                    ),
+                    color = if (selected) Color.White else Color(0xFF90A4AE),
                 )
             }
         }

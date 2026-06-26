@@ -206,10 +206,13 @@ fun MainToolbar(
         Text(
             modifier = Modifier
                 .align(Alignment.CenterStart)
-                .padding(start = 16.dp),
+                .padding(start = 16.dp)
+                .padding(end = 64.dp),
             text = label ?: "",
             color = MaterialTheme.appColors.textDark,
-            style = MaterialTheme.appTypography.titleLarge
+            style = MaterialTheme.appTypography.titleLarge,
+            maxLines = 2,
+            overflow = TextOverflow.Ellipsis
         )
         Row(
             modifier = Modifier
@@ -219,23 +222,36 @@ fun MainToolbar(
         ) {
             Box {
                 IconButton(
+                    modifier = Modifier
+                        .size(48.dp)
+                        .clip(CircleShape)
+                        .background(MaterialTheme.appColors.surface),
                     onClick = {
                         onNotificationClick()
                     }
                 ) {
                     Icon(
-                        imageVector = Icons.Default.Notifications,
-                        tint = MaterialTheme.appColors.textAccent,
-                        contentDescription = "Notifications"
+                        imageVector = Icons.Default.NotificationsNone,
+                        tint = MaterialTheme.appColors.textDark,
+                        contentDescription = "Notifications",
+                        modifier = Modifier.size(28.dp)
                     )
                     if (haveNewNotification) {
                         Box(
                             modifier = Modifier
-                                .padding(top = 8.dp, end = 8.dp)
                                 .size(10.dp)
-                                .background(Color.Red, CircleShape)
+                                .clip(CircleShape)
+                                .background(Color.White)
                                 .align(Alignment.TopEnd)
-                        )
+                                .padding(1.dp)
+                        ) {
+                            Box(
+                                modifier = Modifier
+                                    .fillMaxSize()
+                                    .clip(CircleShape)
+                                    .background(Color.Red)
+                            )
+                        }
                     }
                 }
             }

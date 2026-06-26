@@ -52,7 +52,8 @@ data class PaginatedDto<T>(
 data class StatCardData(
     val icon: androidx.compose.ui.graphics.vector.ImageVector,
     val value: String,
-    val label: String
+    val label: String,
+    val color: androidx.compose.ui.graphics.Color = androidx.compose.ui.graphics.Color.Black
 )
 
 data class CourseCardData(

@@ -255,6 +255,7 @@ private fun CourseHomeUI(
                                 .padding(horizontal = 16.dp),
                             verticalArrangement = Arrangement.spacedBy(16.dp)
                         ) {
+                            Spacer(modifier = Modifier.height(8.dp))
                             if (uiState.datesBannerInfo.isBannerAvailableForDashboard()) {
                                 if (windowSize.isTablet) {
                                     CourseDatesBannerTablet(

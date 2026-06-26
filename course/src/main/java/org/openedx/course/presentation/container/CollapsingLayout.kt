@@ -78,7 +78,6 @@ import kotlin.math.roundToInt
 private const val FLING_DELAY = 50L
 private const val SCROLL_UP_THRESHOLD = 0.15f
 private const val SCROLL_DOWN_THRESHOLD = 0.85f
-private const val SHADE_HEIGHT_MULTIPLIER = 0.1f
 private const val BLUR_PADDING_FACTOR = 2
 
 @Composable
@@ -341,11 +340,7 @@ private fun CollapsingLayoutTablet(
                 modifier = Modifier
                     .background(MaterialTheme.appColors.courseHomeHeaderShade)
                     .fillMaxWidth()
-                    .height(
-                        with(localDensity) {
-                            (expandedTopHeight.value + navigationHeight.value).toDp() * SHADE_HEIGHT_MULTIPLIER
-                        }
-                    )
+                    .height(1.dp)
                     .align(Alignment.BottomCenter)
             )
         }
@@ -526,11 +521,7 @@ private fun CollapsingLayoutMobile(
                     modifier = Modifier
                         .background(MaterialTheme.appColors.courseHomeHeaderShade)
                         .fillMaxWidth()
-                        .height(
-                            with(localDensity) {
-                                (collapsedTopHeight.value + navigationHeight.value).toDp() * SHADE_HEIGHT_MULTIPLIER
-                            }
-                        )
+                        .height(1.dp)
                         .align(Alignment.BottomCenter)
                 )
             }
@@ -672,11 +663,7 @@ private fun CollapsingLayoutMobile(
                     modifier = Modifier
                         .background(MaterialTheme.appColors.courseHomeHeaderShade)
                         .fillMaxWidth()
-                        .height(
-                            with(localDensity) {
-                                (expandedTopHeight.value + navigationHeight.value).toDp() * SHADE_HEIGHT_MULTIPLIER
-                            }
-                        )
+                        .height(1.dp)
                         .align(Alignment.BottomCenter)
                 )
             }

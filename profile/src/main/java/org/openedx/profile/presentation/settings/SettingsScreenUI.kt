@@ -280,6 +280,15 @@ private fun SupportInfoSection(
             backgroundColor = MaterialTheme.appColors.cardViewBackground
         ) {
             Column(Modifier.fillMaxWidth()) {
+                if (uiState.configuration.contactUsUrl.isNotBlank()) {
+                    SettingsItem(
+                        text = stringResource(id = profileR.string.profile_contact_us),
+                        external = true,
+                    ) {
+                        onAction(SettingsScreenAction.ContactUsClick)
+                    }
+                    SettingsDivider()
+                }
                 if (uiState.configuration.supportEmail.isNotBlank()) {
                     SettingsItem(text = stringResource(id = profileR.string.profile_contact_support)) {
                         onAction(SettingsScreenAction.SupportClick)
@@ -631,6 +640,7 @@ private val mockAppData = AppData(
 private val mockConfiguration = Configuration(
     agreementUrls = AgreementUrls(),
     faqUrl = "https://example.com/faq",
+    contactUsUrl = "https://example.com/contact",
     supportEmail = "test@example.com",
     versionName = mockAppData.versionName,
 )

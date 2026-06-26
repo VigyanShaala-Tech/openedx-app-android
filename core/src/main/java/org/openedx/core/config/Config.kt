@@ -48,6 +48,10 @@ class Config(context: Context) {
         return getString(FEEDBACK_EMAIL_ADDRESS)
     }
 
+    fun getContactUsUrl(): String {
+        return getString(CONTACT_US_URL)
+    }
+
     fun getPlatformName(): String {
         return getString(PLATFORM_NAME)
     }
@@ -172,6 +176,7 @@ class Config(context: Context) {
         private const val TOKEN_TYPE = "TOKEN_TYPE"
         private const val FAQ_URL = "FAQ_URL"
         private const val FEEDBACK_EMAIL_ADDRESS = "FEEDBACK_EMAIL_ADDRESS"
+        private const val CONTACT_US_URL = "CONTACT_US_URL"
         private const val AGREEMENT_URLS = "AGREEMENT_URLS"
         private const val WHATS_NEW_ENABLED = "WHATS_NEW_ENABLED"
         private const val SOCIAL_AUTH_ENABLED = "SOCIAL_AUTH_ENABLED"

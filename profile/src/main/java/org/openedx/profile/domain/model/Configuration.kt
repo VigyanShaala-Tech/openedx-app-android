@@ -11,6 +11,7 @@ import org.openedx.core.domain.model.AgreementUrls
 data class Configuration(
     val agreementUrls: AgreementUrls,
     val faqUrl: String,
+    val contactUsUrl: String,
     val supportEmail: String,
     val versionName: String,
 )

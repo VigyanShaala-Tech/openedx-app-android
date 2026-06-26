@@ -238,7 +238,7 @@ fun MainToolbar(
                         )
                     }
                 }
-                if (true) {
+                if (haveNewNotification) {
                     Box(
                         modifier = Modifier
                             .zIndex(1f)

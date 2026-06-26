@@ -67,6 +67,7 @@ class SettingsViewModel(
         get() = Configuration(
             agreementUrls = config.getAgreement(Locale.current.language),
             faqUrl = config.getFaqUrl(),
+            contactUsUrl = config.getContactUsUrl(),
             supportEmail = config.getFeedbackEmailAddress(),
             versionName = appData.versionName,
         )
@@ -155,6 +156,17 @@ class SettingsViewModel(
 
     fun faqClicked() {
         logProfileEvent(ProfileAnalyticsEvent.FAQ_CLICKED)
+    }
+
+    fun contactUsClicked(fragmentManager: FragmentManager) {
+        if (configuration.contactUsUrl.isNotBlank()) {
+            profileRouter.navigateToWebContent(
+                fm = fragmentManager,
+                title = resourceManager.getString(org.openedx.profile.R.string.profile_contact_us),
+                url = configuration.contactUsUrl,
+            )
+        }
+        logProfileEvent(ProfileAnalyticsEvent.CONTACT_SUPPORT_CLICKED)
     }
 
     fun termsOfUseClicked(fragmentManager: FragmentManager) {

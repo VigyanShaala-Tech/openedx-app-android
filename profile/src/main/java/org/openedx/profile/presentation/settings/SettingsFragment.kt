@@ -69,6 +69,10 @@ class SettingsFragment : Fragment() {
                                 viewModel.emailSupportClicked(requireContext())
                             }
 
+                            SettingsScreenAction.ContactUsClick -> {
+                                viewModel.contactUsClicked(requireActivity().supportFragmentManager)
+                            }
+
                             SettingsScreenAction.TermsClick -> {
                                 viewModel.termsOfUseClicked(
                                     requireActivity().supportFragmentManager
@@ -115,6 +119,7 @@ internal interface SettingsScreenAction {
     object FaqClick : SettingsScreenAction
     object TermsClick : SettingsScreenAction
     object SupportClick : SettingsScreenAction
+    object ContactUsClick : SettingsScreenAction
     object VideoSettingsClick : SettingsScreenAction
     object ManageAccountClick : SettingsScreenAction
     object CalendarSettingsClick : SettingsScreenAction

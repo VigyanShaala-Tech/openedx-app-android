@@ -50,6 +50,7 @@ import org.openedx.core.ui.theme.appColors
 import org.openedx.core.ui.theme.appShapes
 import org.openedx.core.ui.theme.appTypography
 import org.openedx.profile.R
+import org.openedx.profile.presentation.settings.SettingsUIState
 import org.openedx.profile.presentation.settings.SettingsViewModel
 
 class AboutVigyanshaalaFragment : Fragment() {
@@ -75,7 +76,14 @@ class AboutVigyanshaalaFragment : Fragment() {
                         viewModel.privacyPolicyClicked(requireActivity().supportFragmentManager)
                     },
                     onContactUsClick = {
-                        viewModel.emailSupportClicked(requireContext())
+                        val contactUsUrl = viewModel.uiState.value.let {
+                            if (it is SettingsUIState.Data) it.configuration.contactUsUrl else ""
+                        }
+                        if (contactUsUrl.isNotBlank()) {
+                            viewModel.contactUsClicked(requireActivity().supportFragmentManager)
+                        } else {
+                            viewModel.emailSupportClicked(requireContext())
+                        }
                     }
                 )
             }
@@ -152,7 +160,7 @@ private fun AboutVigyanshaalaScreen(
                     )
                     AboutItem(
                         icon = Icons.Filled.MailOutline,
-                        title = "Contact Us",
+                        title = stringResource(id = R.string.profile_contact_us),
                         onClick = onContactUsClick
                     )
                 }

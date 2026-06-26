@@ -615,23 +615,29 @@ private fun CollapsingLayoutMobile(
     } else {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
             if (imageHeight > 0) {
-                Image(
+                Box(
                     modifier = Modifier
                         .fillMaxWidth()
                         .height(imageHeight.dp)
+                        .background(Color(0xFFF1F4F6))
                         .onSizeChanged { size ->
                             backgroundImageHeight.value = size.height.toFloat()
                         },
-                    bitmap = courseImage.asImageBitmap(),
-                    contentDescription = null,
-                    contentScale = ContentScale.Crop
-                )
+                    contentAlignment = Alignment.Center
+                ) {
+                    Image(
+                        modifier = Modifier
+                            .fillMaxWidth(0.7f),
+                        bitmap = courseImage.asImageBitmap(),
+                        contentDescription = null,
+                        contentScale = ContentScale.Fit
+                    )
+                }
             }
             Box(
                 modifier = Modifier
                     .offset { IntOffset(x = 0, y = toolbarBackgroundOffset) }
                     .background(MaterialTheme.appColors.background)
-                    .blur(100.dp)
             ) {
                 val adaptiveBlurImagePadding = blurImagePadding.value * (BLUR_PADDING_FACTOR - rawFactor)
                 Box(
@@ -646,16 +652,21 @@ private fun CollapsingLayoutMobile(
                         .align(Alignment.Center)
                 )
                 if (imageHeight > 0) {
-                    Image(
+                    Box(
                         modifier = Modifier
                             .fillMaxWidth()
                             .height(blurImagePadding)
+                            .background(Color(0xFFF1F4F6))
                             .align(Alignment.TopCenter),
-                        bitmap = courseImage.asImageBitmap(),
-                        contentDescription = null,
-                        contentScale = ContentScale.Crop,
-                        alignment = PixelAlignment(0f, blurImageAlignment),
-                    )
+                        contentAlignment = Alignment.Center
+                    ) {
+                        Image(
+                            modifier = Modifier.fillMaxWidth(0.7f),
+                            bitmap = courseImage.asImageBitmap(),
+                            contentDescription = null,
+                            contentScale = ContentScale.Fit,
+                        )
+                    }
                 }
                 Box(
                     modifier = Modifier
@@ -757,14 +768,12 @@ private fun CollapsingLayoutMobile(
             Icon(
                 modifier = Modifier
                     .statusBarsInset()
-                    .padding(top = 12.dp, start = backBtnStartPadding)
-                    .clip(CircleShape)
-                    .background(MaterialTheme.appColors.courseHomeBackBtnBackground.copy(factor / 2))
+                    .padding(top = 16.dp, start = backBtnStartPadding + 8.dp)
                     .clickable {
                         onBackClick()
                     },
                 imageVector = Icons.AutoMirrored.Filled.ArrowBack,
-                tint = MaterialTheme.appColors.textPrimary,
+                tint = Color.Black,
                 contentDescription = stringResource(id = R.string.core_accessibility_btn_back)
             )
             Spacer(modifier = Modifier.width(8.dp))

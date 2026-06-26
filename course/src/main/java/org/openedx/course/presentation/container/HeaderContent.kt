@@ -3,6 +3,8 @@ package org.openedx.course.presentation.container
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -28,6 +30,8 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Devices
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
+import org.openedx.course.R
 import org.openedx.core.ui.theme.OpenEdXTheme
 import org.openedx.core.ui.theme.appColors
 import org.openedx.core.ui.theme.appTypography
@@ -50,36 +54,28 @@ internal fun ExpandedHeaderContent(
     Column(
         modifier
             .fillMaxWidth()
-            .padding(start = horizontalPadding, end = horizontalPadding, bottom = 12.dp, top = 12.dp),
-        horizontalAlignment = Alignment.CenterHorizontally
+            .background(Color.White)
+            .padding(start = horizontalPadding, end = horizontalPadding, bottom = 24.dp, top = 20.dp),
+        horizontalAlignment = Alignment.Start
     ) {
         Row(
             modifier = Modifier
                 .fillMaxWidth(),
-            verticalAlignment = Alignment.CenterVertically
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.SpaceBetween
         ) {
-            Column(modifier = Modifier.weight(1f)) {
-                Text(
-                    text = org ?: "",
-                    color = MaterialTheme.appColors.textSecondary,
-                    style = MaterialTheme.appTypography.labelMedium
-                )
-                Text(
-                    text = courseTitle ?: "",
-                    color = MaterialTheme.appColors.textDark,
-                    style = MaterialTheme.appTypography.titleLarge,
-                    overflow = TextOverflow.Ellipsis,
-                    maxLines = 2,
-                    fontWeight = FontWeight.Bold
-                )
-            }
+            Text(
+                text = org ?: "",
+                color = MaterialTheme.appColors.textSecondary,
+                style = MaterialTheme.appTypography.labelMedium
+            )
             IconButton(
                 onClick = onNotificationClick,
-                modifier = Modifier.size(32.dp).align(Alignment.Top)
+                modifier = Modifier.size(32.dp)
             ) {
                 Box {
                     Icon(
-                        painter = painterResource(id = coreR.drawable.core_ic_warning),
+                        painter = painterResource(id = R.drawable.ic_triangle_alert),
                         contentDescription = null,
                         tint = Color(0xFFD32F2F),
                         modifier = Modifier.size(24.dp)
@@ -88,14 +84,24 @@ internal fun ExpandedHeaderContent(
                     Box(
                         modifier = Modifier
                             .size(8.dp)
-                            .background(Color.Red, CircleShape)
-                            .border(1.dp, Color.White, CircleShape)
+                            .background(Color(0xFFD32F2F), CircleShape)
+                            .border(1.2.dp, Color.White, CircleShape)
                             .align(Alignment.TopEnd)
                             .offset(x = 2.dp, y = (-2).dp)
                     )
                 }
             }
         }
+        Spacer(modifier = Modifier.height(12.dp))
+        Text(
+            text = courseTitle ?: "",
+            color = Color(0xFF212121),
+            style = MaterialTheme.appTypography.titleLarge,
+            overflow = TextOverflow.Ellipsis,
+            maxLines = 3,
+            fontWeight = FontWeight.Bold,
+            lineHeight = 32.sp
+        )
     }
 }
 

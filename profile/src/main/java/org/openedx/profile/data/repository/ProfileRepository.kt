@@ -35,7 +35,9 @@ class ProfileRepository(
     }
 
     suspend fun updateAccount(fields: Map<String, Any?>): Account {
-        return api.updateAccount(corePreferences.user?.username!!, fields).mapToDomain()
+        val account = api.updateAccount(corePreferences.user?.username!!, fields)
+        profilePreferences.profile = account
+        return account.mapToDomain()
     }
 
     suspend fun setProfileImage(file: File, mimeType: String) {

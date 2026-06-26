@@ -59,7 +59,7 @@ class SignUpViewModel(
             isGoogleAuthEnabled = config.getGoogleConfig().isEnabled(),
             isMicrosoftAuthEnabled = config.getMicrosoftConfig().isEnabled(),
             isSocialAuthEnabled = config.isSocialAuthEnabled(),
-            isLoading = true,
+            isLoading = false,
         )
     )
     val uiState = _uiState.asStateFlow()

@@ -184,6 +184,13 @@ class EditProfileFragment : Fragment() {
                 val leaveDialog by viewModel.showLeaveDialog.observeAsState(false)
                 val isOtpLoading by viewModel.isOtpLoading.collectAsState()
                 val isOtpSent by viewModel.isOtpSent.collectAsState()
+                val saveSuccess by viewModel.saveSuccess.collectAsState(initial = false)
+
+                LaunchedEffect(saveSuccess) {
+                    if (saveSuccess) {
+                        requireActivity().supportFragmentManager.popBackStackImmediate()
+                    }
+                }
 
                 EditProfileScreen(
                     windowSize = windowSize,
@@ -573,19 +580,30 @@ private fun EditProfileScreen(
                         BackBtn(modifier = Modifier.padding(end = 16.dp)) {
                             onBackClick(saveButtonEnabled)
                         }
-                        if (saveButtonEnabled) {
-                            IconText(
-                                modifier = Modifier
-                                    .height(48.dp)
-                                    .padding(end = 24.dp),
-                                text = stringResource(id = R.string.profile_done),
-                                icon = Icons.Filled.Done,
-                                color = MaterialTheme.appColors.primary,
-                                textStyle = MaterialTheme.appTypography.labelLarge,
-                                onClick = {
-                                    onSaveClick(mapFields.toMap())
-                                }
-                            )
+                        if (saveButtonEnabled || uiState.isUpdating) {
+                            if (uiState.isUpdating) {
+                                CircularProgressIndicator(
+                                    modifier = Modifier
+                                        .size(24.dp)
+                                        .align(Alignment.CenterVertically)
+                                        .padding(end = 24.dp),
+                                    color = MaterialTheme.appColors.primary,
+                                    strokeWidth = 2.dp
+                                )
+                            } else {
+                                IconText(
+                                    modifier = Modifier
+                                        .height(48.dp)
+                                        .padding(end = 24.dp),
+                                    text = stringResource(id = R.string.profile_done),
+                                    icon = Icons.Filled.Done,
+                                    color = MaterialTheme.appColors.primary,
+                                    textStyle = MaterialTheme.appTypography.labelLarge,
+                                    onClick = {
+                                        onSaveClick(mapFields.toMap())
+                                    }
+                                )
+                            }
                         }
                     }
                 }

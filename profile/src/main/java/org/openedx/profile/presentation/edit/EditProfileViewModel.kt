@@ -4,7 +4,10 @@ import android.net.Uri
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.viewModelScope
+import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.SharedFlow
+import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 import org.openedx.core.R
@@ -38,6 +41,10 @@ class EditProfileViewModel(
     private val _uiMessage = MutableLiveData<UIMessage>()
     val uiMessage: LiveData<UIMessage>
         get() = _uiMessage
+
+    private val _saveSuccess = MutableSharedFlow<Boolean>()
+    val saveSuccess: SharedFlow<Boolean>
+        get() = _saveSuccess.asSharedFlow()
 
     var account = account
         private set
@@ -102,6 +109,7 @@ class EditProfileViewModel(
                 sendAccountUpdated()
                 _deleteImage.value = false
                 _selectedImageUri.value = null
+                _saveSuccess.emit(true)
             } catch (e: Exception) {
                 _uiState.value = EditProfileUIState(account.copy(), isLimited = isLimitedProfile)
                 if (e.isInternetError()) {
@@ -127,6 +135,7 @@ class EditProfileViewModel(
                     EditProfileUIState(updatedAccount, isUpdating = false, isLimitedProfile)
                 _selectedImageUri.value = null
                 sendAccountUpdated()
+                _saveSuccess.emit(true)
             } catch (e: Exception) {
                 _uiState.value = EditProfileUIState(account.copy(), isLimited = isLimitedProfile)
                 if (e.isInternetError()) {
@@ -174,6 +183,7 @@ class EditProfileViewModel(
     fun verifyOtp(phoneNumber: String, otp: String) {
         val key = _verificationKey.value ?: return
         _isOtpLoading.value = true
+        _uiState.value = EditProfileUIState(account, isUpdating = true, isLimited = isLimitedProfile)
         viewModelScope.launch {
             try {
                 val response = interactor.verifyWhatsappOtp(phoneNumber, otp, key)
@@ -183,13 +193,16 @@ class EditProfileViewModel(
                         "is_whatsapp_verified" to true
                     ))
                     account = updatedAccount
-                    _uiState.value = EditProfileUIState(updatedAccount, isUpdating = false, isLimitedProfile)
+                    _uiState.value = EditProfileUIState(updatedAccount, isUpdating = false, isLimited = isLimitedProfile)
                     sendAccountUpdated()
                     _isOtpSent.value = false
                     _verificationKey.value = null
+                } else {
+                    _uiState.value = EditProfileUIState(account, isUpdating = false, isLimited = isLimitedProfile)
                 }
                 _uiMessage.value = UIMessage.SnackBarMessage(response.message)
             } catch (e: Exception) {
+                _uiState.value = EditProfileUIState(account, isUpdating = false, isLimited = isLimitedProfile)
                 _uiMessage.value = UIMessage.SnackBarMessage(e.message ?: "Failed to verify OTP")
             } finally {
                 _isOtpLoading.value = false

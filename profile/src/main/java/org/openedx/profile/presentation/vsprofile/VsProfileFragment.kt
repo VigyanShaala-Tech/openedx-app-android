@@ -107,6 +107,11 @@ class VsProfileFragment : Fragment() {
     private val settingsViewModel by viewModel<org.openedx.profile.presentation.settings.SettingsViewModel>()
     private val profileViewModel by viewModel<ProfileViewModel>()
 
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        lifecycle.addObserver(profileViewModel)
+    }
+
     override fun onCreateView(
         inflater: LayoutInflater,
         container: ViewGroup?,

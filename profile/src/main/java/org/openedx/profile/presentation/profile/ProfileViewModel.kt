@@ -15,6 +15,7 @@ import org.openedx.foundation.presentation.BaseViewModel
 import org.openedx.foundation.presentation.UIMessage
 import org.openedx.foundation.system.ResourceManager
 import org.openedx.profile.domain.interactor.ProfileInteractor
+import org.openedx.profile.presentation.edit.WHATSAPP
 import org.openedx.profile.presentation.ProfileAnalytics
 import org.openedx.profile.presentation.ProfileAnalyticsEvent
 import org.openedx.profile.presentation.ProfileAnalyticsKey
@@ -125,7 +126,7 @@ class ProfileViewModel(
                 if (response.success) {
                     // Update account with verified WhatsApp number
                     interactor.updateAccount(mapOf(
-                        "phone_number" to phoneNumber,
+                        WHATSAPP to phoneNumber,
                         "is_whatsapp_verified" to true
                     ))
                     getAccount()

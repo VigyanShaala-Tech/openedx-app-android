@@ -349,10 +349,10 @@ private fun NewDashboardScreenContent(
                 item {
                     Text(
                         text = "My Courses",
-                        style = MaterialTheme.appTypography.headlineSmall.copy(
+                        style = MaterialTheme.appTypography.titleMedium.copy(
                             fontWeight = FontWeight.Bold,
                             color = MaterialTheme.appColors.textDark,
-                            fontSize = 24.sp
+//                            fontSize = 20.sp
                         ),
                         modifier = Modifier.padding(top = 8.dp)
                     )
@@ -514,33 +514,32 @@ private fun CoursesTabs(
     Row(
         modifier = Modifier
             .fillMaxWidth()
-            .background(MaterialTheme.appColors.textFieldBackground, RoundedCornerShape(24.dp))
-            .padding(6.dp),
-        horizontalArrangement = Arrangement.spacedBy(8.dp)
+            .background(MaterialTheme.appColors.textFieldBackground, RoundedCornerShape(32.dp))
+            .padding(4.dp),
+        horizontalArrangement = Arrangement.spacedBy(4.dp)
     ) {
         tabs.forEachIndexed { index, label ->
             val selected = selectedTab == index
             Box(
                 modifier = Modifier
                     .weight(1f)
-                    .clip(RoundedCornerShape(20.dp))
-                    .then(
-                        if (selected) {
-                            Modifier.background(MaterialTheme.appColors.primary)
-                        } else {
-                            Modifier
-                        }
+                    .clip(RoundedCornerShape(28.dp))
+                    .background(
+                        if (selected) MaterialTheme.appColors.primary else Color.Transparent
                     )
                     .clickable { selectedTab = index }
-                    .padding(vertical = 10.dp),
+                    .padding(vertical = 10.dp, horizontal = 4.dp),
                 contentAlignment = Alignment.Center
             ) {
                 Text(
                     text = label,
-                    style = MaterialTheme.appTypography.labelSmall.copy(
-                        fontWeight = if (selected) FontWeight.Medium else FontWeight.Normal
+                    style = MaterialTheme.appTypography.labelMedium.copy(
+                        fontWeight = if (selected) FontWeight.SemiBold else FontWeight.Medium,
+                        fontSize = 11.sp
                     ),
-                    color = if (selected) Color.White else MaterialTheme.appColors.primary,
+                    color = if (selected) Color.White else Color(0xFF78909C),
+                    maxLines = 1,
+                    softWrap = false
                 )
             }
         }

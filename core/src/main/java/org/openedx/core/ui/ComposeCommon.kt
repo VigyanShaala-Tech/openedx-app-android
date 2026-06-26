@@ -220,39 +220,33 @@ fun MainToolbar(
                 .padding(end = 12.dp),
             verticalAlignment = Alignment.CenterVertically
         ) {
-            Box {
-                IconButton(
+            Box(modifier = Modifier.size(48.dp)) {
+                Surface(
                     modifier = Modifier
-                        .size(48.dp)
-                        .clip(CircleShape)
-                        .background(MaterialTheme.appColors.surface),
-                    onClick = {
-                        onNotificationClick()
-                    }
+                        .fillMaxSize()
+                        .clickable { onNotificationClick() },
+                    shape = CircleShape,
+                    color = MaterialTheme.appColors.surface,
+                    elevation = 0.dp
                 ) {
-                    Icon(
-                        imageVector = Icons.Default.NotificationsNone,
-                        tint = MaterialTheme.appColors.textDark,
-                        contentDescription = "Notifications",
-                        modifier = Modifier.size(28.dp)
-                    )
-                    if (haveNewNotification) {
-                        Box(
-                            modifier = Modifier
-                                .size(10.dp)
-                                .clip(CircleShape)
-                                .background(Color.White)
-                                .align(Alignment.TopEnd)
-                                .padding(1.dp)
-                        ) {
-                            Box(
-                                modifier = Modifier
-                                    .fillMaxSize()
-                                    .clip(CircleShape)
-                                    .background(Color.Red)
-                            )
-                        }
+                    Box(contentAlignment = Alignment.Center) {
+                        Icon(
+                            imageVector = Icons.Default.NotificationsNone,
+                            tint = MaterialTheme.appColors.textDark,
+                            contentDescription = "Notifications",
+                            modifier = Modifier.size(28.dp)
+                        )
                     }
+                }
+                if (true) {
+                    Box(
+                        modifier = Modifier
+                            .zIndex(1f)
+                            .align(Alignment.Center)
+                            .offset(x = 10.dp, y = (-10).dp)
+                            .size(8.dp)
+                            .background(Color(0xFFE8174F), CircleShape)
+                    )
                 }
             }
         }

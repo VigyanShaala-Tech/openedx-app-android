@@ -158,9 +158,6 @@ class NewDashboardFragment : Fragment() {
                             requireActivity().supportFragmentManager,
                             "COMPLETED"
                         )
-                    },
-                    onNotificationClick = {
-                        dashboardRouter.navigateToNotifications(requireActivity().supportFragmentManager)
                     }
                 )
             }
@@ -177,13 +174,11 @@ private fun NewDashboardScreen(
     onRecommendationClick: (String) -> Unit,
     onCourseClick: (String, String) -> Unit,
     onContinueViewAllClick: () -> Unit,
-    onCompletedViewAllClick: () -> Unit,
-    onNotificationClick: () -> Unit
+    onCompletedViewAllClick: () -> Unit
 ) {
     val uiState by viewModel.state.collectAsState(NewDashboardState())
     NewDashboardScreenContent(
         uiState,
-        viewModel.userFullName ?: viewModel.userName,
         onWishlistViewAllClick,
         onAchievementsViewAllClick,
         onRecommendedViewAllClick,
@@ -191,7 +186,6 @@ private fun NewDashboardScreen(
         onCourseClick,
         onContinueViewAllClick,
         onCompletedViewAllClick,
-        onNotificationClick,
         onRemoveWishlist = { id -> viewModel.removeFromWishlist(id) }
     )
 }
@@ -200,7 +194,6 @@ private fun NewDashboardScreen(
 @Composable
 private fun NewDashboardScreenContent(
     uiState: NewDashboardState,
-    displayName: String,
     onWishlistViewAllClick: () -> Unit,
     onAchievementsViewAllClick: () -> Unit,
     onRecommendedViewAllClick: () -> Unit,
@@ -208,7 +201,6 @@ private fun NewDashboardScreenContent(
     onCourseClick: (String, String) -> Unit,
     onContinueViewAllClick: () -> Unit,
     onCompletedViewAllClick: () -> Unit,
-    onNotificationClick: () -> Unit,
     onRemoveWishlist: (String) -> Unit
 ) {
     val windowSize = rememberWindowSize()
@@ -520,7 +512,7 @@ private fun CoursesTabs(
     Row(
         modifier = Modifier
             .fillMaxWidth()
-            .background(Color(0xFFF3F5F7), RoundedCornerShape(24.dp))
+            .background(MaterialTheme.appColors.textFieldBackground, RoundedCornerShape(24.dp))
             .padding(6.dp),
         horizontalArrangement = Arrangement.spacedBy(8.dp)
     ) {
@@ -546,7 +538,7 @@ private fun CoursesTabs(
                     style = MaterialTheme.appTypography.labelSmall.copy(
                         fontWeight = if (selected) FontWeight.Medium else FontWeight.Normal
                     ),
-                    color = if (selected) Color.White else Color(0xFF90A4AE),
+                    color = if (selected) Color.White else MaterialTheme.appColors.primary,
                 )
             }
         }
@@ -993,7 +985,6 @@ private fun NewDashboardScreenPreview() {
                     pagination = PaginationDto(null, null, 1, 1)
                 )
             ),
-            displayName = "Priya",
             onWishlistViewAllClick = {},
             onAchievementsViewAllClick = {},
             onRecommendedViewAllClick = {},
@@ -1001,7 +992,6 @@ private fun NewDashboardScreenPreview() {
             onCourseClick = { _, _ -> },
             onContinueViewAllClick = {},
             onCompletedViewAllClick = {},
-            onNotificationClick = {},
             onRemoveWishlist = {}
         )
     }
@@ -1013,7 +1003,6 @@ private fun NewDashboardScreenLoadingPreview() {
     OpenEdXTheme {
         NewDashboardScreenContent(
             uiState = NewDashboardState(loading = true),
-            displayName = "Priya",
             onWishlistViewAllClick = {},
             onAchievementsViewAllClick = {},
             onRecommendedViewAllClick = {},
@@ -1021,7 +1010,6 @@ private fun NewDashboardScreenLoadingPreview() {
             onCourseClick = { _, _ -> },
             onContinueViewAllClick = {},
             onCompletedViewAllClick = {},
-            onNotificationClick = {},
             onRemoveWishlist = {}
         )
     }
@@ -1033,7 +1021,6 @@ private fun NewDashboardScreenEmptyPreview() {
     OpenEdXTheme {
         NewDashboardScreenContent(
             uiState = NewDashboardState(loading = false),
-            displayName = "Priya",
             onWishlistViewAllClick = {},
             onAchievementsViewAllClick = {},
             onRecommendedViewAllClick = {},
@@ -1041,7 +1028,6 @@ private fun NewDashboardScreenEmptyPreview() {
             onCourseClick = { _, _ -> },
             onContinueViewAllClick = {},
             onCompletedViewAllClick = {},
-            onNotificationClick = {},
             onRemoveWishlist = {}
         )
     }

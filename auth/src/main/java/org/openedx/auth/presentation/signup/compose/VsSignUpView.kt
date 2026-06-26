@@ -44,6 +44,7 @@ import org.openedx.auth.presentation.signup.VsSignUpUIState
 import org.openedx.auth.presentation.signup.compose.SocialSignedView
 import org.openedx.auth.presentation.ui.SocialAuthView
 import org.openedx.core.ui.HandleUIMessage
+import org.openedx.core.ui.OpenEdXButton
 import org.openedx.core.ui.theme.appColors
 import org.openedx.core.ui.theme.appTypography
 import org.openedx.foundation.presentation.UIMessage
@@ -345,51 +346,49 @@ fun VsSignUpView(
 
             Spacer(modifier = Modifier.height(32.dp))
 
-            Button(
-                onClick = {
-                    fullNameError = if (fullName.isBlank()) "Please enter your full name" else null
-                    emailError = when {
-                        email.isBlank() -> "Please enter your email"
-                        !android.util.Patterns.EMAIL_ADDRESS.matcher(email).matches() -> "Please enter a valid email"
-                        else -> null
-                    }
-                    passwordError = if (password.length < 8) "Password must be at least 8 characters" else null
-                    confirmPasswordError = if (password != confirmPassword) "Passwords do not match" else null
-
-                    if (fullNameError == null && emailError == null && passwordError == null && confirmPasswordError == null) {
-                        if (isAgreed) {
-                            onRegisterClick(email, fullName, password, selectedRole)
-                        } else {
-                            onValidationError("Please agree to the Terms of Service")
-                        }
-                    }
-                },
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .height(56.dp),
-                shape = RoundedCornerShape(12.dp),
-                colors = ButtonDefaults.buttonColors(
-                    backgroundColor = MaterialTheme.appColors.primary,
-                    disabledBackgroundColor = Color(0xFFE0E0E0)
-                ),
-                enabled = !uiState.isButtonLoading &&
-                        fullName.isNotBlank() &&
-                        email.isNotBlank() &&
-                        password.isNotBlank() &&
-                        confirmPassword.isNotBlank() &&
-                        isAgreed ||
-                        (uiState.socialAuth != null  && isAgreed)
-            ) {
-                if (uiState.isButtonLoading) {
-                    CircularProgressIndicator(color = Color.White, modifier = Modifier.size(24.dp))
-                } else {
-                    Text(
-                        text = "Create Account",
-                        color = Color.White,
-                        fontWeight = FontWeight.Bold,
-                        fontSize = 18.sp
-                    )
+            if (uiState.isButtonLoading) {
+                Box(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(vertical = 16.dp),
+                    contentAlignment = Alignment.Center
+                ) {
+                    CircularProgressIndicator(color = MaterialTheme.appColors.primary)
                 }
+            } else {
+                OpenEdXButton(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(56.dp),
+                    text = "Create Account",
+                    backgroundColor = MaterialTheme.appColors.primary,
+                    onClick = {
+                        fullNameError = if (fullName.isBlank()) "Please enter your full name" else null
+                        emailError = when {
+                            email.isBlank() -> "Please enter your email"
+                            !android.util.Patterns.EMAIL_ADDRESS.matcher(email).matches() -> "Please enter a valid email"
+                            else -> null
+                        }
+                        passwordError =
+                            if (password.length < 8) "Password must be at least 8 characters" else null
+                        confirmPasswordError =
+                            if (password != confirmPassword) "Passwords do not match" else null
+
+                        if (fullNameError == null && emailError == null && passwordError == null && confirmPasswordError == null) {
+                            if (isAgreed) {
+                                onRegisterClick(email, fullName, password, selectedRole)
+                            } else {
+                                onValidationError("Please agree to the Terms of Service")
+                            }
+                        }
+                    },
+                    enabled = (fullName.isNotBlank() &&
+                            email.isNotBlank() &&
+                            password.isNotBlank() &&
+                            confirmPassword.isNotBlank() &&
+                            isAgreed) ||
+                            (uiState.socialAuth != null && isAgreed)
+                )
             }
 
             Row(

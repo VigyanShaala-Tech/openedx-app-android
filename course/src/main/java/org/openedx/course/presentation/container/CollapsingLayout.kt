@@ -11,6 +11,7 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.gestures.awaitEachGesture
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxScope
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
@@ -341,7 +342,7 @@ private fun CollapsingLayoutTablet(
                     .background(MaterialTheme.appColors.courseHomeHeaderShade)
                     .fillMaxWidth()
                     .height(1.dp)
-                    .align(Alignment.BottomCenter)
+                    .align(Alignment.TopCenter)
             )
         }
     } else {
@@ -439,8 +440,17 @@ private fun CollapsingLayoutTablet(
             .onSizeChanged { size ->
                 navigationHeight.value = size.height.toFloat()
             },
-        content = navigation,
-    )
+    ) {
+        Column {
+            Box(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(1.dp)
+                    .background(MaterialTheme.appColors.courseHomeHeaderShade)
+            )
+            Box(content = navigation)
+        }
+    }
 
     val bodyPadding = expandedTopHeight.value + backgroundImageHeight.value + navigationHeight.value
     val bodyModifier = if (isEnabled) {
@@ -522,7 +532,7 @@ private fun CollapsingLayoutMobile(
                         .background(MaterialTheme.appColors.courseHomeHeaderShade)
                         .fillMaxWidth()
                         .height(1.dp)
-                        .align(Alignment.BottomCenter)
+                        .align(Alignment.TopCenter)
                 )
             }
         } else {
@@ -589,8 +599,17 @@ private fun CollapsingLayoutMobile(
                 .onSizeChanged { size ->
                     navigationHeight.value = size.height.toFloat()
                 },
-            content = navigation,
-        )
+        ) {
+            Column {
+                Box(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(1.dp)
+                        .background(MaterialTheme.appColors.courseHomeHeaderShade)
+                )
+                Box(content = navigation)
+            }
+        }
 
         Box(
             modifier = Modifier
@@ -664,7 +683,7 @@ private fun CollapsingLayoutMobile(
                         .background(MaterialTheme.appColors.courseHomeHeaderShade)
                         .fillMaxWidth()
                         .height(1.dp)
-                        .align(Alignment.BottomCenter)
+                        .align(Alignment.TopCenter)
                 )
             }
         } else {
@@ -786,8 +805,17 @@ private fun CollapsingLayoutMobile(
                 .onSizeChanged { size ->
                     navigationHeight.value = size.height.toFloat()
                 },
-            content = navigation,
-        )
+        ) {
+            Column {
+                Box(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(1.dp)
+                        .background(MaterialTheme.appColors.courseHomeHeaderShade)
+                )
+                Box(content = navigation)
+            }
+        }
 
         val bodyPadding = expandedTopHeight.value + offset.value + backgroundImageHeight.value +
                 navigationHeight.value - blurImagePaddingPx * factor

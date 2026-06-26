@@ -62,7 +62,7 @@ fun GradesHomePagerCardContent(
     ) {
         Text(
             text = stringResource(R.string.course_grades_title),
-            style = MaterialTheme.appTypography.titleLarge,
+            style = MaterialTheme.appTypography.titleMedium,
             color = MaterialTheme.appColors.textPrimary,
             fontWeight = FontWeight.SemiBold
         )

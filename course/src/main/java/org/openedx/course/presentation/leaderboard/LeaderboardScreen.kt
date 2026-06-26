@@ -72,10 +72,10 @@ private fun LeaderboardUI(
                 Spacer(modifier = Modifier.height(24.dp))
                 Text(
                     text = "Leaderboard",
-                    style = MaterialTheme.appTypography.headlineSmall.copy(
+                    style = MaterialTheme.appTypography.titleMedium.copy(
                         fontWeight = FontWeight.Bold,
                         color = MaterialTheme.appColors.textDark,
-                        fontSize = 28.sp
+//                        fontSize = 28.sp
                     )
                 )
 

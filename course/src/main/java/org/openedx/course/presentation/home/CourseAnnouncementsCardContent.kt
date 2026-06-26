@@ -39,7 +39,7 @@ fun CourseAnnouncementsCardContent(
             Spacer(modifier = Modifier.width(8.dp))
             Text(
                 text = stringResource(R.string.course_announcements),
-                style = MaterialTheme.appTypography.titleLarge,
+                style = MaterialTheme.appTypography.titleMedium,
                 color = MaterialTheme.appColors.textDark,
                 fontWeight = FontWeight.Bold
             )

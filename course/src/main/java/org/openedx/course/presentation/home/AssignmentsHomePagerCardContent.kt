@@ -60,7 +60,7 @@ fun AssignmentsHomePagerCardContent(
         // Header
         Text(
             text = "Assignments",
-            style = MaterialTheme.appTypography.titleLarge,
+            style = MaterialTheme.appTypography.titleMedium,
             color = MaterialTheme.appColors.textDark,
             fontWeight = FontWeight.Bold
         )

@@ -628,10 +628,10 @@ private fun DashboardHeader() {
     Column {
         Text(
             text = "Your progress",
-            style = MaterialTheme.appTypography.headlineSmall.copy(
+            style = MaterialTheme.appTypography.titleMedium.copy(
                 fontWeight = FontWeight.Bold,
                 color = MaterialTheme.appColors.textDark,
-                fontSize = 24.sp
+//                fontSize = 24.sp
             )
         )
         Spacer(modifier = Modifier.height(8.dp))

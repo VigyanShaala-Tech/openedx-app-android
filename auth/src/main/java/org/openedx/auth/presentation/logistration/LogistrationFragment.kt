@@ -359,13 +359,13 @@ private fun LogistrationScreen(
                             LogistrationCarousel(items = carouselItems)
                         } else {
                             Toolbar(
-                                label = "Explore Our Courses",
+                                label = "Explore Our Programs",
                                 canShowBackBtn = false,
                                 onBackClick = onBackClick
                             )
                             Spacer(Modifier.height(8.dp))
                             Text(
-                                text = "Discover a comprehensive collection of STEM courses designed to help you build skills and advance your career.",
+                                text = "Bridge the gap from classroom to career with guided STEM projects, mentorship, and self-belief.",
                                 style = MaterialTheme.appTypography.bodySmall,
                                 modifier = Modifier.padding(bottom = 16.dp),
                                 color = MaterialTheme.appColors.textDark

@@ -669,7 +669,7 @@ private fun CourseCard(c: CourseCardData, onClick: () -> Unit) {
                     modifier = Modifier
                         .fillMaxWidth()
                         .height(120.dp)
-                        .clip(MaterialTheme.appShapes.cardShape),
+                        .clip(RoundedCornerShape(topStart = 12.dp, topEnd = 12.dp)),
                     contentScale = ContentScale.Crop,
                     model = ImageRequest.Builder(LocalContext.current)
                         .data(c.imageUrl)

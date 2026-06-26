@@ -26,8 +26,10 @@ import androidx.compose.ui.focus.FocusDirection
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalFocusManager
+import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.platform.LocalUriHandler
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.font.FontWeight
@@ -69,6 +71,7 @@ fun VsSignUpView(
 ) {
     val scaffoldState = rememberScaffoldState()
     val uriHandler = LocalUriHandler.current
+    val keyboardController = LocalSoftwareKeyboardController.current
 
     var fullName by rememberSaveable { mutableStateOf("") }
     var email by rememberSaveable { mutableStateOf("") }
@@ -360,9 +363,10 @@ fun VsSignUpView(
                     modifier = Modifier
                         .fillMaxWidth()
                         .height(56.dp),
-                    text = "Create Account",
+                    text = stringResource(id = R.string.auth_create_account),
                     backgroundColor = MaterialTheme.appColors.primary,
                     onClick = {
+                        keyboardController?.hide()
                         fullNameError = if (fullName.isBlank()) "Please enter your full name" else null
                         emailError = when {
                             email.isBlank() -> "Please enter your email"
@@ -394,7 +398,7 @@ fun VsSignUpView(
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(bottom = 40.dp),
+                    .padding(top = 24.dp,bottom = 40.dp),
                 horizontalArrangement = Arrangement.Center
             ) {
                 Text(

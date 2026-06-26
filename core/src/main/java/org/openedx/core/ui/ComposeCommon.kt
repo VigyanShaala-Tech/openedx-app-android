@@ -987,6 +987,7 @@ fun OpenEdXButton(
     enabled: Boolean = true,
     textColor: Color = MaterialTheme.appColors.primaryButtonText,
     backgroundColor: Color = MaterialTheme.appColors.primaryButtonBackground,
+    disabledBackgroundColor: Color = backgroundColor.copy(alpha = 0.3f),
     content: (@Composable RowScope.() -> Unit)? = null
 ) {
     Button(
@@ -995,7 +996,10 @@ fun OpenEdXButton(
             .then(modifier),
         shape = MaterialTheme.appShapes.buttonShape,
         colors = ButtonDefaults.buttonColors(
-            backgroundColor = backgroundColor
+            backgroundColor = backgroundColor,
+            disabledBackgroundColor = disabledBackgroundColor,
+            contentColor = textColor,
+            disabledContentColor = textColor.copy(alpha = 0.6f)
         ),
         enabled = enabled,
         onClick = onClick
@@ -1004,7 +1008,6 @@ fun OpenEdXButton(
             Text(
                 modifier = Modifier.testTag("txt_${text.tagId()}"),
                 text = text,
-                color = textColor,
                 style = MaterialTheme.appTypography.labelLarge
             )
         } else {

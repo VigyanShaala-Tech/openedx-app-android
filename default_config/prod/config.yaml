@@ -8,10 +8,10 @@ OAUTH_CLIENT_ID: 'cFd8Le3wxWJU7uRppAx1UggW99BQXzVIibQuB5Wq'
 
 # Keep empty to hide setting
 AGREEMENT_URLS:
-  PRIVACY_POLICY_URL: 'https://apps.uat.vigyanshaala.com/public/privacy?view=mobile'
-  COOKIE_POLICY_URL: 'https://apps.uat.vigyanshaala.com/public/privacy?view=mobile'
-  DATA_SELL_CONSENT_URL: 'https://uat.vigyanshaala.com/complaints-policy'
-  TOS_URL: 'https://apps.uat.vigyanshaala.com/public/terms?view=mobile'
+  PRIVACY_POLICY_URL: 'https://apps.uat.vigyanshaala.com/public/privacy?mobile=true'
+  COOKIE_POLICY_URL: 'https://apps.uat.vigyanshaala.com/public/privacy?mobile=true'
+  DATA_SELL_CONSENT_URL: 'https://uat.vigyanshaala.com/complaints-policy?mobile=true'
+  TOS_URL: 'https://apps.uat.vigyanshaala.com/public/terms?mobile=true'
   EULA_URL: ''
   SUPPORTED_LANGUAGES: [ ] #en is default language
 

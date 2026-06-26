@@ -339,15 +339,15 @@ private fun VsProfileScreen(
                 onClick = onShareClick
             )
 
-            VsProfileItem(
-                icon = Icons.Outlined.Smartphone,
-                title = if (account?.isWhatsappVerified == true) {
-                    "${stringResource(id = R.string.profile_whatsapp_number)}: ${account.whatsappNumber}"
-                } else {
-                    stringResource(id = R.string.profile_setup_whatsapp)
-                },
-                onClick = { showWhatsappDialog = true }
-            )
+//            VsProfileItem(
+//                icon = Icons.Outlined.Smartphone,
+//                title = if (account?.isWhatsappVerified == true) {
+//                    "${stringResource(id = R.string.profile_whatsapp_number)}: ${account.whatsappNumber}"
+//                } else {
+//                    stringResource(id = R.string.profile_setup_whatsapp)
+//                },
+//                onClick = { showWhatsappDialog = true }
+//            )
 
             Card(
                 backgroundColor = MaterialTheme.appColors.background,
@@ -376,6 +376,7 @@ private fun VsProfileScreen(
                     )
                 }
             }
+            Spacer(Modifier.height(16.dp))
         }
     }
 }

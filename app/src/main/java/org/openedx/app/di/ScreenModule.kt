@@ -25,6 +25,7 @@ import org.openedx.course.presentation.contenttab.ContentTabViewModel
 import org.openedx.course.presentation.dates.CourseDatesViewModel
 import org.openedx.course.presentation.handouts.HandoutsViewModel
 import org.openedx.course.presentation.home.CourseHomeViewModel
+import org.openedx.course.presentation.notifications.CourseNotificationsViewModel
 import org.openedx.course.presentation.offline.CourseOfflineViewModel
 import org.openedx.course.presentation.outline.CourseContentAllViewModel
 import org.openedx.course.presentation.progress.CourseProgressViewModel
@@ -326,6 +327,7 @@ val screenModule = module {
             get(),
             get(),
             get(),
+            get(),
         )
     }
     viewModel { (courseId: String, courseTitle: String) ->
@@ -380,6 +382,12 @@ val screenModule = module {
         org.openedx.course.presentation.leaderboard.LeaderboardViewModel(
             courseId,
             get(),
+            get()
+        )
+    }
+    viewModel { (courseId: String) ->
+        CourseNotificationsViewModel(
+            courseId,
             get()
         )
     }

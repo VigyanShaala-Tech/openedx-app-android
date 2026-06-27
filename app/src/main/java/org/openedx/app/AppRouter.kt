@@ -23,6 +23,7 @@ import org.openedx.course.presentation.container.CourseContainerFragment
 import org.openedx.course.presentation.container.NoAccessCourseContainerFragment
 import org.openedx.course.presentation.handouts.HandoutsType
 import org.openedx.course.presentation.handouts.HandoutsWebViewFragment
+import org.openedx.course.presentation.notifications.CourseNotificationsFragment
 import org.openedx.course.presentation.section.CourseSectionFragment
 import org.openedx.course.presentation.unit.container.CourseUnitContainerFragment
 import org.openedx.course.presentation.unit.container.CourseViewMode
@@ -465,6 +466,14 @@ class AppRouter :
 
     override fun navigateToVideoQuality(fm: FragmentManager, videoQualityType: VideoQualityType) {
         replaceFragmentWithBackStack(fm, VideoQualityFragment.newInstance(videoQualityType.name))
+    }
+
+    override fun navigateToCourseNotifications(
+        fm: FragmentManager,
+        courseId: String,
+        courseTitle: String
+    ) {
+        replaceFragmentWithBackStack(fm, CourseNotificationsFragment.newInstance(courseId, courseTitle))
     }
 
     override fun navigateToDiscover(fm: FragmentManager) {

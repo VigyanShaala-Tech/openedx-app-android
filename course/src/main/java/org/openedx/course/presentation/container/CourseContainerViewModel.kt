@@ -44,6 +44,7 @@ import org.openedx.core.system.notifier.RefreshProgress
 import org.openedx.core.worker.CalendarSyncScheduler
 import org.openedx.course.DatesShiftedSnackBar
 import org.openedx.course.domain.interactor.CourseInteractor
+import org.openedx.course.domain.interactor.LeaderboardInteractor
 import org.openedx.course.presentation.CalendarSyncDialog
 import org.openedx.course.presentation.CourseAnalytics
 import org.openedx.course.presentation.CourseAnalyticsEvent
@@ -65,6 +66,7 @@ class CourseContainerViewModel(
     private var resumeBlockId: String,
     private val config: Config,
     private val interactor: CourseInteractor,
+    private val leaderboardInteractor: LeaderboardInteractor,
     private val resourceManager: ResourceManager,
     private val courseNotifier: CourseNotifier,
     private val networkConnection: NetworkConnection,
@@ -98,6 +100,9 @@ class CourseContainerViewModel(
     private val _isNavigationEnabled = MutableStateFlow(false)
     val isNavigationEnabled: StateFlow<Boolean> =
         _isNavigationEnabled.asStateFlow()
+
+    private val _haveNewNotification = MutableStateFlow(false)
+    val haveNewNotification: StateFlow<Boolean> = _haveNewNotification.asStateFlow()
 
     private val _uiMessage = MutableSharedFlow<UIMessage>()
     val uiMessage: SharedFlow<UIMessage>
@@ -168,6 +173,7 @@ class CourseContainerViewModel(
     }
 
     fun fetchCourseDetails() {
+        fetchNotifications()
         courseDashboardViewed()
 
         // If data is already loaded, do nothing
@@ -278,6 +284,17 @@ class CourseContainerViewModel(
                 }
             }
         )
+    }
+
+    fun fetchNotifications() {
+        viewModelScope.launch {
+            try {
+                val response = leaderboardInteractor.getCourseNotifications(courseId)
+                _haveNewNotification.value = response.haveNewNotification
+            } catch (e: Exception) {
+                e.printStackTrace()
+            }
+        }
     }
 
     fun onRefresh(courseContainerTab: CourseContainerTab) {

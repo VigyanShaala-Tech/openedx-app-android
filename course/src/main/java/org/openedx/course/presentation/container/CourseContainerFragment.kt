@@ -102,6 +102,7 @@ import org.openedx.course.presentation.handouts.HandoutsType
 import org.openedx.course.presentation.home.CourseHomePagerTab
 import org.openedx.course.presentation.home.CourseHomeScreen
 import org.openedx.course.presentation.home.ItemsRequiringAttentionDialog
+import org.openedx.course.presentation.notifications.CourseNotificationsDialog
 import org.openedx.course.presentation.offline.CourseOfflineScreen
 import org.openedx.course.presentation.progress.CourseProgressScreen
 import org.openedx.course.presentation.ui.DatesShiftedSnackBar
@@ -275,6 +276,7 @@ fun CourseDashboard(
     val courseImage by viewModel.courseImage.collectAsState()
     val uiMessage by viewModel.uiMessage.collectAsState(null)
     var showAttentionDialog by remember { mutableStateOf(false) }
+    var showNotificationsDialog by remember { mutableStateOf(false) }
 
     val requiredTab = when (openTab.uppercase()) {
         CourseContainerTab.HOME.name -> CourseContainerTab.HOME
@@ -370,6 +372,7 @@ fun CourseDashboard(
                 Box(
                     modifier = Modifier.weight(1f)
                 ) {
+                    val haveNewNotification by viewModel.haveNewNotification.collectAsState()
                     CollapsingLayout(
                         modifier = Modifier
                             .fillMaxWidth()
@@ -381,7 +384,8 @@ fun CourseDashboard(
                             ExpandedHeaderContent(
                                 courseTitle = viewModel.courseName,
                                 org = viewModel.courseDetails?.courseInfoOverview?.org ?: "",
-                                onNotificationClick = { showAttentionDialog = true }
+                                haveNewNotification = haveNewNotification,
+                                onNotificationClick = { showNotificationsDialog = true }
                             )
                         },
                         collapsedTop = {
@@ -465,6 +469,12 @@ fun CourseDashboard(
         }
         if (showAttentionDialog) {
             ItemsRequiringAttentionDialog(onDismiss = { showAttentionDialog = false })
+        }
+        if (showNotificationsDialog) {
+            CourseNotificationsDialog(
+                courseId = viewModel.courseId,
+                onDismiss = { showNotificationsDialog = false }
+            )
         }
     }
 }

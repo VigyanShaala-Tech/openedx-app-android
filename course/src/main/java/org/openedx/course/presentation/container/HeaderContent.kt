@@ -43,6 +43,7 @@ internal fun ExpandedHeaderContent(
     modifier: Modifier = Modifier,
     org: String?,
     courseTitle: String?,
+    haveNewNotification: Boolean = false,
     onNotificationClick: () -> Unit = {}
 ) {
     val windowSize = rememberWindowSize()
@@ -81,14 +82,16 @@ internal fun ExpandedHeaderContent(
                         modifier = Modifier.size(24.dp)
                     )
                     // Red dot
-                    Box(
-                        modifier = Modifier
-                            .size(8.dp)
-                            .background(Color(0xFFD32F2F), CircleShape)
-                            .border(1.2.dp, Color.White, CircleShape)
-                            .align(Alignment.TopEnd)
-                            .offset(x = 2.dp, y = (-2).dp)
-                    )
+                    if (haveNewNotification) {
+                        Box(
+                            modifier = Modifier
+                                .size(8.dp)
+                                .background(Color(0xFFD32F2F), CircleShape)
+                                .border(1.2.dp, Color.White, CircleShape)
+                                .align(Alignment.TopEnd)
+                                .offset(x = 2.dp, y = (-2).dp)
+                        )
+                    }
                 }
             }
         }

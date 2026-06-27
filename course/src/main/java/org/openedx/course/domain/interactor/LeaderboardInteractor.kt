@@ -6,6 +6,8 @@ class LeaderboardInteractor(
     private val repository: LeaderboardRepository
 ) {
 
+    suspend fun getCourseNotifications(courseId: String) = repository.getCourseNotifications(courseId)
+
     suspend fun getUniversities() = repository.getUniversities()
 
     suspend fun getRankingOptions() = repository.getRankingOptions()

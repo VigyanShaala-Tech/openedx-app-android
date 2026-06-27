@@ -6,10 +6,15 @@ import org.openedx.course.data.model.LeaderboardResponse
 import org.openedx.course.data.model.RankingOption
 import org.openedx.course.data.model.University
 import org.openedx.course.data.model.UserRanking
+import org.openedx.course.data.model.CourseNotificationsResponse
 
 class LeaderboardRepository(
     private val api: LeaderboardApi
 ) {
+
+    suspend fun getCourseNotifications(courseId: String): CourseNotificationsResponse {
+        return api.getCourseNotifications(courseId)
+    }
 
     suspend fun getUniversities(): List<University> {
         val responseBody = try { api.getUniversities() } catch (_: Exception) { return emptyList() }

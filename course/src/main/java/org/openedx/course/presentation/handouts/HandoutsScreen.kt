@@ -106,14 +106,14 @@ fun HandoutsScreen(
                             onClick = onAnnouncementsClick
                         )
                     }
-                    item {
-                        HandoutsItem(
-                            title = stringResource(id = courseR.string.course_container_content_tab_live_sessions),
-                            description = "View and join course live sessions",
-                            painter = rememberVectorPainter(Icons.Outlined.Videocam),
-                            onClick = onLiveSessionsClick
-                        )
-                    }
+//                    item {
+//                        HandoutsItem(
+//                            title = stringResource(id = courseR.string.course_container_content_tab_live_sessions),
+//                            description = "View and join course live sessions",
+//                            painter = rememberVectorPainter(Icons.Outlined.Videocam),
+//                            onClick = onLiveSessionsClick
+//                        )
+//                    }
                     item {
                         HandoutsItem(
                             title = stringResource(id = courseR.string.course_about),

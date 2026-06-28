@@ -2,6 +2,7 @@ package org.openedx.profile.presentation.vsprofile
 
 import android.content.Intent
 import android.content.res.Configuration
+import android.net.Uri
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.ViewGroup
@@ -146,6 +147,14 @@ class VsProfileFragment : Fragment() {
                             config.getFaqUrl()
                         )
                     },
+                    onChatWithCurieClick = {
+                        val intent = Intent(Intent.ACTION_VIEW, Uri.parse("https://wa.me/919403509920?text=curie"))
+                        startActivity(intent)
+                    },
+                    onTechnicalSupportClick = {
+                        val intent = Intent(Intent.ACTION_VIEW, Uri.parse("https://wa.me/+918446846141"))
+                        startActivity(intent)
+                    },
                     onShareClick = {
                         val shareIntent = Intent(Intent.ACTION_SEND).apply {
                             type = "text/plain"
@@ -183,6 +192,8 @@ private fun VsProfileScreen(
     onEditClick: () -> Unit = {},
     onShareClick: () -> Unit = {},
     onFaqClick: () -> Unit = {},
+    onChatWithCurieClick: () -> Unit = {},
+    onTechnicalSupportClick: () -> Unit = {},
     onSendOtp: (String) -> Unit,
     onVerifyOtp: (String, String) -> Unit
 ) {
@@ -321,12 +332,12 @@ private fun VsProfileScreen(
             VsProfileItem(
                 icon = Icons.Filled.ChatBubbleOutline,
                 title = stringResource(id = R.string.profile_chat_with_curie),
-                onClick = {}
+                onClick = onChatWithCurieClick
             )
             VsProfileItem(
                 icon = Icons.Filled.HeadsetMic,
                 title = stringResource(id = R.string.profile_technical_support),
-                onClick = {}
+                onClick = onTechnicalSupportClick
             )
             VsProfileItem(
                 icon = Icons.AutoMirrored.Filled.HelpOutline,

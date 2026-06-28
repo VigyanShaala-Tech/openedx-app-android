@@ -59,6 +59,7 @@ import org.openedx.core.ui.statusBarsInset
 import org.openedx.core.ui.theme.OpenEdXTheme
 import org.openedx.core.ui.theme.appColors
 import org.openedx.core.ui.theme.appTypography
+import org.openedx.course.R
 import org.openedx.course.data.model.CourseNotificationItem
 import org.openedx.core.R as coreR
 
@@ -152,9 +153,12 @@ fun CourseNotificationsScreen(
                     if (notifications.isEmpty()) {
                         Text(
                             text = "No notifications found",
-                            modifier = Modifier.align(Alignment.Center),
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .align(Alignment.Center),
                             style = MaterialTheme.appTypography.bodyMedium,
-                            color = MaterialTheme.appColors.textSecondary
+                            color = MaterialTheme.appColors.textSecondary,
+                            textAlign = TextAlign.Center
                         )
                     } else {
                         LazyColumn(
@@ -220,7 +224,7 @@ fun CourseNotificationsDialog(
                         horizontalArrangement = Arrangement.SpaceBetween
                     ) {
                         Text(
-                            text = "Course Notifications",
+                            text = stringResource(R.string.items_requiring_attention),
                             style = MaterialTheme.appTypography.titleMedium,
                             color = MaterialTheme.appColors.textDark,
                             fontWeight = FontWeight.Bold
@@ -236,7 +240,11 @@ fun CourseNotificationsDialog(
 
                     Divider(color = MaterialTheme.appColors.divider)
 
-                    Box(modifier = Modifier.weight(1f)) {
+                    Box(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .weight(1f)
+                    ) {
                         when (uiState) {
                             is CourseNotificationsUIState.Loading -> {
                                 CircularProgressIndicator(modifier = Modifier.align(Alignment.Center))
@@ -246,9 +254,12 @@ fun CourseNotificationsDialog(
                                 if (notifications.isEmpty()) {
                                     Text(
                                         text = "No notifications found",
-                                        modifier = Modifier.align(Alignment.Center),
+                                        modifier = Modifier
+                                            .fillMaxWidth()
+                                            .align(Alignment.Center),
                                         style = MaterialTheme.appTypography.bodyMedium,
-                                        color = MaterialTheme.appColors.textSecondary
+                                        color = MaterialTheme.appColors.textSecondary,
+                                        textAlign = TextAlign.Center
                                     )
                                 } else {
                                     LazyColumn(
@@ -279,7 +290,9 @@ fun CourseNotificationsDialog(
                     
                     TextButton(
                         onClick = onDismiss,
-                        modifier = Modifier.align(Alignment.End).padding(8.dp)
+                        modifier = Modifier
+                            .align(Alignment.End)
+                            .padding(8.dp)
                     ) {
                         Text(text = stringResource(id = android.R.string.ok))
                     }

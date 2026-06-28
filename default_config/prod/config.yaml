@@ -4,7 +4,7 @@ ENVIRONMENT_DISPLAY_NAME: 'VigyanShaala'
 URI_SCHEME: 'uat.vigyanshaala.com'
 FEEDBACK_EMAIL_ADDRESS: 'sales@titaned.com'
 CONTACT_US_URL: 'https://apps.uat.vigyanshaala.com/public/contact?mobile=true'
-FAQ_URL: ''
+FAQ_URL: 'https://apps.uat.vigyanshaala.com/public/faq?mobile=true'
 OAUTH_CLIENT_ID: 'cFd8Le3wxWJU7uRppAx1UggW99BQXzVIibQuB5Wq'
 
 # Keep empty to hide setting

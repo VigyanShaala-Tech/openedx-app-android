@@ -82,7 +82,7 @@ internal fun ExpandedHeaderContent(
                         modifier = Modifier.size(24.dp)
                     )
                     // Red dot
-                    if (haveNewNotification) {
+//                    if (haveNewNotification) {
                         Box(
                             modifier = Modifier
                                 .size(8.dp)
@@ -91,7 +91,7 @@ internal fun ExpandedHeaderContent(
                                 .align(Alignment.TopEnd)
                                 .offset(x = 2.dp, y = (-2).dp)
                         )
-                    }
+//                    }
                 }
             }
         }

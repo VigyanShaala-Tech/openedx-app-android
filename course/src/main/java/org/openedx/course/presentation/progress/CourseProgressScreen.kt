@@ -157,59 +157,59 @@ private fun CourseProgressContent(
                         item {
                             OverallPerformanceView(dashboard.overallPerformance)
                         }
-                        item {
-                            Divider(modifier = Modifier.padding(vertical = 16.dp))
-                        }
+//                        item {
+//                            Divider(modifier = Modifier.padding(vertical = 16.dp))
+//                        }
                     }
-                    item {
-                        CourseCompletionView(
-                            progress = uiState.progress
-                        )
-                    }
-                    if (gradingPolicy == null) return@LazyColumn
-                    val assignmentPolicies = uiState.progress.getNotEmptyGradingPolicies()
-                    if (!assignmentPolicies.isNullOrEmpty()) {
-                        item {
-                            OverallGradeView(
-                                progress = uiState.progress,
-                            )
-                        }
-                        item {
-                            GradeDetailsHeaderView()
-                        }
-                        itemsIndexed(assignmentPolicies) { index, policy ->
-                            AssignmentTypeRow(
-                                uiState = uiState,
-                                policy = policy,
-                                color = if (gradingPolicy.assignmentColors.isNotEmpty()) {
-                                    gradingPolicy.assignmentColors[index % gradingPolicy.assignmentColors.size]
-                                } else {
-                                    MaterialTheme.appColors.primary
-                                }
-                            )
-                            Divider(
-                                modifier = Modifier
-                                    .fillMaxWidth()
-                                    .padding(top = 8.dp)
-                            )
-                        }
-                        item {
-                            GradeDetailsFooterView(
-                                progress = uiState.progress
-                            )
-                        }
-                    } else {
-                        item {
-                            Box(
-                                modifier = Modifier
-                                    .fillMaxSize()
-                                    .padding(top = 60.dp),
-                                contentAlignment = Alignment.Center
-                            ) {
-                                NoGradesView()
-                            }
-                        }
-                    }
+//                    item {
+//                        CourseCompletionView(
+//                            progress = uiState.progress
+//                        )
+//                    }
+//                    if (gradingPolicy == null) return@LazyColumn
+//                    val assignmentPolicies = uiState.progress.getNotEmptyGradingPolicies()
+//                    if (!assignmentPolicies.isNullOrEmpty()) {
+//                        item {
+//                            OverallGradeView(
+//                                progress = uiState.progress,
+//                            )
+//                        }
+//                        item {
+//                            GradeDetailsHeaderView()
+//                        }
+//                        itemsIndexed(assignmentPolicies) { index, policy ->
+//                            AssignmentTypeRow(
+//                                uiState = uiState,
+//                                policy = policy,
+//                                color = if (gradingPolicy.assignmentColors.isNotEmpty()) {
+//                                    gradingPolicy.assignmentColors[index % gradingPolicy.assignmentColors.size]
+//                                } else {
+//                                    MaterialTheme.appColors.primary
+//                                }
+//                            )
+//                            Divider(
+//                                modifier = Modifier
+//                                    .fillMaxWidth()
+//                                    .padding(top = 8.dp)
+//                            )
+//                        }
+//                        item {
+//                            GradeDetailsFooterView(
+//                                progress = uiState.progress
+//                            )
+//                        }
+//                    } else {
+//                        item {
+//                            Box(
+//                                modifier = Modifier
+//                                    .fillMaxSize()
+//                                    .padding(top = 60.dp),
+//                                contentAlignment = Alignment.Center
+//                            ) {
+//                                NoGradesView()
+//                            }
+//                        }
+//                    }
                 }
             }
 
@@ -821,7 +821,7 @@ private fun OverallPerformanceView(performance: DashboardProgress.OverallPerform
                 )
                 Spacer(modifier = Modifier.width(8.dp))
                 Text(
-                    text = "Overall performance",
+                    text = stringResource(R.string.overall_performance),
                     style = MaterialTheme.appTypography.titleMedium.copy(fontWeight = FontWeight.Bold),
                     color = MaterialTheme.appColors.textDark
                 )

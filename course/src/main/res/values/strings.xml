@@ -125,4 +125,6 @@
     <!-- Caught Up Messages -->
     <string name="course_videos_caught_up">You\'re all caught up on videos!</string>
     <string name="course_assignments_caught_up">You\'re all caught up on assignments!</string>
+    <string name="items_requiring_attention">Items Requiring Attention</string>
+    <string name="overall_performance">Overall performance</string>
 </resources>

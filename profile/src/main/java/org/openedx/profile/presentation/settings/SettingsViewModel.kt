@@ -154,7 +154,12 @@ class SettingsViewModel(
         logProfileEvent(ProfileAnalyticsEvent.DATA_SELL_CLICKED)
     }
 
-    fun faqClicked() {
+    fun faqClicked(fragmentManager: FragmentManager) {
+        profileRouter.navigateToWebContent(
+            fm = fragmentManager,
+            title = resourceManager.getString(org.openedx.profile.R.string.profile_faqs),
+            url = configuration.faqUrl,
+        )
         logProfileEvent(ProfileAnalyticsEvent.FAQ_CLICKED)
     }
 

@@ -97,11 +97,13 @@ import org.openedx.core.ui.theme.appShapes
 import org.openedx.core.ui.theme.appTypography
 import org.openedx.foundation.presentation.UIMessage
 import org.openedx.profile.R
+import org.openedx.core.config.Config
 import org.openedx.profile.presentation.ProfileRouter
 import org.openedx.profile.presentation.profile.ProfileViewModel
 
 class VsProfileFragment : Fragment() {
     private val router: ProfileRouter by inject()
+    private val config: Config by inject()
     private val corePreferences: CorePreferences by inject()
     private val appData: AppData by inject()
     private val settingsViewModel by viewModel<org.openedx.profile.presentation.settings.SettingsViewModel>()
@@ -137,6 +139,13 @@ class VsProfileFragment : Fragment() {
                     onAboutClick = { router.navigateToAboutVigyanshaala(requireActivity().supportFragmentManager) },
                     onLogoutClick = { settingsViewModel.logout() },
                     onEditClick = { profileViewModel.profileEditClicked(requireActivity().supportFragmentManager) },
+                    onFaqClick = {
+                        router.navigateToWebContent(
+                            requireActivity().supportFragmentManager,
+                            getString(R.string.profile_faqs),
+                            config.getFaqUrl()
+                        )
+                    },
                     onShareClick = {
                         val shareIntent = Intent(Intent.ACTION_SEND).apply {
                             type = "text/plain"
@@ -173,6 +182,7 @@ private fun VsProfileScreen(
     onLogoutClick: () -> Unit,
     onEditClick: () -> Unit = {},
     onShareClick: () -> Unit = {},
+    onFaqClick: () -> Unit = {},
     onSendOtp: (String) -> Unit,
     onVerifyOtp: (String, String) -> Unit
 ) {
@@ -331,7 +341,7 @@ private fun VsProfileScreen(
             VsProfileItem(
                 icon = Icons.AutoMirrored.Filled.Help,
                 title = stringResource(id = R.string.profile_faqs),
-                onClick = {}
+                onClick = onFaqClick
             )
             VsProfileItem(
                 icon = Icons.Filled.Share,

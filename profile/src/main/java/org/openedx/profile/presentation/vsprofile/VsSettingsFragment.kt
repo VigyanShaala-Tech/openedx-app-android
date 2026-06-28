@@ -354,7 +354,7 @@ private fun LogoutDialog(
                 Spacer(Modifier.size(36.dp))
                 OpenEdXButton(
                     text = stringResource(id = R.string.profile_logout),
-                    backgroundColor = MaterialTheme.appColors.warning,
+                    backgroundColor = MaterialTheme.appColors.primary,
                     onClick = onLogoutClick,
                     content = {
                         Box(

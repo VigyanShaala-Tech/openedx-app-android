@@ -63,7 +63,7 @@ class SettingsFragment : Fragment() {
                                 )
                             }
 
-                            SettingsScreenAction.FaqClick -> viewModel.faqClicked()
+                            SettingsScreenAction.FaqClick -> viewModel.faqClicked(requireActivity().supportFragmentManager)
 
                             SettingsScreenAction.SupportClick -> {
                                 viewModel.emailSupportClicked(requireContext())

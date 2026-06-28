@@ -11,6 +11,7 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.gestures.awaitEachGesture
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxScope
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
@@ -309,7 +310,7 @@ private fun CollapsingLayoutTablet(
         ) {
             Box(
                 modifier = Modifier
-                    .background(MaterialTheme.appColors.surface)
+                    .background(Color.White)
                     .fillMaxWidth()
                     .height(
                         with(localDensity) {
@@ -761,11 +762,21 @@ private fun CollapsingLayoutMobile(
                                 ).roundToInt()
                     )
                 }
+                .background(Color.White)
                 .onSizeChanged { size ->
                     navigationHeight.value = size.height.toFloat()
                 },
-            content = navigation,
-        )
+        ) {
+            Column {
+                Box(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(1.dp)
+                        .background(Color(0xFFE0E3E9))
+                )
+                Box(content = navigation)
+            }
+        }
 
         val bodyPadding = expandedTopHeight.value + offset.value + backgroundImageHeight.value +
                 navigationHeight.value - blurImagePaddingPx * factor

@@ -1229,10 +1229,16 @@ fun RoundTabsBar(
             } else {
                 Color.Black // Black for unselected as in image
             }
+            val borderModifier = if (isSelected) {
+                Modifier
+            } else {
+                Modifier.border(1.dp, Color(0xFFE0E3E9), CircleShape)
+            }
 
             RoundTab(
                 modifier = Modifier
                     .height(40.dp)
+                    .then(borderModifier)
                     .clip(CircleShape)
                     .background(backgroundColor)
                     .clickable {

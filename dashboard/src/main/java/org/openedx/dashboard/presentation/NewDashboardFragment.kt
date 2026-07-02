@@ -951,7 +951,7 @@ private fun NewDashboardScreenPreview() {
                         "10 weeks",
                         "Advanced",
                         SAMPLE_IMAGE_4,
-                        4,
+                        4.0,
                         120,
                         "John Doe"
                     )

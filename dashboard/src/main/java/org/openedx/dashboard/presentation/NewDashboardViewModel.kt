@@ -76,31 +76,61 @@ class NewDashboardViewModel(
         viewModelScope.launch {
             _state.value = _state.value.copy(loading = !isRefreshing, refreshing = isRefreshing)
             try {
-                val summary = async { interactor.getSummaryCards() }
-                val contLearn = async { interactor.getContinueLearning() }
-                val achievements = async { interactor.getAchievements() }
-                val recommended = async { interactor.getRecommended() }
-                val wishlist = async { interactor.getWishlist() }
-                val inProgress = async { interactor.getInProgress() }
-                val completed = async { interactor.getCompleted() }
+                kotlinx.coroutines.supervisorScope {
+                    val summary = async { interactor.getSummaryCards() }
+                    val contLearn = async { interactor.getContinueLearning() }
+                    val achievements = async { interactor.getAchievements() }
+                    val recommended = async { interactor.getRecommended() }
+                    val wishlist = async { interactor.getWishlist() }
+                    val inProgress = async { interactor.getInProgress() }
+                    val completed = async { interactor.getCompleted() }
 
-                val summaryVal = try { summary.await() } catch (e: Exception) { emptyList() }
-                val contLearnVal = try { contLearn.await() } catch (e: Exception) { emptyList() }
-                
-                _state.value = _state.value.copy(
-                    loading = false,
-                    summary = summaryVal,
-                    continueLearning = contLearnVal,
-                )
-                
-                _state.value = _state.value.copy(
-                    refreshing = false,
-                    achievements = try { achievements.await() } catch (e: Exception) { emptyList() },
-                    recommended = try { recommended.await() } catch (e: Exception) { emptyList() },
-                    wishlist = try { wishlist.await() } catch (e: Exception) { null },
-                    inProgress = try { inProgress.await() } catch (e: Exception) { null },
-                    completed = try { completed.await() } catch (e: Exception) { null },
-                )
+                    val summaryVal = try {
+                        summary.await()
+                    } catch (e: Exception) {
+                        emptyList()
+                    }
+                    val contLearnVal = try {
+                        contLearn.await()
+                    } catch (e: Exception) {
+                        emptyList()
+                    }
+
+                    _state.value = _state.value.copy(
+                        loading = false,
+                        summary = summaryVal,
+                        continueLearning = contLearnVal,
+                    )
+
+                    _state.value = _state.value.copy(
+                        refreshing = false,
+                        achievements = try {
+                            achievements.await()
+                        } catch (e: Exception) {
+                            emptyList()
+                        },
+                        recommended = try {
+                            recommended.await()
+                        } catch (e: Exception) {
+                            emptyList()
+                        },
+                        wishlist = try {
+                            wishlist.await()
+                        } catch (e: Exception) {
+                            null
+                        },
+                        inProgress = try {
+                            inProgress.await()
+                        } catch (e: Exception) {
+                            null
+                        },
+                        completed = try {
+                            completed.await()
+                        } catch (e: Exception) {
+                            null
+                        },
+                    )
+                }
             } catch (e: Exception) {
                 _state.value = _state.value.copy(loading = false, refreshing = false)
                 if (e.isInternetError()) {

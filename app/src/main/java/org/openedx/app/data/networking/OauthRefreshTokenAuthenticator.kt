@@ -119,6 +119,9 @@ class OauthRefreshTokenAuthenticator(
                         )
                         .build()
                 } else {
+                    runBlocking {
+                        appNotifier.send(LogoutEvent(true))
+                    }
                     null
                 }
             }

@@ -33,6 +33,9 @@ class HandleErrorInterceptor(
                 throw IOException("HTTP ${response.code}: $jsonStr", e)
             }
         } else {
+            if (response.code == 401) {
+                throw EdxError.UnknownException("HTTP 401 Unauthorized")
+            }
             throw IOException("HTTP ${response.code}")
         }
     }
@@ -54,10 +57,13 @@ class HandleErrorInterceptor(
         val exception = when {
             errorResponse?.error == ERROR_INVALID_GRANT -> EdxError.InvalidGrantException()
             errorResponse?.error == ERROR_USER_NOT_ACTIVE -> EdxError.UserNotActiveException()
+            errorResponse?.error == ERROR_TOKEN_EXPIRED || errorResponse?.errorDescription == ERROR_JWT_TOKEN_EXPIRED ->
+                EdxError.TokenExpiredException()
+
             errorResponse?.errorDescription != null ->
                 EdxError.ValidationException(errorResponse.errorDescription.orEmpty())
 
-            else -> return null
+            else -> throw EdxError.UnknownException("HTTP Error: ${errorResponse?.error ?: "Unknown"}")
         }
         throw exception
     }
@@ -65,5 +71,7 @@ class HandleErrorInterceptor(
     companion object {
         const val ERROR_INVALID_GRANT = "invalid_grant"
         const val ERROR_USER_NOT_ACTIVE = "user_not_active"
+        const val ERROR_TOKEN_EXPIRED = "token_expired"
+        const val ERROR_JWT_TOKEN_EXPIRED = "Token has expired."
     }
 }

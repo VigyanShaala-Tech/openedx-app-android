@@ -13,7 +13,11 @@ class LeaderboardRepository(
 ) {
 
     suspend fun getCourseNotifications(courseId: String): CourseNotificationsResponse {
-        return api.getCourseNotifications(courseId)
+        return try {
+            api.getCourseNotifications(courseId)
+        } catch (e: Exception) {
+            CourseNotificationsResponse(false, emptyList())
+        }
     }
 
     suspend fun getUniversities(): List<University> {
@@ -153,7 +157,11 @@ class LeaderboardRepository(
     }
 
     suspend fun getUserRanking(courseId: String): UserRanking {
-        return api.getUserRanking(courseId).result
+        return try {
+            api.getUserRanking(courseId).result
+        } catch (e: Exception) {
+            UserRanking(0, 0)
+        }
     }
 
     suspend fun getLeaderboard(
@@ -163,6 +171,10 @@ class LeaderboardRepository(
         rangeType: String,
         university: String?
     ): LeaderboardResponse {
-        return api.getLeaderboard(courseId, page, pageSize, rangeType, university)
+        return try {
+            api.getLeaderboard(courseId, page, pageSize, rangeType, university)
+        } catch (e: Exception) {
+            LeaderboardResponse(emptyList(), null)
+        }
     }
 }

@@ -20,9 +20,12 @@ class SyncFirebaseTokenWorker(context: Context, params: WorkerParameters) :
 
     override suspend fun doWork(): Result {
         if (preferences.user != null && preferences.pushToken.isNotEmpty()) {
-            api.syncFirebaseToken(preferences.pushToken)
-
-            return Result.success()
+            return try {
+                api.syncFirebaseToken(preferences.pushToken)
+                Result.success()
+            } catch (e: Exception) {
+                Result.failure()
+            }
         }
         return Result.failure()
     }

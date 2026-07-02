@@ -19,11 +19,11 @@ class HandleErrorInterceptor(
             return response
         }
 
-        val body = response.body
-        val source = body?.source()
-        source?.request(Long.MAX_VALUE)
-        val buffer = source?.buffer
-        val jsonStr = buffer?.clone()?.readString(Charsets.UTF_8)
+        val jsonStr = try {
+            response.peekBody(MAX_PEEK_SIZE).string()
+        } catch (e: Exception) {
+            null
+        }
 
         return if (jsonStr != null) {
             try {
@@ -73,5 +73,6 @@ class HandleErrorInterceptor(
         const val ERROR_USER_NOT_ACTIVE = "user_not_active"
         const val ERROR_TOKEN_EXPIRED = "token_expired"
         const val ERROR_JWT_TOKEN_EXPIRED = "Token has expired."
+        private const val MAX_PEEK_SIZE = 1024 * 1024L
     }
 }

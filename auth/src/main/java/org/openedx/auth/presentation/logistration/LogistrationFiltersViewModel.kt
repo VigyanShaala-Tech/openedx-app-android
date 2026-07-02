@@ -60,9 +60,13 @@ class LogistrationFiltersViewModel(
 
     init {
         viewModelScope.launch {
-            val opts = repository.getFilterOptions()
-            val initialSelected = opts.options.mapValues { (_, values) -> values.firstOrNull().orEmpty() }
-            _state.value = FiltersState(options = opts, selected = initialSelected)
+            try {
+                val opts = repository.getFilterOptions()
+                val initialSelected = opts.options.mapValues { (_, values) -> values.firstOrNull().orEmpty() }
+                _state.value = FiltersState(options = opts, selected = initialSelected)
+            } catch (e: Exception) {
+                e.printStackTrace()
+            }
         }
     }
 

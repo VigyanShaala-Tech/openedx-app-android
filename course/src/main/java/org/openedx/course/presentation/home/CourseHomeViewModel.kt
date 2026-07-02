@@ -441,10 +441,14 @@ class CourseHomeViewModel(
 
     fun openBlock(fragmentManager: FragmentManager, blockId: String) {
         viewModelScope.launch {
-            val courseStructure = interactor.getCourseStructure(courseId, false)
-            val blocks = courseStructure.blockData
-            getResumeBlock(blocks, blockId)
-            resumeBlock(fragmentManager, blockId)
+            try {
+                val courseStructure = interactor.getCourseStructure(courseId, false)
+                val blocks = courseStructure.blockData
+                getResumeBlock(blocks, blockId)
+                resumeBlock(fragmentManager, blockId)
+            } catch (e: Exception) {
+                e.printStackTrace()
+            }
         }
     }
 

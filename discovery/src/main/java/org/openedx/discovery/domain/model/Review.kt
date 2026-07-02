@@ -5,6 +5,6 @@ data class Review(
     val profilePicture: String,
     val comment: String,
     val designation: String,
-    val rating: Int,
+    val rating: Double,
     val submittedAt: String,
 )

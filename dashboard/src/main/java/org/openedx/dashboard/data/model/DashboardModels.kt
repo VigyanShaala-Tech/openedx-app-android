@@ -32,7 +32,7 @@ data class RecommendationDto(
     val duration: String?,
     val level: String?,
     val image: String?,
-    val rating: Int?,
+    val rating: Double?,
     val reviews: Int?,
     val instructor: String?
 )

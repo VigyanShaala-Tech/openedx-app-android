@@ -7,10 +7,10 @@ import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
-import org.openedx.course.data.model.LeaderboardEntry
-import org.openedx.course.data.model.RankingOption
-import org.openedx.course.data.model.University
-import org.openedx.course.data.model.UserRanking
+import org.openedx.core.domain.model.LeaderboardEntry
+import org.openedx.core.domain.model.RankingOption
+import org.openedx.core.domain.model.University
+import org.openedx.core.domain.model.UserRanking
 import org.openedx.course.domain.interactor.LeaderboardInteractor
 import org.openedx.foundation.extension.isInternetError
 import org.openedx.foundation.presentation.BaseViewModel
@@ -47,8 +47,8 @@ class LeaderboardViewModel(
                 
                 // Filter out if "All Colleges" or similar already exists in fetched list to avoid duplicates
                 val filteredFetched = fetchedUniversities.filter {
-                    val name = (it.name ?: it.universityName ?: it.collegeName ?: it.label ?: it.text ?: "").trim()
-                    !name.equals("All Colleges", ignoreCase = true) && 
+                    val name = it.name.trim()
+                    !name.equals("All Colleges", ignoreCase = true) &&
                     !name.equals("All Students", ignoreCase = true) &&
                     it.id != "0"
                 }
@@ -66,8 +66,8 @@ class LeaderboardViewModel(
                 } catch (_: Exception) {
                     null
                 }
-                
-                _uiState.update { 
+
+                _uiState.update {
                     it.copy(
                         universities = universities,
                         rankingOptions = rankingOptions,
@@ -75,8 +75,8 @@ class LeaderboardViewModel(
                         isLoading = false,
                         selectedUniversity = it.selectedUniversity ?: universities.first(),
                         selectedRankingOption = if ((it.selectedRankingOption.id == "all" || it.selectedRankingOption.id == null) && rankingOptions.isNotEmpty() && rankingOptions.first().id != "all")
-                            rankingOptions.first() 
-                        else 
+                            rankingOptions.first()
+                        else
                             it.selectedRankingOption
                     )
                 }
@@ -110,15 +110,16 @@ class LeaderboardViewModel(
                     courseId = courseId,
                     page = currentState.page,
                     pageSize = 10,
-                    rangeType = currentState.selectedRankingOption.value ?: currentState.selectedRankingOption.id ?: "all",
-                    university = if (currentState.selectedUniversity?.id == "0" || currentState.selectedUniversity?.id == null) null else currentState.selectedUniversity?.let { it.name ?: it.universityName ?: it.universityNameSnake ?: it.collegeName ?: it.collegeNameSnake ?: it.title ?: it.label ?: it.text ?: it.value }
+                    rangeType = currentState.selectedRankingOption.id,
+                    university = if (currentState.selectedUniversity?.id == "0" || currentState.selectedUniversity?.id == null) null else currentState.selectedUniversity.name
                 )
-                
-                _uiState.update { 
+
+                _uiState.update {
                     val newEntries = if (currentState.page == 1) response.results else it.leaderboardEntries + response.results
+                    val pagination = response.pagination
                     it.copy(
                         leaderboardEntries = newEntries,
-                        hasMore = response.pagination?.next != null && response.results.isNotEmpty(),
+                        hasMore = pagination != null && response.results.isNotEmpty() && (currentState.page < pagination.numPages),
                         isLoading = false
                     )
                 }

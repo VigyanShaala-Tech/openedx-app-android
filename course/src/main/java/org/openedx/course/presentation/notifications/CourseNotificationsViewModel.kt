@@ -6,7 +6,7 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 import org.openedx.foundation.presentation.BaseViewModel
-import org.openedx.course.data.model.CourseNotificationItem
+import org.openedx.core.domain.model.NotificationModel
 import org.openedx.course.domain.interactor.LeaderboardInteractor
 
 class CourseNotificationsViewModel(
@@ -36,6 +36,6 @@ class CourseNotificationsViewModel(
 
 sealed class CourseNotificationsUIState {
     object Loading : CourseNotificationsUIState()
-    data class Success(val notifications: List<CourseNotificationItem>) : CourseNotificationsUIState()
+    data class Success(val notifications: List<NotificationModel>) : CourseNotificationsUIState()
     data class Error(val message: String) : CourseNotificationsUIState()
 }

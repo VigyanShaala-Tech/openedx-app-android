@@ -1,6 +1,7 @@
 package org.openedx.core.data.api
 
 import okhttp3.MultipartBody
+import okhttp3.ResponseBody
 import org.openedx.core.data.model.AnnouncementModel
 import org.openedx.core.data.model.BlocksCompletionBody
 import org.openedx.core.data.model.CourseComponentStatus
@@ -8,15 +9,19 @@ import org.openedx.core.data.model.CourseDates
 import org.openedx.core.data.model.CourseDatesBannerInfo
 import org.openedx.core.data.model.CourseEnrollmentDetails
 import org.openedx.core.data.model.CourseEnrollments
+import org.openedx.core.data.model.CourseNotificationsResponse
 import org.openedx.core.data.model.CourseProgressResponse
 import org.openedx.core.data.model.CourseStructureModel
 import org.openedx.core.data.model.DashboardProgressResponse
 import org.openedx.core.data.model.DownloadCoursePreview
+import org.openedx.core.data.model.EnrollmentFormResponse
 import org.openedx.core.data.model.EnrollmentStatus
 import org.openedx.core.data.model.HandoutsModel
 import org.openedx.core.data.model.JoinMeetingResponse
+import org.openedx.core.data.model.LeaderboardResponse
 import org.openedx.core.data.model.LiveClassResponse
 import org.openedx.core.data.model.ResetCourseDates
+import org.openedx.core.data.model.UserRankingResponse
 import retrofit2.http.Body
 import retrofit2.http.GET
 import retrofit2.http.Header
@@ -135,4 +140,30 @@ interface CourseApi {
     suspend fun getJoinMeetingUrl(
         @Path("meeting_id") meetingId: String
     ): JoinMeetingResponse
+
+    @GET("/api/v1/cohort-registration/{form_id}/form/")
+    suspend fun getEnrollmentForm(
+        @Path("form_id") formId: String
+    ): EnrollmentFormResponse
+
+    @GET("https://uat.vigyanshaala.com/api/v1/options/universities/")
+    suspend fun getUniversities(): ResponseBody
+
+    @GET("https://uat.vigyanshaala.com/api/v1/options/rankings/")
+    suspend fun getRankingOptions(): ResponseBody
+
+    @GET("https://uat.vigyanshaala.com/api/v1/get/course/notifications/{course_id}/")
+    suspend fun getCourseNotifications(@Path("course_id") courseId: String): CourseNotificationsResponse
+
+    @GET("/api/v1/get/course/user/rankings/{course_id}/")
+    suspend fun getUserRanking(@Path("course_id") courseId: String): UserRankingResponse
+
+    @GET("/api/v1/get/course/leaderboard/{course_id}/")
+    suspend fun getLeaderboard(
+        @Path("course_id") courseId: String,
+        @Query("page") page: Int,
+        @Query("page_size") pageSize: Int,
+        @Query("range_type") rangeType: String,
+        @Query("university") university: String? = null
+    ): LeaderboardResponse
 }

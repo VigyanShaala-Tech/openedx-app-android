@@ -60,7 +60,7 @@ import org.openedx.core.ui.theme.OpenEdXTheme
 import org.openedx.core.ui.theme.appColors
 import org.openedx.core.ui.theme.appTypography
 import org.openedx.course.R
-import org.openedx.course.data.model.CourseNotificationItem
+import org.openedx.core.domain.model.NotificationModel
 import org.openedx.core.R as coreR
 
 class CourseNotificationsFragment : Fragment() {
@@ -166,7 +166,7 @@ fun CourseNotificationsScreen(
                             contentPadding = PaddingValues(16.dp)
                         ) {
                             items(notifications) { notification ->
-                                CourseNotificationItem(notification)
+                                NotificationItemView(notification)
                                 Divider(
                                     modifier = Modifier.padding(vertical = 12.dp),
                                     color = MaterialTheme.appColors.divider
@@ -267,7 +267,7 @@ fun CourseNotificationsDialog(
                                         contentPadding = PaddingValues(16.dp)
                                     ) {
                                         items(notifications) { notification ->
-                                            CourseNotificationItem(notification)
+                                            NotificationItemView(notification)
                                             Divider(
                                                 modifier = Modifier.padding(vertical = 12.dp),
                                                 color = MaterialTheme.appColors.divider
@@ -303,7 +303,7 @@ fun CourseNotificationsDialog(
 }
 
 @Composable
-fun CourseNotificationItem(notification: CourseNotificationItem) {
+fun NotificationItemView(notification: NotificationModel) {
     Row(
         modifier = Modifier.fillMaxWidth(),
         verticalAlignment = Alignment.Top

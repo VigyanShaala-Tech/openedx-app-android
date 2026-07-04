@@ -1,12 +1,12 @@
 package org.openedx.course.domain.interactor
 
-import org.openedx.course.data.model.EnrollmentFormResponse
-import org.openedx.course.data.repository.CourseRegistrationRepository
+import org.openedx.core.domain.model.EnrollmentForm
+import org.openedx.course.data.repository.CourseRepository
 
 class CourseRegistrationInteractor(
-    private val repository: CourseRegistrationRepository
+    private val repository: CourseRepository
 ) {
-    suspend fun getEnrollmentForm(formId: String): EnrollmentFormResponse {
+    suspend fun getEnrollmentForm(formId: String): EnrollmentForm {
         return repository.getEnrollmentForm(formId)
     }
 }

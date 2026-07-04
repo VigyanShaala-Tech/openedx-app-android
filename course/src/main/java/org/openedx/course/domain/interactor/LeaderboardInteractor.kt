@@ -1,9 +1,9 @@
 package org.openedx.course.domain.interactor
 
-import org.openedx.course.data.repository.LeaderboardRepository
+import org.openedx.course.data.repository.CourseRepository
 
 class LeaderboardInteractor(
-    private val repository: LeaderboardRepository
+    private val repository: CourseRepository
 ) {
 
     suspend fun getCourseNotifications(courseId: String) = repository.getCourseNotifications(courseId)

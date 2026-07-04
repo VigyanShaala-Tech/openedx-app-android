@@ -23,8 +23,9 @@ import androidx.compose.ui.window.Dialog
 import org.openedx.core.ui.HandleUIMessage
 import org.openedx.core.ui.theme.appColors
 import org.openedx.core.ui.theme.appTypography
-import org.openedx.course.data.model.University
-import org.openedx.course.data.model.RankingOption
+import org.openedx.core.domain.model.RankingOption
+import org.openedx.core.domain.model.University
+import org.openedx.core.domain.model.LeaderboardEntry
 import org.openedx.foundation.presentation.WindowSize
 import org.openedx.foundation.presentation.UIMessage
 
@@ -142,10 +143,10 @@ private fun LeaderboardUI(
 
                 // University Filter
                 LeaderboardFilter(
-                    label = uiState.selectedUniversity?.let { it.name ?: it.universityName ?: it.universityNameSnake ?: it.collegeName ?: it.collegeNameSnake ?: it.title ?: it.label ?: it.text ?: it.value } ?: "All Colleges",
+                    label = uiState.selectedUniversity?.name ?: "All Colleges",
                     title = "Select College",
                     options = uiState.universities,
-                    labelExtractor = { it.name ?: it.universityName ?: it.universityNameSnake ?: it.collegeName ?: it.collegeNameSnake ?: it.title ?: it.label ?: it.text ?: it.value ?: "" },
+                    labelExtractor = { it.name },
                     onSelected = onUniversitySelected
                 )
 
@@ -153,10 +154,10 @@ private fun LeaderboardUI(
 
                 // Ranking Filter
                 LeaderboardFilter(
-                    label = uiState.selectedRankingOption.let { it.label ?: it.name ?: it.displayName ?: "" },
+                    label = uiState.selectedRankingOption.label,
                     title = "Select Filter",
                     options = uiState.rankingOptions,
-                    labelExtractor = { it.label ?: it.name ?: it.displayName ?: "" },
+                    labelExtractor = { it.label },
                     onSelected = onRankingOptionSelected
                 )
 
@@ -252,7 +253,7 @@ private fun LeaderboardHeader() {
 }
 
 @Composable
-private fun LeaderboardRow(entry: org.openedx.course.data.model.LeaderboardEntry) {
+private fun LeaderboardRow(entry: LeaderboardEntry) {
     Surface(
         modifier = Modifier.fillMaxWidth(),
         color = MaterialTheme.appColors.background,

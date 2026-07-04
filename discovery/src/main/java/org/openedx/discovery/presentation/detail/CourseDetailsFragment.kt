@@ -52,6 +52,7 @@ import androidx.compose.material.icons.outlined.FavoriteBorder
 import androidx.compose.material.icons.outlined.Report
 import androidx.compose.material.rememberScaffoldState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.livedata.observeAsState
@@ -141,6 +142,15 @@ class CourseDetailsFragment : Fragment() {
                 val uiState by viewModel.uiState.observeAsState()
                 val uiMessage by viewModel.uiMessage.observeAsState()
 
+                LaunchedEffect(uiState) {
+                    if (uiState is CourseDetailsUIState.NavigateToRegistration) {
+                        router.navigateToCourseRegistration(
+                            requireActivity().supportFragmentManager,
+                            (uiState as CourseDetailsUIState.NavigateToRegistration).courseId
+                        )
+                    }
+                }
+
                 val colorBackgroundValue = MaterialTheme.appColors.background.value
                 val colorTextValue = MaterialTheme.appColors.textPrimary.value
 
@@ -177,11 +187,15 @@ class CourseDetailsFragment : Fragment() {
                                 }
 
                                 currentState.course.isEnrolled == true -> {
-                                    router.navigateToCourseOutline(
-                                        requireActivity().supportFragmentManager,
+                                    viewModel.enrollInACourse(
                                         currentState.course.courseId.orEmpty(),
-                                        currentState.course.name.orEmpty(),
+                                        currentState.course.name.orEmpty()
                                     )
+//                                    router.navigateToCourseOutline(
+//                                        requireActivity().supportFragmentManager,
+//                                        currentState.course.courseId.orEmpty(),
+//                                        currentState.course.name.orEmpty(),
+//                                    )
                                 }
 
                                 else -> {
@@ -340,6 +354,8 @@ internal fun CourseDetailsScreen(
                                 )
                             }
                         }
+
+                        is CourseDetailsUIState.NavigateToRegistration -> {}
                     }
                     if (!isInternetConnectionShown.value && !hasInternetConnection) {
                         OfflineModeDialog(

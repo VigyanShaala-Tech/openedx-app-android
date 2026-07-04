@@ -67,4 +67,6 @@ interface CourseRouter {
     fun navigateToWebContent(fm: FragmentManager, title: String, url: String)
 
     fun navigateToCourseNotifications(fm: FragmentManager, courseId: String, courseTitle: String)
+
+    fun navigateToCourseRegistration(fm: FragmentManager, courseId: String)
 }

@@ -122,26 +122,30 @@ class CourseDetailsViewModel(
 
     fun enrollInACourse(id: String, title: String) {
         viewModelScope.launch {
-            try {
-                val courseData = _uiState.value
-                if (courseData is CourseDetailsUIState.CourseData) {
-                    courseEnrollClickedEvent(id, title)
-                }
-                interactor.enrollInACourse(id)
-                val course = interactor.getCourseDetails(id)
-                if (courseData is CourseDetailsUIState.CourseData) {
-                    _uiState.value = courseData.copy(course = course)
-                    courseEnrollSuccessEvent(id, title)
-                    calendarSyncScheduler.requestImmediateSync(id)
-                    notifier.send(CourseDashboardUpdate())
-                }
-            } catch (e: Exception) {
-                if (e.isInternetError()) {
-                    _uiMessage.value =
-                        UIMessage.SnackBarMessage(resourceManager.getString(R.string.core_error_no_connection))
-                } else {
-                    _uiMessage.value =
-                        UIMessage.SnackBarMessage(resourceManager.getString(R.string.core_error_unknown_error))
+            if (/* TODO: condition for dynamic registration form */ true) {
+                _uiState.value = CourseDetailsUIState.NavigateToRegistration(id)
+            } else {
+                try {
+                    val courseData = _uiState.value
+                    if (courseData is CourseDetailsUIState.CourseData) {
+                        courseEnrollClickedEvent(id, title)
+                    }
+                    interactor.enrollInACourse(id)
+                    val course = interactor.getCourseDetails(id)
+                    if (courseData is CourseDetailsUIState.CourseData) {
+                        _uiState.value = courseData.copy(course = course)
+                        courseEnrollSuccessEvent(id, title)
+                        calendarSyncScheduler.requestImmediateSync(id)
+                        notifier.send(CourseDashboardUpdate())
+                    }
+                } catch (e: Exception) {
+                    if (e.isInternetError()) {
+                        _uiMessage.value =
+                            UIMessage.SnackBarMessage(resourceManager.getString(R.string.core_error_no_connection))
+                    } else {
+                        _uiMessage.value =
+                            UIMessage.SnackBarMessage(resourceManager.getString(R.string.core_error_unknown_error))
+                    }
                 }
             }
         }

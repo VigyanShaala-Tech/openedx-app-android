@@ -361,6 +361,14 @@ class AppRouter :
             HandoutsWebViewFragment.newInstance(type.name, courseId)
         )
     }
+
+    override fun navigateToCourseRegistration(fm: FragmentManager, courseId: String) {
+        replaceFragmentWithBackStack(
+            fm,
+            org.openedx.course.presentation.registration.CourseRegistrationFragment.newInstance(courseId)
+        )
+    }
+
     // endregion
 
     // region DiscussionRouter

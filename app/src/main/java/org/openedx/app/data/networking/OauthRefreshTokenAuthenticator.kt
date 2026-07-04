@@ -45,7 +45,7 @@ class OauthRefreshTokenAuthenticator(
             val response = createUnauthorizedResponse(chain)
             val request = authenticate(chain.connection()?.route(), response)
 
-            return request?.let { chain.proceed(it) } ?: response
+            return request?.let { chain.proceed(it) } ?: chain.proceed(chain.request())
         }
         return chain.proceed(chain.request())
     }
@@ -74,12 +74,7 @@ class OauthRefreshTokenAuthenticator(
 
         if (refreshToken.isEmpty()) return null
 
-        val responseBodyStr = try {
-            response.peekBody(MAX_PEEK_SIZE).string()
-        } catch (e: Exception) {
-            return null
-        }
-        val errorCode = getErrorCode(responseBodyStr) ?: return null
+        val errorCode = getErrorCode(response.peekBody(Long.MAX_VALUE).string()) ?: return null
 
         return when (errorCode) {
             TOKEN_EXPIRED_ERROR_MESSAGE, JWT_TOKEN_EXPIRED -> {
@@ -281,6 +276,5 @@ class OauthRefreshTokenAuthenticator(
         private const val REFRESH_TOKEN_INTERVAL_MINIMUM = 60 * 1000
 
         private const val REFRESH_TOKEN_THREAD_SLEEP = 1500L
-        private const val MAX_PEEK_SIZE = 1024 * 1024L
     }
 }

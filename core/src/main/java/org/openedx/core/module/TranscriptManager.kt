@@ -26,7 +26,11 @@ class TranscriptManager(
 
     private val transcriptDownloader = object : AbstractDownloader() {
         override val client: OkHttpClient
-            get() = OkHttpClient.Builder().build()
+            get() = OkHttpClient.Builder().apply {
+                connectTimeout(60, TimeUnit.SECONDS)
+                writeTimeout(60, TimeUnit.SECONDS)
+                readTimeout(60, TimeUnit.SECONDS)
+            }.build()
     }
 
     private var transcriptObject: TimedTextObject? = null

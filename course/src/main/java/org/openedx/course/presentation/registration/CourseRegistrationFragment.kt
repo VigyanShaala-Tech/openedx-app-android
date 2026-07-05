@@ -41,7 +41,13 @@ class CourseRegistrationFragment : Fragment() {
                     answers = answers,
                     eligibilityErrors = eligibilityErrors,
                     onBackClick = {
-                        requireActivity().supportFragmentManager.popBackStack()
+                        if (viewModel.uiState.value is CourseRegistrationUIState.CourseData &&
+                            (viewModel.uiState.value as CourseRegistrationUIState.CourseData).currentStep > 1
+                        ) {
+                            viewModel.previousStep()
+                        } else {
+                            requireActivity().supportFragmentManager.popBackStack()
+                        }
                     },
                     onNextClick = {
                         viewModel.nextStep()

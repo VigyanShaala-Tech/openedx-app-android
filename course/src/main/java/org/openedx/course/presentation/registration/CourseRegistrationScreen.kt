@@ -1,5 +1,6 @@
 package org.openedx.course.presentation.registration
 
+import androidx.activity.compose.BackHandler
 import android.webkit.WebView
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
@@ -57,6 +58,10 @@ fun CourseRegistrationScreen(
     isFieldVisible: (EnrollmentRegistrationField) -> Boolean
 ) {
     val scaffoldState = rememberScaffoldState()
+
+    BackHandler(enabled = uiState is CourseRegistrationUIState.CourseData && uiState.currentStep > 1) {
+        onPreviousClick()
+    }
 
     Scaffold(
         scaffoldState = scaffoldState,
@@ -125,7 +130,6 @@ fun CourseRegistrationScreen(
                         answers = answers,
                         eligibilityErrors = eligibilityErrors,
                         onNextClick = onNextClick,
-                        onPreviousClick = onPreviousClick,
                         onAnswerUpdate = onAnswerUpdate,
                         isNextEnabled = isNextEnabled,
                         isFieldVisible = isFieldVisible
@@ -176,7 +180,6 @@ fun CourseRegistrationContent(
     answers: Map<String, String>,
     eligibilityErrors: Map<String, String>,
     onNextClick: () -> Unit,
-    onPreviousClick: () -> Unit,
     onAnswerUpdate: (EnrollmentRegistrationField, String) -> Unit,
     isNextEnabled: Boolean,
     isFieldVisible: (EnrollmentRegistrationField) -> Boolean
@@ -199,30 +202,6 @@ fun CourseRegistrationContent(
         )
 
         Spacer(modifier = Modifier.height(24.dp))
-
-        if (uiState.currentStep > 1) {
-            OutlinedButton(
-                onClick = onPreviousClick,
-                modifier = Modifier.height(44.dp),
-                shape = RoundedCornerShape(8.dp),
-                border = androidx.compose.foundation.BorderStroke(1.dp, Color(0xFFBDBDBD)),
-                colors = ButtonDefaults.outlinedButtonColors(contentColor = Color(0xFF424242))
-            ) {
-                Icon(
-                    imageVector = Icons.AutoMirrored.Filled.ArrowBack,
-                    contentDescription = null,
-                    modifier = Modifier.size(18.dp)
-                )
-                Spacer(modifier = Modifier.width(8.dp))
-                Text(
-                    text = "Back",
-                    style = MaterialTheme.appTypography.labelLarge,
-                    fontWeight = FontWeight.Medium,
-                    fontSize = 16.sp
-                )
-            }
-            Spacer(modifier = Modifier.height(24.dp))
-        }
 
         category?.let {
             if (it.description.isNotEmpty()) {

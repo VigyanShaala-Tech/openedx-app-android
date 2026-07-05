@@ -14,4 +14,8 @@ class CourseRegistrationInteractor(
     suspend fun checkEligibility(formId: String, body: Map<String, String>): EligibilityResult {
         return repository.checkEligibility(formId, body)
     }
+
+    suspend fun submitRegistration(formId: String, body: Map<String, Any>) {
+        repository.submitRegistration(formId, body)
+    }
 }

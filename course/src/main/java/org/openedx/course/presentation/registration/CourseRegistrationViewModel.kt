@@ -152,7 +152,36 @@ class CourseRegistrationViewModel(
     }
 
     private fun submitRegistration() {
-        // TODO: Implement submission logic
+        val currentState = _uiState.value
+        if (currentState is CourseRegistrationUIState.CourseData) {
+            _uiState.update { currentState.copy(isSubmitting = true) }
+            viewModelScope.launch {
+                try {
+                    val submissionBody = mutableMapOf<String, Any>()
+                    
+                    // Collect all fields from all categories
+                    val allFields = currentState.enrollmentForm.categories.flatMap { it.fields }
+                    
+                    _answers.value.forEach { (key, value) ->
+                        val field = allFields.find { it.name == key }
+                        if (field?.type == "multi-select") {
+                            // Convert comma-separated string to list
+                            submissionBody[key] = value.split(",").filter { it.isNotEmpty() }
+                        } else {
+                            submissionBody[key] = value
+                        }
+                    }
+                    
+                    interactor.submitRegistration(formId, submissionBody)
+                    
+                    _uiState.update { currentState.copy(isSubmitting = false) }
+                    _uiState.update { CourseRegistrationUIState.SubmissionSuccess }
+                } catch (e: Exception) {
+                    _uiState.update { currentState.copy(isSubmitting = false) }
+                    handleError(e)
+                }
+            }
+        }
     }
 
     private suspend fun handleError(e: Exception) {
@@ -173,4 +202,5 @@ sealed class CourseRegistrationUIState {
         val isSubmitting: Boolean = false
     ) : CourseRegistrationUIState()
     object Error : CourseRegistrationUIState()
+    object SubmissionSuccess : CourseRegistrationUIState()
 }

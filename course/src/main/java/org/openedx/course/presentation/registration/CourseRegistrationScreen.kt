@@ -35,6 +35,7 @@ import com.google.gson.reflect.TypeToken
 import org.openedx.core.domain.model.EnrollmentRegistrationField
 import org.openedx.core.domain.model.EnrollmentRegistrationOption
 import org.openedx.core.ui.HandleUIMessage
+import org.openedx.core.ui.OpenEdXButton
 import org.openedx.core.ui.theme.appColors
 import org.openedx.core.ui.theme.appTypography
 import org.openedx.foundation.presentation.UIMessage
@@ -130,7 +131,40 @@ fun CourseRegistrationScreen(
                         isFieldVisible = isFieldVisible
                     )
                 }
+                is CourseRegistrationUIState.SubmissionSuccess -> {
+                    Box(
+                        modifier = Modifier.fillMaxSize(),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                            Icon(
+                                painter = painterResource(id = coreR.drawable.ic_core_check),
+                                contentDescription = null,
+                                tint = Color(0xFF4CAF50),
+                                modifier = Modifier.size(64.dp)
+                            )
+                            Spacer(modifier = Modifier.height(16.dp))
+                            Text(
+                                text = "Registration Successful!",
+                                style = MaterialTheme.appTypography.titleLarge,
+                                color = Color.Black
+                            )
+                            Spacer(modifier = Modifier.height(24.dp))
+                            Button(onClick = onBackClick) {
+                                Text(text = "Go Back")
+                            }
+                        }
+                    }
+                }
                 is CourseRegistrationUIState.Error -> { }
+            }
+        }
+        if (uiState is CourseRegistrationUIState.CourseData && uiState.isSubmitting) {
+            Box(
+                modifier = Modifier.fillMaxSize().background(Color.Black.copy(alpha = 0.3f)),
+                contentAlignment = Alignment.Center
+            ) {
+                CircularProgressIndicator(color = Color.White)
             }
         }
     }

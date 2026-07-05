@@ -314,6 +314,10 @@ class CourseRepository(
         )
     }
 
+    suspend fun submitRegistration(formId: String, body: Map<String, Any>) {
+        api.submitRegistration(formId, body)
+    }
+
     suspend fun getCourseNotifications(courseId: String): NotificationListResponse {
         return try {
             api.getCourseNotifications(courseId).mapToDomain()

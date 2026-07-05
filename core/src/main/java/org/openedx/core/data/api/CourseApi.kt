@@ -153,6 +153,12 @@ interface CourseApi {
         @Body body: Map<String, String>
     ): EligibilityResponse
 
+    @POST("/api/v1/cohort-registration/{form_id}/prepare-auth/")
+    suspend fun submitRegistration(
+        @Path("form_id") formId: String,
+        @Body body: Map<String, Any>
+    ): ResponseBody
+
     @GET("https://uat.vigyanshaala.com/api/v1/options/universities/")
     suspend fun getUniversities(): ResponseBody
 

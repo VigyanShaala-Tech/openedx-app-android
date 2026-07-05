@@ -27,6 +27,9 @@ class CourseRegistrationViewModel(
     private val _uiMessage = MutableSharedFlow<UIMessage>()
     val uiMessage = _uiMessage.asSharedFlow()
 
+    private val _answers = MutableStateFlow<Map<String, String>>(emptyMap())
+    val answers = _answers.asStateFlow()
+
     init {
         getEnrollmentForm()
     }
@@ -51,6 +54,10 @@ class CourseRegistrationViewModel(
         }
     }
 
+    fun updateAnswer(fieldName: String, answer: String) {
+        _answers.update { it + (fieldName to answer) }
+    }
+
     fun nextStep() {
         val currentState = _uiState.value
         if (currentState is CourseRegistrationUIState.CourseData) {
@@ -70,6 +77,23 @@ class CourseRegistrationViewModel(
                 _uiState.update { currentState.copy(currentStep = currentState.currentStep - 1) }
             }
         }
+    }
+
+    fun isStepValid(): Boolean {
+        val currentState = _uiState.value
+        if (currentState is CourseRegistrationUIState.CourseData) {
+            val category = currentState.enrollmentForm.categories.getOrNull(currentState.currentStep - 1)
+            category?.fields?.filter { it.visible && it.required }?.forEach { field ->
+                val answer = _answers.value[field.name]
+                if (answer.isNullOrBlank()) return false
+                
+                if (field.type == "email" && !android.util.Patterns.EMAIL_ADDRESS.matcher(answer).matches()) {
+                    return false
+                }
+            }
+            return true
+        }
+        return false
     }
 
     private fun submitRegistration() {

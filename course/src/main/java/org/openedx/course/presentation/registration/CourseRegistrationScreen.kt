@@ -4,28 +4,37 @@ import android.webkit.WebView
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material.icons.filled.Close
+import androidx.compose.material.icons.filled.Search
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.viewinterop.AndroidView
+import androidx.compose.ui.window.Dialog
+import androidx.compose.ui.window.DialogProperties
+import com.google.gson.Gson
+import com.google.gson.reflect.TypeToken
+import org.openedx.core.domain.model.EnrollmentRegistrationField
+import org.openedx.core.domain.model.EnrollmentRegistrationOption
 import org.openedx.core.ui.HandleUIMessage
-import org.openedx.core.ui.OpenEdXButton
-import org.openedx.core.ui.Toolbar
 import org.openedx.core.ui.theme.appColors
 import org.openedx.core.ui.theme.appTypography
 import org.openedx.foundation.presentation.UIMessage
@@ -37,9 +46,12 @@ fun CourseRegistrationScreen(
     windowSize: WindowSize,
     uiState: CourseRegistrationUIState,
     uiMessage: UIMessage?,
+    answers: Map<String, String>,
     onBackClick: () -> Unit,
     onNextClick: () -> Unit,
-    onPreviousClick: () -> Unit
+    onPreviousClick: () -> Unit,
+    onAnswerUpdate: (String, String) -> Unit,
+    isNextEnabled: Boolean
 ) {
     val scaffoldState = rememberScaffoldState()
 
@@ -49,7 +61,7 @@ fun CourseRegistrationScreen(
             Box(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .height(120.dp)
+                    .height(130.dp)
                     .background(Color.White)
             ) {
                 IconButton(
@@ -62,7 +74,7 @@ fun CourseRegistrationScreen(
                     Icon(
                         Icons.AutoMirrored.Filled.ArrowBack,
                         contentDescription = "Back",
-                        tint = MaterialTheme.appColors.textDark
+                        tint = Color.Black
                     )
                 }
                 Image(
@@ -75,9 +87,20 @@ fun CourseRegistrationScreen(
                         .padding(top = 16.dp),
                     contentScale = ContentScale.Fit
                 )
+                Text(
+                    text = "Registration Form",
+                    style = MaterialTheme.appTypography.titleLarge.copy(
+                        fontWeight = FontWeight.Bold,
+                        color = Color(0xFF2C3E50),
+                        textAlign = TextAlign.Center
+                    ),
+                    modifier = Modifier
+                        .align(Alignment.BottomCenter)
+                        .padding(bottom = 16.dp)
+                )
             }
         },
-        backgroundColor = MaterialTheme.appColors.background
+        backgroundColor = Color(0xFFF5F5F5) // Light grey background like in image
     ) { paddingValues ->
         HandleUIMessage(uiMessage = uiMessage, scaffoldState = scaffoldState)
 
@@ -96,12 +119,15 @@ fun CourseRegistrationScreen(
                 is CourseRegistrationUIState.CourseData -> {
                     CourseRegistrationContent(
                         uiState = uiState,
+                        answers = answers,
                         onNextClick = onNextClick,
-                        onPreviousClick = onPreviousClick
+                        onPreviousClick = onPreviousClick,
+                        onAnswerUpdate = onAnswerUpdate,
+                        isNextEnabled = isNextEnabled
                     )
                 }
                 is CourseRegistrationUIState.Error -> {
-                    // TODO: Implement error state
+                    // Handled by snackbars
                 }
             }
         }
@@ -111,8 +137,11 @@ fun CourseRegistrationScreen(
 @Composable
 fun CourseRegistrationContent(
     uiState: CourseRegistrationUIState.CourseData,
+    answers: Map<String, String>,
     onNextClick: () -> Unit,
-    onPreviousClick: () -> Unit
+    onPreviousClick: () -> Unit,
+    onAnswerUpdate: (String, String) -> Unit,
+    isNextEnabled: Boolean
 ) {
     val scrollState = rememberScrollState()
     val category = uiState.enrollmentForm.categories.getOrNull(uiState.currentStep - 1)
@@ -121,19 +150,9 @@ fun CourseRegistrationContent(
         modifier = Modifier
             .fillMaxSize()
             .verticalScroll(scrollState)
+            .background(Color.White) // White card-like background
             .padding(horizontal = 24.dp)
     ) {
-        Spacer(modifier = Modifier.height(16.dp))
-        Text(
-            text = "Registration Form",
-            style = MaterialTheme.appTypography.titleLarge.copy(
-                fontWeight = FontWeight.Bold,
-                color = MaterialTheme.appColors.textDark,
-                textAlign = androidx.compose.ui.text.style.TextAlign.Center
-            ),
-            modifier = Modifier.fillMaxWidth()
-        )
-        
         Spacer(modifier = Modifier.height(24.dp))
 
         // Step Indicator
@@ -147,19 +166,25 @@ fun CourseRegistrationContent(
         if (uiState.currentStep > 1) {
             OutlinedButton(
                 onClick = onPreviousClick,
-                modifier = Modifier.height(40.dp),
+                modifier = Modifier.height(44.dp),
                 shape = RoundedCornerShape(8.dp),
-                border = androidx.compose.foundation.BorderStroke(1.dp, Color.Gray)
+                border = androidx.compose.foundation.BorderStroke(1.dp, Color(0xFFBDBDBD)),
+                colors = ButtonDefaults.outlinedButtonColors(contentColor = Color(0xFF424242))
             ) {
                 Icon(
                     imageVector = Icons.AutoMirrored.Filled.ArrowBack,
                     contentDescription = null,
-                    modifier = Modifier.size(16.dp)
+                    modifier = Modifier.size(18.dp)
                 )
-                Spacer(modifier = Modifier.width(4.dp))
-                Text(text = "Back", color = Color.Gray)
+                Spacer(modifier = Modifier.width(8.dp))
+                Text(
+                    text = "Back",
+                    style = MaterialTheme.appTypography.labelLarge,
+                    fontWeight = FontWeight.Medium,
+                    fontSize = 16.sp
+                )
             }
-            Spacer(modifier = Modifier.height(16.dp))
+            Spacer(modifier = Modifier.height(24.dp))
         }
 
         category?.let {
@@ -167,25 +192,50 @@ fun CourseRegistrationContent(
                 Text(
                     text = it.description,
                     style = MaterialTheme.appTypography.bodyMedium,
-                    color = MaterialTheme.appColors.textSecondary,
+                    color = Color(0xFF616161),
                     modifier = Modifier.padding(bottom = 24.dp)
                 )
             }
 
             it.fields.filter { it.visible }.forEach { field ->
-                RegistrationField(field = field)
+                RegistrationFieldItem(
+                    field = field,
+                    currentValue = answers[field.name] ?: "",
+                    onValueChange = { newValue -> onAnswerUpdate(field.name, newValue) }
+                )
                 Spacer(modifier = Modifier.height(24.dp))
             }
         }
 
         Spacer(modifier = Modifier.height(16.dp))
 
-        OpenEdXButton(
-            text = if (uiState.currentStep == uiState.enrollmentForm.categories.size) "Submit" else "Next",
+        Button(
             onClick = onNextClick,
-            modifier = Modifier.fillMaxWidth().height(56.dp),
-            backgroundColor = MaterialTheme.appColors.primary
-        )
+            enabled = isNextEnabled,
+            modifier = Modifier
+                .fillMaxWidth()
+                .height(56.dp)
+                .border(
+                    width = 1.dp,
+                    color = if (isNextEnabled) Color(0xFF4CAF50) else Color(0xFFE0E0E0),
+                    shape = RoundedCornerShape(8.dp)
+                ),
+            shape = RoundedCornerShape(8.dp),
+            colors = ButtonDefaults.buttonColors(
+                backgroundColor = Color.White,
+                contentColor = Color(0xFF4CAF50),
+                disabledBackgroundColor = Color.White,
+                disabledContentColor = Color(0xFFBDBDBD)
+            ),
+            elevation = null
+        ) {
+            Text(
+                text = if (uiState.currentStep == uiState.enrollmentForm.categories.size) "Submit" else "Next",
+                style = MaterialTheme.appTypography.labelLarge,
+                fontSize = 18.sp,
+                fontWeight = FontWeight.Normal
+            )
+        }
 
         if (uiState.currentStep == 1 && uiState.enrollmentForm.infoSections.isNotEmpty()) {
             Spacer(modifier = Modifier.height(32.dp))
@@ -197,49 +247,141 @@ fun CourseRegistrationContent(
 }
 
 @Composable
-fun RegistrationField(field: org.openedx.core.domain.model.EnrollmentRegistrationField) {
-    Column {
-        Text(
-            text = field.label + if (field.required) " *" else "",
-            style = MaterialTheme.appTypography.bodyMedium.copy(fontWeight = FontWeight.Medium),
-            color = MaterialTheme.appColors.textDark
+fun RegistrationFieldItem(
+    field: EnrollmentRegistrationField,
+    currentValue: String,
+    onValueChange: (String) -> Unit
+) {
+    val options = remember(field.options) {
+        parseOptions(field.options)
+    }
+
+    var showDialog by remember { mutableStateOf(false) }
+
+    when (field.type) {
+        "text", "email", "textarea" -> {
+            VsRegistrationTextField(
+                label = field.label,
+                value = currentValue,
+                onValueChange = onValueChange,
+                placeholder = field.placeholder,
+                isRequired = field.required,
+                helperText = field.helper.takeIf { it.isNotEmpty() }
+            )
+        }
+        "select" -> {
+            val selectedOption = options.find { it.value == currentValue }
+            VsRegistrationSelectField(
+                label = field.label,
+                value = selectedOption?.label ?: "",
+                onClick = { showDialog = true },
+                placeholder = field.placeholder,
+                isRequired = field.required,
+                helperText = field.helper.takeIf { it.isNotEmpty() }
+            )
+        }
+        "radio" -> {
+            VsRegistrationRadioField(
+                label = field.label,
+                options = options,
+                selectedValue = currentValue,
+                onValueChange = onValueChange,
+                isRequired = field.required
+            )
+        }
+    }
+
+    if (showDialog) {
+        SelectionDialog(
+            title = field.label,
+            options = options,
+            onDismiss = { showDialog = false },
+            onSelect = { 
+                onValueChange(it.value)
+                showDialog = false
+            }
         )
-        Spacer(modifier = Modifier.height(8.dp))
-        
-        when (field.type) {
-            "text", "email", "textarea" -> {
-                OutlinedTextField(
-                    value = "",
-                    onValueChange = {},
+    }
+}
+
+@Composable
+fun SelectionDialog(
+    title: String,
+    options: List<EnrollmentRegistrationOption>,
+    onDismiss: () -> Unit,
+    onSelect: (EnrollmentRegistrationOption) -> Unit
+) {
+    var searchQuery by remember { mutableStateOf("") }
+    val filteredOptions = options.filter { it.label.contains(searchQuery, ignoreCase = true) }
+
+    Dialog(
+        onDismissRequest = onDismiss,
+        properties = DialogProperties(usePlatformDefaultWidth = false)
+    ) {
+        Surface(
+            modifier = Modifier
+                .fillMaxSize()
+                .background(Color.White),
+            color = Color.White
+        ) {
+            Column(modifier = Modifier.fillMaxSize().padding(16.dp)) {
+                Row(
                     modifier = Modifier.fillMaxWidth(),
-                    placeholder = { Text(text = field.placeholder) },
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.SpaceBetween
+                ) {
+                    Text(text = title, style = MaterialTheme.appTypography.titleMedium, color = Color.Black)
+                    IconButton(onClick = onDismiss) {
+                        Icon(imageVector = Icons.Default.Close, contentDescription = "Close", tint = Color.Black)
+                    }
+                }
+                
+                Spacer(modifier = Modifier.height(16.dp))
+                
+                OutlinedTextField(
+                    value = searchQuery,
+                    onValueChange = { searchQuery = it },
+                    modifier = Modifier.fillMaxWidth(),
+                    placeholder = { Text(text = "Search...") },
+                    leadingIcon = { Icon(imageVector = Icons.Default.Search, contentDescription = null) },
                     shape = RoundedCornerShape(12.dp)
                 )
-            }
-            "select" -> {
-                Box(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .height(56.dp)
-                        .border(1.dp, Color.LightGray, RoundedCornerShape(12.dp))
-                        .padding(horizontal = 16.dp),
-                    contentAlignment = Alignment.CenterStart
-                ) {
-                    Text(text = field.placeholder.ifEmpty { "Select " + field.label }, color = Color.Gray)
-                    Icon(
-                        painter = painterResource(id = org.openedx.course.R.drawable.course_ic_arrow_down),
-                        contentDescription = null,
-                        modifier = Modifier.align(Alignment.CenterEnd).size(24.dp)
-                    )
-                }
-            }
-            "radio" -> {
-                // Simplified radio rendering
-                Column {
-                    // Logic to render options if any
+
+                Spacer(modifier = Modifier.height(16.dp))
+
+                LazyColumn(modifier = Modifier.weight(1f)) {
+                    items(filteredOptions) { option ->
+                        Text(
+                            text = option.label,
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .clickable { onSelect(option) }
+                                .padding(vertical = 16.dp, horizontal = 8.dp),
+                            style = MaterialTheme.appTypography.bodyMedium,
+                            color = Color.Black
+                        )
+                        Divider(color = Color.LightGray)
+                    }
                 }
             }
         }
+    }
+}
+
+private fun parseOptions(options: Any?): List<EnrollmentRegistrationOption> {
+    if (options == null) return emptyList()
+    
+    if (options is List<*>) {
+        return options.filterIsInstance<EnrollmentRegistrationOption>()
+    }
+    
+    return try {
+        val gson = Gson()
+        val json = gson.toJson(options)
+        val type = object : TypeToken<List<EnrollmentRegistrationOption>>() {}.type
+        gson.fromJson(json, type)
+    } catch (e: Exception) {
+        emptyList()
     }
 }
 
@@ -247,72 +389,7 @@ fun RegistrationField(field: org.openedx.core.domain.model.EnrollmentRegistratio
 fun HtmlInfoSection(html: String) {
     AndroidView(factory = { context ->
         WebView(context).apply {
-            loadData(html, "text/html", "UTF-8")
+            loadDataWithBaseURL(null, html, "text/html", "UTF-8", null)
         }
     }, modifier = Modifier.fillMaxWidth().heightIn(min = 200.dp))
-}
-
-@Composable
-fun RegistrationStepper(
-    currentStep: Int,
-    totalSteps: Int
-) {
-    Row(
-        modifier = Modifier.fillMaxWidth(),
-        horizontalArrangement = Arrangement.Center,
-        verticalAlignment = Alignment.CenterVertically
-    ) {
-        for (i in 1..totalSteps) {
-            StepCircle(
-                step = i,
-                isCompleted = i < currentStep,
-                isSelected = i == currentStep
-            )
-            if (i < totalSteps) {
-                Divider(
-                    modifier = Modifier.width(60.dp),
-                    color = if (i < currentStep) MaterialTheme.appColors.primary else Color.LightGray,
-                    thickness = 2.dp
-                )
-            }
-        }
-    }
-}
-
-@Composable
-fun StepCircle(
-    step: Int,
-    isCompleted: Boolean,
-    isSelected: Boolean
-) {
-    Box(
-        modifier = Modifier
-            .size(32.dp)
-            .background(
-                color = if (isCompleted || isSelected) MaterialTheme.appColors.primary else Color.Transparent,
-                shape = CircleShape
-            )
-            .border(
-                width = 1.dp,
-                color = if (isCompleted || isSelected) MaterialTheme.appColors.primary else Color.LightGray,
-                shape = CircleShape
-            ),
-        contentAlignment = Alignment.Center
-    ) {
-        if (isCompleted) {
-            Icon(
-                painter = painterResource(id = coreR.drawable.ic_core_check),
-                contentDescription = null,
-                tint = Color.White,
-                modifier = Modifier.size(16.dp)
-            )
-        } else {
-            Text(
-                text = step.toString(),
-                color = if (isSelected) Color.White else Color.Gray,
-                fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Normal,
-                fontSize = 14.sp
-            )
-        }
-    }
 }

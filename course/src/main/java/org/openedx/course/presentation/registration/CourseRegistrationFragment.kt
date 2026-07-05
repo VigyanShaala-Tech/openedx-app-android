@@ -50,7 +50,8 @@ class CourseRegistrationFragment : Fragment() {
                     onAnswerUpdate = { fieldName, answer ->
                         viewModel.updateAnswer(fieldName, answer)
                     },
-                    isNextEnabled = viewModel.isStepValid()
+                    isNextEnabled = viewModel.isStepValid(),
+                    isFieldVisible = { field -> viewModel.isFieldVisible(field) }
                 )
             }
         }

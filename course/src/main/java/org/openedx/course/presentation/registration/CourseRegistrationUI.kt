@@ -106,6 +106,7 @@ fun VsRegistrationTextField(
     onValueChange: (String) -> Unit,
     placeholder: String,
     isRequired: Boolean = false,
+    isTextArea: Boolean = false,
     helperText: String? = null,
     errorText: String? = null
 ) {
@@ -150,7 +151,9 @@ fun VsRegistrationTextField(
                 textColor = Color.Black,
                 cursorColor = Color.Black
             ),
-            isError = errorText != null
+            isError = errorText != null,
+            minLines = if (isTextArea) 3 else 1,
+            maxLines = if (isTextArea) 5 else 1
         )
         if (errorText != null) {
             Text(
@@ -186,7 +189,7 @@ fun VsRegistrationSelectField(
             color = Color(0xFF424242)
         )
         if (!helperText.isNullOrEmpty()) {
-            Spacer(modifier = Modifier.height(8.dp))
+            Spacer(modifier = Modifier.height(4.dp))
             Text(
                 text = helperText,
                 style = MaterialTheme.appTypography.bodySmall,
@@ -198,17 +201,18 @@ fun VsRegistrationSelectField(
         Box(
             modifier = Modifier
                 .fillMaxWidth()
-                .height(56.dp)
+                .heightIn(min = 56.dp)
                 .background(Color.White, RoundedCornerShape(8.dp))
                 .border(1.dp, Color(0xFFE0E0E0), RoundedCornerShape(8.dp))
                 .clickable { onClick() }
-                .padding(horizontal = 16.dp),
+                .padding(horizontal = 16.dp, vertical = 12.dp),
             contentAlignment = Alignment.CenterStart
         ) {
             Text(
                 text = value.ifEmpty { placeholder },
                 style = MaterialTheme.appTypography.bodyMedium,
-                color = if (value.isEmpty()) Color(0xFF9E9E9E) else Color.Black
+                color = if (value.isEmpty()) Color(0xFF9E9E9E) else Color.Black,
+                modifier = Modifier.padding(end = 24.dp)
             )
             Icon(
                 imageVector = Icons.Default.ArrowDropDown,

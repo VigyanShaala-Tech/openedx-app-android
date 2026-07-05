@@ -51,7 +51,8 @@ fun CourseRegistrationScreen(
     onNextClick: () -> Unit,
     onPreviousClick: () -> Unit,
     onAnswerUpdate: (String, String) -> Unit,
-    isNextEnabled: Boolean
+    isNextEnabled: Boolean,
+    isFieldVisible: (EnrollmentRegistrationField) -> Boolean
 ) {
     val scaffoldState = rememberScaffoldState()
 
@@ -100,7 +101,7 @@ fun CourseRegistrationScreen(
                 )
             }
         },
-        backgroundColor = Color(0xFFF5F5F5) // Light grey background like in image
+        backgroundColor = Color(0xFFF5F5F5)
     ) { paddingValues ->
         HandleUIMessage(uiMessage = uiMessage, scaffoldState = scaffoldState)
 
@@ -123,12 +124,11 @@ fun CourseRegistrationScreen(
                         onNextClick = onNextClick,
                         onPreviousClick = onPreviousClick,
                         onAnswerUpdate = onAnswerUpdate,
-                        isNextEnabled = isNextEnabled
+                        isNextEnabled = isNextEnabled,
+                        isFieldVisible = isFieldVisible
                     )
                 }
-                is CourseRegistrationUIState.Error -> {
-                    // Handled by snackbars
-                }
+                is CourseRegistrationUIState.Error -> { }
             }
         }
     }
@@ -141,7 +141,8 @@ fun CourseRegistrationContent(
     onNextClick: () -> Unit,
     onPreviousClick: () -> Unit,
     onAnswerUpdate: (String, String) -> Unit,
-    isNextEnabled: Boolean
+    isNextEnabled: Boolean,
+    isFieldVisible: (EnrollmentRegistrationField) -> Boolean
 ) {
     val scrollState = rememberScrollState()
     val category = uiState.enrollmentForm.categories.getOrNull(uiState.currentStep - 1)
@@ -150,12 +151,11 @@ fun CourseRegistrationContent(
         modifier = Modifier
             .fillMaxSize()
             .verticalScroll(scrollState)
-            .background(Color.White) // White card-like background
+            .background(Color.White)
             .padding(horizontal = 24.dp)
     ) {
         Spacer(modifier = Modifier.height(24.dp))
 
-        // Step Indicator
         RegistrationStepper(
             currentStep = uiState.currentStep,
             totalSteps = uiState.enrollmentForm.categories.size
@@ -197,10 +197,11 @@ fun CourseRegistrationContent(
                 )
             }
 
-            it.fields.filter { it.visible }.forEach { field ->
+            it.fields.filter { isFieldVisible(it) }.forEach { field ->
                 RegistrationFieldItem(
                     field = field,
                     currentValue = answers[field.name] ?: "",
+                    answers = answers,
                     onValueChange = { newValue -> onAnswerUpdate(field.name, newValue) }
                 )
                 Spacer(modifier = Modifier.height(24.dp))
@@ -250,10 +251,11 @@ fun CourseRegistrationContent(
 fun RegistrationFieldItem(
     field: EnrollmentRegistrationField,
     currentValue: String,
+    answers: Map<String, String>,
     onValueChange: (String) -> Unit
 ) {
-    val options = remember(field.options) {
-        parseOptions(field.options)
+    val options = remember(field.options, answers[field.dependsOn]) {
+        parseOptions(field, answers)
     }
 
     var showDialog by remember { mutableStateOf(false) }
@@ -266,14 +268,23 @@ fun RegistrationFieldItem(
                 onValueChange = onValueChange,
                 placeholder = field.placeholder,
                 isRequired = field.required,
+                isTextArea = field.type == "textarea",
                 helperText = field.helper.takeIf { it.isNotEmpty() }
             )
         }
-        "select" -> {
-            val selectedOption = options.find { it.value == currentValue }
+        "select", "multi-select" -> {
+            val isMultiSelect = field.type == "multi-select"
+            val selectedLabels = if (isMultiSelect) {
+                currentValue.split(",").filter { it.isNotEmpty() }.map { valId ->
+                    options.find { it.value == valId }?.label ?: valId
+                }.joinToString(", ")
+            } else {
+                options.find { it.value == currentValue }?.label ?: currentValue
+            }
+            
             VsRegistrationSelectField(
                 label = field.label,
-                value = selectedOption?.label ?: "",
+                value = selectedLabels,
                 onClick = { showDialog = true },
                 placeholder = field.placeholder,
                 isRequired = field.required,
@@ -295,9 +306,12 @@ fun RegistrationFieldItem(
         SelectionDialog(
             title = field.label,
             options = options,
+            isMultiSelect = field.type == "multi-select",
+            maxSelections = field.maxSelections,
+            initialValue = currentValue,
             onDismiss = { showDialog = false },
             onSelect = { 
-                onValueChange(it.value)
+                onValueChange(it)
                 showDialog = false
             }
         )
@@ -308,11 +322,22 @@ fun RegistrationFieldItem(
 fun SelectionDialog(
     title: String,
     options: List<EnrollmentRegistrationOption>,
+    isMultiSelect: Boolean,
+    maxSelections: Int,
+    initialValue: String,
     onDismiss: () -> Unit,
-    onSelect: (EnrollmentRegistrationOption) -> Unit
+    onSelect: (String) -> Unit
 ) {
     var searchQuery by remember { mutableStateOf("") }
     val filteredOptions = options.filter { it.label.contains(searchQuery, ignoreCase = true) }
+    
+    val selectedValues = remember {
+        mutableStateListOf<String>().apply {
+            if (initialValue.isNotEmpty()) {
+                addAll(initialValue.split(","))
+            }
+        }
+    }
 
     Dialog(
         onDismissRequest = onDismiss,
@@ -351,16 +376,50 @@ fun SelectionDialog(
 
                 LazyColumn(modifier = Modifier.weight(1f)) {
                     items(filteredOptions) { option ->
-                        Text(
-                            text = option.label,
+                        Row(
                             modifier = Modifier
                                 .fillMaxWidth()
-                                .clickable { onSelect(option) }
+                                .clickable {
+                                    if (isMultiSelect) {
+                                        if (selectedValues.contains(option.value)) {
+                                            selectedValues.remove(option.value)
+                                        } else if (selectedValues.size < maxSelections) {
+                                            selectedValues.add(option.value)
+                                        }
+                                    } else {
+                                        onSelect(option.value)
+                                    }
+                                }
                                 .padding(vertical = 16.dp, horizontal = 8.dp),
-                            style = MaterialTheme.appTypography.bodyMedium,
-                            color = Color.Black
-                        )
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            if (isMultiSelect) {
+                                Checkbox(
+                                    checked = selectedValues.contains(option.value),
+                                    onCheckedChange = null,
+                                    colors = CheckboxDefaults.colors(checkedColor = MaterialTheme.appColors.primary)
+                                )
+                                Spacer(modifier = Modifier.width(8.dp))
+                            }
+                            Text(
+                                text = option.label,
+                                style = MaterialTheme.appTypography.bodyMedium,
+                                color = Color.Black
+                            )
+                        }
                         Divider(color = Color.LightGray)
+                    }
+                }
+                
+                if (isMultiSelect) {
+                    Spacer(modifier = Modifier.height(16.dp))
+                    Button(
+                        onClick = { onSelect(selectedValues.joinToString(",")) },
+                        modifier = Modifier.fillMaxWidth().height(48.dp),
+                        colors = ButtonDefaults.buttonColors(backgroundColor = MaterialTheme.appColors.primary),
+                        shape = RoundedCornerShape(8.dp)
+                    ) {
+                        Text(text = "Apply", color = Color.White)
                     }
                 }
             }
@@ -368,8 +427,8 @@ fun SelectionDialog(
     }
 }
 
-private fun parseOptions(options: Any?): List<EnrollmentRegistrationOption> {
-    if (options == null) return emptyList()
+private fun parseOptions(field: EnrollmentRegistrationField, answers: Map<String, String>): List<EnrollmentRegistrationOption> {
+    val options = field.options ?: return emptyList()
     
     if (options is List<*>) {
         return options.filterIsInstance<EnrollmentRegistrationOption>()
@@ -378,8 +437,14 @@ private fun parseOptions(options: Any?): List<EnrollmentRegistrationOption> {
     return try {
         val gson = Gson()
         val json = gson.toJson(options)
-        val type = object : TypeToken<List<EnrollmentRegistrationOption>>() {}.type
-        gson.fromJson(json, type)
+        if (field.dependsOn.isNotEmpty()) {
+            val type = object : TypeToken<Map<String, List<EnrollmentRegistrationOption>>>() {}.type
+            val map = gson.fromJson<Map<String, List<EnrollmentRegistrationOption>>>(json, type)
+            map[answers[field.dependsOn]] ?: emptyList()
+        } else {
+            val type = object : TypeToken<List<EnrollmentRegistrationOption>>() {}.type
+            gson.fromJson(json, type)
+        }
     } catch (e: Exception) {
         emptyList()
     }

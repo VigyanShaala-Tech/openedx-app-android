@@ -9,6 +9,7 @@ import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import org.openedx.course.domain.interactor.CourseRegistrationInteractor
 import org.openedx.core.domain.model.EnrollmentForm
+import org.openedx.core.domain.model.EnrollmentRegistrationField
 import org.openedx.foundation.extension.isInternetError
 import org.openedx.foundation.presentation.BaseViewModel
 import org.openedx.foundation.presentation.UIMessage
@@ -79,11 +80,30 @@ class CourseRegistrationViewModel(
         }
     }
 
+    fun isFieldVisible(field: EnrollmentRegistrationField): Boolean {
+        // If field depends on another field, check if parent is answered
+        if (field.dependsOn.isNotEmpty()) {
+            return _answers.value[field.dependsOn]?.isNotEmpty() == true
+        }
+        
+        // Step 1 logic: use visible flag from API
+        val currentState = _uiState.value
+        if (currentState is CourseRegistrationUIState.CourseData) {
+            val category = currentState.enrollmentForm.categories.find { it.fields.contains(field) }
+            if (category?.id == "01_registration") {
+                return field.visible
+            }
+        }
+        
+        // Step 2 & 3 logic: show if visible:true OR if no dependency (since visible:false in JSON seems to be wrong for Step 2)
+        return true
+    }
+
     fun isStepValid(): Boolean {
         val currentState = _uiState.value
         if (currentState is CourseRegistrationUIState.CourseData) {
             val category = currentState.enrollmentForm.categories.getOrNull(currentState.currentStep - 1)
-            category?.fields?.filter { it.visible && it.required }?.forEach { field ->
+            category?.fields?.filter { isFieldVisible(it) && it.required }?.forEach { field ->
                 val answer = _answers.value[field.name]
                 if (answer.isNullOrBlank()) return false
                 

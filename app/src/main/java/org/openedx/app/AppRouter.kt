@@ -362,10 +362,10 @@ class AppRouter :
         )
     }
 
-    override fun navigateToCourseRegistration(fm: FragmentManager, courseId: String) {
+    override fun navigateToCourseRegistration(fm: FragmentManager, courseId: String, formId: String) {
         replaceFragmentWithBackStack(
             fm,
-            org.openedx.course.presentation.registration.CourseRegistrationFragment.newInstance(courseId)
+            org.openedx.course.presentation.registration.CourseRegistrationFragment.newInstance(courseId, formId)
         )
     }
 

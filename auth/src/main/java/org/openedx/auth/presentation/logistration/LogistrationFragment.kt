@@ -691,4 +691,5 @@ private val mockCourse = Course(
     level = "Beginner",
     category = "STEM",
     instructorName = "Dr. Priya Sharma",
+    cohortFormId = "6c2d8d459edb4b37"
 )

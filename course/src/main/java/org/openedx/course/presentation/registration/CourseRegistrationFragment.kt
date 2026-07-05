@@ -18,7 +18,10 @@ import org.openedx.foundation.presentation.rememberWindowSize
 class CourseRegistrationFragment : Fragment() {
 
     private val viewModel by viewModel<CourseRegistrationViewModel> {
-        parametersOf(requireArguments().getString(ARG_COURSE_ID, ""))
+        parametersOf(
+            requireArguments().getString(ARG_COURSE_ID, ""),
+            requireArguments().getString(ARG_FORM_ID, "")
+        )
     }
 
     override fun onCreateView(
@@ -74,9 +77,14 @@ class CourseRegistrationFragment : Fragment() {
 
     companion object {
         private const val ARG_COURSE_ID = "courseId"
-        fun newInstance(courseId: String): CourseRegistrationFragment {
+        private const val ARG_FORM_ID = "formId"
+
+        fun newInstance(courseId: String, formId: String): CourseRegistrationFragment {
             val fragment = CourseRegistrationFragment()
-            fragment.arguments = bundleOf(ARG_COURSE_ID to courseId)
+            fragment.arguments = bundleOf(
+                ARG_COURSE_ID to courseId,
+                ARG_FORM_ID to formId
+            )
             return fragment
         }
     }

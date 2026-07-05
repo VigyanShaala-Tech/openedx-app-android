@@ -99,7 +99,8 @@ data class CourseEntity(
             isWishlisted = isWishlisted,
             instructorName = instructorName,
             category = category,
-            level = level
+            level = level,
+            cohortFormId = "6c2d8d459edb4b37"
         )
     }
 

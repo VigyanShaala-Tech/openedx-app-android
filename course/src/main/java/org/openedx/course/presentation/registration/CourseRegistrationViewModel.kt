@@ -21,13 +21,12 @@ import org.openedx.core.R as coreR
 
 class CourseRegistrationViewModel(
     val courseId: String,
+    val formId: String,
     private val interactor: CourseRegistrationInteractor,
     private val resourceManager: ResourceManager,
     private val notifier: DiscoveryNotifier,
     private val corePreferences: CorePreferences
 ) : BaseViewModel() {
-
-    private val formId = "6c2d8d459edb4b37" // Placeholder or from courseId
 
     private val _uiState = MutableStateFlow<CourseRegistrationUIState>(CourseRegistrationUIState.Loading)
     val uiState = _uiState.asStateFlow()

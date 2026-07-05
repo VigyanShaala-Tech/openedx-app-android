@@ -34,6 +34,7 @@ import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.CircularProgressIndicator
 import androidx.compose.material.Icon
@@ -89,6 +90,8 @@ import androidx.compose.ui.viewinterop.AndroidView
 import androidx.compose.ui.zIndex
 import androidx.core.os.bundleOf
 import androidx.fragment.app.Fragment
+import coil.compose.AsyncImage
+import coil.request.ImageRequest
 import org.koin.android.ext.android.inject
 import org.koin.androidx.viewmodel.ext.android.viewModel
 import org.koin.core.parameter.parametersOf
@@ -107,6 +110,8 @@ import org.openedx.core.ui.theme.appTypography
 import org.openedx.core.utils.EmailUtil
 import org.openedx.discovery.R
 import org.openedx.discovery.domain.model.Course
+import org.openedx.discovery.domain.model.Instructor
+import org.openedx.discovery.domain.model.Review
 import org.openedx.discovery.presentation.DiscoveryRouter
 import org.openedx.discovery.presentation.ui.ImageHeader
 import org.openedx.discovery.presentation.ui.WarningLabel
@@ -147,7 +152,8 @@ class CourseDetailsFragment : Fragment() {
                     navigateToRegistration?.let {
                         router.navigateToCourseRegistration(
                             requireActivity().supportFragmentManager,
-                            it
+                            it.first,
+                            it.second
                         )
                     }
                 }
@@ -188,15 +194,11 @@ class CourseDetailsFragment : Fragment() {
                                 }
 
                                 currentState.course.isEnrolled == true -> {
-                                    viewModel.enrollInACourse(
+                                    router.navigateToCourseOutline(
+                                        requireActivity().supportFragmentManager,
                                         currentState.course.courseId.orEmpty(),
-                                        currentState.course.name.orEmpty()
+                                        currentState.course.name.orEmpty(),
                                     )
-//                                    router.navigateToCourseOutline(
-//                                        requireActivity().supportFragmentManager,
-//                                        currentState.course.courseId.orEmpty(),
-//                                        currentState.course.name.orEmpty(),
-//                                    )
                                 }
 
                                 else -> {
@@ -386,8 +388,8 @@ private fun CourseDetailNativeContent(
     htmlBody: String,
     isWishlisted: Boolean,
     curriculum: Map<String, List<String>>,
-    instructors: List<org.openedx.discovery.domain.model.Instructor>,
-    reviews: List<org.openedx.discovery.domain.model.Review>,
+    instructors: List<Instructor>,
+    reviews: List<Review>,
     onButtonClick: () -> Unit,
     onWishlistClick: () -> Unit,
 ) {
@@ -427,7 +429,7 @@ private fun CourseDetailNativeContent(
                 courseImage = course.media?.image?.large,
                 courseName = course.name.orEmpty()
             )
-            androidx.compose.material.IconButton(
+            IconButton(
                 onClick = onWishlistClick,
                 modifier = Modifier
                     .align(Alignment.TopEnd)
@@ -651,7 +653,7 @@ private fun CourseDetailNativeContent(
                                     Box(
                                         modifier = Modifier
                                             .size(24.dp)
-                                            .clip(androidx.compose.foundation.shape.CircleShape)
+                                            .clip(CircleShape)
                                             .background(MaterialTheme.appColors.primary.copy(alpha = 0.1f)),
                                         contentAlignment = Alignment.Center
                                     ) {
@@ -693,8 +695,8 @@ private fun CourseDetailNativeContent(
                                 modifier = Modifier.fillMaxWidth().padding(vertical = 12.dp),
                                 verticalAlignment = Alignment.Top
                             ) {
-                                coil.compose.AsyncImage(
-                                    model = coil.request.ImageRequest.Builder(LocalContext.current)
+                                AsyncImage(
+                                    model = ImageRequest.Builder(LocalContext.current)
                                         .data(instructor.profilePicture.toImageLink(apiHostUrl))
                                         .error(CoreR.drawable.core_ic_default_profile_picture)
                                         .placeholder(CoreR.drawable.core_ic_default_profile_picture)
@@ -702,7 +704,7 @@ private fun CourseDetailNativeContent(
                                     contentDescription = null,
                                     modifier = Modifier
                                         .size(56.dp)
-                                        .clip(androidx.compose.foundation.shape.CircleShape)
+                                        .clip(CircleShape)
                                 )
                                 Spacer(Modifier.width(16.dp))
                                 Column {
@@ -980,5 +982,6 @@ private val mockCourse = Course(
     isWishlisted = false,
     instructorName = "Mahendra",
     category = "Art",
-    level = "Beginner"
+    level = "Beginner",
+    cohortFormId = "6c2d8d459edb4b37"
 )

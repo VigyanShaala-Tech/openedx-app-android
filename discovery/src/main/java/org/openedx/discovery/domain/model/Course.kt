@@ -31,5 +31,6 @@ data class Course(
     val isWishlisted: Boolean?,
     val instructorName: String?,
     val category: String?,
-    val level: String?
+    val level: String?,
+    val cohortFormId: String?
 )

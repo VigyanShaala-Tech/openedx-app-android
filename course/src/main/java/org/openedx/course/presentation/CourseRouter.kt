@@ -68,5 +68,5 @@ interface CourseRouter {
 
     fun navigateToCourseNotifications(fm: FragmentManager, courseId: String, courseTitle: String)
 
-    fun navigateToCourseRegistration(fm: FragmentManager, courseId: String)
+    fun navigateToCourseRegistration(fm: FragmentManager, courseId: String, formId: String)
 }

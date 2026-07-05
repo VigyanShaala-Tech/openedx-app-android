@@ -175,7 +175,7 @@ class LogistrationViewModel(
                     subject = subject
                 )
                 val mapped = resp.results.map { c ->
-                    org.openedx.discovery.domain.model.Course(
+                    Course(
                         id = c.id,
                         blocksUrl = "",
                         courseId = c.course_id ?: c.id,
@@ -206,13 +206,14 @@ class LogistrationViewModel(
                         startType = c.start_type ?: "",
                         overview = "",
                         isEnrolled = false,
-                        rating = c.rating.toString()?:"0",
-                        noOfReviews = c.no_of_reviews.toString()?:"0",
-                        enrollments = c.enrollments.toString()?:"0",
+                        rating = c.rating?.toString() ?: "0",
+                        noOfReviews = c.no_of_reviews?.toString() ?: "0",
+                        enrollments = c.enrollments?.toString() ?: "0",
                         isWishlisted = false,
                         level = c.level,
                         category = c.category,
                         instructorName = c.instructor_name,
+                        cohortFormId = null
                     )
                 }
                 _uiState.value = DiscoveryUIState.Courses(mapped)

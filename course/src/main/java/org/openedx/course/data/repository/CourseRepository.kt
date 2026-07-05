@@ -20,6 +20,7 @@ import org.openedx.core.domain.model.CourseEnrollmentDetails
 import org.openedx.core.domain.model.CourseProgress
 import org.openedx.core.domain.model.DashboardProgress
 import org.openedx.core.domain.model.CourseStructure
+import org.openedx.core.domain.model.EligibilityResult
 import org.openedx.core.domain.model.EnrollmentForm
 import org.openedx.core.domain.model.LeaderboardList
 import org.openedx.core.domain.model.NotificationListResponse
@@ -303,6 +304,14 @@ class CourseRepository(
 
     suspend fun getEnrollmentForm(formId: String): EnrollmentForm {
         return api.getEnrollmentForm(formId).mapToDomain()
+    }
+
+    suspend fun checkEligibility(formId: String, body: Map<String, String>): EligibilityResult {
+        val response = api.checkEligibility(formId, body)
+        return EligibilityResult(
+            isEligible = response.isEligible ?: false,
+            message = response.message ?: ""
+        )
     }
 
     suspend fun getCourseNotifications(courseId: String): NotificationListResponse {

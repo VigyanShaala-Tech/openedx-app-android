@@ -47,10 +47,11 @@ fun CourseRegistrationScreen(
     uiState: CourseRegistrationUIState,
     uiMessage: UIMessage?,
     answers: Map<String, String>,
+    eligibilityErrors: Map<String, String>,
     onBackClick: () -> Unit,
     onNextClick: () -> Unit,
     onPreviousClick: () -> Unit,
-    onAnswerUpdate: (String, String) -> Unit,
+    onAnswerUpdate: (EnrollmentRegistrationField, String) -> Unit,
     isNextEnabled: Boolean,
     isFieldVisible: (EnrollmentRegistrationField) -> Boolean
 ) {
@@ -121,6 +122,7 @@ fun CourseRegistrationScreen(
                     CourseRegistrationContent(
                         uiState = uiState,
                         answers = answers,
+                        eligibilityErrors = eligibilityErrors,
                         onNextClick = onNextClick,
                         onPreviousClick = onPreviousClick,
                         onAnswerUpdate = onAnswerUpdate,
@@ -138,9 +140,10 @@ fun CourseRegistrationScreen(
 fun CourseRegistrationContent(
     uiState: CourseRegistrationUIState.CourseData,
     answers: Map<String, String>,
+    eligibilityErrors: Map<String, String>,
     onNextClick: () -> Unit,
     onPreviousClick: () -> Unit,
-    onAnswerUpdate: (String, String) -> Unit,
+    onAnswerUpdate: (EnrollmentRegistrationField, String) -> Unit,
     isNextEnabled: Boolean,
     isFieldVisible: (EnrollmentRegistrationField) -> Boolean
 ) {
@@ -201,8 +204,9 @@ fun CourseRegistrationContent(
                 RegistrationFieldItem(
                     field = field,
                     currentValue = answers[field.name] ?: "",
+                    errorText = eligibilityErrors[field.name],
                     answers = answers,
-                    onValueChange = { newValue -> onAnswerUpdate(field.name, newValue) }
+                    onValueChange = { newValue -> onAnswerUpdate(field, newValue) }
                 )
                 Spacer(modifier = Modifier.height(24.dp))
             }
@@ -251,6 +255,7 @@ fun CourseRegistrationContent(
 fun RegistrationFieldItem(
     field: EnrollmentRegistrationField,
     currentValue: String,
+    errorText: String?,
     answers: Map<String, String>,
     onValueChange: (String) -> Unit
 ) {
@@ -269,7 +274,8 @@ fun RegistrationFieldItem(
                 placeholder = field.placeholder,
                 isRequired = field.required,
                 isTextArea = field.type == "textarea",
-                helperText = field.helper.takeIf { it.isNotEmpty() }
+                helperText = field.helper.takeIf { it.isNotEmpty() },
+                errorText = errorText
             )
         }
         "select", "multi-select" -> {
@@ -290,6 +296,14 @@ fun RegistrationFieldItem(
                 isRequired = field.required,
                 helperText = field.helper.takeIf { it.isNotEmpty() }
             )
+            if (errorText != null) {
+                Text(
+                    text = errorText,
+                    style = MaterialTheme.appTypography.labelSmall,
+                    color = Color.Red,
+                    modifier = Modifier.padding(top = 4.dp)
+                )
+            }
         }
         "radio" -> {
             VsRegistrationRadioField(
@@ -299,6 +313,14 @@ fun RegistrationFieldItem(
                 onValueChange = onValueChange,
                 isRequired = field.required
             )
+            if (errorText != null) {
+                Text(
+                    text = errorText,
+                    style = MaterialTheme.appTypography.labelSmall,
+                    color = Color.Red,
+                    modifier = Modifier.padding(top = 4.dp)
+                )
+            }
         }
     }
 

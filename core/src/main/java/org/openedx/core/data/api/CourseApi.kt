@@ -14,6 +14,7 @@ import org.openedx.core.data.model.CourseProgressResponse
 import org.openedx.core.data.model.CourseStructureModel
 import org.openedx.core.data.model.DashboardProgressResponse
 import org.openedx.core.data.model.DownloadCoursePreview
+import org.openedx.core.data.model.EligibilityResponse
 import org.openedx.core.data.model.EnrollmentFormResponse
 import org.openedx.core.data.model.EnrollmentStatus
 import org.openedx.core.data.model.HandoutsModel
@@ -145,6 +146,12 @@ interface CourseApi {
     suspend fun getEnrollmentForm(
         @Path("form_id") formId: String
     ): EnrollmentFormResponse
+
+    @POST("/api/v1/cohort-registration/{form_id}/check-eligibility/")
+    suspend fun checkEligibility(
+        @Path("form_id") formId: String,
+        @Body body: Map<String, String>
+    ): EligibilityResponse
 
     @GET("https://uat.vigyanshaala.com/api/v1/options/universities/")
     suspend fun getUniversities(): ResponseBody

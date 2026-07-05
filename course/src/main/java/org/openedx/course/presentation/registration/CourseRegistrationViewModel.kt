@@ -22,6 +22,8 @@ class CourseRegistrationViewModel(
     private val resourceManager: ResourceManager
 ) : BaseViewModel() {
 
+    private val formId = "6c2d8d459edb4b37" // Placeholder or from courseId
+
     private val _uiState = MutableStateFlow<CourseRegistrationUIState>(CourseRegistrationUIState.Loading)
     val uiState = _uiState.asStateFlow()
 
@@ -31,6 +33,9 @@ class CourseRegistrationViewModel(
     private val _answers = MutableStateFlow<Map<String, String>>(emptyMap())
     val answers = _answers.asStateFlow()
 
+    private val _eligibilityErrors = MutableStateFlow<Map<String, String>>(emptyMap())
+    val eligibilityErrors = _eligibilityErrors.asStateFlow()
+
     init {
         getEnrollmentForm()
     }
@@ -39,8 +44,6 @@ class CourseRegistrationViewModel(
         _uiState.update { CourseRegistrationUIState.Loading }
         viewModelScope.launch {
             try {
-                // TODO: Replace with actual form ID if needed, currently using a placeholder or courseId
-                val formId = "6c2d8d459edb4b37" // Placeholder
                 val enrollmentForm = interactor.getEnrollmentForm(formId)
                 _uiState.update {
                     CourseRegistrationUIState.CourseData(
@@ -55,8 +58,32 @@ class CourseRegistrationViewModel(
         }
     }
 
-    fun updateAnswer(fieldName: String, answer: String) {
+    fun updateAnswer(field: EnrollmentRegistrationField, answer: String) {
+        val fieldName = field.name
         _answers.update { it + (fieldName to answer) }
+        
+        // Clear previous error for this field
+        _eligibilityErrors.update { it - fieldName }
+
+        if (field.isEligibilityField && answer.isNotEmpty()) {
+            checkEligibility(fieldName)
+        }
+    }
+
+    private fun checkEligibility(triggerField: String) {
+        viewModelScope.launch {
+            try {
+                val body = _answers.value.toMutableMap()
+                body["triggerField"] = triggerField
+                val result = interactor.checkEligibility(formId, body)
+                if (!result.isEligible) {
+                    _eligibilityErrors.update { it + (triggerField to result.message) }
+                }
+            } catch (e: Exception) {
+                // Background check failed, maybe just log it
+                e.printStackTrace()
+            }
+        }
     }
 
     fun nextStep() {
@@ -103,12 +130,20 @@ class CourseRegistrationViewModel(
         val currentState = _uiState.value
         if (currentState is CourseRegistrationUIState.CourseData) {
             val category = currentState.enrollmentForm.categories.getOrNull(currentState.currentStep - 1)
-            category?.fields?.filter { isFieldVisible(it) && it.required }?.forEach { field ->
-                val answer = _answers.value[field.name]
-                if (answer.isNullOrBlank()) return false
-                
-                if (field.type == "email" && !android.util.Patterns.EMAIL_ADDRESS.matcher(answer).matches()) {
-                    return false
+            val stepFields = category?.fields ?: return false
+            
+            // Check required fields and eligibility errors
+            stepFields.forEach { field ->
+                if (isFieldVisible(field)) {
+                    if (field.required && _answers.value[field.name].isNullOrBlank()) return false
+                    if (_eligibilityErrors.value[field.name] != null) return false
+                    
+                    if (field.type == "email") {
+                        val answer = _answers.value[field.name] ?: ""
+                        if (answer.isNotEmpty() && !android.util.Patterns.EMAIL_ADDRESS.matcher(answer).matches()) {
+                            return false
+                        }
+                    }
                 }
             }
             return true

@@ -32,12 +32,14 @@ class CourseRegistrationFragment : Fragment() {
                 val uiState by viewModel.uiState.collectAsState()
                 val uiMessage by viewModel.uiMessage.collectAsState(initial = null)
                 val answers by viewModel.answers.collectAsState()
+                val eligibilityErrors by viewModel.eligibilityErrors.collectAsState()
 
                 CourseRegistrationScreen(
                     windowSize = windowSize,
                     uiState = uiState,
                     uiMessage = uiMessage,
                     answers = answers,
+                    eligibilityErrors = eligibilityErrors,
                     onBackClick = {
                         requireActivity().supportFragmentManager.popBackStack()
                     },
@@ -47,8 +49,8 @@ class CourseRegistrationFragment : Fragment() {
                     onPreviousClick = {
                         viewModel.previousStep()
                     },
-                    onAnswerUpdate = { fieldName, answer ->
-                        viewModel.updateAnswer(fieldName, answer)
+                    onAnswerUpdate = { field, answer ->
+                        viewModel.updateAnswer(field, answer)
                     },
                     isNextEnabled = viewModel.isStepValid(),
                     isFieldVisible = { field -> viewModel.isFieldVisible(field) }

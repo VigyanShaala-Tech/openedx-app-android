@@ -147,6 +147,11 @@ interface CourseApi {
         @Path("form_id") formId: String
     ): EnrollmentFormResponse
 
+    @POST("/api/v1/cohort-registration/{form_id}/prefill/")
+    suspend fun getPrefillData(
+        @Path("form_id") formId: String
+    ): Map<String, Any>
+
     @POST("/api/v1/cohort-registration/{form_id}/check-eligibility/")
     suspend fun checkEligibility(
         @Path("form_id") formId: String,

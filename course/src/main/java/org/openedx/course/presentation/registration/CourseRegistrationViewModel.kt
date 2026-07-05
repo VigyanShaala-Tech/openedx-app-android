@@ -51,6 +51,37 @@ class CourseRegistrationViewModel(
                         currentStep = 1
                     )
                 }
+                
+                // Call prefill API
+                try {
+                    val prefillData = interactor.getPrefillData(formId)
+                    val processedAnswers = mutableMapOf<String, String>()
+                    
+                    prefillData.forEach { (key, value) ->
+                        if (value != "null") {
+                            if (value is List<*>) {
+                                processedAnswers[key] = value.joinToString(",")
+                            } else {
+                                processedAnswers[key] = value.toString()
+                            }
+                        }
+                    }
+                    
+                    if (processedAnswers.isNotEmpty()) {
+                        _answers.update { it + processedAnswers }
+                        
+                        // Check eligibility for prefilled fields if they are eligibility fields
+                        val allFields = enrollmentForm.categories.flatMap { it.fields }
+                        processedAnswers.forEach { (key, value) ->
+                            val field = allFields.find { it.name == key }
+                            if (field?.isEligibilityField == true && value.isNotEmpty()) {
+                                checkEligibility(key)
+                            }
+                        }
+                    }
+                } catch (e: Exception) {
+                    e.printStackTrace()
+                }
             } catch (e: Exception) {
                 _uiState.update { CourseRegistrationUIState.Error }
                 handleError(e)
@@ -80,7 +111,6 @@ class CourseRegistrationViewModel(
                     _eligibilityErrors.update { it + (triggerField to result.message) }
                 }
             } catch (e: Exception) {
-                // Background check failed, maybe just log it
                 e.printStackTrace()
             }
         }

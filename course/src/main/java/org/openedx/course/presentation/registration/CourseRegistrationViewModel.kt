@@ -10,6 +10,8 @@ import kotlinx.coroutines.launch
 import org.openedx.course.domain.interactor.CourseRegistrationInteractor
 import org.openedx.core.domain.model.EnrollmentForm
 import org.openedx.core.domain.model.EnrollmentRegistrationField
+import org.openedx.core.system.notifier.CourseDashboardUpdate
+import org.openedx.core.system.notifier.DiscoveryNotifier
 import org.openedx.foundation.extension.isInternetError
 import org.openedx.foundation.presentation.BaseViewModel
 import org.openedx.foundation.presentation.UIMessage
@@ -19,7 +21,8 @@ import org.openedx.core.R as coreR
 class CourseRegistrationViewModel(
     val courseId: String,
     private val interactor: CourseRegistrationInteractor,
-    private val resourceManager: ResourceManager
+    private val resourceManager: ResourceManager,
+    private val notifier: DiscoveryNotifier
 ) : BaseViewModel() {
 
     private val formId = "6c2d8d459edb4b37" // Placeholder or from courseId
@@ -202,10 +205,12 @@ class CourseRegistrationViewModel(
                         }
                     }
                     
-                    interactor.submitRegistration(formId, submissionBody)
+                    val response = interactor.submitRegistration(formId, submissionBody)
                     
                     _uiState.update { currentState.copy(isSubmitting = false) }
+                    _uiMessage.emit(UIMessage.SnackBarMessage(response.thanksMessage))
                     _uiState.update { CourseRegistrationUIState.SubmissionSuccess }
+                    notifier.send(CourseDashboardUpdate())
                 } catch (e: Exception) {
                     _uiState.update { currentState.copy(isSubmitting = false) }
                     handleError(e)

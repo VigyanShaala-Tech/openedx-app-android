@@ -19,6 +19,7 @@ import org.openedx.core.domain.model.CourseDatesResult
 import org.openedx.core.domain.model.CourseEnrollmentDetails
 import org.openedx.core.domain.model.CourseProgress
 import org.openedx.core.domain.model.DashboardProgress
+import org.openedx.core.data.model.RegistrationSubmitResponse
 import org.openedx.core.domain.model.CourseStructure
 import org.openedx.core.domain.model.EligibilityResult
 import org.openedx.core.domain.model.EnrollmentForm
@@ -318,8 +319,8 @@ class CourseRepository(
         )
     }
 
-    suspend fun submitRegistration(formId: String, body: Map<String, Any>) {
-        api.submitRegistration(formId, body)
+    suspend fun submitRegistration(formId: String, body: Map<String, Any>): RegistrationSubmitResponse {
+        return api.submitRegistration(formId, body)
     }
 
     suspend fun getCourseNotifications(courseId: String): NotificationListResponse {

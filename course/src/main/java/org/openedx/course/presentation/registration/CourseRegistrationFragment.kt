@@ -3,6 +3,7 @@ package org.openedx.course.presentation.registration
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.ViewGroup
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.collectAsState
 import androidx.compose.ui.platform.ComposeView
@@ -33,6 +34,12 @@ class CourseRegistrationFragment : Fragment() {
                 val uiMessage by viewModel.uiMessage.collectAsState(initial = null)
                 val answers by viewModel.answers.collectAsState()
                 val eligibilityErrors by viewModel.eligibilityErrors.collectAsState()
+
+                LaunchedEffect(uiState) {
+                    if (uiState is CourseRegistrationUIState.SubmissionSuccess) {
+                        requireActivity().supportFragmentManager.popBackStack()
+                    }
+                }
 
                 CourseRegistrationScreen(
                     windowSize = windowSize,

@@ -52,6 +52,13 @@ class CourseDetailsViewModel(
 
     init {
         getCourseDetail()
+        viewModelScope.launch {
+            notifier.notifier.collect { event ->
+                if (event is CourseDashboardUpdate) {
+                    getCourseDetail()
+                }
+            }
+        }
     }
 
     fun toggleWishlist() {

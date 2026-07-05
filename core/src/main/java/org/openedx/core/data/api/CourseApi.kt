@@ -21,6 +21,7 @@ import org.openedx.core.data.model.HandoutsModel
 import org.openedx.core.data.model.JoinMeetingResponse
 import org.openedx.core.data.model.LeaderboardResponse
 import org.openedx.core.data.model.LiveClassResponse
+import org.openedx.core.data.model.RegistrationSubmitResponse
 import org.openedx.core.data.model.ResetCourseDates
 import org.openedx.core.data.model.UserRankingResponse
 import retrofit2.http.Body
@@ -150,7 +151,7 @@ interface CourseApi {
     @POST("/api/v1/cohort-registration/{form_id}/prefill/")
     suspend fun getPrefillData(
         @Path("form_id") formId: String
-    ): Map<String, Any>
+    ): Map<String, @JvmSuppressWildcards Any>
 
     @POST("/api/v1/cohort-registration/{form_id}/check-eligibility/")
     suspend fun checkEligibility(
@@ -161,8 +162,8 @@ interface CourseApi {
     @POST("/api/v1/cohort-registration/{form_id}/prepare-auth/")
     suspend fun submitRegistration(
         @Path("form_id") formId: String,
-        @Body body: Map<String, Any>
-    ): ResponseBody
+        @Body body: Map<String, @JvmSuppressWildcards Any>
+    ): RegistrationSubmitResponse
 
     @GET("https://uat.vigyanshaala.com/api/v1/options/universities/")
     suspend fun getUniversities(): ResponseBody

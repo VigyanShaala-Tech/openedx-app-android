@@ -1,5 +1,6 @@
 package org.openedx.course.domain.interactor
 
+import org.openedx.core.data.model.RegistrationSubmitResponse
 import org.openedx.core.domain.model.EligibilityResult
 import org.openedx.core.domain.model.EnrollmentForm
 import org.openedx.course.data.repository.CourseRepository
@@ -19,7 +20,7 @@ class CourseRegistrationInteractor(
         return repository.checkEligibility(formId, body)
     }
 
-    suspend fun submitRegistration(formId: String, body: Map<String, Any>) {
-        repository.submitRegistration(formId, body)
+    suspend fun submitRegistration(formId: String, body: Map<String, Any>): RegistrationSubmitResponse {
+        return repository.submitRegistration(formId, body)
     }
 }

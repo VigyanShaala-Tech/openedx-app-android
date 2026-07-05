@@ -308,7 +308,12 @@ class CourseRepository(
     }
 
     suspend fun getPrefillData(formId: String, body: Map<String, String>): Map<String, Any> {
-        return api.getPrefillData(formId, body)
+        val response = api.getPrefillData(formId, body)
+        return if (response.prefill) {
+            response.answers
+        } else {
+            emptyMap()
+        }
     }
 
     suspend fun checkEligibility(formId: String, body: Map<String, String>): EligibilityResult {

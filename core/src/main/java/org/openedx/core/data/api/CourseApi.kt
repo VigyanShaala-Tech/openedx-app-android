@@ -21,6 +21,7 @@ import org.openedx.core.data.model.HandoutsModel
 import org.openedx.core.data.model.JoinMeetingResponse
 import org.openedx.core.data.model.LeaderboardResponse
 import org.openedx.core.data.model.LiveClassResponse
+import org.openedx.core.data.model.PrefillResponse
 import org.openedx.core.data.model.RegistrationSubmitResponse
 import org.openedx.core.data.model.ResetCourseDates
 import org.openedx.core.data.model.UserRankingResponse
@@ -152,7 +153,7 @@ interface CourseApi {
     suspend fun getPrefillData(
         @Path("form_id") formId: String,
         @Body body: Map<String, String>
-    ): Map<String, @JvmSuppressWildcards Any>
+    ): PrefillResponse
 
     @POST("/api/v1/cohort-registration/{form_id}/check-eligibility/")
     suspend fun checkEligibility(

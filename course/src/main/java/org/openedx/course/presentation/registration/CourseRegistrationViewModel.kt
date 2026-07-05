@@ -67,7 +67,7 @@ class CourseRegistrationViewModel(
                     val processedAnswers = mutableMapOf<String, String>()
                     
                     prefillData.forEach { (key, value) ->
-                        if (value != "null") {
+                        if (value != null && value.toString() != "null") {
                             if (value is List<*>) {
                                 processedAnswers[key] = value.joinToString(",")
                             } else {

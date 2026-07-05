@@ -141,12 +141,13 @@ class CourseDetailsFragment : Fragment() {
 
                 val uiState by viewModel.uiState.observeAsState()
                 val uiMessage by viewModel.uiMessage.observeAsState()
+                val navigateToRegistration by viewModel.navigateToRegistration.observeAsState()
 
-                LaunchedEffect(uiState) {
-                    if (uiState is CourseDetailsUIState.NavigateToRegistration) {
+                LaunchedEffect(navigateToRegistration) {
+                    navigateToRegistration?.let {
                         router.navigateToCourseRegistration(
                             requireActivity().supportFragmentManager,
-                            (uiState as CourseDetailsUIState.NavigateToRegistration).courseId
+                            it
                         )
                     }
                 }
@@ -354,8 +355,6 @@ internal fun CourseDetailsScreen(
                                 )
                             }
                         }
-
-                        is CourseDetailsUIState.NavigateToRegistration -> {}
                     }
                     if (!isInternetConnectionShown.value && !hasInternetConnection) {
                         OfflineModeDialog(

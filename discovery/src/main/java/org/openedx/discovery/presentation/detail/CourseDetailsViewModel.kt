@@ -45,6 +45,10 @@ class CourseDetailsViewModel(
     val uiMessage: LiveData<UIMessage>
         get() = _uiMessage
 
+    private val _navigateToRegistration = SingleEventLiveData<String>()
+    val navigateToRegistration: LiveData<String>
+        get() = _navigateToRegistration
+
     private var course: Course? = null
 
     val hasInternetConnection: Boolean
@@ -130,7 +134,7 @@ class CourseDetailsViewModel(
     fun enrollInACourse(id: String, title: String) {
         viewModelScope.launch {
             if (/* TODO: condition for dynamic registration form */ true) {
-                _uiState.value = CourseDetailsUIState.NavigateToRegistration(id)
+                _navigateToRegistration.value = id
             } else {
                 try {
                     val courseData = _uiState.value

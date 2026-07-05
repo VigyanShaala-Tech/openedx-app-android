@@ -14,6 +14,4 @@ sealed class CourseDetailsUIState {
         CourseDetailsUIState()
 
     data object Loading : CourseDetailsUIState()
-
-    data class NavigateToRegistration(val courseId: String) : CourseDetailsUIState()
 }

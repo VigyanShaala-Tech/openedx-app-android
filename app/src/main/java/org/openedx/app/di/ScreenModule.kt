@@ -286,7 +286,7 @@ val screenModule = module {
     factory { org.openedx.course.domain.interactor.CourseRegistrationInteractor(get()) }
 
     viewModel { (courseId: String) ->
-        org.openedx.course.presentation.registration.CourseRegistrationViewModel(courseId, get(), get(), get())
+        org.openedx.course.presentation.registration.CourseRegistrationViewModel(courseId, get(), get(), get(), get())
     }
 
     viewModel { (pathId: String, infoType: String) ->

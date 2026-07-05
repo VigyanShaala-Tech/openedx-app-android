@@ -12,8 +12,8 @@ class CourseRegistrationInteractor(
         return repository.getEnrollmentForm(formId)
     }
 
-    suspend fun getPrefillData(formId: String): Map<String, Any> {
-        return repository.getPrefillData(formId)
+    suspend fun getPrefillData(formId: String, body: Map<String, String>): Map<String, Any> {
+        return repository.getPrefillData(formId, body)
     }
 
     suspend fun checkEligibility(formId: String, body: Map<String, String>): EligibilityResult {

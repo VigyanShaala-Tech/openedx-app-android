@@ -150,7 +150,8 @@ interface CourseApi {
 
     @POST("/api/v1/cohort-registration/{form_id}/prefill/")
     suspend fun getPrefillData(
-        @Path("form_id") formId: String
+        @Path("form_id") formId: String,
+        @Body body: Map<String, String>
     ): Map<String, @JvmSuppressWildcards Any>
 
     @POST("/api/v1/cohort-registration/{form_id}/check-eligibility/")

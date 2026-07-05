@@ -8,6 +8,7 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import org.openedx.course.domain.interactor.CourseRegistrationInteractor
+import org.openedx.core.data.storage.CorePreferences
 import org.openedx.core.domain.model.EnrollmentForm
 import org.openedx.core.domain.model.EnrollmentRegistrationField
 import org.openedx.core.system.notifier.CourseDashboardUpdate
@@ -22,7 +23,8 @@ class CourseRegistrationViewModel(
     val courseId: String,
     private val interactor: CourseRegistrationInteractor,
     private val resourceManager: ResourceManager,
-    private val notifier: DiscoveryNotifier
+    private val notifier: DiscoveryNotifier,
+    private val corePreferences: CorePreferences
 ) : BaseViewModel() {
 
     private val formId = "6c2d8d459edb4b37" // Placeholder or from courseId
@@ -57,7 +59,11 @@ class CourseRegistrationViewModel(
                 
                 // Call prefill API
                 try {
-                    val prefillData = interactor.getPrefillData(formId)
+                    val body = mutableMapOf<String, String>()
+                    corePreferences.user?.email?.let {
+                        body["email"] = it
+                    }
+                    val prefillData = interactor.getPrefillData(formId, body)
                     val processedAnswers = mutableMapOf<String, String>()
                     
                     prefillData.forEach { (key, value) ->

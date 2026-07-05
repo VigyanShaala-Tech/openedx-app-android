@@ -307,8 +307,8 @@ class CourseRepository(
         return api.getEnrollmentForm(formId).mapToDomain()
     }
 
-    suspend fun getPrefillData(formId: String): Map<String, Any> {
-        return api.getPrefillData(formId)
+    suspend fun getPrefillData(formId: String, body: Map<String, String>): Map<String, Any> {
+        return api.getPrefillData(formId, body)
     }
 
     suspend fun checkEligibility(formId: String, body: Map<String, String>): EligibilityResult {

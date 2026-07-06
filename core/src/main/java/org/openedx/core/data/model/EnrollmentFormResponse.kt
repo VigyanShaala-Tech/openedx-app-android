@@ -29,6 +29,7 @@ data class EnrollmentFormResponse(
             courseId = courseId ?: "",
             pageTitle = pageTitle ?: "",
             infoSections = infoSections ?: "",
+            eligibilityNote = eligibilityNote ?: "",
             categories = result?.map { it.mapToDomain() } ?: emptyList()
         )
     }

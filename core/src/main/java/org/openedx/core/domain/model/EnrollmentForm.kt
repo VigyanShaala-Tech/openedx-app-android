@@ -5,6 +5,7 @@ data class EnrollmentForm(
     val courseId: String,
     val pageTitle: String,
     val infoSections: String,
+    val eligibilityNote: String,
     val categories: List<RegistrationCategory>
 )
 
@@ -30,7 +31,8 @@ data class EnrollmentRegistrationField(
     val allowOther: Boolean,
     val helper: String,
     val dependsOn: String,
-    val maxSelections: Int
+    val maxSelections: Int,
+    val isEditable: Boolean = true
 )
 
 data class EnrollmentRegistrationOption(

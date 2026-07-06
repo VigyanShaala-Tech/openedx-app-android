@@ -48,47 +48,79 @@ class CourseRegistrationViewModel(
         _uiState.update { CourseRegistrationUIState.Loading }
         viewModelScope.launch {
             try {
-                val enrollmentForm = interactor.getEnrollmentForm(formId)
-                _uiState.update {
-                    CourseRegistrationUIState.CourseData(
-                        enrollmentForm = enrollmentForm,
-                        currentStep = 1
-                    )
-                }
+                var enrollmentForm = interactor.getEnrollmentForm(formId)
                 
                 // Call prefill API
-                try {
+                val processedAnswers = try {
                     val body = mutableMapOf<String, String>()
                     corePreferences.user?.email?.let {
                         body["email"] = it
                     }
                     val prefillData = interactor.getPrefillData(formId, body)
-                    val processedAnswers = mutableMapOf<String, String>()
+                    val map = mutableMapOf<String, String>()
                     
                     prefillData.forEach { (key, value) ->
                         if (value != null && value.toString() != "null") {
                             if (value is List<*>) {
-                                processedAnswers[key] = value.joinToString(",")
+                                map[key] = value.joinToString(",")
                             } else {
-                                processedAnswers[key] = value.toString()
+                                map[key] = value.toString()
                             }
                         }
                     }
-                    
-                    if (processedAnswers.isNotEmpty()) {
-                        _answers.update { it + processedAnswers }
+                    map
+                } catch (_: Exception) {
+                    mutableMapOf<String, String>()
+                }
+
+                val finalAnswers = processedAnswers.toMutableMap()
+                val nonEditableFields = mutableSetOf<String>()
+
+                // Check for full_name and email to prefill from user profile if not in prefill data
+                val allFields = enrollmentForm.categories.flatMap { it.fields }
+                allFields.forEach { field ->
+                    if (field.name == "full_name" || field.name == "email") {
+                        var value = finalAnswers[field.name]
+                        if (value.isNullOrBlank()) {
+                            value = if (field.name == "full_name") corePreferences.user?.name else corePreferences.user?.email
+                        }
                         
-                        // Check eligibility for prefilled fields if they are eligibility fields
-                        val allFields = enrollmentForm.categories.flatMap { it.fields }
-                        processedAnswers.forEach { (key, value) ->
-                            val field = allFields.find { it.name == key }
-                            if (field?.isEligibilityField == true && value.isNotEmpty()) {
-                                checkEligibility(key)
-                            }
+                        if (!value.isNullOrBlank()) {
+                            finalAnswers[field.name] = value
+                            nonEditableFields.add(field.name)
                         }
                     }
-                } catch (e: Exception) {
-                    e.printStackTrace()
+                }
+
+                // Update isEditable in enrollmentForm domain model
+                val updatedCategories = enrollmentForm.categories.map { category ->
+                    category.copy(fields = category.fields.map { field ->
+                        if (nonEditableFields.contains(field.name)) {
+                            field.copy(isEditable = false)
+                        } else {
+                            field
+                        }
+                    })
+                }
+                enrollmentForm = enrollmentForm.copy(categories = updatedCategories)
+
+                if (finalAnswers.isNotEmpty()) {
+                    _answers.update { it + finalAnswers }
+                    
+                    // Check eligibility for prefilled fields if they are eligibility fields
+                    finalAnswers.forEach { (key, value) ->
+                        val field = allFields.find { it.name == key }
+                        if (field?.isEligibilityField == true && value.isNotEmpty()) {
+                            checkEligibility(key)
+                        }
+                    }
+                }
+
+                _uiState.update {
+                    CourseRegistrationUIState.CourseData(
+                        enrollmentForm = enrollmentForm,
+                        currentStep = 1
+                    )
                 }
             } catch (e: Exception) {
                 _uiState.update { CourseRegistrationUIState.Error }

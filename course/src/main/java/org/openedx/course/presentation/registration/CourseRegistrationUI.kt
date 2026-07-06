@@ -108,7 +108,8 @@ fun VsRegistrationTextField(
     isRequired: Boolean = false,
     isTextArea: Boolean = false,
     helperText: String? = null,
-    errorText: String? = null
+    errorText: String? = null,
+    enabled: Boolean = true
 ) {
     Column(modifier = Modifier.fillMaxWidth()) {
         Text(
@@ -143,13 +144,16 @@ fun VsRegistrationTextField(
                     color = Color(0xFF9E9E9E)
                 )
             },
+            enabled = enabled,
             shape = RoundedCornerShape(8.dp),
             colors = TextFieldDefaults.outlinedTextFieldColors(
                 unfocusedBorderColor = Color(0xFFE0E0E0),
                 focusedBorderColor = Color(0xFFE0E0E0),
-                backgroundColor = Color.White,
+                backgroundColor = if (enabled) Color.White else Color(0xFFF5F5F5),
                 textColor = Color.Black,
-                cursorColor = Color.Black
+                cursorColor = Color.Black,
+                disabledTextColor = Color(0xFF757575),
+                disabledBorderColor = Color(0xFFE0E0E0)
             ),
             isError = errorText != null,
             minLines = if (isTextArea) 3 else 1,
@@ -173,7 +177,8 @@ fun VsRegistrationSelectField(
     onClick: () -> Unit,
     placeholder: String,
     isRequired: Boolean = false,
-    helperText: String? = null
+    helperText: String? = null,
+    enabled: Boolean = true
 ) {
     Column(modifier = Modifier.fillMaxWidth()) {
         Text(
@@ -202,24 +207,26 @@ fun VsRegistrationSelectField(
             modifier = Modifier
                 .fillMaxWidth()
                 .heightIn(min = 56.dp)
-                .background(Color.White, RoundedCornerShape(8.dp))
+                .background(if (enabled) Color.White else Color(0xFFF5F5F5), RoundedCornerShape(8.dp))
                 .border(1.dp, Color(0xFFE0E0E0), RoundedCornerShape(8.dp))
-                .clickable { onClick() }
+                .clickable(enabled = enabled) { onClick() }
                 .padding(horizontal = 16.dp, vertical = 12.dp),
             contentAlignment = Alignment.CenterStart
         ) {
             Text(
                 text = value.ifEmpty { placeholder },
                 style = MaterialTheme.appTypography.bodyMedium,
-                color = if (value.isEmpty()) Color(0xFF9E9E9E) else Color.Black,
+                color = if (value.isEmpty()) Color(0xFF9E9E9E) else if (enabled) Color.Black else Color(0xFF757575),
                 modifier = Modifier.padding(end = 24.dp)
             )
-            Icon(
-                imageVector = Icons.Default.ArrowDropDown,
-                contentDescription = null,
-                modifier = Modifier.align(Alignment.CenterEnd).size(32.dp),
-                tint = Color.Black
-            )
+            if (enabled) {
+                Icon(
+                    imageVector = Icons.Default.ArrowDropDown,
+                    contentDescription = null,
+                    modifier = Modifier.align(Alignment.CenterEnd).size(32.dp),
+                    tint = Color.Black
+                )
+            }
         }
     }
 }
@@ -230,7 +237,8 @@ fun VsRegistrationRadioField(
     options: List<org.openedx.core.domain.model.EnrollmentRegistrationOption>,
     selectedValue: String,
     onValueChange: (String) -> Unit,
-    isRequired: Boolean = false
+    isRequired: Boolean = false,
+    enabled: Boolean = true
 ) {
     Column(modifier = Modifier.fillMaxWidth()) {
         Text(
@@ -247,7 +255,12 @@ fun VsRegistrationRadioField(
         )
         Spacer(modifier = Modifier.height(8.dp))
         Row(
-            modifier = Modifier.fillMaxWidth(),
+            modifier = Modifier
+                .fillMaxWidth()
+                .background(
+                    color = if (enabled) Color.Transparent else Color(0xFFF5F5F5),
+                    shape = RoundedCornerShape(8.dp)
+                ),
             horizontalArrangement = Arrangement.Start,
             verticalAlignment = Alignment.CenterVertically
         ) {
@@ -255,21 +268,23 @@ fun VsRegistrationRadioField(
                 Row(
                     verticalAlignment = Alignment.CenterVertically,
                     modifier = Modifier
-                        .clickable { onValueChange(option.value) }
+                        .clickable(enabled = enabled) { onValueChange(option.value) }
                         .padding(end = 16.dp)
                 ) {
                     RadioButton(
                         selected = selectedValue == option.value,
-                        onClick = { onValueChange(option.value) },
+                        onClick = if (enabled) { { onValueChange(option.value) } } else null,
+                        enabled = enabled,
                         colors = RadioButtonDefaults.colors(
                             selectedColor = Color(0xFF2196F3),
-                            unselectedColor = Color(0xFF757575)
+                            unselectedColor = Color(0xFF757575),
+                            disabledColor = if (selectedValue == option.value) Color(0xFF2196F3) else Color(0xFFBDBDBD)
                         )
                     )
                     Text(
                         text = option.label,
                         style = MaterialTheme.appTypography.bodyMedium,
-                        color = Color.Black,
+                        color = if (enabled) Color.Black else Color(0xFF757575),
                         modifier = Modifier.padding(start = 4.dp)
                     )
                 }

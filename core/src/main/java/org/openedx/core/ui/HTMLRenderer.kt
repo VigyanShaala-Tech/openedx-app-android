@@ -237,11 +237,15 @@ private fun AnnotatedString.Builder.AppendNodes(nodes: List<Node>) {
 private fun AnnotatedString.Builder.AppendElement(element: Element) {
     when (element.tagName()) {
         "br" -> append("\n")
-        "strong" -> withStyle(SpanStyle(fontWeight = FontWeight.Bold)) {
+        "strong", "b" -> withStyle(SpanStyle(fontWeight = FontWeight.Bold)) {
             AppendNodes(element.childNodes())
         }
 
-        "em" -> withStyle(SpanStyle(fontStyle = FontStyle.Italic)) {
+        "em", "i" -> withStyle(SpanStyle(fontStyle = FontStyle.Italic)) {
+            AppendNodes(element.childNodes())
+        }
+
+        "u" -> withStyle(SpanStyle(textDecoration = TextDecoration.Underline)) {
             AppendNodes(element.childNodes())
         }
 

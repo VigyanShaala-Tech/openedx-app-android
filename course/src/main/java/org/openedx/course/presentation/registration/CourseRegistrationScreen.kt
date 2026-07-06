@@ -37,6 +37,7 @@ import org.openedx.core.domain.model.EnrollmentRegistrationField
 import org.openedx.core.domain.model.EnrollmentRegistrationOption
 import org.openedx.core.ui.HandleUIMessage
 import org.openedx.core.ui.OpenEdXButton
+import org.openedx.core.ui.RenderHtmlContent
 import org.openedx.core.ui.theme.appColors
 import org.openedx.core.ui.theme.appTypography
 import org.openedx.foundation.presentation.UIMessage
@@ -59,53 +60,68 @@ fun CourseRegistrationScreen(
 ) {
     val scaffoldState = rememberScaffoldState()
 
-    BackHandler(enabled = uiState is CourseRegistrationUIState.CourseData && uiState.currentStep > 1) {
+    BackHandler(enabled = (uiState is CourseRegistrationUIState.CourseData && uiState.currentStep > 1)) {
         onPreviousClick()
     }
 
     Scaffold(
         scaffoldState = scaffoldState,
         topBar = {
-            Box(
+            Column(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .height(130.dp)
                     .background(Color.White)
+                    .statusBarsPadding()
             ) {
-                IconButton(
-                    onClick = onBackClick,
-                    modifier = Modifier
-                        .statusBarsPadding()
-                        .padding(top = 16.dp, start = 16.dp)
-                        .size(32.dp)
-                ) {
-                    Icon(
-                        Icons.AutoMirrored.Filled.ArrowBack,
-                        contentDescription = "Back",
-                        tint = Color.Black
+                Box(modifier = Modifier.fillMaxWidth().height(60.dp)) {
+                    IconButton(
+                        onClick = onBackClick,
+                        modifier = Modifier
+                            .align(Alignment.CenterStart)
+                            .padding(start = 16.dp)
+                            .size(32.dp)
+                    ) {
+                        Icon(
+                            Icons.AutoMirrored.Filled.ArrowBack,
+                            contentDescription = "Back",
+                            tint = Color.Black
+                        )
+                    }
+                    Image(
+                        painter = painterResource(id = coreR.drawable.core_ic_logo),
+                        contentDescription = "Vigyan Shaala",
+                        modifier = Modifier
+                            .align(Alignment.Center)
+                            .height(60.dp),
+                        contentScale = ContentScale.Fit
                     )
                 }
-                Image(
-                    painter = painterResource(id = coreR.drawable.core_ic_logo),
-                    contentDescription = "Vigyan Shaala",
+                Column(
                     modifier = Modifier
-                        .statusBarsPadding()
-                        .align(Alignment.Center)
-                        .height(60.dp)
-                        .padding(top = 16.dp),
-                    contentScale = ContentScale.Fit
-                )
-                Text(
-                    text = "Registration Form",
-                    style = MaterialTheme.appTypography.titleLarge.copy(
-                        fontWeight = FontWeight.Bold,
-                        color = Color(0xFF2C3E50),
-                        textAlign = TextAlign.Center
-                    ),
-                    modifier = Modifier
-                        .align(Alignment.BottomCenter)
-                        .padding(bottom = 16.dp)
-                )
+                        .fillMaxWidth()
+                        .padding(start = 16.dp, end = 16.dp, bottom = 16.dp),
+                    horizontalAlignment = Alignment.CenterHorizontally
+                ) {
+                    Text(
+                        text = "Registration Form",
+                        style = MaterialTheme.appTypography.titleLarge.copy(
+                            fontWeight = FontWeight.Bold,
+                            color = Color(0xFF2C3E50),
+                            textAlign = TextAlign.Center
+                        )
+                    )
+
+                    val eligibilityNote = (uiState as? CourseRegistrationUIState.CourseData)?.enrollmentForm?.eligibilityNote
+                    if (!eligibilityNote.isNullOrEmpty()) {
+                        Spacer(modifier = Modifier.height(4.dp))
+                        Box(
+                            modifier = Modifier.fillMaxWidth(),
+                            contentAlignment = Alignment.Center
+                        ) {
+                            RenderHtmlContent(html = eligibilityNote)
+                        }
+                    }
+                }
             }
         },
         backgroundColor = Color(0xFFF5F5F5)
@@ -288,7 +304,8 @@ fun RegistrationFieldItem(
                 isRequired = field.required,
                 isTextArea = field.type == "textarea",
                 helperText = field.helper.takeIf { it.isNotEmpty() },
-                errorText = errorText
+                errorText = errorText,
+                enabled = field.isEditable
             )
         }
         "select", "multi-select" -> {
@@ -307,7 +324,8 @@ fun RegistrationFieldItem(
                 onClick = { showDialog = true },
                 placeholder = field.placeholder,
                 isRequired = field.required,
-                helperText = field.helper.takeIf { it.isNotEmpty() }
+                helperText = field.helper.takeIf { it.isNotEmpty() },
+                enabled = field.isEditable
             )
             if (errorText != null) {
                 Text(
@@ -324,7 +342,8 @@ fun RegistrationFieldItem(
                 options = options,
                 selectedValue = currentValue,
                 onValueChange = onValueChange,
-                isRequired = field.required
+                isRequired = field.required,
+                enabled = field.isEditable
             )
             if (errorText != null) {
                 Text(
@@ -480,7 +499,7 @@ private fun parseOptions(field: EnrollmentRegistrationField, answers: Map<String
             val type = object : TypeToken<List<EnrollmentRegistrationOption>>() {}.type
             gson.fromJson(json, type)
         }
-    } catch (e: Exception) {
+    } catch (_: Exception) {
         emptyList()
     }
 }

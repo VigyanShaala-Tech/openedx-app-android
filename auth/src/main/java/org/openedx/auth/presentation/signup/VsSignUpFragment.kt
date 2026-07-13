@@ -24,7 +24,9 @@ class VsSignUpFragment : Fragment() {
     private val viewModel by viewModel<VsSignUpViewModel> {
         parametersOf(
             requireArguments().getString(ARG_COURSE_ID, ""),
-            requireArguments().getString(ARG_INFO_TYPE, "")
+            requireArguments().getString(ARG_INFO_TYPE, ""),
+            requireArguments().getString(ARG_EMAIL, ""),
+            requireArguments().getString(ARG_NAME, "")
         )
     }
     private val signUpViewModel by viewModel<SignUpViewModel> {
@@ -137,11 +139,21 @@ class VsSignUpFragment : Fragment() {
     companion object {
         private const val ARG_COURSE_ID = "courseId"
         private const val ARG_INFO_TYPE = "info_type"
-        fun newInstance(courseId: String?, infoType: String?): VsSignUpFragment {
+        private const val ARG_EMAIL = "email"
+        private const val ARG_NAME = "name"
+
+        fun newInstance(
+            courseId: String?,
+            infoType: String?,
+            email: String? = null,
+            name: String? = null
+        ): VsSignUpFragment {
             val fragment = VsSignUpFragment()
             fragment.arguments = bundleOf(
                 ARG_COURSE_ID to courseId,
-                ARG_INFO_TYPE to infoType
+                ARG_INFO_TYPE to infoType,
+                ARG_EMAIL to email,
+                ARG_NAME to name
             )
             return fragment
         }

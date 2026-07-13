@@ -160,7 +160,7 @@ val screenModule = module {
         )
     }
 
-    viewModel { (courseId: String?, infoType: String?) ->
+    viewModel { (courseId: String?, infoType: String?, email: String?, name: String?) ->
         VsSignUpViewModel(
             get(),
             get(),
@@ -170,7 +170,9 @@ val screenModule = module {
             get(),
             get(),
             courseId,
-            infoType
+            infoType,
+            email,
+            name
         )
     }
 

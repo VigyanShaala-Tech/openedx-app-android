@@ -273,20 +273,23 @@ private fun LogistrationScreen(
                             modifier = Modifier
                                 .weight(1f)
                                 .height(48.dp),
-                            text = stringResource(id = CoreR.string.core_sign_in),
+                            text = stringResource(id = CoreR.string.core_log_in),
                             onClick = onSignInClick,
-                            borderColor = Color.Transparent, 
-                            textColor = Color(0xFF37474F)
+                            borderColor = MaterialTheme.appColors.primary,
+                            textColor = MaterialTheme.appColors.primary,
+                            backgroundColor = Color.White
                         )
                         if (isRegistrationEnabled) {
                             Spacer(Modifier.width(16.dp))
-                            OpenEdXButton(
+                            OpenEdXOutlinedButton(
                                 modifier = Modifier
-                                    .weight(1.2f)
+                                    .weight(1f)
                                     .height(48.dp),
                                 text = stringResource(id = CoreR.string.core_register),
                                 onClick = onRegisterClick,
-                                backgroundColor = MaterialTheme.appColors.primary
+                                borderColor = MaterialTheme.appColors.primary,
+                                textColor = MaterialTheme.appColors.primary,
+                                backgroundColor = Color.White
                             )
                         }
                     }
@@ -372,93 +375,97 @@ private fun LogistrationScreen(
                             )
                         }
 
-                        val focusManager = LocalFocusManager.current
-                        var isSearchFocused by remember { mutableStateOf(false) }
-                        Column {
-                            Spacer(Modifier.height(24.dp))
-                            SearchBar(
-                                modifier = Modifier
-                                    .testTag("tf_discovery_search")
-                                    .fillMaxWidth()
-                                    .height(48.dp)
-                                    .onFocusChanged { isSearchFocused = it.isFocused }
-                                    .clip(RoundedCornerShape(8.dp))
-                                    .border(
-                                        width = if (isSearchFocused) 2.dp else 1.dp,
-                                        color = if (isSearchFocused) MaterialTheme.appColors.primary else Color.Transparent,
-                                        shape = RoundedCornerShape(8.dp)
-                                    )
-                                    .background(Color(0xFFF1F4F6)),
-                                label = "Search courses...",
-                                requestFocus = false,
-                                searchValue = textFieldValue,
-                                clearOnSubmit = true,
-                                keyboardActions = {
-                                    focusManager.clearFocus()
-                                    onSearchSubmit(textFieldValue.text)
-                                },
-                                onValueChanged = { text ->
-                                    textFieldValue = text
-                                },
-                                onClearValue = {
-                                    textFieldValue = TextFieldValue("")
-                                }
-                            )
-                            Spacer(Modifier.height(16.dp))
-                            LogistrationFilters(
-                                onFiltersChanged = onFiltersChanged
-                            )
-                        }
+                        if (origin.equals("RECOMMENDED", true)) {
+                            val focusManager = LocalFocusManager.current
+                            var isSearchFocused by remember { mutableStateOf(false) }
+                            Column {
+                                Spacer(Modifier.height(24.dp))
+                                SearchBar(
+                                    modifier = Modifier
+                                        .testTag("tf_discovery_search")
+                                        .fillMaxWidth()
+                                        .height(48.dp)
+                                        .onFocusChanged { isSearchFocused = it.isFocused }
+                                        .clip(RoundedCornerShape(8.dp))
+                                        .border(
+                                            width = if (isSearchFocused) 2.dp else 1.dp,
+                                            color = if (isSearchFocused) MaterialTheme.appColors.primary else Color.Transparent,
+                                            shape = RoundedCornerShape(8.dp)
+                                        )
+                                        .background(Color(0xFFF1F4F6)),
+                                    label = "Search courses...",
+                                    requestFocus = false,
+                                    searchValue = textFieldValue,
+                                    clearOnSubmit = true,
+                                    keyboardActions = {
+                                        focusManager.clearFocus()
+                                        onSearchSubmit(textFieldValue.text)
+                                    },
+                                    onValueChanged = { text ->
+                                        textFieldValue = text
+                                    },
+                                    onClearValue = {
+                                        textFieldValue = TextFieldValue("")
+                                    }
+                                )
+                                Spacer(Modifier.height(16.dp))
+                                LogistrationFilters(
+                                    onFiltersChanged = onFiltersChanged
+                                )
+                            }
 
-                        Spacer(Modifier.height(16.dp))
-                        if (state is DiscoveryUIState.Courses) {
-                            Text(
-                                text = "Showing ${state.courses.size} of ${state.courses.size} courses",
-                                style = MaterialTheme.appTypography.bodySmall.copy(
-                                    fontWeight = FontWeight.SemiBold,
-                                    fontSize = 12.sp
-                                ),
-                                color = MaterialTheme.appColors.primary,
-                                modifier = Modifier.fillMaxWidth(),
-                                textAlign = TextAlign.Start
-                            )
+                            Spacer(Modifier.height(16.dp))
+                            if (state is DiscoveryUIState.Courses) {
+                                Text(
+                                    text = "Showing ${state.courses.size} of ${state.courses.size} courses",
+                                    style = MaterialTheme.appTypography.bodySmall.copy(
+                                        fontWeight = FontWeight.SemiBold,
+                                        fontSize = 12.sp
+                                    ),
+                                    color = MaterialTheme.appColors.primary,
+                                    modifier = Modifier.fillMaxWidth(),
+                                    textAlign = TextAlign.Start
+                                )
+                            }
                         }
                     }
                 }
 
-                when (state) {
-                    is DiscoveryUIState.Loading -> {
-                        item {
-                            Box(
-                                modifier = Modifier
-                                    .fillMaxWidth()
-                                    .padding(vertical = 32.dp),
-                                contentAlignment = Alignment.Center
-                            ) {
-                                CircularProgressIndicator(color = MaterialTheme.appColors.primary)
-                            }
-                        }
-                    }
-
-                    is DiscoveryUIState.Courses -> {
-                        items(state.courses) { course ->
-                            LogistrationCourseItem(
-                                apiHostUrl = apiHostUrl,
-                                course = course,
-                                onClick = {
-                                    onItemClick(course)
-                                }
-                            )
-                        }
-                        item {
-                            if (canLoadMore) {
+                if (origin.equals("RECOMMENDED", true)) {
+                    when (state) {
+                        is DiscoveryUIState.Loading -> {
+                            item {
                                 Box(
                                     modifier = Modifier
                                         .fillMaxWidth()
-                                        .padding(vertical = 16.dp),
+                                        .padding(vertical = 32.dp),
                                     contentAlignment = Alignment.Center
                                 ) {
                                     CircularProgressIndicator(color = MaterialTheme.appColors.primary)
+                                }
+                            }
+                        }
+
+                        is DiscoveryUIState.Courses -> {
+                            items(state.courses) { course ->
+                                LogistrationCourseItem(
+                                    apiHostUrl = apiHostUrl,
+                                    course = course,
+                                    onClick = {
+                                        onItemClick(course)
+                                    }
+                                )
+                            }
+                            item {
+                                if (canLoadMore) {
+                                    Box(
+                                        modifier = Modifier
+                                            .fillMaxWidth()
+                                            .padding(vertical = 16.dp),
+                                        contentAlignment = Alignment.Center
+                                    ) {
+                                        CircularProgressIndicator(color = MaterialTheme.appColors.primary)
+                                    }
                                 }
                             }
                         }

@@ -17,7 +17,13 @@ interface AuthRouter {
 
     fun navigateToLogistration(fm: FragmentManager, courseId: String?, origin: String?)
 
-    fun navigateToSignUp(fm: FragmentManager, courseId: String?, infoType: String?)
+    fun navigateToSignUp(
+        fm: FragmentManager,
+        courseId: String?,
+        infoType: String?,
+        email: String? = null,
+        name: String? = null
+    )
 
     fun navigateToRestorePassword(fm: FragmentManager)
 

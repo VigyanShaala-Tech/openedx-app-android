@@ -123,7 +123,7 @@ fun VsSignUpView(
                     modifier = Modifier
                         .statusBarsPadding()
                         .align(Alignment.Center)
-                        .height(70.dp)
+                        .height(100.dp)
                         .padding(top = 16.dp),
                     contentScale = ContentScale.Fit
                 )
@@ -334,7 +334,10 @@ fun VsSignUpView(
                 }
                 Text(
                     text = annotatedText,
-                    style = MaterialTheme.appTypography.bodySmall.copy(color = MaterialTheme.appColors.textSecondary),
+                    style = MaterialTheme.appTypography.bodyMedium.copy(
+                        color = MaterialTheme.appColors.textSecondary,
+                        fontSize = 14.sp
+                    ),
                     modifier = Modifier
                         .weight(1f)
                         .clickable {

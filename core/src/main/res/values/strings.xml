@@ -113,6 +113,7 @@
 
     <string name="core_register">Sign Up</string>
     <string name="core_sign_in">Sign in</string>
+    <string name="core_log_in">Log In</string>
 
     <!--    Accessibility-->
     <string name="core_accessibility_user_profile_image">%1$s profile image</string>

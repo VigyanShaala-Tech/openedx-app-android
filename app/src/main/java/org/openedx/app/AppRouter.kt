@@ -100,10 +100,16 @@ class AppRouter :
         replaceFragmentWithBackStack(fm, SignInFragment.newInstance(courseId, infoType))
     }
 
-    override fun navigateToSignUp(fm: FragmentManager, courseId: String?, infoType: String?) {
+    override fun navigateToSignUp(
+        fm: FragmentManager,
+        courseId: String?,
+        infoType: String?,
+        email: String?,
+        name: String?
+    ) {
         // Comment out current signup screen redirection and redirect to new created signup screen
         // replaceFragmentWithBackStack(fm, SignUpFragment.newInstance(courseId, infoType))
-        replaceFragmentWithBackStack(fm, VsSignUpFragment.newInstance(courseId, infoType))
+        replaceFragmentWithBackStack(fm, VsSignUpFragment.newInstance(courseId, infoType, email, name))
     }
 
     override fun navigateToLogistration(fm: FragmentManager, courseId: String?) {
@@ -166,6 +172,10 @@ class AppRouter :
     // region DiscoveryRouter
     override fun navigateToCourseDetail(fm: FragmentManager, courseId: String) {
         replaceFragmentWithBackStack(fm, CourseDetailsFragment.newInstance(courseId))
+    }
+
+    override fun navigateToSignUp(fm: FragmentManager, courseId: String?, infoType: String?) {
+        navigateToSignUp(fm, courseId, infoType, null, null)
     }
 
     override fun navigateToResetPassword(fm: FragmentManager, token: String) {

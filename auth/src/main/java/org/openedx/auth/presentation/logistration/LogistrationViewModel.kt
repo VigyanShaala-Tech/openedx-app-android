@@ -72,7 +72,11 @@ class LogistrationViewModel(
 
     init {
         logLogistrationScreenEvent()
-        getCoursesList()
+        if (courseId.isEmpty() && !discoveryTypeWebView) {
+            searchCatalogCourses()
+        } else {
+            getCoursesList()
+        }
     }
 
     fun getCoursesList(

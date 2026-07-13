@@ -154,13 +154,12 @@ class SignInViewModel(
     fun socialAuth(fragment: Fragment, authType: AuthType) {
         _uiState.update { it.copy(showProgress = true) }
         viewModelScope.launch {
-            withContext(Dispatchers.IO) {
+            val response = withContext(Dispatchers.IO) {
                 runCatching {
                     oAuthHelper.socialAuth(fragment, authType)
-                }
+                }.getOrNull()
             }
-                .getOrNull()
-                .checkToken()
+            response.checkToken(fragment.parentFragmentManager)
         }
     }
 
@@ -290,12 +289,23 @@ class SignInViewModel(
         oAuthHelper.clear()
     }
 
-    private suspend fun exchangeToken(token: String, authType: AuthType) {
+    private suspend fun exchangeToken(
+        token: String,
+        authType: AuthType,
+        name: String = "",
+        email: String = "",
+        fm: FragmentManager
+    ) {
         runCatching {
             interactor.loginSocial(token, authType)
         }.onFailure { error ->
             logger.e { "Social login error: $error" }
-            onUnknownError()
+            if (authType == AuthType.GOOGLE) {
+                router.navigateToSignUp(fm, courseId, infoType, email, name)
+                _uiState.update { it.copy(showProgress = false) }
+            } else {
+                onUnknownError()
+            }
         }.onSuccess {
             logger.d { "Social login (${authType.methodName}) success" }
             _uiState.update { it.copy(loginSuccess = true) }
@@ -321,10 +331,10 @@ class SignInViewModel(
         }
     }
 
-    private suspend fun SocialAuthResponse?.checkToken() {
-        this?.accessToken?.let { token ->
-            if (token.isNotEmpty()) {
-                exchangeToken(token, authType)
+    private suspend fun SocialAuthResponse?.checkToken(fm: FragmentManager) {
+        this?.let { response ->
+            if (response.accessToken.isNotEmpty()) {
+                exchangeToken(response.accessToken, response.authType, response.name, response.email, fm)
             } else {
                 _uiState.update { it.copy(showProgress = false) }
             }

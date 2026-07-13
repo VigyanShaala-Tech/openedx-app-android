@@ -8,6 +8,7 @@ import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import org.openedx.auth.data.model.AuthType
 import org.openedx.auth.data.model.VsRegisterRequest
 import org.openedx.auth.domain.interactor.AuthInteractor
 import org.openedx.auth.domain.model.SocialAuthResponse
@@ -34,10 +35,22 @@ class VsSignUpViewModel(
     private val config: Config,
     val courseId: String?,
     val infoType: String?,
+    val initialEmail: String?,
+    val initialName: String?,
 ) : BaseViewModel() {
 
     private val _uiState = MutableStateFlow(VsSignUpUIState(
-        tosUrl = config.getAgreement(Locale.getDefault().language).tosUrl
+        tosUrl = config.getAgreement(Locale.getDefault().language).tosUrl,
+        socialAuth = if (!initialEmail.isNullOrBlank() || !initialName.isNullOrBlank()) {
+            SocialAuthResponse(
+                accessToken = "",
+                name = initialName ?: "",
+                email = initialEmail ?: "",
+                authType = AuthType.GOOGLE // Assuming Google for now as per requirement
+            )
+        } else {
+            null
+        }
     ))
     val uiState = _uiState.asStateFlow()
 

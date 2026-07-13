@@ -102,7 +102,7 @@ internal fun LoginScreen(
                     modifier = Modifier
                         .statusBarsPadding()
                         .align(Alignment.Center)
-                        .height(70.dp)
+                        .height(100.dp)
                         .padding(top = 16.dp),
                     contentScale = ContentScale.Fit
                 )
@@ -121,7 +121,7 @@ internal fun LoginScreen(
         ) {
             Spacer(modifier = Modifier.height(24.dp))
             Text(
-                text = "Sign in",
+                text = "Log In",
                 style = MaterialTheme.appTypography.headlineSmall.copy(
                     fontWeight = FontWeight.Bold,
                     color = MaterialTheme.appColors.textDark,
@@ -130,7 +130,7 @@ internal fun LoginScreen(
             )
             Spacer(modifier = Modifier.height(8.dp))
             Text(
-                text = "Welcome back! Sign in to access your courses.",
+                text = "Welcome back! Log in to access your courses.",
                 style = MaterialTheme.appTypography.bodyMedium.copy(
                     color = MaterialTheme.appColors.textSecondary,
                     fontSize = 16.sp
@@ -160,7 +160,7 @@ internal fun LoginScreen(
                     )
                     Spacer(modifier = Modifier.width(12.dp))
                     Text(
-                        text = "Sign in with Google",
+                        text = "Continue with Google",
                         style = MaterialTheme.appTypography.bodyLarge.copy(
                             fontWeight = FontWeight.Medium,
                             color = MaterialTheme.appColors.textDark
@@ -206,86 +206,47 @@ private fun AuthForm(
 ) {
     var login by rememberSaveable { mutableStateOf("") }
     var password by rememberSaveable { mutableStateOf("") }
-    var mobile by rememberSaveable { mutableStateOf("") }
-    var otp by rememberSaveable { mutableStateOf("") }
-    var isOtpSent by rememberSaveable { mutableStateOf(false) }
-    var isEmailTab by rememberSaveable { mutableStateOf(true) }
     val keyboardController = LocalSoftwareKeyboardController.current
     var isEmailError by rememberSaveable { mutableStateOf(false) }
     var isPasswordError by rememberSaveable { mutableStateOf(false) }
-    var isMobileError by rememberSaveable { mutableStateOf(false) }
-    var isOtpError by rememberSaveable { mutableStateOf(false) }
 
     Column(horizontalAlignment = Alignment.CenterHorizontally) {
         if (!state.isBrowserLoginEnabled) {
-            AuthMethodTabs(
-                isEmailSelected = isEmailTab,
-                onSelectEmail = { isEmailTab = true },
-                onSelectOtp = { isEmailTab = false }
+            SignInInputField(
+                label = "Email Address",
+                value = login,
+                onValueChange = {
+                    login = it
+                    isEmailError = false
+                },
+                placeholder = "kalpna.chawla@example.com",
+                leadingIcon = Icons.Default.PersonOutline,
+                errorText = if (isEmailError) stringResource(id = R.string.auth_error_empty_username_email) else null,
+                imeAction = ImeAction.Next
             )
-            Spacer(modifier = Modifier.height(24.dp))
-            if (isEmailTab) {
-                SignInInputField(
-                    label = "Email Address",
-                    value = login,
-                    onValueChange = {
-                        login = it
-                        isEmailError = false
-                    },
-                    placeholder = "kalpna.chawla@example.com",
-                    leadingIcon = Icons.Default.PersonOutline,
-                    errorText = if (isEmailError) stringResource(id = R.string.auth_error_empty_username_email) else null,
-                    imeAction = ImeAction.Next
-                )
 
-                Spacer(modifier = Modifier.height(18.dp))
-                SignInInputField(
-                    label = "Password",
-                    value = password,
-                    onValueChange = {
-                        password = it
-                        isPasswordError = false
-                    },
-                    placeholder = "Enter your password",
-                    isPassword = true,
-                    errorText = if (isPasswordError) stringResource(id = R.string.auth_error_empty_password) else null,
-                    imeAction = ImeAction.Done,
-                    onImeAction = {
-                        keyboardController?.hide()
-                        if (login.isNotEmpty() && password.isNotEmpty()) {
-                            onEvent(AuthEvent.SignIn(login = login, password = password))
-                        } else {
-                            isEmailError = login.isEmpty()
-                            isPasswordError = password.isEmpty()
-                        }
+            Spacer(modifier = Modifier.height(18.dp))
+            SignInInputField(
+                label = "Password",
+                value = password,
+                onValueChange = {
+                    password = it
+                    isPasswordError = false
+                },
+                placeholder = "Enter your password",
+                isPassword = true,
+                errorText = if (isPasswordError) stringResource(id = R.string.auth_error_empty_password) else null,
+                imeAction = ImeAction.Done,
+                onImeAction = {
+                    keyboardController?.hide()
+                    if (login.isNotEmpty() && password.isNotEmpty()) {
+                        onEvent(AuthEvent.SignIn(login = login, password = password))
+                    } else {
+                        isEmailError = login.isEmpty()
+                        isPasswordError = password.isEmpty()
                     }
-                )
-            } else {
-                MobileOtpSection(
-                    isOtpSent = isOtpSent,
-                    mobile = mobile,
-                    otp = otp,
-                    onMobileChanged = {
-                        mobile = it
-                        isMobileError = false
-                    },
-                    onOtpChanged = {
-                        otp = it
-                        isOtpError = false
-                    },
-                    isMobileError = isMobileError,
-                    isOtpError = isOtpError,
-                    secondsLeft = state.otpSecondsLeft,
-                    canResend = state.otpCanResend,
-                    onResend = {
-                        if (mobile.isNotEmpty()) {
-                            onEvent(AuthEvent.SendOtp(mobile))
-                        } else {
-                            isMobileError = true
-                        }
-                    }
-                )
-            }
+                }
+            )
         }
 
         Row(
@@ -294,7 +255,7 @@ private fun AuthForm(
                 .padding(top = 12.dp, bottom = 24.dp),
             horizontalArrangement = Arrangement.End
         ) {
-            if (!state.isBrowserLoginEnabled && isEmailTab) {
+            if (!state.isBrowserLoginEnabled) {
                 Text(
                     modifier = Modifier
                         .testTag("txt_forgot_password")
@@ -314,34 +275,15 @@ private fun AuthForm(
         } else {
             OpenEdXButton(
                 modifier = Modifier.fillMaxWidth().height(56.dp),
-                text = if (isEmailTab) stringResource(id = coreR.string.core_sign_in)
-                       else if (!isOtpSent) "Send OTP"
-                       else stringResource(id = R.string.auth_verify_and_sign_in),
+                text = stringResource(id = coreR.string.core_log_in),
                 backgroundColor = MaterialTheme.appColors.primary,
                 onClick = {
                     keyboardController?.hide()
-                    if (isEmailTab) {
-                        if (login.isNotEmpty() && password.isNotEmpty()) {
-                            onEvent(AuthEvent.SignIn(login = login, password = password))
-                        } else {
-                            isEmailError = login.isEmpty()
-                            isPasswordError = password.isEmpty()
-                        }
+                    if (login.isNotEmpty() && password.isNotEmpty()) {
+                        onEvent(AuthEvent.SignIn(login = login, password = password))
                     } else {
-                        if (!isOtpSent) {
-                            if (mobile.isNotEmpty()) {
-                                onEvent(AuthEvent.SendOtp(mobile))
-                                isOtpSent = true
-                            } else {
-                                isMobileError = true
-                            }
-                        } else {
-                            if (otp.isNotEmpty()) {
-                                onEvent(AuthEvent.VerifyOtp(mobile, otp))
-                            } else {
-                                isOtpError = true
-                            }
-                        }
+                        isEmailError = login.isEmpty()
+                        isPasswordError = password.isEmpty()
                     }
                 }
             )

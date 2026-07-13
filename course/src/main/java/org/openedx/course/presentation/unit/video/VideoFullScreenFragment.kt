@@ -1,6 +1,7 @@
 package org.openedx.course.presentation.unit.video
 
 import android.annotation.SuppressLint
+import android.content.pm.ActivityInfo
 import android.os.Bundle
 import android.view.View
 import android.widget.FrameLayout
@@ -65,6 +66,7 @@ class VideoFullScreenFragment : Fragment(R.layout.fragment_video_full_screen) {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        requireActivity().requestedOrientation = ActivityInfo.SCREEN_ORIENTATION_FULL_SENSOR
         viewModel.videoUrl = requireArguments().getString(ARG_BLOCK_VIDEO_URL, "")
         blockId = requireArguments().getString(ARG_BLOCK_ID, "")
         if (viewModel.currentVideoTime == 0L) {
@@ -212,6 +214,7 @@ class VideoFullScreenFragment : Fragment(R.layout.fragment_video_full_screen) {
     @SuppressLint("SourceLockedOrientationActivity")
     override fun onDestroy() {
         releasePlayer()
+        requireActivity().requestedOrientation = ActivityInfo.SCREEN_ORIENTATION_PORTRAIT
         super.onDestroy()
     }
 

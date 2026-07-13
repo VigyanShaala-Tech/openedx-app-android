@@ -1,5 +1,6 @@
 package org.openedx.course.presentation.unit.video
 
+import android.content.pm.ActivityInfo
 import android.os.Bundle
 import android.view.View
 import android.widget.FrameLayout
@@ -39,6 +40,7 @@ class YoutubeVideoFullScreenFragment : Fragment(R.layout.fragment_youtube_video_
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        requireActivity().requestedOrientation = ActivityInfo.SCREEN_ORIENTATION_FULL_SENSOR
         viewModel.videoUrl = requireArguments().getString(ARG_BLOCK_VIDEO_URL, "")
         blockId = requireArguments().getString(ARG_BLOCK_ID, "")
         if (viewModel.currentVideoTime == 0L) {
@@ -137,6 +139,11 @@ class YoutubeVideoFullScreenFragment : Fragment(R.layout.fragment_youtube_video_
     override fun onDestroyView() {
         viewModel.sendTime()
         super.onDestroyView()
+    }
+
+    override fun onDestroy() {
+        requireActivity().requestedOrientation = ActivityInfo.SCREEN_ORIENTATION_PORTRAIT
+        super.onDestroy()
     }
 
     companion object {

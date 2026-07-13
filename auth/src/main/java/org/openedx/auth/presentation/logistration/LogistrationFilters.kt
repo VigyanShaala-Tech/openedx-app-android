@@ -14,6 +14,7 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material.DropdownMenu
 import androidx.compose.material.DropdownMenuItem
 import androidx.compose.material.Icon
@@ -35,6 +36,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import org.koin.androidx.compose.koinViewModel
+import org.openedx.core.ui.horizontalScrollbar
 import org.openedx.core.ui.theme.appColors
 import org.openedx.core.ui.theme.appTypography
 
@@ -46,11 +48,15 @@ fun LogistrationFilters(
 ) {
     val state by viewModel.state.collectAsState(FiltersState())
     val entries = state.options.options.entries.toList()
+    val scrollState = rememberLazyListState()
 
     LazyRow(
-        modifier = modifier.fillMaxWidth(),
+        modifier = modifier
+            .fillMaxWidth()
+            .horizontalScrollbar(scrollState, MaterialTheme.appColors.primary),
+        state = scrollState,
         horizontalArrangement = Arrangement.spacedBy(10.dp),
-        contentPadding = PaddingValues(end = 32.dp)
+        contentPadding = PaddingValues(start = 24.dp, end = 24.dp, bottom = 8.dp)
     ) {
         items(entries) { (key, options) ->
             val label = state.selected[key] ?: options.firstOrNull().orEmpty()

@@ -24,6 +24,9 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.composed
 import androidx.compose.ui.draw.drawWithCache
 import androidx.compose.ui.draw.paint
+import androidx.compose.ui.draw.drawWithContent
+import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Path
 import androidx.compose.ui.graphics.PathEffect
@@ -192,5 +195,52 @@ fun Modifier.crop(
         placeable.height - (vertical * 2).toPxInt()
     ) {
         placeable.placeRelative(-horizontal.toPx().toInt(), -vertical.toPx().toInt())
+    }
+}
+
+fun Modifier.horizontalScrollbar(
+    state: LazyListState,
+    color: Color,
+    thickness: Dp = 2.dp
+): Modifier = composed {
+    val density = LocalDensity.current
+    val thicknessPx = with(density) { thickness.toPx() }
+
+    this.drawWithContent {
+        drawContent()
+
+        val layoutInfo = state.layoutInfo
+        val visibleItemsInfo = layoutInfo.visibleItemsInfo
+        if (visibleItemsInfo.isEmpty()) return@drawWithContent
+
+        val totalItemsCount = layoutInfo.totalItemsCount
+        val viewportSize = layoutInfo.viewportSize.width.toFloat()
+
+        val averageItemSize = visibleItemsInfo.map { it.size }.average().toFloat()
+        val estimatedTotalWidth =
+            totalItemsCount * averageItemSize + (totalItemsCount - 1) * layoutInfo.mainAxisItemSpacing
+
+        if (estimatedTotalWidth > viewportSize) {
+            val scrollbarAreaWidth = viewportSize - layoutInfo.beforeContentPadding - layoutInfo.afterContentPadding
+            val scrollbarWidth = (viewportSize / estimatedTotalWidth) * scrollbarAreaWidth
+            val scrollOffset =
+                state.firstVisibleItemIndex * (averageItemSize + layoutInfo.mainAxisItemSpacing) + state.firstVisibleItemScrollOffset
+            val scrollbarOffset = layoutInfo.beforeContentPadding + (scrollOffset / estimatedTotalWidth) * scrollbarAreaWidth
+
+            // Draw track
+            drawRect(
+                color = color.copy(alpha = 0.1f),
+                topLeft = Offset(layoutInfo.beforeContentPadding.toFloat(), size.height - thicknessPx),
+                size = Size(scrollbarAreaWidth, thicknessPx)
+            )
+
+            // Draw thumb
+            drawRect(
+                color = color,
+                topLeft = Offset(scrollbarOffset.coerceIn(layoutInfo.beforeContentPadding.toFloat(), viewportSize - layoutInfo.afterContentPadding - scrollbarWidth), size.height - thicknessPx),
+                size = Size(scrollbarWidth, thicknessPx),
+                alpha = 0.6f
+            )
+        }
     }
 }

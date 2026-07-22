@@ -5,6 +5,7 @@ import com.braze.Braze
 import com.braze.configuration.BrazeConfig
 import com.braze.ui.BrazeDeeplinkHandler
 import com.google.firebase.FirebaseApp
+//import com.shakebugs.shake.Shake
 import io.branch.referral.Branch
 import org.koin.android.ext.android.inject
 import org.koin.android.ext.koin.androidContext
@@ -23,6 +24,7 @@ class OpenEdXApp : Application() {
 
     override fun onCreate() {
         super.onCreate()
+//        Shake.start(this, "cPTADlzkZMBMsSZBnsVePoQ6WlOV5d3obEnVIutkBH8MbWBr6M34802")
         startKoin {
             androidContext(this@OpenEdXApp)
             modules(

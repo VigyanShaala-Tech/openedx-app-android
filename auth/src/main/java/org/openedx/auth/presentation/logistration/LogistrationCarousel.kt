@@ -105,7 +105,7 @@ fun LogistrationCarousel(
                     },
                     style = MaterialTheme.appTypography.titleLarge.copy(
                         fontWeight = FontWeight.ExtraBold,
-                        fontSize = 24.sp,
+                        fontSize = 20.sp,
                         textAlign = TextAlign.Center,
                         lineHeight = 32.sp,
                         fontFamily = MaterialTheme.appTypography.defaultFontFamily

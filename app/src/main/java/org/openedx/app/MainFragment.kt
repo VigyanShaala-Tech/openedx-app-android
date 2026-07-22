@@ -101,9 +101,9 @@ class MainFragment : Fragment(R.layout.fragment_main) {
         return mutableListOf<Pair<Int, () -> Fragment>>().apply {
             add(R.id.fragmentLearn to learnFragmentFactory)
             add(R.id.fragmentDiscover to { viewModel.getDiscoveryFragment })
-            if (viewModel.isDownloadsFragmentEnabled) {
-                add(R.id.fragmentDownloads to { DownloadsFragment() })
-            }
+//            if (viewModel.isDownloadsFragmentEnabled) {
+//                add(R.id.fragmentDownloads to { DownloadsFragment() })
+//            }
             add(R.id.fragmentProfile to { org.openedx.profile.presentation.vsprofile.VsProfileFragment() })
         }
     }
@@ -112,13 +112,13 @@ class MainFragment : Fragment(R.layout.fragment_main) {
         val tabTitles = mapOf(
             R.id.fragmentLearn to resources.getString(R.string.app_navigation_learn),
             R.id.fragmentDiscover to resources.getString(R.string.app_navigation_discovery),
-            R.id.fragmentDownloads to resources.getString(R.string.app_navigation_downloads),
+//            R.id.fragmentDownloads to resources.getString(R.string.app_navigation_downloads),
             R.id.fragmentProfile to resources.getString(R.string.app_navigation_profile),
         )
         val tabIconSelectors = mapOf(
             R.id.fragmentLearn to R.drawable.app_ic_learn_selector,
             R.id.fragmentDiscover to R.drawable.app_ic_discover_selector,
-            R.id.fragmentDownloads to R.drawable.app_ic_downloads_selector,
+//            R.id.fragmentDownloads to R.drawable.app_ic_downloads_selector,
             R.id.fragmentProfile to R.drawable.app_ic_profile_selector
         )
 
@@ -135,7 +135,7 @@ class MainFragment : Fragment(R.layout.fragment_main) {
             when (menuItem.itemId) {
                 R.id.fragmentLearn -> viewModel.logLearnTabClickedEvent()
                 R.id.fragmentDiscover -> viewModel.logDiscoveryTabClickedEvent()
-                R.id.fragmentDownloads -> viewModel.logDownloadsTabClickedEvent()
+//                R.id.fragmentDownloads -> viewModel.logDownloadsTabClickedEvent()
                 R.id.fragmentProfile -> viewModel.logProfileTabClickedEvent()
             }
             menuIdToIndex[menuItem.itemId]?.let { index ->

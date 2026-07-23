@@ -12,7 +12,8 @@ import retrofit2.http.Query
 
 interface DiscoveryApi {
 
-    @GET("/api/courses/v1/courses/")
+//    @GET("/api/courses/v1/courses/")
+    @GET("/api/v1/catalog/courses/")
     suspend fun getCourseList(
         @Query("search_term") searchQuery: String? = null,
         @Query("page") page: Int,

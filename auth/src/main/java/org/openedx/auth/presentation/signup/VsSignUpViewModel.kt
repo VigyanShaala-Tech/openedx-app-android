@@ -16,6 +16,7 @@ import org.openedx.auth.presentation.AuthAnalytics
 import org.openedx.auth.presentation.AuthRouter
 import org.openedx.core.config.Config
 import org.openedx.core.data.storage.CorePreferences
+import org.openedx.core.system.EdxError
 import org.openedx.core.system.notifier.app.AppNotifier
 import org.openedx.core.system.notifier.app.SignInEvent
 import org.openedx.foundation.extension.isInternetError
@@ -108,10 +109,11 @@ class VsSignUpViewModel(
             } catch (e: Exception) {
                 e.printStackTrace()
                 _uiState.update { it.copy(isButtonLoading = false) }
-                val errorMessage = if (e.isInternetError()) {
-                    resourceManager.getString(coreR.string.core_error_no_connection)
-                } else {
-                    e.message ?: resourceManager.getString(coreR.string.core_error_unknown_error)
+                val errorMessage = when {
+                    e is EdxError.ValidationException -> e.error
+                    e is EdxError.UnknownException -> e.error
+                    e.isInternetError() -> resourceManager.getString(coreR.string.core_error_no_connection)
+                    else -> e.message ?: resourceManager.getString(coreR.string.core_error_unknown_error)
                 }
                 _uiMessage.emit(UIMessage.SnackBarMessage(errorMessage))
             }

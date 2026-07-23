@@ -129,7 +129,7 @@ dependencies {
     implementation project(path: ':whatsnew')
     implementation project(path: ':downloads')
 
-//    implementation("com.shakebugs:shake:17.2.2")
+    implementation("com.shakebugs:shake:17.2.2")
 
     ksp "androidx.room:room-compiler:$room_version"
 

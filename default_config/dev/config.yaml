@@ -1,5 +1,5 @@
 API_HOST_URL: 'https://uat.vigyanshaala.com'
-APPLICATION_ID: 'org.app.vigyanshaala'
+APPLICATION_ID: 'org.app.vigyanshaala.stemchampions'
 ENVIRONMENT_DISPLAY_NAME: 'VigyanShaala'
 URI_SCHEME: 'uat.vigyanshaala.com'
 FEEDBACK_EMAIL_ADDRESS: 'sales@titaned.com'

@@ -1,6 +1,7 @@
 package org.openedx.app.data.networking
 
 import com.google.gson.Gson
+import com.google.gson.JsonElement
 import com.google.gson.JsonSyntaxException
 import okhttp3.Interceptor
 import okhttp3.Response
@@ -46,6 +47,31 @@ class HandleErrorInterceptor(
 
     private fun handleErrorResponse(response: Response, jsonStr: String): Response {
         return try {
+            val jsonElement = gson.fromJson(jsonStr, JsonElement::class.java)
+
+            // 1. Check for critical system errors first
+            if (jsonElement.isJsonObject) {
+                val obj = jsonElement.asJsonObject
+                val errorCode = when {
+                    obj.has("error") -> obj.get("error").asString
+                    obj.has("error_code") -> obj.get("error_code").asString
+                    else -> null
+                }
+
+                when (errorCode) {
+                    ERROR_INVALID_GRANT -> throw EdxError.InvalidGrantException()
+                    ERROR_USER_NOT_ACTIVE -> throw EdxError.UserNotActiveException()
+                    ERROR_TOKEN_EXPIRED -> throw EdxError.TokenExpiredException()
+                }
+            }
+
+            // 2. Extract human-readable message with high priority from the raw JSON
+            val extractedMessage = extractMessageFromTree(jsonElement)
+            if (extractedMessage != null) {
+                throw EdxError.ValidationException(extractedMessage)
+            }
+
+            // 3. Fallback to generic ErrorResponse parsing if no descriptive message found
             val errorResponse = gson.fromJson(jsonStr, ErrorResponse::class.java)
             handleParsedErrorResponse(errorResponse) ?: response
         } catch (e: JsonSyntaxException) {
@@ -63,9 +89,52 @@ class HandleErrorInterceptor(
             errorResponse?.errorDescription != null ->
                 EdxError.ValidationException(errorResponse.errorDescription.orEmpty())
 
-            else -> throw EdxError.UnknownException("HTTP Error: ${errorResponse?.error ?: "Unknown"}")
+            else -> {
+                throw EdxError.UnknownException("HTTP Error: ${errorResponse?.error ?: "Unknown"}")
+            }
         }
         throw exception
+    }
+
+    private fun extractMessageFromTree(jsonTree: JsonElement): String? {
+        if (!jsonTree.isJsonObject) return null
+        val jsonObject = jsonTree.asJsonObject
+        val errorMessage = StringBuilder()
+
+        val keysToTry = listOf("email", "username", "message", "user_message", "error_description")
+        for (key in keysToTry) {
+            if (jsonObject.has(key)) {
+                extractMessage(jsonObject.get(key))?.let {
+                    if (errorMessage.isNotEmpty()) errorMessage.append("\n")
+                    errorMessage.append(it)
+                }
+            }
+        }
+
+        return if (errorMessage.isNotEmpty()) errorMessage.toString() else null
+    }
+
+    private fun extractMessage(element: JsonElement): String? {
+        if (element.isJsonArray) {
+            val array = element.asJsonArray
+            if (array.size() > 0) {
+                val first = array.get(0)
+                if (first.isJsonObject) {
+                    val obj = first.asJsonObject
+                    if (obj.has("user_message")) return obj.get("user_message").asString
+                    if (obj.has("message")) return obj.get("message").asString
+                } else if (first.isJsonPrimitive) {
+                    return first.asString
+                }
+            }
+        } else if (element.isJsonObject) {
+            val obj = element.asJsonObject
+            if (obj.has("user_message")) return obj.get("user_message").asString
+            if (obj.has("message")) return obj.get("message").asString
+        } else if (element.isJsonPrimitive) {
+            return element.asString
+        }
+        return null
     }
 
     companion object {

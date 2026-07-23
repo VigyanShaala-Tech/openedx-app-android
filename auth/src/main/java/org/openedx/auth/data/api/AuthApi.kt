@@ -79,6 +79,7 @@ interface AuthApi {
         @Field("user_role") user_role: String?,
         @Field("username") username: String?,
         @Field("verification_key") verification_key: String?,
+        @Field("gender") gender: String?,
     ): retrofit2.Response<Unit>
 
     @FormUrlEncoded

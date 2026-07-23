@@ -9,5 +9,6 @@ data class VsRegisterRequest(
     @SerializedName("terms_of_service") val termsOfService: Boolean = true,
     @SerializedName("user_role") val userRole: String?,
     @SerializedName("username") val username: String,
-    @SerializedName("verification_key") val verificationKey: String?
+    @SerializedName("verification_key") val verificationKey: String?,
+    @SerializedName("gender") val gender: String?
 )

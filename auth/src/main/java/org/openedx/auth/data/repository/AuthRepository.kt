@@ -82,6 +82,7 @@ class AuthRepository(
             user_role = body.userRole,
             username = body.username,
             verification_key = body.verificationKey,
+            gender = body.gender,
         )
         if (!response.isSuccessful) {
             val errorBodyStr = response.errorBody()?.string()

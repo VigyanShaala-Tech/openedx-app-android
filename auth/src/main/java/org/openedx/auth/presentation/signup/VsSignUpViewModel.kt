@@ -72,6 +72,7 @@ class VsSignUpViewModel(
         name: String,
         password: String,
         userRole: String,
+        gender: String,
         socialAuth: SocialAuthResponse? = null
     ) {
         _uiState.update { it.copy(isButtonLoading = true) }
@@ -85,7 +86,8 @@ class VsSignUpViewModel(
                     termsOfService = true,
                     userRole = userRole.takeIf { it.isNotBlank() },
                     username = email,
-                    verificationKey = null
+                    verificationKey = null,
+                    gender = gender
                 )
 
                 interactor.registerVs(body)

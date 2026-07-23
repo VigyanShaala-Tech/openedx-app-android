@@ -25,6 +25,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.focus.FocusDirection
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.platform.LocalUriHandler
@@ -37,13 +38,13 @@ import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.input.VisualTransformation
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import org.openedx.auth.R
 import org.openedx.auth.data.model.AuthType
 import org.openedx.auth.presentation.signup.VsSignUpUIState
-import org.openedx.auth.presentation.signup.compose.SocialSignedView
 import org.openedx.auth.presentation.ui.SocialAuthView
 import org.openedx.core.ui.HandleUIMessage
 import org.openedx.core.ui.OpenEdXButton
@@ -59,7 +60,7 @@ fun VsSignUpView(
     uiState: VsSignUpUIState,
     uiMessage: UIMessage?,
     onBackClick: () -> Unit,
-    onRegisterClick: (String, String, String, String) -> Unit,
+    onRegisterClick: (String, String, String, String, String) -> Unit,
     onSocialRegisterClick: (AuthType) -> Unit,
     onSignInClick: () -> Unit,
     onValidationError: (String) -> Unit,
@@ -72,12 +73,14 @@ fun VsSignUpView(
     val scaffoldState = rememberScaffoldState()
     val uriHandler = LocalUriHandler.current
     val keyboardController = LocalSoftwareKeyboardController.current
+    val context = LocalContext.current
 
     var fullName by rememberSaveable { mutableStateOf("") }
     var email by rememberSaveable { mutableStateOf("") }
     var password by rememberSaveable { mutableStateOf("") }
     var confirmPassword by rememberSaveable { mutableStateOf("") }
     var selectedRole by rememberSaveable { mutableStateOf("student") }
+    var selectedGender by rememberSaveable { mutableStateOf("") }
     var isAgreed by rememberSaveable { mutableStateOf(false) }
     var passwordVisible by rememberSaveable { mutableStateOf(false) }
     var confirmPasswordVisible by rememberSaveable { mutableStateOf(false) }
@@ -113,7 +116,7 @@ fun VsSignUpView(
                 ) {
                     Icon(
                         Icons.AutoMirrored.Filled.ArrowBack,
-                        contentDescription = "Back",
+                        contentDescription = stringResource(id = coreR.string.core_accessibility_btn_back),
                         tint = Color.White
                     )
                 }
@@ -142,7 +145,7 @@ fun VsSignUpView(
         ) {
             Spacer(modifier = Modifier.height(24.dp))
             Text(
-                text = "Create Account",
+                text = stringResource(id = R.string.auth_create_account_title),
                 style = MaterialTheme.appTypography.headlineSmall.copy(
                     fontWeight = FontWeight.Bold,
                     color = MaterialTheme.appColors.textDark,
@@ -151,44 +154,12 @@ fun VsSignUpView(
             )
             Spacer(modifier = Modifier.height(8.dp))
             Text(
-                text = "Join VigyanShaala and start learning today!",
+                text = stringResource(id = R.string.auth_join_vigyanshaala),
                 style = MaterialTheme.appTypography.bodyMedium.copy(
                     color = MaterialTheme.appColors.textSecondary,
                     fontSize = 16.sp
                 )
             )
-
-//            Spacer(modifier = Modifier.height(32.dp))
-//
-//            // Google Sign Up Button
-//            Surface(
-//                modifier = Modifier
-//                    .fillMaxWidth()
-//                    .height(56.dp)
-//                    .clickable { onSocialRegisterClick(AuthType.GOOGLE) },
-//                shape = RoundedCornerShape(12.dp),
-//                border = BorderStroke(1.dp, MaterialTheme.appColors.textFieldBorder),
-//                color = MaterialTheme.appColors.textFieldBackgroundVariant
-//            ) {
-//                Row(
-//                    verticalAlignment = Alignment.CenterVertically,
-//                    horizontalArrangement = Arrangement.Center
-//                ) {
-//                    Image(
-//                        painter = painterResource(id = R.drawable.auth_ic_google),
-//                        contentDescription = null,
-//                        modifier = Modifier.size(24.dp)
-//                    )
-//                    Spacer(modifier = Modifier.width(12.dp))
-//                    Text(
-//                        text = "Sign up with Google",
-//                        style = MaterialTheme.appTypography.bodyLarge.copy(
-//                            fontWeight = FontWeight.Medium,
-//                            color = MaterialTheme.appColors.textDark
-//                        )
-//                    )
-//                }
-//            }
 
             Spacer(modifier = Modifier.height(24.dp))
             if (isSocialAuthEnabled && uiState.socialAuth == null) {
@@ -208,7 +179,7 @@ fun VsSignUpView(
             Row(verticalAlignment = Alignment.CenterVertically) {
                 Divider(modifier = Modifier.weight(1f), color = MaterialTheme.appColors.divider)
                 Text(
-                    " or ",
+                    stringResource(id = R.string.auth_or),
                     modifier = Modifier.padding(horizontal = 16.dp),
                     color = MaterialTheme.appColors.textFieldHint,
                     fontSize = 14.sp
@@ -218,26 +189,26 @@ fun VsSignUpView(
             Spacer(modifier = Modifier.height(24.dp))
 
             VsSignUpInputField(
-                label = "Full Name",
+                label = stringResource(id = R.string.auth_full_name),
                 value = fullName,
                 onValueChange = { 
                     fullName = it
                     fullNameError = null
                 },
-                placeholder = "Kalpna Chawla",
+                placeholder = stringResource(id = R.string.auth_full_name_placeholder),
                 isRequired = true,
                 errorText = fullNameError,
                 imeAction = ImeAction.Next
             )
 
             VsSignUpInputField(
-                label = "Email",
+                label = stringResource(id = R.string.auth_email),
                 value = email,
                 onValueChange = { 
                     email = it
                     emailError = null
                 },
-                placeholder = "kalpna.chawla@example.com",
+                placeholder = stringResource(id = R.string.auth_email_placeholder),
                 isRequired = true,
                 errorText = emailError,
                 keyboardType = KeyboardType.Email,
@@ -246,13 +217,13 @@ fun VsSignUpView(
 
             if (uiState.socialAuth == null) {
                 VsSignUpInputField(
-                    label = "Password",
+                    label = stringResource(id = coreR.string.core_password),
                     value = password,
                     onValueChange = {
                         password = it
                         passwordError = null
                     },
-                    placeholder = "Create password",
+                    placeholder = stringResource(id = R.string.auth_password_placeholder),
                     isRequired = true,
                     isPassword = true,
                     passwordVisible = passwordVisible,
@@ -263,13 +234,13 @@ fun VsSignUpView(
                 )
 
                 VsSignUpInputField(
-                    label = "Confirm Password",
+                    label = stringResource(id = R.string.auth_confirm_new_password),
                     value = confirmPassword,
                     onValueChange = {
                         confirmPassword = it
                         confirmPasswordError = null
                     },
-                    placeholder = "Confirm password",
+                    placeholder = stringResource(id = R.string.auth_confirm_password_placeholder),
                     isRequired = true,
                     isPassword = true,
                     passwordVisible = confirmPasswordVisible,
@@ -282,7 +253,44 @@ fun VsSignUpView(
 
             Text(
                 text = buildAnnotatedString {
-                    append("I am a ")
+                    append(stringResource(id = R.string.auth_gender))
+                    withStyle(style = SpanStyle(color = MaterialTheme.appColors.error)) { append(" *") }
+                },
+                style = MaterialTheme.appTypography.bodyMedium.copy(
+                    fontWeight = FontWeight.Medium,
+                    color = MaterialTheme.appColors.textDark
+                ),
+                modifier = Modifier.padding(top = 24.dp)
+            )
+            Row(modifier = Modifier.padding(top = 12.dp)) {
+                VsRoleButton(
+                    text = stringResource(id = R.string.auth_male),
+                    isSelected = selectedGender == "m",
+                    onClick = { selectedGender = "m" },
+                    modifier = Modifier.weight(1f),
+                    selectedColor = MaterialTheme.appColors.primary
+                )
+                Spacer(modifier = Modifier.width(8.dp))
+                VsRoleButton(
+                    text = stringResource(id = R.string.auth_female),
+                    isSelected = selectedGender == "f",
+                    onClick = { selectedGender = "f" },
+                    modifier = Modifier.weight(1f),
+                    selectedColor = MaterialTheme.appColors.primary
+                )
+                Spacer(modifier = Modifier.width(8.dp))
+                VsRoleButton(
+                    text = stringResource(id = R.string.auth_prefer_not_to_say),
+                    isSelected = selectedGender == "o",
+                    onClick = { selectedGender = "o" },
+                    modifier = Modifier.weight(1.2f),
+                    selectedColor = MaterialTheme.appColors.primary
+                )
+            }
+
+            Text(
+                text = buildAnnotatedString {
+                    append(stringResource(id = R.string.auth_i_am_a))
                     withStyle(style = SpanStyle(color = MaterialTheme.appColors.error)) { append("*") }
                 },
                 style = MaterialTheme.appTypography.bodyMedium.copy(
@@ -293,7 +301,7 @@ fun VsSignUpView(
             )
             Row(modifier = Modifier.padding(top = 12.dp)) {
                 VsRoleButton(
-                    text = "Student",
+                    text = stringResource(id = R.string.auth_student),
                     isSelected = selectedRole == "student",
                     onClick = { selectedRole = "student" },
                     modifier = Modifier.weight(1f),
@@ -301,7 +309,7 @@ fun VsSignUpView(
                 )
                 Spacer(modifier = Modifier.width(16.dp))
                 VsRoleButton(
-                    text = "Mentor",
+                    text = stringResource(id = R.string.auth_mentor),
                     isSelected = selectedRole == "mentor",
                     onClick = { selectedRole = "mentor" },
                     modifier = Modifier.weight(1f),
@@ -327,9 +335,9 @@ fun VsSignUpView(
                 }
                 Spacer(modifier = Modifier.width(12.dp))
                 val annotatedText = buildAnnotatedString {
-                    append("I agree to the VigyanShaala International ")
+                    append(stringResource(id = R.string.auth_i_agree_to))
                     withStyle(style = SpanStyle(color = MaterialTheme.appColors.primary, fontWeight = FontWeight.Bold)) {
-                        append("Terms of Service")
+                        append(stringResource(id = R.string.auth_terms_of_service))
                     }
                 }
                 Text(
@@ -370,22 +378,24 @@ fun VsSignUpView(
                     backgroundColor = MaterialTheme.appColors.primary,
                     onClick = {
                         keyboardController?.hide()
-                        fullNameError = if (fullName.isBlank()) "Please enter your full name" else null
+                        fullNameError = if (fullName.isBlank()) context.getString(R.string.auth_error_enter_full_name) else null
                         emailError = when {
-                            email.isBlank() -> "Please enter your email"
-                            !android.util.Patterns.EMAIL_ADDRESS.matcher(email).matches() -> "Please enter a valid email"
+                            email.isBlank() -> context.getString(R.string.auth_error_enter_email)
+                            !android.util.Patterns.EMAIL_ADDRESS.matcher(email).matches() -> context.getString(R.string.auth_error_invalid_email)
                             else -> null
                         }
                         passwordError =
-                            if (password.length < 8) "Password must be at least 8 characters" else null
+                            if (password.length < 8) context.getString(R.string.auth_error_password_length) else null
                         confirmPasswordError =
-                            if (password != confirmPassword) "Passwords do not match" else null
+                            if (password != confirmPassword) context.getString(R.string.auth_error_passwords_not_match) else null
 
                         if (fullNameError == null && emailError == null && passwordError == null && confirmPasswordError == null) {
-                            if (isAgreed) {
-                                onRegisterClick(email, fullName, password, selectedRole)
+                            if (selectedGender.isBlank()) {
+                                onValidationError(context.getString(R.string.auth_error_select_gender))
+                            } else if (isAgreed) {
+                                onRegisterClick(email, fullName, password, selectedRole, selectedGender)
                             } else {
-                                onValidationError("Please agree to the Terms of Service")
+                                onValidationError(context.getString(R.string.auth_error_agree_tos))
                             }
                         }
                     },
@@ -393,8 +403,9 @@ fun VsSignUpView(
                             email.isNotBlank() &&
                             password.isNotBlank() &&
                             confirmPassword.isNotBlank() &&
+                            selectedGender.isNotBlank() &&
                             isAgreed) ||
-                            (uiState.socialAuth != null && isAgreed)
+                            (uiState.socialAuth != null && isAgreed && selectedGender.isNotBlank())
                 )
             }
 
@@ -405,12 +416,12 @@ fun VsSignUpView(
                 horizontalArrangement = Arrangement.Center
             ) {
                 Text(
-                    "Already have an account? ",
+                    stringResource(id = R.string.auth_already_have_account),
                     color = MaterialTheme.appColors.textSecondary,
                     fontSize = 16.sp
                 )
                 Text(
-                    "Sign in",
+                    stringResource(id = R.string.auth_sign_in_link),
                     color = MaterialTheme.appColors.primary,
                     modifier = Modifier.clickable { onSignInClick() },
                     fontWeight = FontWeight.Bold,
@@ -425,14 +436,14 @@ fun VsSignUpView(
             onDismissRequest = {},
             title = {
                 Text(
-                    text = "Verify your email",
+                    text = stringResource(id = R.string.auth_verify_email_title),
                     style = MaterialTheme.appTypography.titleMedium,
                     color = MaterialTheme.appColors.textPrimary
                 )
             },
             text = {
                 Text(
-                    text = "Please verify your email to login.",
+                    text = stringResource(id = R.string.auth_verify_email_desc),
                     style = MaterialTheme.appTypography.bodyMedium,
                     color = MaterialTheme.appColors.textPrimary
                 )
@@ -440,7 +451,7 @@ fun VsSignUpView(
             confirmButton = {
                 TextButton(onClick = { onDialogOkClick() }) {
                     Text(
-                        text = "OK",
+                        text = stringResource(id = coreR.string.core_ok),
                         style = MaterialTheme.appTypography.labelLarge,
                         color = MaterialTheme.appColors.primary
                     )
@@ -557,7 +568,8 @@ fun VsRoleButton(
                 text = text,
                 color = if (isSelected) selectedColor else MaterialTheme.appColors.textSecondary,
                 fontWeight = if (isSelected) FontWeight.SemiBold else FontWeight.Normal,
-                fontSize = 16.sp
+                fontSize = 14.sp,
+                textAlign = TextAlign.Center
             )
         }
     }

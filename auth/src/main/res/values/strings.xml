@@ -64,4 +64,33 @@
     <string name="auth_back_to_sign_in">Back to Sign In</string>
     <string name="auth_remember_password_sign_in">Remember your password? Sign In</string>
     <string name="auth_password_reset_success">Password has been reset successfully.</string>
+
+    <!-- VS Signup Strings -->
+    <string name="auth_create_account_title">Create Account</string>
+    <string name="auth_join_vigyanshaala">Join VigyanShaala and start learning today!</string>
+    <string name="auth_full_name">Full Name</string>
+    <string name="auth_full_name_placeholder">Kalpna Chawla</string>
+    <string name="auth_email_placeholder">kalpna.chawla@example.com</string>
+    <string name="auth_password_placeholder">Create password</string>
+    <string name="auth_confirm_password_placeholder">Confirm password</string>
+    <string name="auth_i_am_a">I am a </string>
+    <string name="auth_student">Student</string>
+    <string name="auth_mentor">Mentor</string>
+    <string name="auth_i_agree_to">I agree to the VigyanShaala International </string>
+    <string name="auth_terms_of_service">Terms of Service</string>
+    <string name="auth_already_have_account">Already have an account? </string>
+    <string name="auth_sign_in_link">Sign in</string>
+    <string name="auth_verify_email_title">Verify your email</string>
+    <string name="auth_verify_email_desc">Please verify your email to login.</string>
+    <string name="auth_gender">Gender</string>
+    <string name="auth_male">Male</string>
+    <string name="auth_female">Female</string>
+    <string name="auth_prefer_not_to_say">Prefer not to say</string>
+    <string name="auth_error_enter_full_name">Please enter your full name</string>
+    <string name="auth_error_enter_email">Please enter your email</string>
+    <string name="auth_error_invalid_email">Please enter a valid email</string>
+    <string name="auth_error_password_length">Password must be at least 8 characters</string>
+    <string name="auth_error_passwords_not_match">Passwords do not match</string>
+    <string name="auth_error_select_gender">Please select your gender</string>
+    <string name="auth_error_agree_tos">Please agree to the Terms of Service</string>
 </resources>

@@ -1,6 +1,7 @@
 package org.openedx.app
 
 import android.app.Application
+import com.bugsee.library.Bugsee
 import com.braze.Braze
 import com.braze.configuration.BrazeConfig
 import com.braze.ui.BrazeDeeplinkHandler
@@ -24,7 +25,6 @@ class OpenEdXApp : Application() {
 
     override fun onCreate() {
         super.onCreate()
-        Shake.start(this, "cPTADlzkZMBMsSZBnsVePoQ6WlOV5d3obEnVIutkBH8MbWBr6M34802")
         startKoin {
             androidContext(this@OpenEdXApp)
             modules(
@@ -33,6 +33,15 @@ class OpenEdXApp : Application() {
                 screenModule
             )
         }
+
+        if (config.getShakeConfig().enabled) {
+            Shake.start(this, config.getShakeConfig().token)
+        }
+
+        if (config.getBugseeConfig().enabled) {
+            Bugsee.launch(this, config.getBugseeConfig().token)
+        }
+
         if (config.getFirebaseConfig().enabled) {
             FirebaseApp.initializeApp(this)
         }

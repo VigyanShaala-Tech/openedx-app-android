@@ -104,6 +104,14 @@ class Config(context: Context) {
         return getObjectOrNewInstance(BRANCH, BranchConfig::class.java)
     }
 
+    fun getBugseeConfig(): BugseeConfig {
+        return getObjectOrNewInstance(BUGSEE, BugseeConfig::class.java)
+    }
+
+    fun getShakeConfig(): ShakeConfig {
+        return getObjectOrNewInstance(SHAKE, ShakeConfig::class.java)
+    }
+
     fun isWhatsNewEnabled(): Boolean {
         return getBoolean(WHATS_NEW_ENABLED, false)
     }
@@ -194,6 +202,8 @@ class Config(context: Context) {
         private const val DASHBOARD = "DASHBOARD"
         private const val EXPERIMENTAL_FEATURES = "EXPERIMENTAL_FEATURES"
         private const val BRANCH = "BRANCH"
+        private const val BUGSEE = "BUGSEE"
+        private const val SHAKE = "SHAKE"
         private const val UI_COMPONENTS = "UI_COMPONENTS"
         private const val PLATFORM_NAME = "PLATFORM_NAME"
     }

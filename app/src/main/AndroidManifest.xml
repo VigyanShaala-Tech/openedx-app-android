@@ -139,6 +139,20 @@
             android:name="io.branch.sdk.BranchKey.test"
             android:value="@string/branch_key" />
 
+        <!-- Bugsee init -->
+        <meta-data
+            android:name="com.bugsee.app-token"
+            android:value="@string/bugsee_app_token" />
+        <meta-data
+            android:name="com.bugsee.auto-init"
+            android:value="false" />
+        <meta-data
+            android:name="com.bugsee.option.detect.crash-ndk"
+            android:value="true" />
+        <meta-data
+            android:name="com.bugsee.option.capture.breadcrumbs"
+            android:value="true" />
+
         <service
             android:name="androidx.work.impl.foreground.SystemForegroundService"
             android:foregroundServiceType="dataSync"

@@ -12,6 +12,7 @@ buildscript {
         google_services_version = '4.4.3'
         firebase_crashlytics_version = '3.0.6'
         ksp_version = '2.2.10-2.0.2'
+        bugsee_plugin_version = '4.0.1'
 
         //Depends on versions in OEXFoundation
         kotlin_version = '2.2.10'
@@ -71,6 +72,7 @@ plugins {
     id 'com.google.gms.google-services' version "$google_services_version" apply false
     id "com.google.firebase.crashlytics" version "$firebase_crashlytics_version" apply false
     id "com.google.devtools.ksp" version "$ksp_version" apply false
+    id "com.bugsee.android.gradle" version "$bugsee_plugin_version" apply false
     id "org.jetbrains.kotlin.plugin.compose" version "$kotlin_version" apply false
     id 'io.gitlab.arturbosch.detekt' version "$detekt_version" apply false
 }

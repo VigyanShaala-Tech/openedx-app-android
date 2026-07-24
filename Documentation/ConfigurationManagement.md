@@ -81,6 +81,8 @@ android:
 - **Facebook:** Sign in and Sign up via Facebook
 - **Branch:** Deeplinks
 - **Braze:** Cloud Messaging
+- **Bugsee:** Bug reporting and crash analysis
+- **Shake:** Bug reporting and crash analysis
 
 ## Available Feature Flags
 - **PRE_LOGIN_EXPERIENCE_ENABLED:** Enables the pre login courses discovery experience.
@@ -93,6 +95,22 @@ android:
 ## Future Support
 - To add config related to some other service, create a class, e.g. `ServiceNameConfig.kt`, to be able to populate related fields.
 - Create a `function` in the `Config.kt` to be able to parse and use the newly created service from the main Config.
+
+Example Bugsee Config:
+
+```yaml
+BUGSEE:
+  ENABLED: true
+  TOKEN: 'your-app-token'
+```
+
+Example Shake Config:
+
+```yaml
+SHAKE:
+  ENABLED: true
+  TOKEN: 'your-app-token'
+```
 
 Example:
 

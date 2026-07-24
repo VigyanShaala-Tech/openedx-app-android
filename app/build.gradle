@@ -5,6 +5,7 @@ def firebaseConfig = config.get('FIREBASE')
 def firebaseEnabled = firebaseConfig?.getOrDefault('ENABLED', false)
 
 apply plugin: 'com.android.application'
+apply plugin: 'com.bugsee.android.gradle'
 apply plugin: 'org.jetbrains.kotlin.android'
 apply plugin: 'kotlin-parcelize'
 apply plugin: 'com.google.devtools.ksp'
@@ -129,6 +130,7 @@ dependencies {
     implementation project(path: ':whatsnew')
     implementation project(path: ':downloads')
 
+    implementation("com.bugsee:bugsee-android:7.0.4")
     implementation("com.shakebugs:shake:17.2.2")
 
     ksp "androidx.room:room-compiler:$room_version"
@@ -188,4 +190,12 @@ private def setupFirebaseConfigFields(buildType) {
 
 ksp {
     arg("room.schemaLocation", "$projectDir/schemas")
+}
+
+bugsee {
+    instrumentation {
+        compose = false
+        composeSecure = false
+        composeInput = false
+    }
 }

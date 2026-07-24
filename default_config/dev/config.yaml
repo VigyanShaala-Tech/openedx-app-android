@@ -65,6 +65,14 @@ BRANCH:
   HOST: ''
   ALTERNATE_HOST: ''
 
+BUGSEE:
+  ENABLED: true
+  TOKEN: 'e3f970e4-0574-468e-b327-3ec4ef089494'
+
+SHAKE:
+  ENABLED: false
+  TOKEN: 'cPTADlzkZMBMsSZBnsVePoQ6WlOV5d3obEnVIutkBH8MbWBr6M34802'
+
 #Platform names
 PLATFORM_NAME: "VigyanShaala"
 PLATFORM_FULL_NAME: "VigyanShaala"

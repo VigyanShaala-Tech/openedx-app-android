@@ -3,6 +3,7 @@ pluginManagement {
         gradlePluginPortal()
         google()
         mavenCentral()
+        maven { url 'https://download.bugsee.com/maven' }
     }
     buildscript {
         repositories {
@@ -21,6 +22,7 @@ dependencyResolutionManagement {
     repositories {
         google()
         mavenCentral()
+        maven { url 'https://download.bugsee.com/maven' }
         maven {
             url "http://appboy.github.io/appboy-android-sdk/sdk"
             allowInsecureProtocol = true

@@ -2,7 +2,6 @@ package org.openedx.app.data.networking
 
 import com.google.gson.Gson
 import com.google.gson.JsonElement
-import com.google.gson.JsonSyntaxException
 import okhttp3.Interceptor
 import okhttp3.Response
 import okio.IOException
@@ -31,13 +30,13 @@ class HandleErrorInterceptor(
                 handleErrorResponse(response, jsonStr)
             } catch (e: Exception) {
                 if (e is EdxError) throw e
-                throw IOException("HTTP ${response.code}: $jsonStr", e)
+                throw EdxError.UnknownException("HTTP ${response.code}")
             }
         } else {
             if (response.code == 401) {
                 throw EdxError.UnknownException("HTTP 401 Unauthorized")
             }
-            throw IOException("HTTP ${response.code}")
+            throw EdxError.UnknownException("HTTP ${response.code}")
         }
     }
 
@@ -50,7 +49,7 @@ class HandleErrorInterceptor(
             val jsonElement = gson.fromJson(jsonStr, JsonElement::class.java)
 
             // 1. Check for critical system errors first
-            if (jsonElement.isJsonObject) {
+            if (jsonElement != null && jsonElement.isJsonObject) {
                 val obj = jsonElement.asJsonObject
                 val errorCode = when {
                     obj.has("error") -> obj.get("error").asString
@@ -66,16 +65,21 @@ class HandleErrorInterceptor(
             }
 
             // 2. Extract human-readable message with high priority from the raw JSON
-            val extractedMessage = extractMessageFromTree(jsonElement)
+            val extractedMessage = jsonElement?.let { extractMessageFromTree(it) }
             if (extractedMessage != null) {
                 throw EdxError.ValidationException(extractedMessage)
             }
 
             // 3. Fallback to generic ErrorResponse parsing if no descriptive message found
-            val errorResponse = gson.fromJson(jsonStr, ErrorResponse::class.java)
+            val errorResponse = try {
+                gson.fromJson(jsonStr, ErrorResponse::class.java)
+            } catch (e: Exception) {
+                null
+            }
             handleParsedErrorResponse(errorResponse) ?: response
-        } catch (e: JsonSyntaxException) {
-            throw IOException("JsonSyntaxException $jsonStr", e)
+        } catch (e: Exception) {
+            if (e is EdxError) throw e
+            throw EdxError.UnknownException("HTTP ${response.code}")
         }
     }
 

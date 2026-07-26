@@ -72,7 +72,15 @@ class CourseSearchViewModelTest {
         startDisplay = "startDisplay",
         startType = "startType",
         overview = "",
-        false
+        isEnrolled = false,
+        rating = "",
+        noOfReviews = "",
+        enrollments = "",
+        isWishlisted = false,
+        instructorName = "",
+        category = "",
+        level = "",
+        cohortFormId = null
     )
 
     //endregion

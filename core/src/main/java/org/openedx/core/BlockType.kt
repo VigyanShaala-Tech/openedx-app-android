@@ -43,13 +43,17 @@ enum class BlockType {
     WORD_CLOUD {
         override fun isContainer() = false
     },
-//    LTI {
-//        override fun isContainer() = false
-//    },
-//    EDX_SGA {
-//        override fun isContainer() = false
-//    },
+    LTI {
+        override fun isContainer() = false
+    },
+    EDX_SGA {
+        override fun isContainer() = false
+    },
     SURVEY {
+        override fun isContainer() = false
+    },
+
+    ZOOM_XBLOCK {
         override fun isContainer() = false
     };
 

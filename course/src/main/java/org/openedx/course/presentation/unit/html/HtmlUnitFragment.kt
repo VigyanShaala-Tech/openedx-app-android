@@ -317,10 +317,10 @@ private fun HTMLContentView(
                         request: WebResourceRequest?
                     ): Boolean {
                         val clickUrl = request?.url?.toString() ?: ""
-                        return if (clickUrl.isNotEmpty() && clickUrl.startsWith("http")) {
+                        return /*if (clickUrl.isNotEmpty() && clickUrl.startsWith("http")) {
                             context.startActivity(Intent(Intent.ACTION_VIEW, Uri.parse(clickUrl)))
                             true
-                        } else if (clickUrl.startsWith("mailto:")) {
+                        } else*/ if (clickUrl.startsWith("mailto:")) {
                             val email = clickUrl.replace("mailto:", "")
                             if (email.isEmailValid()) {
                                 EmailUtil.sendEmailIntent(context, email, "", "")

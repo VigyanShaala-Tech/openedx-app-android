@@ -1,12 +1,10 @@
 package org.openedx.app
 
 import android.app.Application
-import com.bugsee.library.Bugsee
 import com.braze.Braze
 import com.braze.configuration.BrazeConfig
 import com.braze.ui.BrazeDeeplinkHandler
 import com.google.firebase.FirebaseApp
-import com.shakebugs.shake.Shake
 import io.branch.referral.Branch
 import org.koin.android.ext.android.inject
 import org.koin.android.ext.koin.androidContext
@@ -35,11 +33,21 @@ class OpenEdXApp : Application() {
         }
 
         if (config.getShakeConfig().enabled) {
-            Shake.start(this, config.getShakeConfig().token)
+            try {
+                Class.forName("com.shakebugs.shake.Shake")
+                com.shakebugs.shake.Shake.start(this, config.getShakeConfig().token)
+            } catch (e: Exception) {
+                e.printStackTrace()
+            }
         }
 
         if (config.getBugseeConfig().enabled) {
-            Bugsee.launch(this, config.getBugseeConfig().token)
+            try {
+                Class.forName("com.bugsee.library.Bugsee")
+                com.bugsee.library.Bugsee.launch(this, config.getBugseeConfig().token)
+            } catch (e: Exception) {
+                e.printStackTrace()
+            }
         }
 
         if (config.getFirebaseConfig().enabled) {
@@ -69,6 +77,20 @@ class OpenEdXApp : Application() {
 
             if (config.getBranchConfig().enabled) {
                 BrazeDeeplinkHandler.setBrazeDeeplinkHandler(BranchBrazeDeeplinkHandler())
+            }
+        }
+
+        if (config.getFacebookConfig().isEnabled()) {
+            try {
+                val clazz = Class.forName("com.facebook.FacebookSdk")
+                clazz.getMethod("setApplicationId", String::class.java)
+                    .invoke(null, config.getFacebookConfig().appId)
+                clazz.getMethod("setClientToken", String::class.java)
+                    .invoke(null, config.getFacebookConfig().clientToken)
+                clazz.getMethod("sdkInitialize", android.content.Context::class.java)
+                    .invoke(null, this)
+            } catch (e: Exception) {
+                e.printStackTrace()
             }
         }
 

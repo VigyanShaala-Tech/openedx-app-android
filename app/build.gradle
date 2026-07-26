@@ -80,6 +80,7 @@ android {
         release {
             minifyEnabled true
             proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
+            signingConfig signingConfigs.debug
 
             if (firebaseEnabled) {
                 firebaseCrashlytics {
@@ -130,8 +131,11 @@ dependencies {
     implementation project(path: ':whatsnew')
     implementation project(path: ':downloads')
 
-    implementation("com.bugsee:bugsee-android:7.0.4")
-    implementation("com.shakebugs:shake:17.2.2")
+    developImplementation("com.bugsee:bugsee-android:7.0.4")
+    stageImplementation("com.bugsee:bugsee-android:7.0.4")
+
+    developImplementation("com.shakebugs:shake:17.2.2")
+    stageImplementation("com.shakebugs:shake:17.2.2")
 
     ksp "androidx.room:room-compiler:$room_version"
 

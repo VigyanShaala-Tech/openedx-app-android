@@ -2,6 +2,7 @@ package org.openedx.core.domain.helper
 
 import android.content.Context
 import org.openedx.core.domain.model.Block
+import org.openedx.core.domain.model.getVideoPreview
 import org.openedx.core.system.connection.NetworkConnection
 import org.openedx.core.utils.VideoPreview
 

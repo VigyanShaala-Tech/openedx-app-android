@@ -8,6 +8,7 @@ import org.openedx.core.module.db.DownloadModel
 import org.openedx.course.presentation.unit.NotAvailableUnitFragment
 import org.openedx.course.presentation.unit.NotAvailableUnitType
 import org.openedx.course.presentation.unit.html.HtmlUnitFragment
+import org.openedx.course.presentation.unit.pdf.PdfUnitFragment
 import org.openedx.course.presentation.unit.video.VideoUnitFragment
 import org.openedx.course.presentation.unit.video.YoutubeVideoUnitFragment
 import org.openedx.discussion.presentation.threads.DiscussionThreadsFragment
@@ -46,6 +47,10 @@ class CourseUnitContainerAdapter(
                 createDiscussionFragment(block)
             }
 
+            block.isPdfBlock -> {
+                createPdfUnitFragment(block)
+            }
+
             isSupportedHtmlBlock(block) -> {
                 createHtmlUnitFragment(block, downloadedModel, noNetwork, offlineUrl)
             }
@@ -82,7 +87,11 @@ class CourseUnitContainerAdapter(
                 block.isDragAndDropBlock ||
                 block.isWordCloudBlock ||
                 block.isLTIConsumerBlock ||
-                block.isSurveyBlock
+                block.isSurveyBlock||
+                block.isGoogleCalendarBlock||
+                block.isScormBlock||
+                block.isGoogleDocumentBlock
+
     }
 
     private fun createHtmlUnitFragment(
@@ -144,6 +153,14 @@ class CourseUnitContainerAdapter(
             block.displayName,
             FragmentViewType.MAIN_CONTENT.name,
             block.id
+        )
+    }
+
+    private fun createPdfUnitFragment(block: Block): Fragment {
+        return PdfUnitFragment.newInstance(
+            block.id,
+            block.pdfWebUrl ?: "",
+            block.displayName
         )
     }
 }

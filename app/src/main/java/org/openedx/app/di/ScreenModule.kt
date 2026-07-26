@@ -33,6 +33,7 @@ import org.openedx.course.presentation.section.CourseSectionViewModel
 import org.openedx.course.presentation.unit.container.CourseUnitContainerViewModel
 import org.openedx.course.presentation.unit.container.CourseViewMode
 import org.openedx.course.presentation.unit.html.HtmlUnitViewModel
+import org.openedx.course.presentation.unit.pdf.PdfUnitViewModel
 import org.openedx.course.presentation.unit.video.BaseVideoViewModel
 import org.openedx.course.presentation.unit.video.EncodedVideoUnitViewModel
 import org.openedx.course.presentation.unit.video.VideoUnitViewModel
@@ -578,6 +579,14 @@ val screenModule = module {
             get(),
             get(),
             get(),
+        )
+    }
+
+    viewModel {
+        PdfUnitViewModel(
+            get(),
+            get(),
+            get()
         )
     }
 

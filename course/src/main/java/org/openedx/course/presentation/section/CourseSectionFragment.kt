@@ -407,5 +407,7 @@ private val mockBlock = Block(
     containsGatedContent = false,
     assignmentProgress = AssignmentProgress("", 1f, 2f, "HM1"),
     due = Date(),
-    offlineDownload = null
+    offlineDownload = null,
+    vimeoUrl = null,
+    pdfWebUrl = null
 )

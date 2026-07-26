@@ -55,6 +55,22 @@ enum class BlockType {
 
     ZOOM_XBLOCK {
         override fun isContainer() = false
+    },
+
+    SCORM {
+        override fun isContainer() = false
+    },
+
+    PDF {
+        override fun isContainer() = false
+    },
+
+    GOOGLE_DOCUMENT {
+        override fun isContainer() = false
+    },
+
+    GOOGLE_CALENDAR {
+        override fun isContainer() = false
     };
 
     abstract fun isContainer(): Boolean

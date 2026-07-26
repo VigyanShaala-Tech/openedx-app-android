@@ -46,3 +46,10 @@ This document outlines the recent changes made to the project to address build i
 - Consolidated feature flags and SDK configurations into `config.yaml` files.
 - Used flavor-specific resource directories for theming and environment-specific strings.
 - Implementation follows a modular approach where feature modules (`auth`, `discovery`, etc.) encapsulate their own logic and dependencies, while the `app` module orchestrates global state and SDK lifecycle.
+
+## 5. New Features
+
+### PDF Viewing Support
+- Integrated `ahmer-pdfviewer` to support native PDF viewing in course units.
+- Updated `Block` models to handle PDF metadata.
+- Implemented `PdfUnitFragment` and `PdfUnitViewModel` using Jetpack Compose and Koin.

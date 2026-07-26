@@ -16,6 +16,7 @@ import org.openedx.core.BlockType
 import org.openedx.core.data.storage.CorePreferences
 import org.openedx.core.domain.interactor.CourseInteractor
 import org.openedx.core.domain.model.Block
+import org.openedx.core.domain.model.getFileSize
 import org.openedx.core.domain.model.DownloadCoursePreview
 import org.openedx.core.module.DownloadWorkerController
 import org.openedx.core.module.db.DownloadModel

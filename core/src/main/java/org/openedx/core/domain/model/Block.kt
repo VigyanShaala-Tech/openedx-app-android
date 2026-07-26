@@ -34,7 +34,9 @@ data class Block(
     val downloadModel: DownloadModel? = null,
     val assignmentProgress: AssignmentProgress?,
     val due: Date?,
-    val offlineDownload: OfflineDownload?
+    val offlineDownload: OfflineDownload?,
+    val vimeoUrl: String? = null,
+    val pdfWebUrl: String? = null
 ) : Parcelable {
     val isDownloadable: Boolean
         get() {
@@ -76,44 +78,6 @@ data class Block(
         return count
     }
 
-    fun getFileSize(): Long {
-        return when {
-            type == BlockType.VIDEO -> downloadModel?.size ?: 0L
-            isxBlock -> offlineDownload?.fileSize ?: 0L
-            else -> 0L
-        }
-    }
-
-    fun getVideoPreview(context: Context, isOnline: Boolean, offlineUrl: String?): VideoPreview? {
-        return if (studentViewData?.encodedVideos?.hasYoutubeUrl == true) {
-            val youtubeUrl = studentViewData.encodedVideos.youtube?.url ?: ""
-            VideoPreview.createYoutubePreview(
-                PreviewHelper.getYouTubeThumbnailUrl(youtubeUrl)
-            )
-        } else if (studentViewData?.encodedVideos?.hasVideoUrl == true) {
-            val videoUrl = if (studentViewData.encodedVideos.videoUrl.isNotEmpty() && isOnline) {
-                studentViewData.encodedVideos.videoUrl
-            } else {
-                offlineUrl ?: ""
-            }
-            val bitmap = PreviewHelper.getVideoFrameBitmap(
-                context = context,
-                isOnline = isOnline,
-                videoUrl = videoUrl
-            )
-            bitmap?.let { VideoPreview.createEncodedVideoPreview(it) }
-        } else {
-            null
-        }
-    }
-
-    val videoUrl: String?
-        get() = if (studentViewData?.encodedVideos?.hasVideoUrl == true) {
-            studentViewData.encodedVideos.videoUrl
-        } else {
-            studentViewData?.encodedVideos?.youtube?.url
-        }
-
     val isVideoBlock get() = type == BlockType.VIDEO
     val isDiscussionBlock get() = type == BlockType.DISCUSSION
     val isHTMLBlock get() = type == BlockType.HTML
@@ -123,6 +87,29 @@ data class Block(
     val isWordCloudBlock get() = type == BlockType.WORD_CLOUD
     val isLTIConsumerBlock get() = type == BlockType.LTI_CONSUMER
     val isSurveyBlock get() = type == BlockType.SURVEY
+    val isPdfBlock get() = type == BlockType.PDF
+    val isGoogleDocumentBlock get() = type == BlockType.GOOGLE_DOCUMENT
+    val isGoogleCalendarBlock get() = type == BlockType.GOOGLE_CALENDAR
+    val isScormBlock get() = type == BlockType.SCORM
+}
+
+fun Block.getFileSize(): Long {
+    return studentViewData?.encodedVideos?.mobileLow?.fileSize ?: offlineDownload?.fileSize ?: 0L
+}
+
+fun Block.getVideoPreview(context: Context, isOnline: Boolean, offlineUrl: String? = null): VideoPreview? {
+    if (isVideoBlock) {
+        val encodedVideos = studentViewData?.encodedVideos
+        if (encodedVideos?.hasYoutubeUrl == true) {
+            return VideoPreview.createYoutubePreview(PreviewHelper.getYouTubeThumbnailUrl(encodedVideos.youtube?.url ?: ""))
+        }
+        val videoUrl = offlineUrl ?: encodedVideos?.videoUrl ?: ""
+        if (videoUrl.isNotEmpty()) {
+            val bitmap = PreviewHelper.getVideoFrameBitmap(context, isOnline, videoUrl)
+            return bitmap?.let { VideoPreview.createEncodedVideoPreview(it) }
+        }
+    }
+    return null
 }
 
 @Parcelize
@@ -142,20 +129,23 @@ data class EncodedVideos(
     var desktopMp4: VideoInfo?,
     var mobileHigh: VideoInfo?,
     var mobileLow: VideoInfo?,
+    var vimeoVideo: VideoInfo? = null,
 ) : Parcelable {
     val hasDownloadableVideo: Boolean
         get() = isPreferredVideoInfo(hls) ||
                 isPreferredVideoInfo(fallback) ||
                 isPreferredVideoInfo(desktopMp4) ||
                 isPreferredVideoInfo(mobileHigh) ||
-                isPreferredVideoInfo(mobileLow)
+                isPreferredVideoInfo(mobileLow)||
+                isPreferredVideoInfo(vimeoVideo)
 
     val hasNonYoutubeVideo: Boolean
         get() = mobileHigh?.url != null ||
                 mobileLow?.url != null ||
                 desktopMp4?.url != null ||
                 hls?.url != null ||
-                fallback?.url != null
+                fallback?.url != null||
+                vimeoVideo?.url != null
 
     val videoUrl: String
         get() = fallback?.url
@@ -163,6 +153,7 @@ data class EncodedVideos(
             ?: desktopMp4?.url
             ?: mobileHigh?.url
             ?: mobileLow?.url
+            ?:vimeoVideo?.url
             ?: ""
 
     val hasVideoUrl: Boolean
@@ -194,10 +185,7 @@ data class EncodedVideos(
             isPreferredVideoInfo(mobileHigh) -> mobileHigh
             isPreferredVideoInfo(desktopMp4) -> desktopMp4
             fallback != null && isPreferredVideoInfo(fallback) &&
-                    !VideoUtil.videoHasFormat(
-                        fallback!!.url,
-                        AppDataConstants.VIDEO_FORMAT_M3U8
-                    ) -> fallback
+                    !VideoUtil.videoHasFormat(fallback!!.url, AppDataConstants.VIDEO_FORMAT_M3U8) -> fallback
 
             hls != null && isPreferredVideoInfo(hls) -> hls
             else -> null

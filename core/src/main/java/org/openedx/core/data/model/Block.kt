@@ -44,6 +44,10 @@ data class Block(
     val due: String?,
     @SerializedName("offline_download")
     val offlineDownload: OfflineDownload?,
+    @SerializedName("vimeo_url")
+    val vimeoUrl: String?,
+    @SerializedName("pdf_web_url")
+    val pdfWebUrl: String?
 ) {
     fun mapToDomain(blockData: Map<String, Block>): DomainBlock {
         val blockType = BlockType.getBlockType(type.orEmpty())
@@ -67,7 +71,9 @@ data class Block(
             containsGatedContent = containsGatedContent ?: false,
             assignmentProgress = assignmentProgress?.mapToDomain(displayName.orEmpty()),
             due = TimeUtils.iso8601ToDate(due.orEmpty()),
-            offlineDownload = offlineDownload?.mapToDomain()
+            offlineDownload = offlineDownload?.mapToDomain(),
+            vimeoUrl = vimeoUrl,
+            pdfWebUrl = pdfWebUrl
         )
     }
 
@@ -117,7 +123,9 @@ data class EncodedVideos(
     @SerializedName("mobile_high")
     var mobileHigh: VideoInfo?,
     @SerializedName("mobile_low")
-    var mobileLow: VideoInfo?
+    var mobileLow: VideoInfo?,
+    @SerializedName("vimeo_video")
+    var vimeoVideo: VideoInfo?
 ) {
     fun mapToDomain() = DomainEncodedVideos(
         youtube = videoInfo?.mapToDomain(),
@@ -125,7 +133,8 @@ data class EncodedVideos(
         fallback = fallback?.mapToDomain(),
         desktopMp4 = desktopMp4?.mapToDomain(),
         mobileHigh = mobileHigh?.mapToDomain(),
-        mobileLow = mobileLow?.mapToDomain()
+        mobileLow = mobileLow?.mapToDomain(),
+        vimeoVideo = vimeoVideo?.mapToDomain()
     )
 }
 

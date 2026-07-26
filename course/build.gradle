@@ -71,6 +71,10 @@ dependencies {
     implementation "androidx.media3:media3-cast:$media3_version"
     implementation "me.saket.extendedspans:extendedspans:$extented_spans_version"
 
+    // PDF Viewer
+    implementation 'io.github.ahmerafzal1:ahmer-pdfium:1.9.2'
+    implementation 'io.github.ahmerafzal1:ahmer-pdfviewer:2.0.1'
+
     testImplementation "junit:junit:$junit_version"
     androidTestImplementation "androidx.test.ext:junit:$test_ext_version"
     androidTestImplementation "androidx.test.espresso:espresso-core:$espresso_version"

@@ -682,7 +682,9 @@ private val mockChapterBlock = Block(
     containsGatedContent = false,
     assignmentProgress = mockAssignmentProgress,
     due = Date(),
-    offlineDownload = null
+    offlineDownload = null,
+    vimeoUrl = null,
+    pdfWebUrl = null
 )
 
 private val mockSequentialBlock = Block(
@@ -703,5 +705,7 @@ private val mockSequentialBlock = Block(
     containsGatedContent = false,
     assignmentProgress = mockAssignmentProgress,
     due = Date(),
-    offlineDownload = null
+    offlineDownload = null,
+    vimeoUrl = null,
+    pdfWebUrl = null
 )

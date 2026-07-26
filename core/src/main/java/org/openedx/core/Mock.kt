@@ -46,7 +46,9 @@ object Mock {
         containsGatedContent = false,
         assignmentProgress = mockAssignmentProgress,
         due = Date(),
-        offlineDownload = null
+        offlineDownload = null,
+        vimeoUrl = null,
+        pdfWebUrl = null
     )
     private val mockSequentialBlock = Block(
         id = "id",
@@ -67,6 +69,8 @@ object Mock {
         assignmentProgress = mockAssignmentProgress,
         due = Date(),
         offlineDownload = OfflineDownload("fileUrl", "", 1),
+        vimeoUrl = null,
+        pdfWebUrl = null
     )
 
     val mockCourseStructure = CourseStructure(
@@ -179,7 +183,8 @@ object Mock {
                 mobileLow = VideoInfo(
                     url = "test-url",
                     fileSize = 1000L
-                )
+                ),
+                vimeoVideo = null
             ),
             topicId = ""
         ),
@@ -192,6 +197,8 @@ object Mock {
         assignmentProgress = null,
         due = null,
         offlineDownload = null,
+        vimeoUrl = null,
+        pdfWebUrl = null
     )
 
     val mockSequentialBlockForDownload = Block(
@@ -213,6 +220,8 @@ object Mock {
         assignmentProgress = null,
         due = null,
         offlineDownload = null,
+        vimeoUrl = null,
+        pdfWebUrl = null
     )
 
     val mockVerticalBlock = Block(
@@ -234,6 +243,8 @@ object Mock {
         assignmentProgress = null,
         due = null,
         offlineDownload = null,
+        vimeoUrl = null,
+        pdfWebUrl = null
     )
 
     val mockCourseStructureForDownload = CourseStructure(

@@ -51,6 +51,10 @@ data class BlockDb(
     val due: String?,
     @Embedded
     val offlineDownload: OfflineDownloadDb?,
+    @ColumnInfo("vimeo_url")
+    val vimeoUrl: String?,
+    @ColumnInfo("pdf_web_url")
+    val pdfWebUrl: String?
 ) {
     fun mapToDomain(blocks: List<BlockDb>): DomainBlock {
         val blockType = BlockType.getBlockType(type)
@@ -82,7 +86,9 @@ data class BlockDb(
             containsGatedContent = containsGatedContent,
             assignmentProgress = assignmentProgress?.mapToDomain(),
             due = TimeUtils.iso8601ToDate(due ?: ""),
-            offlineDownload = offlineDownload?.mapToDomain()
+            offlineDownload = offlineDownload?.mapToDomain(),
+            vimeoUrl = vimeoUrl,
+            pdfWebUrl = pdfWebUrl
         )
     }
 
@@ -109,7 +115,9 @@ data class BlockDb(
                     containsGatedContent = containsGatedContent ?: false,
                     assignmentProgress = assignmentProgress?.mapToRoomEntity(),
                     due = due,
-                    offlineDownload = offlineDownload?.mapToRoomEntity()
+                    offlineDownload = offlineDownload?.mapToRoomEntity(),
+                    vimeoUrl = vimeoUrl,
+                    pdfWebUrl = pdfWebUrl
                 )
             }
         }
@@ -164,7 +172,9 @@ data class EncodedVideosDb(
     @ColumnInfo("mobileHigh")
     var mobileHigh: VideoInfoDb?,
     @ColumnInfo("mobileLow")
-    var mobileLow: VideoInfoDb?
+    var mobileLow: VideoInfoDb?,
+    @ColumnInfo("vimeoVideo")
+    var vimeoVideo: VideoInfoDb?
 ) {
     fun mapToDomain(): DomainEncodedVideos {
         return DomainEncodedVideos(
@@ -174,6 +184,7 @@ data class EncodedVideosDb(
             desktopMp4 = desktopMp4?.mapToDomain(),
             mobileHigh = mobileHigh?.mapToDomain(),
             mobileLow = mobileLow?.mapToDomain(),
+            vimeoVideo = vimeoVideo?.mapToDomain()
         )
     }
 
@@ -186,6 +197,7 @@ data class EncodedVideosDb(
                 desktopMp4 = VideoInfoDb.createFrom(encodedVideos?.desktopMp4),
                 mobileHigh = VideoInfoDb.createFrom(encodedVideos?.mobileHigh),
                 mobileLow = VideoInfoDb.createFrom(encodedVideos?.mobileLow),
+                vimeoVideo = VideoInfoDb.createFrom(encodedVideos?.vimeoVideo)
             )
         }
     }

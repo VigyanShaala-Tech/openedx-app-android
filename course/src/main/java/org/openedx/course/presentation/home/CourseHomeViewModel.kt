@@ -4,6 +4,7 @@ import android.net.Uri
 import androidx.fragment.app.FragmentManager
 import androidx.lifecycle.viewModelScope
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.async
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharedFlow
@@ -177,43 +178,13 @@ class CourseHomeViewModel(
     }
 
     private fun getCourseDataInternal() {
+        _uiState.value = CourseHomeUIState.Loading
         viewModelScope.launch {
             val courseStructureFlow = interactor.getCourseStructureFlow(courseId, false)
                 .catch { emit(null) }
             val courseStatusFlow = interactor.getCourseStatusFlow(courseId)
             val courseDatesFlow = interactor.getCourseDatesFlow(courseId)
             val courseProgressFlow = interactor.getCourseProgress(courseId, false, true)
-            
-            // Fetch announcements
-            val announcements = try {
-                interactor.getAnnouncements(courseId)
-            } catch (e: Exception) {
-                emptyList()
-            }
-
-            // Fetch live classes
-            val liveClassesToday = try {
-                interactor.getLiveClasses(courseId, "today", 1).results
-            } catch (e: Exception) {
-                emptyList()
-            }
-            val liveClassesUpcoming = try {
-                interactor.getLiveClasses(courseId, "upcoming", 1).results
-            } catch (e: Exception) {
-                emptyList()
-            }
-            val liveClassesPast = try {
-                interactor.getLiveClasses(courseId, "past", 1).results
-            } catch (e: Exception) {
-                emptyList()
-            }
-
-            // Fetch ongoing session
-            val ongoingSession = try {
-                interactor.getOngoingSession(courseId).result
-            } catch (e: Exception) {
-                null
-            }
 
             combine(
                 courseStructureFlow,
@@ -225,18 +196,67 @@ class CourseHomeViewModel(
                 val blocks = courseStructure.blockData
                 val datesBannerInfo = courseDatesResult.courseBanner
 
-                initializeCourseData(
-                    blocks,
-                    courseStructure,
-                    courseStatus,
-                    datesBannerInfo,
-                    courseProgress,
-                    announcements,
-                    liveClassesToday,
-                    liveClassesUpcoming,
-                    liveClassesPast,
-                    ongoingSession
-                )
+                viewModelScope.launch {
+                    // Fetch announcements
+                    val announcementsDeferred = async {
+                        try {
+                            interactor.getAnnouncements(courseId)
+                        } catch (e: Exception) {
+                            emptyList()
+                        }
+                    }
+
+                    // Fetch live classes
+                    val liveTodayDeferred = async {
+                        try {
+                            interactor.getLiveClasses(courseId, "today", 1).results
+                        } catch (e: Exception) {
+                            emptyList()
+                        }
+                    }
+                    val liveUpcomingDeferred = async {
+                        try {
+                            interactor.getLiveClasses(courseId, "upcoming", 1).results
+                        } catch (e: Exception) {
+                            emptyList()
+                        }
+                    }
+                    val livePastDeferred = async {
+                        try {
+                            interactor.getLiveClasses(courseId, "past", 1).results
+                        } catch (e: Exception) {
+                            emptyList()
+                        }
+                    }
+
+                    // Fetch ongoing session
+                    val ongoingSessionDeferred = async {
+                        try {
+                            interactor.getOngoingSession(courseId).result
+                        } catch (e: Exception) {
+                            null
+                        }
+                    }
+
+                    val announcements = announcementsDeferred.await()
+                    val liveClassesToday = liveTodayDeferred.await()
+                    val liveClassesUpcoming = liveUpcomingDeferred.await()
+                    val liveClassesPast = livePastDeferred.await()
+                    val ongoingSession = ongoingSessionDeferred.await()
+
+                    initializeCourseData(
+                        blocks,
+                        courseStructure,
+                        courseStatus,
+                        datesBannerInfo,
+                        courseProgress,
+                        announcements,
+                        liveClassesToday,
+                        liveClassesUpcoming,
+                        liveClassesPast,
+                        ongoingSession
+                    )
+                }
             }.catch { e ->
                 handleCourseDataError(e)
             }.collect { }

@@ -426,18 +426,6 @@ private fun HTMLContentView(
                     override fun onPermissionRequest(request: PermissionRequest?) {
                         request?.grant(request.resources)
                     }
-
-                    override fun onCreateWindow(
-                        view: WebView?,
-                        isDialog: Boolean,
-                        isUserGesture: Boolean,
-                        resultMsg: android.os.Message?
-                    ): Boolean {
-                        val transport = resultMsg?.obj as? WebView.WebViewTransport
-                        transport?.webView = view
-                        resultMsg?.sendToTarget()
-                        return true
-                    }
                 }
                 @Suppress("DEPRECATION")
                 with(settings) {
@@ -454,7 +442,7 @@ private fun HTMLContentView(
                     javaScriptCanOpenWindowsAutomatically = true
                     allowFileAccessFromFileURLs = true
                     allowUniversalAccessFromFileURLs = true
-                    setSupportMultipleWindows(true)
+                    setSupportMultipleWindows(false)
                     if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
                         mixedContentMode = WebSettings.MIXED_CONTENT_ALWAYS_ALLOW
                     }

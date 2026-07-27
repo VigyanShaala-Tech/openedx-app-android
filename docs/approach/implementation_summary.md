@@ -67,7 +67,7 @@ This document outlines the recent changes made to the project to address build i
 - Implemented `WebChromeClient.onShowFileChooser` in `HtmlUnitFragment` using `ActivityResultLauncher` with `FLAG_GRANT_READ_URI_PERMISSION` to handle file uploads securely.
 - Enhanced WebView settings in `HtmlUnitFragment` for maximum compatibility:
     - Enabled `databaseEnabled`, `domStorageEnabled`, and `javaScriptEnabled`.
-    - Enabled `setSupportMultipleWindows(true)` and implemented `onCreateWindow`.
+    - Disabled `setSupportMultipleWindows` to prevent `IllegalArgumentException` crashes when content attempts to open popup windows (common in some XBlocks).
     - Added `CookieManager.getInstance().setAcceptThirdPartyCookies(true)` for embedded content.
     - Implemented Desktop User Agent override for `google-calendar` URLs.
     - Set `mixedContentMode = WebSettings.MIXED_CONTENT_ALWAYS_ALLOW`.

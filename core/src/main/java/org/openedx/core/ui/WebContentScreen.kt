@@ -55,6 +55,7 @@ fun WebContentScreen(
     onBackClick: () -> Unit,
     htmlBody: String? = null,
     contentUrl: String? = null,
+    canShowBackBtn: Boolean = true,
 ) {
     val scaffoldState = rememberScaffoldState()
     Scaffold(
@@ -85,17 +86,19 @@ fun WebContentScreen(
             contentAlignment = Alignment.TopCenter
         ) {
             Column(screenWidth) {
-                Box(
-                    Modifier
-                        .fillMaxWidth()
-                        .zIndex(1f),
-                    contentAlignment = Alignment.CenterStart
-                ) {
-                    Toolbar(
-                        label = title ?: "",
-                        canShowBackBtn = true,
-                        onBackClick = onBackClick
-                    )
+                if (title?.isNotEmpty() == true || canShowBackBtn) {
+                    Box(
+                        Modifier
+                            .fillMaxWidth()
+                            .zIndex(1f),
+                        contentAlignment = Alignment.CenterStart
+                    ) {
+                        Toolbar(
+                            label = title ?: "",
+                            canShowBackBtn = canShowBackBtn,
+                            onBackClick = onBackClick
+                        )
+                    }
                 }
                 Surface(
                     Modifier.fillMaxSize(),

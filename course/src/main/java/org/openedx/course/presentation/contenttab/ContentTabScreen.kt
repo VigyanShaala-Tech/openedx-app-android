@@ -315,7 +315,8 @@ private fun HandoutsUI(
                     uiState.htmlContent,
                     colorBackgroundValue,
                     colorTextValue
-                )
+                ),
+                canShowBackBtn = false
             )
         }
 

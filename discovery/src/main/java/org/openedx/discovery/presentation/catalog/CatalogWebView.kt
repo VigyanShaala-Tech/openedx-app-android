@@ -1,6 +1,8 @@
 package org.openedx.discovery.presentation.catalog
 
 import android.annotation.SuppressLint
+import android.webkit.PermissionRequest
+import android.webkit.WebChromeClient
 import android.webkit.WebResourceError
 import android.webkit.WebResourceRequest
 import android.webkit.WebView
@@ -8,6 +10,7 @@ import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import androidx.compose.ui.platform.LocalContext
+import org.openedx.core.extension.addMobileQueryParam
 import org.openedx.foundation.extension.applyDarkModeIfEnabled
 import org.openedx.discovery.presentation.catalog.WebViewLink.Authority as linkAuthority
 
@@ -97,6 +100,12 @@ fun CatalogWebViewScreen(
                 }
             }
 
+            webChromeClient = object : WebChromeClient() {
+                override fun onPermissionRequest(request: PermissionRequest?) {
+                    request?.grant(request.resources)
+                }
+            }
+
             with(settings) {
                 javaScriptEnabled = true
                 loadWithOverviewMode = true
@@ -109,7 +118,7 @@ fun CatalogWebViewScreen(
             isVerticalScrollBarEnabled = false
             isHorizontalScrollBarEnabled = false
 
-            loadUrl(url)
+            loadUrl(url.addMobileQueryParam())
             applyDarkModeIfEnabled(isDarkTheme)
         }
     }

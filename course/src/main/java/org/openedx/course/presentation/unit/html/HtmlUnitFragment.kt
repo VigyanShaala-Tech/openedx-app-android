@@ -1,8 +1,10 @@
 package org.openedx.course.presentation.unit.html
 
+import android.Manifest
 import android.annotation.SuppressLint
 import android.app.Activity
 import android.content.Intent
+import android.content.pm.PackageManager
 import android.content.res.Configuration
 import android.graphics.Bitmap
 import android.net.Uri
@@ -52,12 +54,14 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.viewinterop.AndroidView
 import androidx.compose.ui.zIndex
+import androidx.core.content.ContextCompat
 import androidx.core.os.bundleOf
 import androidx.fragment.app.Fragment
 import kotlinx.coroutines.launch
 import org.koin.androidx.viewmodel.ext.android.viewModel
 import org.koin.core.parameter.parametersOf
 import org.openedx.core.AppDataConstants
+import org.openedx.core.extension.addMobileQueryParam
 import org.openedx.core.extension.loadUrl
 import org.openedx.core.system.AppCookieManager
 import org.openedx.core.ui.FullScreenErrorView
@@ -98,12 +102,41 @@ class HtmlUnitFragment : Fragment() {
         filePathCallback = null
     }
 
+    private val permissionsLauncher = registerForActivityResult(
+        ActivityResultContracts.RequestMultiplePermissions()
+    ) { }
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         blockUrl = requireArguments().getString(ARG_BLOCK_URL, "")
         offlineUrl = requireArguments().getString(ARG_OFFLINE_URL, "")
         lastModified = requireArguments().getString(ARG_LAST_MODIFIED, "")
         fromDownloadedContent = lastModified.isNotEmpty()
+        checkAndRequestPermissions()
+    }
+
+    private fun checkAndRequestPermissions() {
+        val permissions = mutableListOf(
+            Manifest.permission.CAMERA,
+            Manifest.permission.RECORD_AUDIO
+        )
+
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+            permissions.add(Manifest.permission.READ_MEDIA_IMAGES)
+            permissions.add(Manifest.permission.READ_MEDIA_VIDEO)
+            permissions.add(Manifest.permission.READ_MEDIA_AUDIO)
+        } else {
+            permissions.add(Manifest.permission.READ_EXTERNAL_STORAGE)
+            permissions.add(Manifest.permission.WRITE_EXTERNAL_STORAGE)
+        }
+
+        val missingPermissions = permissions.filter {
+            ContextCompat.checkSelfPermission(requireContext(), it) != PackageManager.PERMISSION_GRANTED
+        }
+
+        if (missingPermissions.isNotEmpty()) {
+            permissionsLauncher.launch(missingPermissions.toTypedArray())
+        }
     }
 
     override fun onCreateView(
@@ -392,7 +425,7 @@ private fun HTMLContentView(
                                 403, 401, 404 -> {
                                     coroutineScope.launch {
                                         cookieManager.tryToRefreshSessionCookie()
-                                        loadUrl(url)
+                                        loadUrl(url.addMobileQueryParam())
                                     }
                                 }
                             }

@@ -7,6 +7,7 @@ import android.webkit.WebResourceRequest
 import android.webkit.WebResourceResponse
 import android.webkit.WebView
 import android.webkit.WebViewClient
+import org.openedx.core.extension.addMobileQueryParam
 import org.openedx.core.utils.EmailUtil
 import org.openedx.foundation.extension.isEmailValid
 
@@ -58,7 +59,7 @@ open class DefaultWebViewClient(
             when (errorResponse.statusCode) {
                 403, 401, 404 -> {
                     refreshSessionCookie()
-                    webView.loadUrl(request.url.toString())
+                    webView.loadUrl(request.url.toString().addMobileQueryParam())
                 }
             }
         }

@@ -39,6 +39,7 @@ import androidx.compose.ui.viewinterop.AndroidView
 import androidx.compose.ui.zIndex
 import org.openedx.core.ui.theme.appColors
 import org.openedx.core.utils.EmailUtil
+import org.openedx.core.extension.addMobileQueryParam
 import org.openedx.foundation.extension.applyDarkModeIfEnabled
 import org.openedx.foundation.extension.isEmailValid
 import org.openedx.foundation.extension.replaceLinkTags
@@ -196,7 +197,7 @@ private fun WebViewContent(
                     )
                 }
                 contentUrl?.let {
-                    loadUrl(it)
+                    loadUrl(it.addMobileQueryParam())
                 }
                 applyDarkModeIfEnabled(isDarkTheme)
             }
@@ -212,7 +213,7 @@ private fun WebViewContent(
                 )
             }
             contentUrl?.let {
-                webView.loadUrl(it)
+                webView.loadUrl(it.addMobileQueryParam())
             }
         }
     )

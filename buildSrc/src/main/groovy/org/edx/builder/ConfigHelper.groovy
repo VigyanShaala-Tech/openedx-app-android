@@ -23,12 +23,12 @@ class ConfigHelper {
             environment = buildType
         }
         this.projectDir = projectDir
-        def configFile = new File(CONFIG_SETTINGS_YAML_FILENAME)
+        def configFile = new File(projectDir, CONFIG_SETTINGS_YAML_FILENAME)
         if (!configFile.exists()) {
             // parse default configurations if `config_settings.yaml` doesn't exist
             println("Configurations are missing at " + configFile.path)
-            println("Parsing Default configurations from " + DEFAULT_CONFIG_PATH)
-            configFile = new File(DEFAULT_CONFIG_PATH)
+            configFile = new File(projectDir, "default_config/" + CONFIG_SETTINGS_YAML_FILENAME)
+            println("Parsing Default configurations from " + configFile.path)
         }
         if (!configFile.exists()) {
             throw new Exception("Configurations are missing at " + configFile.path)
@@ -36,7 +36,7 @@ class ConfigHelper {
 
         def config = new Yaml().load(configFile.newInputStream())
         if (config[CONFIG_DIRECTORY] && config[CONFIG_MAPPING][environment]) {
-            configDir = config[CONFIG_DIRECTORY] + "/" + config[CONFIG_MAPPING][environment]
+            configDir = new File(projectDir, config[CONFIG_DIRECTORY] + "/" + config[CONFIG_MAPPING][environment]).absolutePath
         } else {
             throw new Exception(environment + "key doesn't exist in " + configFile.path)
         }

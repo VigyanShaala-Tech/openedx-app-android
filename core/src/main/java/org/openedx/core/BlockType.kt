@@ -69,6 +69,16 @@ enum class BlockType {
         override fun isContainer() = false
     },
 
+    H5PXBLOCK {
+        override fun isContainer() = false
+    },
+    FILL_BLANK {
+        override fun isContainer() = false
+    },
+    MATCH_COLUMN {
+        override fun isContainer() = false
+    },
+
     GOOGLE_CALENDAR {
         override fun isContainer() = false
     };

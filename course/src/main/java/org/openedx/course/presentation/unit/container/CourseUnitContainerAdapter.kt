@@ -90,6 +90,9 @@ class CourseUnitContainerAdapter(
                 block.isSurveyBlock||
                 block.isGoogleCalendarBlock||
                 block.isScormBlock||
+                block.isH5PBlock||
+                block.isFillBlankBlock||
+                block.isMatchColumnBlock||
                 block.isGoogleDocumentBlock
 
     }

@@ -98,6 +98,7 @@ data class Block(
     val isFillBlankBlock get() = type == BlockType.FILL_BLANK
     val isMatchColumnBlock get() = type == BlockType.MATCH_COLUMN
     val isTasBlock get() = type == BlockType.TAS
+    val isQuickQuizMakerBlock get() = type == BlockType.QUICKQUIZMAKER
     val isSgaBlock get() = type == BlockType.EDX_SGA
 }
 

@@ -94,13 +94,8 @@ class CourseUnitContainerAdapter(
                 block.isPollBlock||
                 block.isTasBlock||
                 block.isZoomxBlock||
+                block.isQuickQuizMakerBlock||
                 block.isGoogleDocumentBlock
-                block.isH5PBlock||
-                block.isFillBlankBlock||
-                block.isMatchColumnBlock||
-                block.isTasBlock||
-                block.isGoogleDocumentBlock||
-                block.isSgaBlock
 
     }
 

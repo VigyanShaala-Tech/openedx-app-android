@@ -91,6 +91,9 @@ data class Block(
     val isGoogleDocumentBlock get() = type == BlockType.GOOGLE_DOCUMENT
     val isGoogleCalendarBlock get() = type == BlockType.GOOGLE_CALENDAR
     val isScormBlock get() = type == BlockType.SCORM
+    val isEdxSgaBlock get() = type == BlockType.EDX_SGA
+    val isPollBlock get() = type == BlockType.POLL
+    val isZoomxBlock get() = type == BlockType.ZOOM_XBLOCK
     val isH5PBlock get() = type == BlockType.H5PXBLOCK
     val isFillBlankBlock get() = type == BlockType.FILL_BLANK
     val isMatchColumnBlock get() = type == BlockType.MATCH_COLUMN

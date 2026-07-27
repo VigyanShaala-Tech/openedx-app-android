@@ -10,10 +10,13 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.material.CircularProgressIndicator
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Scaffold
+import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.ComposeView
@@ -23,11 +26,15 @@ import androidx.compose.ui.viewinterop.AndroidView
 import androidx.core.os.bundleOf
 import androidx.fragment.app.Fragment
 import com.ahmer.pdfviewer.PDFView
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
 import org.koin.androidx.viewmodel.ext.android.viewModel
-import org.openedx.core.ui.FullScreenErrorView
 import org.openedx.core.ui.theme.OpenEdXTheme
 import org.openedx.core.ui.theme.appColors
+import org.openedx.core.ui.theme.appTypography
 import java.io.File
+import java.io.FileOutputStream
+import java.net.URL
 
 class PdfUnitFragment : Fragment() {
 
@@ -51,17 +58,10 @@ class PdfUnitFragment : Fragment() {
         setViewCompositionStrategy(ViewCompositionStrategy.DisposeOnViewTreeLifecycleDestroyed)
         setContent {
             OpenEdXTheme {
-                val uiState by viewModel.uiState.collectAsState()
-                val context = LocalContext.current
-                
-                LaunchedEffect(pdfUrl) {
-                    viewModel.downloadPdf(pdfUrl, context.cacheDir)
-                }
-
                 PdfUnitScreen(
-                    uiState = uiState,
-                    onReloadClick = {
-                        viewModel.downloadPdf(pdfUrl, context.cacheDir)
+                    pdfUrl = pdfUrl,
+                    onDownloadComplete = {
+                        viewModel.notifyCompletionSet()
                     }
                 )
             }
@@ -91,8 +91,8 @@ class PdfUnitFragment : Fragment() {
 
 @Composable
 fun PdfUnitScreen(
-    uiState: PdfUnitUIState,
-    onReloadClick: () -> Unit
+    pdfUrl: String,
+    onDownloadComplete: () -> Unit
 ) {
     Scaffold(
         modifier = Modifier.fillMaxSize(),
@@ -105,39 +105,75 @@ fun PdfUnitScreen(
                 .background(MaterialTheme.appColors.background),
             contentAlignment = Alignment.Center
         ) {
-            when (uiState) {
-                is PdfUnitUIState.Loading -> {
-                    CircularProgressIndicator(color = MaterialTheme.appColors.primary)
-                }
-                is PdfUnitUIState.Loaded -> {
-                    PdfViewer(uiState.file)
-                }
-                is PdfUnitUIState.Error -> {
-                    FullScreenErrorView(
-                        modifier = Modifier.fillMaxSize(),
-                        errorType = uiState.errorType,
-                        onReloadClick = onReloadClick
-                    )
-                }
-            }
+            PdfViewer(
+                url = pdfUrl,
+                onDownloadComplete = onDownloadComplete
+            )
         }
     }
 }
 
 @Composable
-fun PdfViewer(file: File) {
-    AndroidView(
-        factory = { context ->
-            PDFView(context, null)
-        },
-        modifier = Modifier.fillMaxSize(),
-        update = { pdfView ->
-            pdfView.fromFile(file)
-                .enableSwipe(true)
-                .swipeHorizontal(false)
-                .enableDoubleTap(true)
-                .defaultPage(0)
-                .load()
+fun PdfViewer(
+    url: String,
+    onDownloadComplete: () -> Unit
+) {
+    val context = LocalContext.current
+    var pdfFile by remember { mutableStateOf<File?>(null) }
+    var isLoading by remember { mutableStateOf(true) }
+    var error by remember { mutableStateOf<String?>(null) }
+
+    LaunchedEffect(url) {
+        isLoading = true
+        error = null
+        try {
+            withContext(Dispatchers.IO) {
+                val connection = URL(url).openConnection()
+                connection.connect()
+                val inputStream = connection.getInputStream()
+                val tempFile = File.createTempFile("textbook", ".pdf", context.cacheDir)
+                FileOutputStream(tempFile).use { output ->
+                    inputStream.use { input -> input.copyTo(output) }
+                }
+                pdfFile = tempFile
+            }
+            onDownloadComplete()
+        } catch (e: Exception) {
+            error = e.message
+        } finally {
+            isLoading = false
         }
-    )
+    }
+
+    Box(modifier = Modifier.fillMaxSize()) {
+        if (isLoading) {
+            CircularProgressIndicator(
+                modifier = Modifier.align(Alignment.Center),
+                color = MaterialTheme.appColors.primary
+            )
+        } else if (error != null) {
+            Text(
+                text = "Error loading PDF: $error",
+                modifier = Modifier.align(Alignment.Center),
+                style = MaterialTheme.appTypography.bodyMedium,
+                color = MaterialTheme.appColors.error
+            )
+        } else {
+            pdfFile?.let { file ->
+                AndroidView(
+                    factory = { ctx ->
+                        PDFView(ctx, null).apply {
+                            fromFile(file)
+                                .enableSwipe(true)
+                                .swipeHorizontal(false)
+                                .enableDoubleTap(true)
+                                .defaultPage(0)
+                                .load()
+                        }
+                    },
+                    modifier = Modifier.fillMaxSize()
+                )
+            }
+        }
+    }
 }

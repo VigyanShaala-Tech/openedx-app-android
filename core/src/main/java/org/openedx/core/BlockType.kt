@@ -52,9 +52,6 @@ enum class BlockType {
     SURVEY {
         override fun isContainer() = false
     },
-    TAS {
-        override fun isContainer() = false
-    },
     ZOOM_XBLOCK {
         override fun isContainer() = false
     },
@@ -78,6 +75,14 @@ enum class BlockType {
         override fun isContainer() = false
     },
     MATCH_COLUMN {
+        override fun isContainer() = false
+    },
+
+    POLL {
+        override fun isContainer() = false
+    },
+
+    TAS {
         override fun isContainer() = false
     },
 

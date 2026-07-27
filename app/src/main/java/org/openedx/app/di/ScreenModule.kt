@@ -584,8 +584,6 @@ val screenModule = module {
 
     viewModel {
         PdfUnitViewModel(
-            get(),
-            get(),
             get()
         )
     }

@@ -723,6 +723,7 @@ private fun CollapsingLayoutMobile(
         Row(
             modifier = Modifier
                 .fillMaxWidth()
+                .statusBarsInset()
                 .padding(horizontal = 12.dp)
                 .onSizeChanged { size ->
                     collapsedTopHeight.value = size.height.toFloat()
@@ -731,7 +732,6 @@ private fun CollapsingLayoutMobile(
         ) {
             Icon(
                 modifier = Modifier
-                    .statusBarsInset()
                     .padding(top = 12.dp, start = backBtnStartPadding)
                     .clip(CircleShape)
                     .background(MaterialTheme.appColors.courseHomeBackBtnBackground.copy(factor / 2))
@@ -740,7 +740,7 @@ private fun CollapsingLayoutMobile(
                     },
                 imageVector = Icons.AutoMirrored.Filled.ArrowBack,
                 tint = MaterialTheme.appColors.textPrimary,
-                contentDescription = stringResource(id = R.string.core_accessibility_btn_back)
+                contentDescription = stringResource(id = org.openedx.core.R.string.core_accessibility_btn_back)
             )
             Spacer(modifier = Modifier.width(8.dp))
             Box(

@@ -50,6 +50,7 @@ import org.openedx.core.ui.WebContentScreen
 import org.openedx.core.ui.theme.OpenEdXTheme
 import org.openedx.core.ui.theme.appColors
 import org.openedx.core.ui.theme.appShapes
+import org.openedx.core.ui.theme.appTypography
 import org.openedx.course.presentation.assignments.CourseContentAssignmentScreen
 import org.openedx.course.presentation.container.CourseContentTab
 import org.openedx.course.presentation.handouts.HandoutsType
@@ -132,8 +133,25 @@ fun ContentTabScreen(
                                 },
                                 onViewAllLiveSessionsClick = {}
                             )
+                        } else if (uiState is org.openedx.course.presentation.home.CourseHomeUIState.Loading) {
+                            Box(
+                                modifier = Modifier.fillMaxSize(),
+                                contentAlignment = Alignment.Center
+                            ) {
+                                CircularProgress()
+                            }
                         } else {
-                            CircularProgress()
+                            // Empty state or error for live sessions
+                            Box(
+                                modifier = Modifier.fillMaxSize(),
+                                contentAlignment = Alignment.Center
+                            ) {
+                                Text(
+                                    text = "No live sessions available",
+                                    style = MaterialTheme.appTypography.bodyMedium,
+                                    color = MaterialTheme.appColors.textSecondary
+                                )
+                            }
                         }
                     }
 
@@ -176,6 +194,7 @@ private fun ContentTabUI(
 
     Scaffold(
         modifier = Modifier.fillMaxSize(),
+        backgroundColor = MaterialTheme.appColors.background
     ) {
         Column(
             modifier = Modifier
@@ -213,7 +232,7 @@ private fun ContentTabUI(
                                 }
                                 onTabClicked(tab)
                             }
-                            .padding(horizontal = 20.dp, vertical = 10.dp),
+                            .padding(horizontal = 12.dp, vertical = 10.dp),
                         contentAlignment = Alignment.Center
                     ) {
                         Text(
@@ -222,11 +241,7 @@ private fun ContentTabUI(
                                 MaterialTheme.appColors.primaryButtonText
                             else
                                 MaterialTheme.appColors.primary,
-                            style = MaterialTheme.typography.button.copy(
-                                platformStyle = PlatformTextStyle(
-                                    includeFontPadding = false
-                                )
-                            ),
+                            style = MaterialTheme.typography.button,
                             maxLines = 1
                         )
                     }
@@ -248,7 +263,9 @@ private fun ContentTabUI(
                 beyondViewportPageCount = CourseContentTab.entries.size,
                 modifier = Modifier.fillMaxSize()
             ) { page ->
-                content(page)
+                Box(modifier = Modifier.fillMaxSize()) {
+                    content(page)
+                }
             }
         }
     }

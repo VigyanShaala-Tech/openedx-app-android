@@ -144,8 +144,9 @@ class AppActivity : AppCompatActivity(), InsetHolder, WindowSizeHolder {
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
         installSplashScreen()
+        super.onCreate(savedInstanceState)
+        supportActionBar?.hide()
         binding = ActivityAppBinding.inflate(layoutInflater)
         lifecycle.addObserver(viewModel)
         viewModel.logAppLaunchEvent()

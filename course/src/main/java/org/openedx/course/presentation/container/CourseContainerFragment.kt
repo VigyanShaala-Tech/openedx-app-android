@@ -367,7 +367,8 @@ fun CourseDashboard(
             }
 
             Column(
-                modifier = Modifier.fillMaxSize()
+                modifier = Modifier
+                    .fillMaxSize()
             ) {
                 Box(
                     modifier = Modifier.weight(1f)
@@ -379,7 +380,7 @@ fun CourseDashboard(
                             .padding(paddingValues)
                             .pullRefresh(pullRefreshState),
                         courseImage = courseImage,
-                        imageHeight = 250,
+                        imageHeight = 200,
                         expandedTop = {
                             ExpandedHeaderContent(
                                 courseTitle = viewModel.courseName,
@@ -399,7 +400,7 @@ fun CourseDashboard(
                                     items = CourseContainerTab.entries,
                                     contentPadding = PaddingValues(
                                         horizontal = 12.dp,
-                                        vertical = 16.dp
+                                        vertical = 8.dp
                                     ),
                                     rowState = tabState,
                                     pagerState = pagerState,

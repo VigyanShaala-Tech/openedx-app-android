@@ -55,8 +55,8 @@ internal fun ExpandedHeaderContent(
     Column(
         modifier
             .fillMaxWidth()
-            .background(Color.White)
-            .padding(start = horizontalPadding, end = horizontalPadding, bottom = 24.dp, top = 20.dp),
+            .background(MaterialTheme.appColors.background)
+            .padding(start = horizontalPadding, end = horizontalPadding, bottom = 8.dp, top = 8.dp),
         horizontalAlignment = Alignment.Start
     ) {
         Row(

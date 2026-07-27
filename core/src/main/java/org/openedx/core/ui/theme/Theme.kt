@@ -103,6 +103,12 @@ private val DarkColorPalette = AppColors(
     gradeProgressBarBackground = dark_grade_progress_bar_background,
     assignmentCardBorder = dark_assignment_card_border,
     dashboardBackground = dark_dashboard_background,
+
+    liveSessionBackground = dark_live_session_background,
+    liveSessionBorder = dark_live_session_border,
+    liveSessionIconBackground = dark_live_session_icon_background,
+    liveSessionIconTint = dark_live_session_icon_tint,
+    liveSessionJoinButton = dark_live_session_join_button,
 )
 
 private val LightColorPalette = AppColors(
@@ -198,6 +204,12 @@ private val LightColorPalette = AppColors(
     gradeProgressBarBackground = light_grade_progress_bar_background,
     assignmentCardBorder = light_assignment_card_border,
     dashboardBackground = light_dashboard_background,
+
+    liveSessionBackground = light_live_session_background,
+    liveSessionBorder = light_live_session_border,
+    liveSessionIconBackground = light_live_session_icon_background,
+    liveSessionIconTint = light_live_session_icon_tint,
+    liveSessionJoinButton = light_live_session_join_button,
 )
 
 val MaterialTheme.appColors: AppColors

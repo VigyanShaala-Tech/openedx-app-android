@@ -21,6 +21,7 @@ import org.openedx.core.data.model.HandoutsModel
 import org.openedx.core.data.model.JoinMeetingResponse
 import org.openedx.core.data.model.LeaderboardResponse
 import org.openedx.core.data.model.LiveClassResponse
+import org.openedx.core.data.model.OngoingSessionResponse
 import org.openedx.core.data.model.PrefillResponse
 import org.openedx.core.data.model.RegistrationSubmitResponse
 import org.openedx.core.data.model.ResetCourseDates
@@ -131,6 +132,11 @@ interface CourseApi {
     suspend fun getDashboardProgress(
         @Path("course_id") courseId: String,
     ): DashboardProgressResponse
+
+    @GET("/api/v1/get/ongoing-session/{course_id}/")
+    suspend fun getOngoingSession(
+        @Path("course_id") courseId: String
+    ): OngoingSessionResponse
 
     @GET("/api/v1/live-classes/{course_id}/")
     suspend fun getLiveClasses(

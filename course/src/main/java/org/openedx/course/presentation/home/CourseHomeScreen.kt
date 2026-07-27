@@ -58,6 +58,7 @@ import androidx.compose.ui.window.DialogProperties
 import androidx.fragment.app.FragmentManager
 import org.openedx.core.Mock
 import org.openedx.core.NoContentScreenType
+import org.openedx.core.data.model.LiveClassModel
 import org.openedx.core.domain.model.Block
 import org.openedx.core.domain.model.CourseDatesBannerInfo
 import org.openedx.core.ui.CircularProgress
@@ -187,6 +188,9 @@ fun CourseHomeScreen(
         onJoinClick = { session ->
             viewModel.joinMeeting(fragmentManager, session.joinUrl, session.topic)
         },
+        onJoinOngoingClick = { joinUrl ->
+            viewModel.joinMeeting(fragmentManager, joinUrl, "")
+        },
         onViewAllLiveSessionsClick = {
             onNavigateToContent(CourseContentTab.LIVE_SESSIONS)
         }
@@ -213,7 +217,8 @@ private fun CourseHomeUI(
     onViewAllAssignmentsClick: () -> Unit,
     onViewProgressClick: () -> Unit,
     onViewAllAnnouncementsClick: () -> Unit,
-    onJoinClick: (org.openedx.core.data.model.LiveClassModel) -> Unit,
+    onJoinClick: (LiveClassModel) -> Unit,
+    onJoinOngoingClick: (String) -> Unit,
     onViewAllLiveSessionsClick: () -> Unit,
 ) {
     val scaffoldState = rememberScaffoldState()
@@ -298,8 +303,10 @@ private fun CourseHomeUI(
                             // Live Sessions Card
                             DashboardCard {
                                 LiveSessionsCardContent(
+                                    isHomeScreen = true,
                                     uiState = uiState,
                                     onJoinClick = onJoinClick,
+                                    onJoinOngoingClick = onJoinOngoingClick,
                                     onViewAllLiveSessionsClick = onViewAllLiveSessionsClick
                                 )
                             }
@@ -676,6 +683,7 @@ private fun CourseHomeScreenPreview() {
             onViewProgressClick = {},
             onViewAllAnnouncementsClick = {},
             onJoinClick = {},
+            onJoinOngoingClick = {},
             onViewAllLiveSessionsClick = {}
         )
     }

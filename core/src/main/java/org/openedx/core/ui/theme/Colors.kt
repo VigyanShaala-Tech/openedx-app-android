@@ -79,6 +79,12 @@ val light_grade_progress_bar_color = Color.Black
 val light_grade_progress_bar_background = Color(0xFFCCD4E0)
 val light_assignment_card_border = Color(0xFFCCD4E0)
 
+val light_live_session_background = Color(0xFFFFF1F1)
+val light_live_session_border = Color(0xFFFFDADA)
+val light_live_session_icon_background = Color(0xFFFFE0E0)
+val light_live_session_icon_tint = Color.Red
+val light_live_session_join_button = Color(0xFFE53935)
+
 val dark_primary = Color(0xFF69ab4a)
 val dark_primary_variant = Color(0xFF3700B3)
 val dark_secondary = Color(0xFF03DAC6)
@@ -156,6 +162,12 @@ val dark_progress_bar_background_color = Color(0xFF8E9BAE)
 val dark_grade_progress_bar_color = Color.Transparent
 val dark_grade_progress_bar_background = Color(0xFF8E9BAE)
 val dark_assignment_card_border = Color(0xFF8E9BAE)
+
+val dark_live_session_background = Color(0xFF3D2727)
+val dark_live_session_border = Color(0xFF5A3D3D)
+val dark_live_session_icon_background = Color(0xFF4E3333)
+val dark_live_session_icon_tint = Color(0xFFFF5252)
+val dark_live_session_join_button = Color(0xFFE53935)
 
 val light_dashboard_background = Color(0xFFFAFAFA)
 val dark_dashboard_background = Color(0xFF19212F)

@@ -208,6 +208,13 @@ class CourseHomeViewModel(
                 emptyList()
             }
 
+            // Fetch ongoing session
+            val ongoingSession = try {
+                interactor.getOngoingSession(courseId).result
+            } catch (e: Exception) {
+                null
+            }
+
             combine(
                 courseStructureFlow,
                 courseStatusFlow,
@@ -227,7 +234,8 @@ class CourseHomeViewModel(
                     announcements,
                     liveClassesToday,
                     liveClassesUpcoming,
-                    liveClassesPast
+                    liveClassesPast,
+                    ongoingSession
                 )
             }.catch { e ->
                 handleCourseDataError(e)
@@ -244,7 +252,8 @@ class CourseHomeViewModel(
         announcements: List<org.openedx.core.domain.model.AnnouncementModel> = emptyList(),
         liveClassesToday: List<org.openedx.core.data.model.LiveClassModel> = emptyList(),
         liveClassesUpcoming: List<org.openedx.core.data.model.LiveClassModel> = emptyList(),
-        liveClassesPast: List<org.openedx.core.data.model.LiveClassModel> = emptyList()
+        liveClassesPast: List<org.openedx.core.data.model.LiveClassModel> = emptyList(),
+        ongoingSession: org.openedx.core.data.model.OngoingSessionModel? = null
     ) {
         setBlocks(blocks)
         courseSubSections.clear()
@@ -305,7 +314,8 @@ class CourseHomeViewModel(
             announcements = announcements,
             liveClassesToday = liveClassesToday,
             liveClassesUpcoming = liveClassesUpcoming,
-            liveClassesPast = liveClassesPast
+            liveClassesPast = liveClassesPast,
+            ongoingSession = ongoingSession
         )
         getVideoPreview(firstIncompleteVideo)
     }

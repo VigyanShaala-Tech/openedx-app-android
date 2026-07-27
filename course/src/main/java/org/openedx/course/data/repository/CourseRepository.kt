@@ -19,6 +19,7 @@ import org.openedx.core.domain.model.CourseDatesResult
 import org.openedx.core.domain.model.CourseEnrollmentDetails
 import org.openedx.core.domain.model.CourseProgress
 import org.openedx.core.domain.model.DashboardProgress
+import org.openedx.core.data.model.OngoingSessionResponse
 import org.openedx.core.data.model.RegistrationSubmitResponse
 import org.openedx.core.domain.model.CourseStructure
 import org.openedx.core.domain.model.EligibilityResult
@@ -299,6 +300,9 @@ class CourseRepository(
 
     suspend fun getLiveClasses(courseId: String, type: String, page: Int) =
         api.getLiveClasses(courseId, type, page)
+
+    suspend fun getOngoingSession(courseId: String) =
+        api.getOngoingSession(courseId)
 
     suspend fun getJoinMeetingUrl(meetingId: String) =
         api.getJoinMeetingUrl(meetingId)

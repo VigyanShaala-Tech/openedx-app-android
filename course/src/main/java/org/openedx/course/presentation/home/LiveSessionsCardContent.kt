@@ -22,9 +22,6 @@ import androidx.compose.material.Icon
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Text
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.AccessTime
-import androidx.compose.material.icons.filled.CalendarToday
-import androidx.compose.material.icons.filled.RadioButtonChecked
 import androidx.compose.material.icons.filled.Sensors
 import androidx.compose.material.icons.filled.Videocam
 import androidx.compose.runtime.Composable
@@ -37,12 +34,11 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.text.PlatformTextStyle
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import org.openedx.core.data.model.LiveClassModel
+import org.openedx.core.data.model.OngoingSessionModel
 import org.openedx.core.ui.theme.appColors
 import org.openedx.core.ui.theme.appTypography
 import org.openedx.core.utils.TimeUtils
@@ -54,14 +50,16 @@ import java.util.Locale
 @Composable
 fun LiveSessionsCardContent(
     modifier: Modifier = Modifier,
+    isHomeScreen: Boolean = false,
     showTitle: Boolean = true,
     uiState: CourseHomeUIState.CourseData,
     onJoinClick: (LiveClassModel) -> Unit,
+    onJoinOngoingClick: (String) -> Unit,
     onViewAllLiveSessionsClick: () -> Unit
 ) {
-    val todaySessions = uiState.liveClassesToday
+    val ongoingSession = uiState.ongoingSession
 
-    if (todaySessions.isNotEmpty()) {
+    if (isHomeScreen && ongoingSession != null && ongoingSession.isSessionOngoing) {
         Column(
             modifier = modifier.padding(16.dp),
             verticalArrangement = Arrangement.spacedBy(12.dp)
@@ -74,37 +72,34 @@ fun LiveSessionsCardContent(
                 )
                 Spacer(modifier = Modifier.width(8.dp))
                 Text(
-                    text = "Happening Now",
+                    text = stringResource(R.string.course_happening_now),
                     style = MaterialTheme.appTypography.titleSmall,
                     color = MaterialTheme.appColors.textDark,
                     fontWeight = FontWeight.Bold
                 )
             }
 
-            todaySessions.take(3).forEach { session ->
-                HappeningNowItem(
-                    session = session,
-                    onJoinClick = { onJoinClick(session) }
-                )
-            }
+            OngoingSessionItem(
+                session = ongoingSession,
+                onJoinClick = { ongoingSession.link?.let { onJoinOngoingClick(it) } }
+            )
         }
     } else {
-        // Fallback to original tabbed view if nothing is happening now
-        TabbedLiveSessions(uiState, onJoinClick, onViewAllLiveSessionsClick)
+        TabbedLiveSessions(uiState, onJoinClick, onJoinOngoingClick, onViewAllLiveSessionsClick)
     }
 }
 
 @Composable
-fun HappeningNowItem(
-    session: LiveClassModel,
+fun OngoingSessionItem(
+    session: OngoingSessionModel,
     onJoinClick: () -> Unit
 ) {
     Box(
         modifier = Modifier
             .fillMaxWidth()
             .clip(RoundedCornerShape(12.dp))
-            .background(Color(0xFFFFF1F1)) // Light red/pink background
-            .border(1.dp, Color(0xFFFFDADA), RoundedCornerShape(12.dp))
+            .background(MaterialTheme.appColors.liveSessionBackground)
+            .border(1.dp, MaterialTheme.appColors.liveSessionBorder, RoundedCornerShape(12.dp))
             .padding(12.dp)
     ) {
         Row(
@@ -114,27 +109,27 @@ fun HappeningNowItem(
                 modifier = Modifier
                     .size(40.dp)
                     .clip(CircleShape)
-                    .background(Color(0xFFFFE0E0)),
+                    .background(MaterialTheme.appColors.liveSessionIconBackground),
                 contentAlignment = Alignment.Center
             ) {
                 Icon(
                     imageVector = Icons.Default.Sensors,
                     contentDescription = null,
-                    tint = Color.Red,
+                    tint = MaterialTheme.appColors.liveSessionIconTint,
                     modifier = Modifier.size(24.dp)
                 )
             }
             Spacer(modifier = Modifier.width(12.dp))
             Column(modifier = Modifier.weight(1f)) {
                 Text(
-                    text = session.topic ?: "",
+                    text = session.meetingName ?: "",
                     style = MaterialTheme.appTypography.bodyMedium,
                     color = MaterialTheme.appColors.textDark,
                     fontWeight = FontWeight.Bold,
                     maxLines = 1
                 )
                 Text(
-                    text = "Dr. Sharma • Started 10 min ago", // Static for now as requested
+                    text = session.started ?: "",
                     style = MaterialTheme.appTypography.labelSmall,
                     color = MaterialTheme.appColors.textSecondary
                 )
@@ -142,12 +137,12 @@ fun HappeningNowItem(
             Button(
                 onClick = onJoinClick,
                 shape = RoundedCornerShape(20.dp),
-                colors = ButtonDefaults.buttonColors(backgroundColor = Color(0xFFE53935)),
+                colors = ButtonDefaults.buttonColors(backgroundColor = MaterialTheme.appColors.liveSessionJoinButton),
                 contentPadding = PaddingValues(horizontal = 16.dp, vertical = 4.dp),
                 modifier = Modifier.height(32.dp)
             ) {
                 Text(
-                    text = "Join",
+                    text = session.linkLabel ?: stringResource(R.string.course_live_sessions_join),
                     color = Color.White,
                     fontSize = 12.sp,
                     style = MaterialTheme.appTypography.labelMedium
@@ -161,11 +156,13 @@ fun HappeningNowItem(
 fun TabbedLiveSessions(
     uiState: CourseHomeUIState.CourseData,
     onJoinClick: (LiveClassModel) -> Unit,
+    onJoinOngoingClick: (String) -> Unit,
     onViewAllLiveSessionsClick: () -> Unit
 ) {
-    var selectedTab by remember { mutableStateOf("upcoming") }
+    var selectedTab by remember { mutableStateOf("today") }
 
     val sessions = when (selectedTab) {
+        "today" -> uiState.liveClassesToday
         "upcoming" -> uiState.liveClassesUpcoming
         "past" -> uiState.liveClassesPast
         else -> emptyList()
@@ -189,13 +186,19 @@ fun TabbedLiveSessions(
             horizontalArrangement = Arrangement.spacedBy(8.dp)
         ) {
             LiveTabButton(
-                text = "Upcoming",
+                text = stringResource(R.string.course_live_sessions_today),
+                count = if (uiState.ongoingSession?.isSessionOngoing == true) uiState.liveClassesToday.size + 1 else uiState.liveClassesToday.size,
+                isSelected = selectedTab == "today",
+                onClick = { selectedTab = "today" }
+            )
+            LiveTabButton(
+                text = stringResource(R.string.course_live_sessions_upcoming),
                 count = uiState.liveClassesUpcoming.size,
                 isSelected = selectedTab == "upcoming",
                 onClick = { selectedTab = "upcoming" }
             )
             LiveTabButton(
-                text = "Past",
+                text = stringResource(R.string.course_live_sessions_past),
                 count = uiState.liveClassesPast.size,
                 isSelected = selectedTab == "past",
                 onClick = { selectedTab = "past" }
@@ -204,7 +207,15 @@ fun TabbedLiveSessions(
 
         Spacer(modifier = Modifier.height(16.dp))
 
-        if (sessions.isEmpty()) {
+        if (selectedTab == "today" && uiState.ongoingSession?.isSessionOngoing == true) {
+            OngoingSessionItem(
+                session = uiState.ongoingSession,
+                onJoinClick = { uiState.ongoingSession.link?.let { onJoinOngoingClick(it) } }
+            )
+            Spacer(modifier = Modifier.height(12.dp))
+        }
+
+        if (sessions.isEmpty() && (selectedTab != "today" || uiState.ongoingSession?.isSessionOngoing != true)) {
             Text(
                 text = "No sessions found",
                 style = MaterialTheme.appTypography.bodySmall,

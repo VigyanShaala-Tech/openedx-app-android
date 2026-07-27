@@ -131,6 +131,9 @@ fun ContentTabScreen(
                                 onJoinClick = { session ->
                                     homeViewModel.joinMeeting(fragmentManager, session.joinUrl, session.topic)
                                 },
+                                onJoinOngoingClick = { joinUrl ->
+                                    homeViewModel.joinMeeting(fragmentManager, joinUrl, "")
+                                },
                                 onViewAllLiveSessionsClick = {}
                             )
                         } else if (uiState is org.openedx.course.presentation.home.CourseHomeUIState.Loading) {

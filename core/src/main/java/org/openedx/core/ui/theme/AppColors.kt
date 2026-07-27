@@ -85,6 +85,12 @@ data class AppColors(
     val gradeProgressBarBackground: Color,
     val assignmentCardBorder: Color,
     val dashboardBackground: Color,
+
+    val liveSessionBackground: Color,
+    val liveSessionBorder: Color,
+    val liveSessionIconBackground: Color,
+    val liveSessionIconTint: Color,
+    val liveSessionJoinButton: Color,
 ) {
     val primary: Color get() = material.primary
     val primaryVariant: Color get() = material.primaryVariant

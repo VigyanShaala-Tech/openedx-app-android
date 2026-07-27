@@ -24,6 +24,10 @@ import org.junit.rules.TestRule
 import org.openedx.core.Mock
 import org.openedx.core.R
 import org.openedx.core.config.Config
+import org.openedx.core.data.model.LiveClassResponse
+import org.openedx.core.data.model.OngoingSessionModel
+import org.openedx.core.data.model.OngoingSessionResponse
+import org.openedx.core.data.model.Pagination
 import org.openedx.core.data.storage.CorePreferences
 import org.openedx.core.domain.helper.VideoPreviewHelper
 import org.openedx.core.module.DownloadWorkerController
@@ -159,6 +163,17 @@ class CourseHomeViewModelTest {
                 true
             )
         } returns flow { emit(courseProgress) }
+        coEvery { interactor.getLiveClasses(any(), any(), any()) } returns LiveClassResponse(
+            results = emptyList(),
+            pagination = Pagination(0, "", 0, "")
+        )
+        coEvery { interactor.getLiveClasses(any(), any(), any()) } returns LiveClassResponse(
+            results = emptyList(),
+            pagination = Pagination(0, "", 0, "")
+        )
+        coEvery { interactor.getOngoingSession(any()) } returns OngoingSessionResponse(
+            result = OngoingSessionModel(false, "", "", "", "", "")
+        )
         coEvery { interactor.getVideoProgress("video1") } returns videoProgress
 
         val viewModel = CourseHomeViewModel(

@@ -1,21 +1,27 @@
 package org.openedx.course.presentation.unit.html
 
 import android.annotation.SuppressLint
+import android.app.Activity
 import android.content.Intent
 import android.content.res.Configuration
 import android.graphics.Bitmap
 import android.net.Uri
+import android.os.Build
 import android.os.Bundle
 import android.util.Log
 import android.view.LayoutInflater
 import android.view.ViewGroup
 import android.webkit.JavascriptInterface
+import android.webkit.PermissionRequest
+import android.webkit.ValueCallback
+import android.webkit.WebChromeClient
 import android.webkit.WebResourceError
 import android.webkit.WebResourceRequest
 import android.webkit.WebResourceResponse
 import android.webkit.WebSettings
 import android.webkit.WebView
 import android.webkit.WebViewClient
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.background
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Box
@@ -77,6 +83,20 @@ class HtmlUnitFragment : Fragment() {
     private var lastModified: String = ""
     private var fromDownloadedContent: Boolean = false
 
+    private var filePathCallback: ValueCallback<Array<Uri>>? = null
+
+    private val fileChooserLauncher = registerForActivityResult(
+        ActivityResultContracts.StartActivityForResult()
+    ) { result ->
+        if (result.resultCode == Activity.RESULT_OK) {
+            val results = WebChromeClient.FileChooserParams.parseResult(result.resultCode, result.data)
+            filePathCallback?.onReceiveValue(results)
+        } else {
+            filePathCallback?.onReceiveValue(null)
+        }
+        filePathCallback = null
+    }
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         blockUrl = requireArguments().getString(ARG_BLOCK_URL, "")
@@ -97,7 +117,27 @@ class HtmlUnitFragment : Fragment() {
                 blockUrl = blockUrl,
                 offlineUrl = offlineUrl,
                 fromDownloadedContent = fromDownloadedContent,
-                isFragmentAdded = isAdded
+                isFragmentAdded = isAdded,
+                onShowFileChooser = { callback, params ->
+                    filePathCallback = callback
+                    try {
+                        val intent = params.createIntent()
+                        intent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
+                        if (intent.resolveActivity(requireContext().packageManager) != null) {
+                            fileChooserLauncher.launch(intent)
+                        } else {
+                            // Fallback for some devices/OS versions
+                            val backupIntent = Intent(Intent.ACTION_GET_CONTENT).apply {
+                                addCategory(Intent.CATEGORY_OPENABLE)
+                                type = "*/*"
+                            }
+                            fileChooserLauncher.launch(Intent.createChooser(backupIntent, "File Chooser"))
+                        }
+                    } catch (_: Exception) {
+                        filePathCallback?.onReceiveValue(null)
+                        filePathCallback = null
+                    }
+                }
             )
         }
     }
@@ -135,6 +175,7 @@ fun HtmlUnitView(
     offlineUrl: String,
     fromDownloadedContent: Boolean,
     isFragmentAdded: Boolean,
+    onShowFileChooser: (ValueCallback<Array<Uri>>, WebChromeClient.FileChooserParams) -> Unit,
 ) {
     OpenEdXTheme {
         val context = LocalContext.current
@@ -216,6 +257,7 @@ fun HtmlUnitView(
                             saveXBlockProgress = { jsonProgress ->
                                 viewModel.saveXBlockProgress(jsonProgress)
                             },
+                            onShowFileChooser = onShowFileChooser
                         )
                     } else {
                         viewModel.onWebPageLoadError()
@@ -257,6 +299,7 @@ private fun HTMLContentView(
     onWebPageLoaded: () -> Unit,
     onWebPageLoadError: () -> Unit,
     saveXBlockProgress: (String) -> Unit,
+    onShowFileChooser: (ValueCallback<Array<Uri>>, WebChromeClient.FileChooserParams) -> Unit,
 ) {
     val coroutineScope = rememberCoroutineScope()
     val context = LocalContext.current
@@ -362,6 +405,35 @@ private fun HTMLContentView(
                         super.onReceivedError(view, request, error)
                     }
                 }
+                webChromeClient = object : WebChromeClient() {
+                    override fun onShowFileChooser(
+                        webView: WebView?,
+                        filePathCallback: ValueCallback<Array<Uri>>?,
+                        fileChooserParams: FileChooserParams?
+                    ): Boolean {
+                        if (filePathCallback != null && fileChooserParams != null) {
+                            onShowFileChooser(filePathCallback, fileChooserParams)
+                        }
+                        return true
+                    }
+
+                    override fun onPermissionRequest(request: PermissionRequest?) {
+                        request?.grant(request.resources)
+                    }
+
+                    override fun onCreateWindow(
+                        view: WebView?,
+                        isDialog: Boolean,
+                        isUserGesture: Boolean,
+                        resultMsg: android.os.Message?
+                    ): Boolean {
+                        val transport = resultMsg?.obj as? WebView.WebViewTransport
+                        transport?.webView = view
+                        resultMsg?.sendToTarget()
+                        return true
+                    }
+                }
+                @Suppress("DEPRECATION")
                 with(settings) {
                     javaScriptEnabled = true
                     loadWithOverviewMode = true
@@ -372,10 +444,27 @@ private fun HTMLContentView(
                     allowFileAccess = true
                     allowContentAccess = true
                     useWideViewPort = true
+                    databaseEnabled = true
+                    javaScriptCanOpenWindowsAutomatically = true
+                    allowFileAccessFromFileURLs = true
+                    allowUniversalAccessFromFileURLs = true
+                    setSupportMultipleWindows(true)
+                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+                        mixedContentMode = WebSettings.MIXED_CONTENT_ALWAYS_ALLOW
+                    }
                     cacheMode = WebSettings.LOAD_NO_CACHE
+                    if (url.contains("google-calendar")) {
+                        userAgentString =
+                            "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36"
+                    }
+                }
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+                    android.webkit.CookieManager.getInstance().setAcceptThirdPartyCookies(this, true)
                 }
                 isVerticalScrollBarEnabled = false
                 isHorizontalScrollBarEnabled = false
+                isFocusable = true
+                isFocusableInTouchMode = true
 
                 loadUrl(url, coroutineScope, cookieManager)
                 applyDarkModeIfEnabled(isDarkTheme)

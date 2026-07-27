@@ -93,7 +93,9 @@ class CourseUnitContainerAdapter(
                 block.isH5PBlock||
                 block.isFillBlankBlock||
                 block.isMatchColumnBlock||
-                block.isGoogleDocumentBlock
+                block.isTasBlock||
+                block.isGoogleDocumentBlock||
+                block.isSgaBlock
 
     }
 

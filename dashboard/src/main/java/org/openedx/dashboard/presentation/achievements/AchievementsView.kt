@@ -368,19 +368,33 @@ private fun BadgeProgressItem(item: BadgeProgressDto) {
                         ),
                     contentAlignment = Alignment.Center
                 ) {
-                    val icon = when {
-                        item.title.contains("Hour", true) -> Icons.Filled.Alarm
-                        item.title.contains("Research", true) -> Icons.Filled.Book
-                        item.title.contains("Community", true) -> Icons.Filled.EmojiEvents
-                        item.title.contains("Course", true) -> Icons.Filled.CheckCircle
-                        else -> Icons.Filled.EmojiEvents
+                    if (!item.icon_url.isNullOrEmpty()) {
+                        AsyncImage(
+                            modifier = Modifier
+                                .fillMaxSize()
+                                .clip(CircleShape),
+                            contentScale = ContentScale.Crop,
+                            model = ImageRequest.Builder(LocalContext.current)
+                                .data(sanitizeUrl(item.icon_url))
+                                .crossfade(true)
+                                .build(),
+                            contentDescription = null,
+                        )
+                    } else {
+                        val icon = when {
+                            item.title.contains("Hour", true) -> Icons.Filled.Alarm
+                            item.title.contains("Research", true) -> Icons.Filled.Book
+                            item.title.contains("Community", true) -> Icons.Filled.EmojiEvents
+                            item.title.contains("Course", true) -> Icons.Filled.CheckCircle
+                            else -> Icons.Filled.EmojiEvents
+                        }
+                        Icon(
+                            imageVector = icon,
+                            contentDescription = null,
+                            tint = MaterialTheme.appColors.primary,
+                            modifier = Modifier.size(20.dp)
+                        )
                     }
-                    Icon(
-                        imageVector = icon,
-                        contentDescription = null,
-                        tint = MaterialTheme.appColors.primary,
-                        modifier = Modifier.size(20.dp)
-                    )
                 }
                 Spacer(Modifier.width(12.dp))
                 Column(modifier = Modifier.weight(1f)) {
@@ -417,7 +431,7 @@ private fun BadgeProgressItem(item: BadgeProgressDto) {
                         Text(
                             text = "$p%",
                             style = MaterialTheme.appTypography.bodySmall,
-                            color = Color(0xFF7A7A7A)
+                            color = MaterialTheme.appColors.textSecondary
                         )
                     }
                 }

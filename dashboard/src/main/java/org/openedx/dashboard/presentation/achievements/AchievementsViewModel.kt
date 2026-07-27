@@ -57,18 +57,12 @@ class AchievementsViewModel(
             _uiState.value = _uiState.value.copy(loading = !isRefreshing, refreshing = isRefreshing)
             try {
                 val response = interactor.getAllAchievements()
-                val fallbackProgress = listOf(
-                    BadgeProgressDto(null, resourceManager.getString(org.openedx.dashboard.R.string.dashboard_badge_10_hours_title), resourceManager.getString(org.openedx.dashboard.R.string.dashboard_badge_10_hours_desc), 70),
-                    BadgeProgressDto(null, resourceManager.getString(org.openedx.dashboard.R.string.dashboard_badge_research_title), resourceManager.getString(org.openedx.dashboard.R.string.dashboard_badge_research_desc), 40),
-                    BadgeProgressDto(null, resourceManager.getString(org.openedx.dashboard.R.string.dashboard_badge_community_title), resourceManager.getString(org.openedx.dashboard.R.string.dashboard_badge_community_desc), 60),
-                    BadgeProgressDto(null, resourceManager.getString(org.openedx.dashboard.R.string.dashboard_badge_5_courses_title), resourceManager.getString(org.openedx.dashboard.R.string.dashboard_badge_5_courses_desc), 60),
-                )
                 _uiState.value = _uiState.value.copy(
                     loading = false,
                     refreshing = false,
                     stats = response.stats,
                     earnedBadges = response.earned_badges,
-                    badgesInProgress = if (response.badges_in_progress.isNotEmpty()) response.badges_in_progress else fallbackProgress
+                    badgesInProgress = response.badges_in_progress
                 )
             } catch (e: Exception) {
                 _uiState.value = _uiState.value.copy(loading = false, refreshing = false)

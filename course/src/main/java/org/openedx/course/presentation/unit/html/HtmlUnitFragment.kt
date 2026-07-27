@@ -57,6 +57,7 @@ import androidx.fragment.app.Fragment
 import kotlinx.coroutines.launch
 import org.koin.androidx.viewmodel.ext.android.viewModel
 import org.koin.core.parameter.parametersOf
+import org.openedx.core.AppDataConstants
 import org.openedx.core.extension.loadUrl
 import org.openedx.core.system.AppCookieManager
 import org.openedx.core.ui.FullScreenErrorView
@@ -131,7 +132,12 @@ class HtmlUnitFragment : Fragment() {
                                 addCategory(Intent.CATEGORY_OPENABLE)
                                 type = "*/*"
                             }
-                            fileChooserLauncher.launch(Intent.createChooser(backupIntent, "File Chooser"))
+                            fileChooserLauncher.launch(
+                                Intent.createChooser(
+                                    backupIntent,
+                                    getString(org.openedx.core.R.string.core_file_chooser_title)
+                                )
+                            )
                         }
                     } catch (_: Exception) {
                         filePathCallback?.onReceiveValue(null)
@@ -454,8 +460,7 @@ private fun HTMLContentView(
                     }
                     cacheMode = WebSettings.LOAD_NO_CACHE
                     if (url.contains("google-calendar")) {
-                        userAgentString =
-                            "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36"
+                        userAgentString = AppDataConstants.DESKTOP_USER_AGENT
                     }
                 }
                 if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {

@@ -67,9 +67,18 @@ This document outlines the recent changes made to the project to address build i
 - Implemented `WebChromeClient.onShowFileChooser` in `HtmlUnitFragment` using `ActivityResultLauncher` with `FLAG_GRANT_READ_URI_PERMISSION` to handle file uploads securely.
 - Enhanced WebView settings in `HtmlUnitFragment` for maximum compatibility:
     - Enabled `databaseEnabled`, `domStorageEnabled`, and `javaScriptEnabled`.
-    - Enabled `allowFileAccessFromFileURLs` and `allowUniversalAccessFromFileURLs` (deprecated but required by some older XBlocks).
-    - Enabled `setSupportMultipleWindows(true)` and implemented `onCreateWindow` to handle internal redirects and popups.
-    - Added `CookieManager.getInstance().setAcceptThirdPartyCookies(true)` to support embedded content like Google Calendar.
-    - Implemented a Desktop User Agent override for `google-calendar` URLs to avoid mobile-specific loading issues.
-    - Set `mixedContentMode = WebSettings.MIXED_CONTENT_ALWAYS_ALLOW` to ensure HTTP/HTTPS content loads correctly (useful for `uat` environments).
-    - Enabled `isFocusable` and `isFocusableInTouchMode` to fix interaction issues in Survey and other interactive blocks.
+    - Enabled `setSupportMultipleWindows(true)` and implemented `onCreateWindow`.
+    - Added `CookieManager.getInstance().setAcceptThirdPartyCookies(true)` for embedded content.
+    - Implemented Desktop User Agent override for `google-calendar` URLs.
+    - Set `mixedContentMode = WebSettings.MIXED_CONTENT_ALWAYS_ALLOW`.
+    - Enabled `isFocusable` and `isFocusableInTouchMode` for better interaction.
+
+## 7. Dynamic Achievements and Badges
+
+### Refactoring to API-driven Content
+**Issue:** The "My Achievements" screen was using hardcoded fallback data for "Badges in Progress".
+
+**Solution:**
+- Removed hardcoded fallback lists from `AchievementsViewModel.kt`.
+- Updated `AchievementsView.kt` to support remote `icon_url` for badges using `AsyncImage`.
+- Aligned UI styling with the project's theme system by replacing hardcoded colors with `MaterialTheme.appColors`.

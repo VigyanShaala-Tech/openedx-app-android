@@ -39,6 +39,7 @@
     <string name="core_video_quality_p720_description">Best quality</string>
     <string name="core_user_not_active">User account is not activated. Please activate your account first.</string>
     <string name="core_email_chooser_header">Send email using…</string>
+    <string name="core_file_chooser_title">Select File</string>
     <string name="core_email_client_not_present">No e-mail clients installed</string>
     <string name="core_app_version" translatable="false">App version: </string>
     <string name="core_android_os_version" translatable="false">OS version: </string>

@@ -52,59 +52,52 @@ internal fun ExpandedHeaderContent(
     } else {
         98.dp
     }
-    Column(
-        modifier
+    Box(
+        modifier = modifier
             .fillMaxWidth()
             .background(MaterialTheme.appColors.background)
-            .padding(start = horizontalPadding, end = horizontalPadding, bottom = 8.dp, top = 8.dp),
-        horizontalAlignment = Alignment.Start
+            .padding(horizontal = horizontalPadding, vertical = 8.dp)
     ) {
-        Row(
-            modifier = Modifier
-                .fillMaxWidth(),
-            verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.SpaceBetween
-        ) {
-            Text(
-                text = org ?: "",
-                color = MaterialTheme.appColors.textSecondary,
-                style = MaterialTheme.appTypography.labelMedium
-            )
-            IconButton(
-                onClick = onNotificationClick,
-                modifier = Modifier.size(32.dp)
-            ) {
-                Box {
-                    Icon(
-                        painter = painterResource(id = R.drawable.ic_triangle_alert),
-                        contentDescription = null,
-                        tint = Color(0xFFD32F2F),
-                        modifier = Modifier.size(24.dp)
-                    )
-                    // Red dot
-//                    if (haveNewNotification) {
-                        Box(
-                            modifier = Modifier
-                                .size(8.dp)
-                                .background(Color(0xFFD32F2F), CircleShape)
-                                .border(1.2.dp, Color.White, CircleShape)
-                                .align(Alignment.TopEnd)
-                                .offset(x = 2.dp, y = (-2).dp)
-                        )
-//                    }
-                }
-            }
-        }
-        Spacer(modifier = Modifier.height(12.dp))
         Text(
             text = courseTitle ?: "",
-            color = Color(0xFF212121),
+            color = MaterialTheme.appColors.textDark,
             style = MaterialTheme.appTypography.titleLarge,
             overflow = TextOverflow.Ellipsis,
             maxLines = 3,
             fontWeight = FontWeight.Bold,
-            lineHeight = 32.sp
+            lineHeight = 32.sp,
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(end = 40.dp)
         )
+
+        IconButton(
+            onClick = onNotificationClick,
+            modifier = Modifier
+                .size(32.dp)
+                .align(Alignment.TopEnd)
+                .offset(y = (-8).dp)
+        ) {
+            Box {
+                Icon(
+                    painter = painterResource(id = R.drawable.ic_triangle_alert),
+                    contentDescription = null,
+                    tint = MaterialTheme.appColors.warningRed,
+                    modifier = Modifier.size(24.dp)
+                )
+                // Red dot
+//                    if (haveNewNotification) {
+                Box(
+                    modifier = Modifier
+                        .size(8.dp)
+                        .background(MaterialTheme.appColors.warningRed, CircleShape)
+                        .border(1.2.dp, MaterialTheme.appColors.background, CircleShape)
+                        .align(Alignment.TopEnd)
+                        .offset(x = 2.dp, y = (-2).dp)
+                )
+//                    }
+            }
+        }
     }
 }
 

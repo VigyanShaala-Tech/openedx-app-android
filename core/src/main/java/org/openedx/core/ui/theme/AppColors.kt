@@ -91,6 +91,9 @@ data class AppColors(
     val liveSessionIconBackground: Color,
     val liveSessionIconTint: Color,
     val liveSessionJoinButton: Color,
+
+    val warningRed: Color,
+    val cardDivider: Color,
 ) {
     val primary: Color get() = material.primary
     val primaryVariant: Color get() = material.primaryVariant

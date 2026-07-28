@@ -109,6 +109,9 @@ private val DarkColorPalette = AppColors(
     liveSessionIconBackground = dark_live_session_icon_background,
     liveSessionIconTint = dark_live_session_icon_tint,
     liveSessionJoinButton = dark_live_session_join_button,
+
+    warningRed = dark_warning_red,
+    cardDivider = dark_card_divider,
 )
 
 private val LightColorPalette = AppColors(
@@ -210,6 +213,9 @@ private val LightColorPalette = AppColors(
     liveSessionIconBackground = light_live_session_icon_background,
     liveSessionIconTint = light_live_session_icon_tint,
     liveSessionJoinButton = light_live_session_join_button,
+
+    warningRed = light_warning_red,
+    cardDivider = light_card_divider,
 )
 
 val MaterialTheme.appColors: AppColors

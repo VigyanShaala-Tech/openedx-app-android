@@ -82,3 +82,17 @@ This document outlines the recent changes made to the project to address build i
 - Removed hardcoded fallback lists from `AchievementsViewModel.kt`.
 - Updated `AchievementsView.kt` to support remote `icon_url` for badges using `AsyncImage`.
 - Aligned UI styling with the project's theme system by replacing hardcoded colors with `MaterialTheme.appColors`.
+
+## 8. UI Refinement and Static Resource Refactoring
+
+### Course Dashboard Cleanup
+**Issue:** Redundant "VigyanShaala" text in course header and course banner image cut off at the top.
+
+**Solution:**
+- Removed the redundant organization name from `HeaderContent.kt`.
+- Adjusted banner image alignment to `Alignment.TopCenter` in `CollapsingLayout.kt` to ensure the top part of the graphics is always visible.
+- Refactored hardcoded colors in `CourseContainerFragment.kt`, `HeaderContent.kt`, and `CollapsingLayout.kt` to use the central theme system.
+
+### Static Resource Refactoring
+- Added `warningRed` and `cardDivider` colors to `AppColors` and `Theme.kt`.
+- Replaced various hardcoded hex colors and standard Compose colors (like `Color.White`) with theme-aware colors to ensure consistency and better Dark Mode support.

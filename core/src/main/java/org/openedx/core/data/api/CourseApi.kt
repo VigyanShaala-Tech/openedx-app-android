@@ -173,19 +173,19 @@ interface CourseApi {
         @Body body: Map<String, @JvmSuppressWildcards Any>
     ): RegistrationSubmitResponse
 
-    @GET("https://uat.vigyanshaala.com/api/v1/options/universities/")
+    @GET("/api/v1/options/universities/")
     suspend fun getUniversities(): ResponseBody
 
-    @GET("https://uat.vigyanshaala.com/api/v1/options/rankings/")
+    @GET("/api/v1/options/rankings/")
     suspend fun getRankingOptions(): ResponseBody
 
     @GET("https://uat.vigyanshaala.com/api/v1/get/course/notifications/{course_id}/")
     suspend fun getCourseNotifications(@Path("course_id") courseId: String): CourseNotificationsResponse
 
-    @GET("/api/v1/get/course/user/rankings/{course_id}/")
+    @GET("/api/v1/course/{course_id}/ranking/")
     suspend fun getUserRanking(@Path("course_id") courseId: String): UserRankingResponse
 
-    @GET("/api/v1/get/course/leaderboard/{course_id}/")
+    @GET("/api/v1/course/{course_id}/leaderboard/")
     suspend fun getLeaderboard(
         @Path("course_id") courseId: String,
         @Query("page") page: Int,

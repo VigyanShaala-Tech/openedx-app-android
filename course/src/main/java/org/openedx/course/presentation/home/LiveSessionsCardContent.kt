@@ -100,6 +100,7 @@ fun OngoingSessionItem(
             .clip(RoundedCornerShape(12.dp))
             .background(MaterialTheme.appColors.liveSessionBackground)
             .border(1.dp, MaterialTheme.appColors.liveSessionBorder, RoundedCornerShape(12.dp))
+            .clickable(onClick = onJoinClick)
             .padding(12.dp)
     ) {
         Row(
@@ -226,7 +227,7 @@ fun TabbedLiveSessions(
             sessions.take(5).forEach { session ->
                 LiveSessionItem(
                     session = session,
-                    type = selectedTab,
+                    isClickable = selectedTab == "today",
                     onJoinClick = { onJoinClick(session) }
                 )
                 Spacer(modifier = Modifier.height(8.dp))
@@ -263,16 +264,23 @@ fun LiveTabButton(
 @Composable
 fun LiveSessionItem(
     session: LiveClassModel,
-    type: String,
+    isClickable: Boolean = true,
     onJoinClick: () -> Unit
 ) {
     val date = TimeUtils.iso8601ToDate(session.startTime) ?: Calendar.getInstance().time
     val dateFormatter = SimpleDateFormat("MMM dd, yyyy", Locale.getDefault())
     val timeFormatter = SimpleDateFormat("hh:mm a", Locale.getDefault())
 
+    val clickableModifier = if (isClickable) {
+        Modifier.clickable(onClick = onJoinClick)
+    } else {
+        Modifier
+    }
+
     Row(
         modifier = Modifier
             .fillMaxWidth()
+            .then(clickableModifier)
             .padding(vertical = 4.dp),
         verticalAlignment = Alignment.CenterVertically
     ) {
@@ -286,7 +294,7 @@ fun LiveSessionItem(
             Icon(
                 imageVector = Icons.Default.Videocam,
                 contentDescription = null,
-                tint = MaterialTheme.appColors.primary,
+                tint = if (isClickable) MaterialTheme.appColors.primary else MaterialTheme.appColors.textSecondary,
                 modifier = Modifier.size(18.dp)
             )
         }

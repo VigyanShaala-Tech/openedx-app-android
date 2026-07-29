@@ -267,7 +267,7 @@ class AppActivity : AppCompatActivity(), InsetHolder, WindowSizeHolder {
             addFlags(WindowManager.LayoutParams.FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS)
             WindowCompat.setDecorFitsSystemWindows(this, false)
             val insetsController = WindowInsetsControllerCompat(this, binding.root)
-            insetsController.isAppearanceLightStatusBars = !isUsingNightModeResources()
+            insetsController.isAppearanceLightStatusBars = true
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.VANILLA_ICE_CREAM) {
                 insetsController.systemBarsBehavior =
                     WindowInsetsControllerCompat.BEHAVIOR_SHOW_TRANSIENT_BARS_BY_SWIPE
@@ -375,15 +375,6 @@ class AppActivity : AppCompatActivity(), InsetHolder, WindowSizeHolder {
             else -> WindowType.Expanded
         }
         _windowSize = WindowSize(widthWindowSize, heightWindowSize)
-    }
-
-    private fun isUsingNightModeResources(): Boolean {
-        return when (resources.configuration.uiMode and Configuration.UI_MODE_NIGHT_MASK) {
-            Configuration.UI_MODE_NIGHT_YES -> true
-            Configuration.UI_MODE_NIGHT_NO -> false
-            Configuration.UI_MODE_NIGHT_UNDEFINED -> false
-            else -> false
-        }
     }
 
     private fun observeAccountActivation() {

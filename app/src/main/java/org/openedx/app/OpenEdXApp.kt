@@ -1,6 +1,7 @@
 package org.openedx.app
 
 import android.app.Application
+import androidx.appcompat.app.AppCompatDelegate
 import com.braze.Braze
 import com.braze.configuration.BrazeConfig
 import com.braze.ui.BrazeDeeplinkHandler
@@ -23,6 +24,7 @@ class OpenEdXApp : Application() {
 
     override fun onCreate() {
         super.onCreate()
+        AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_NO)
         startKoin {
             androidContext(this@OpenEdXApp)
             modules(

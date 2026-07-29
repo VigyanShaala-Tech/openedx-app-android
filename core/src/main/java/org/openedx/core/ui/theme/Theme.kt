@@ -226,11 +226,7 @@ val MaterialTheme.appColors: AppColors
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
 fun OpenEdXTheme(darkTheme: Boolean = isSystemInDarkTheme(), content: @Composable () -> Unit) {
-    val colors = if (darkTheme) {
-        DarkColorPalette
-    } else {
-        LightColorPalette
-    }
+    val colors = LightColorPalette
 
     MaterialTheme(
         colors = colors.material,

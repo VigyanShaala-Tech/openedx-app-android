@@ -118,3 +118,16 @@ This document outlines the recent changes made to the project to address build i
 ### Notification UI Logic
 - Refined the notification dot logic in `CourseContainerViewModel.kt`. The `haveNewNotification` state is now determined by checking if there are any unread notifications in the list (`unreadCount > 0`), rather than relying solely on the `haveNewNotification` boolean from the API.
 - Updated `HeaderContent.kt` to conditionally display the red dot on the notification icon only when `haveNewNotification` is true.
+
+## 11. Global Theme and Filter Improvements
+
+### Forcing Light Mode
+- Application is now forced to Light Mode regardless of system settings.
+- Implemented `AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_NO)` in `OpenEdXApp.kt`.
+- Updated `OpenEdXTheme` in `Theme.kt` to always use `LightColorPalette`.
+- Configured `AppActivity.kt` to always use dark status bar icons (light mode appearance).
+
+### Discovery Filter Regression Fix
+- Restored the active filter chips in `LogistrationFilters.kt`.
+- When a filter is selected, a chip with a "Close" icon appears below the filter dropdowns, allowing users to easily remove individual filters.
+- Re-implemented `ActiveFilterChip` component with appropriate styling and click handling.

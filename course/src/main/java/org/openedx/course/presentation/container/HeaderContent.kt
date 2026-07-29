@@ -76,7 +76,7 @@ internal fun ExpandedHeaderContent(
             modifier = Modifier
                 .size(32.dp)
                 .align(Alignment.TopEnd)
-                .offset(y = (-8).dp)
+                .offset(y = (-4).dp)
         ) {
             Box {
                 Icon(
@@ -86,16 +86,16 @@ internal fun ExpandedHeaderContent(
                     modifier = Modifier.size(24.dp)
                 )
                 // Red dot
-//                    if (haveNewNotification) {
-                Box(
-                    modifier = Modifier
-                        .size(8.dp)
-                        .background(MaterialTheme.appColors.warningRed, CircleShape)
-                        .border(1.2.dp, MaterialTheme.appColors.background, CircleShape)
-                        .align(Alignment.TopEnd)
-                        .offset(x = 2.dp, y = (-2).dp)
-                )
-//                    }
+                if (haveNewNotification) {
+                    Box(
+                        modifier = Modifier
+                            .size(8.dp)
+                            .background(MaterialTheme.appColors.warningRed, CircleShape)
+                            .border(1.2.dp, MaterialTheme.appColors.background, CircleShape)
+                            .align(Alignment.TopEnd)
+                            .offset(x = 2.dp, y = (-2).dp)
+                    )
+                }
             }
         }
     }

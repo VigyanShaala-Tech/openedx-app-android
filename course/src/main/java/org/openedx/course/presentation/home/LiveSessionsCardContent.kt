@@ -218,7 +218,7 @@ fun TabbedLiveSessions(
 
         if (sessions.isEmpty() && (selectedTab != "today" || uiState.ongoingSession?.isSessionOngoing != true)) {
             Text(
-                text = "No sessions found",
+                text = stringResource(R.string.course_live_sessions_no_sessions),
                 style = MaterialTheme.appTypography.bodySmall,
                 color = MaterialTheme.appColors.textSecondary,
                 modifier = Modifier.padding(vertical = 24.dp)

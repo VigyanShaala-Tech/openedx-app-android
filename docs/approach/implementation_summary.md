@@ -96,3 +96,25 @@ This document outlines the recent changes made to the project to address build i
 ### Static Resource Refactoring
 - Added `warningRed` and `cardDivider` colors to `AppColors` and `Theme.kt`.
 - Replaced various hardcoded hex colors and standard Compose colors (like `Color.White`) with theme-aware colors to ensure consistency and better Dark Mode support.
+- Centralized hardcoded strings from `HeaderContent.kt` and `LiveSessionsCardContent.kt` to `strings.xml`.
+
+## 9. Session and Content Display Improvements
+
+### OauthRefreshTokenAuthenticator Refinement
+- Modified `OauthRefreshTokenAuthenticator.kt` to prevent immediate forced logout on token refresh failure.
+- Removed `appNotifier.send(LogoutEvent(true))` calls from `handleTokenExpired` and `handleInvalidToken` to allow for potential retry or more graceful failure handling.
+- Added logging to track token refresh failures without disrupting the user session prematurely.
+
+### CourseHomeViewModel Enhanced Debugging
+- Added comprehensive logging to `CourseHomeViewModel.kt`'s `getCourseDataInternal` and `combine` logic to help identify why "No content" might be displayed despite successful API responses.
+- Improved error handling in `combine` flow to capture and log specific failure points during course data initialization.
+
+## 10. Course Notification API and UI Updates
+
+### API Endpoint Update
+- Updated the course notifications API endpoint in `CourseApi.kt` from `/api/v1/get/course/notifications/{course_id}/` to `/api/v1/get/notifications/course/{course_id}/`.
+- Removed the hardcoded UAT domain from the endpoint to use the configured API host.
+
+### Notification UI Logic
+- Refined the notification dot logic in `CourseContainerViewModel.kt`. The `haveNewNotification` state is now determined by checking if there are any unread notifications in the list (`unreadCount > 0`), rather than relying solely on the `haveNewNotification` boolean from the API.
+- Updated `HeaderContent.kt` to conditionally display the red dot on the notification icon only when `haveNewNotification` is true.

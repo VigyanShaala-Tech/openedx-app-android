@@ -772,7 +772,7 @@ private fun CollapsingLayoutMobile(
                     modifier = Modifier
                         .fillMaxWidth()
                         .height(1.dp)
-                        .background(Color(0xFFE0E3E9))
+                        .background(MaterialTheme.appColors.cardDivider)
                 )
                 Box(content = navigation)
             }

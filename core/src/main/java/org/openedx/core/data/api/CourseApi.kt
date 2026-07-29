@@ -179,7 +179,7 @@ interface CourseApi {
     @GET("/api/v1/options/rankings/")
     suspend fun getRankingOptions(): ResponseBody
 
-    @GET("https://uat.vigyanshaala.com/api/v1/get/course/notifications/{course_id}/")
+    @GET("/api/v1/get/notifications/course/{course_id}/")
     suspend fun getCourseNotifications(@Path("course_id") courseId: String): CourseNotificationsResponse
 
     @GET("/api/v1/course/{course_id}/ranking/")

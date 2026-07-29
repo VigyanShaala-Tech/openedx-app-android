@@ -1,6 +1,7 @@
 package org.openedx.course.presentation.home
 
 import android.net.Uri
+import android.util.Log
 import androidx.fragment.app.FragmentManager
 import androidx.lifecycle.viewModelScope
 import kotlinx.coroutines.Dispatchers
@@ -181,7 +182,10 @@ class CourseHomeViewModel(
         _uiState.value = CourseHomeUIState.Loading
         viewModelScope.launch {
             val courseStructureFlow = interactor.getCourseStructureFlow(courseId, false)
-                .catch { emit(null) }
+                .catch {
+                    Log.e("CourseHomeViewModel", "Error fetching course structure", it)
+                    emit(null)
+                }
             val courseStatusFlow = interactor.getCourseStatusFlow(courseId)
             val courseDatesFlow = interactor.getCourseDatesFlow(courseId)
             val courseProgressFlow = interactor.getCourseProgress(courseId, false, true)
@@ -192,7 +196,11 @@ class CourseHomeViewModel(
                 courseDatesFlow,
                 courseProgressFlow
             ) { courseStructure, courseStatus, courseDatesResult, courseProgress ->
-                if (courseStructure == null) return@combine
+                Log.d("CourseHomeViewModel", "Combined flows: courseStructure=$courseStructure")
+                if (courseStructure == null) {
+                    Log.w("CourseHomeViewModel", "Course structure is null, returning early")
+                    return@combine
+                }
                 val blocks = courseStructure.blockData
                 val datesBannerInfo = courseDatesResult.courseBanner
 
@@ -202,6 +210,7 @@ class CourseHomeViewModel(
                         try {
                             interactor.getAnnouncements(courseId)
                         } catch (e: Exception) {
+                            Log.e("CourseHomeViewModel", "Error fetching announcements", e)
                             emptyList()
                         }
                     }
@@ -211,6 +220,7 @@ class CourseHomeViewModel(
                         try {
                             interactor.getLiveClasses(courseId, "today", 1).results
                         } catch (e: Exception) {
+                            Log.e("CourseHomeViewModel", "Error fetching live today", e)
                             emptyList()
                         }
                     }
@@ -218,6 +228,7 @@ class CourseHomeViewModel(
                         try {
                             interactor.getLiveClasses(courseId, "upcoming", 1).results
                         } catch (e: Exception) {
+                            Log.e("CourseHomeViewModel", "Error fetching live upcoming", e)
                             emptyList()
                         }
                     }
@@ -225,6 +236,7 @@ class CourseHomeViewModel(
                         try {
                             interactor.getLiveClasses(courseId, "past", 1).results
                         } catch (e: Exception) {
+                            Log.e("CourseHomeViewModel", "Error fetching live past", e)
                             emptyList()
                         }
                     }
@@ -234,6 +246,7 @@ class CourseHomeViewModel(
                         try {
                             interactor.getOngoingSession(courseId).result
                         } catch (e: Exception) {
+                            Log.e("CourseHomeViewModel", "Error fetching ongoing session", e)
                             null
                         }
                     }
@@ -244,6 +257,7 @@ class CourseHomeViewModel(
                     val liveClassesPast = livePastDeferred.await()
                     val ongoingSession = ongoingSessionDeferred.await()
 
+                    Log.d("CourseHomeViewModel", "Initializing course data with ${blocks.size} blocks")
                     initializeCourseData(
                         blocks,
                         courseStructure,
@@ -258,6 +272,7 @@ class CourseHomeViewModel(
                     )
                 }
             }.catch { e ->
+                Log.e("CourseHomeViewModel", "Error in combine flow", e)
                 handleCourseDataError(e)
             }.collect { }
         }

@@ -290,7 +290,8 @@ class CourseContainerViewModel(
         viewModelScope.launch {
             try {
                 val response = leaderboardInteractor.getCourseNotifications(courseId)
-                _haveNewNotification.value = response.haveNewNotification
+                val unreadCount = response.notifications.count { !it.isRead }
+                _haveNewNotification.value = unreadCount > 0
             } catch (e: Exception) {
                 e.printStackTrace()
             }

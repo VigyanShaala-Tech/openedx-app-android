@@ -104,7 +104,10 @@ class LogistrationViewModel(
                     page = -1
                 }
                 coursesList.addAll(response.results)
-                _uiState.value = DiscoveryUIState.Courses(ArrayList(coursesList))
+                _uiState.value = DiscoveryUIState.Courses(
+                    ArrayList(coursesList),
+                    response.pagination.count
+                )
             } catch (e: Exception) {
                 if (e.isInternetError()) {
                     _uiMessage.value =
@@ -139,7 +142,10 @@ class LogistrationViewModel(
                 }
                 coursesList.clear()
                 coursesList.addAll(response.results)
-                _uiState.value = DiscoveryUIState.Courses(ArrayList(coursesList))
+                _uiState.value = DiscoveryUIState.Courses(
+                    ArrayList(coursesList),
+                    response.pagination.count
+                )
             } catch (e: Exception) {
                 if (e.isInternetError()) {
                     _uiMessage.value =
@@ -220,7 +226,7 @@ class LogistrationViewModel(
                         cohortFormId = null
                     )
                 }
-                _uiState.value = DiscoveryUIState.Courses(mapped)
+                _uiState.value = DiscoveryUIState.Courses(mapped, resp.pagination.count)
             } catch (e: Exception) {
                 if (e.isInternetError()) {
                     _uiMessage.value =

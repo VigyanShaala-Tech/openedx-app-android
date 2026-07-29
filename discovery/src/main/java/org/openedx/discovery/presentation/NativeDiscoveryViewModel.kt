@@ -78,13 +78,17 @@ class NativeDiscoveryViewModel(
                         page = -1
                     }
                     coursesList.addAll(response.results)
+                    _uiState.value = DiscoveryUIState.Courses(
+                        ArrayList(coursesList),
+                        response.pagination.count
+                    )
                 } else {
                     val cachedList = interactor.getCoursesListFromCache()
                     _canLoadMore.value = false
                     page = -1
                     coursesList.addAll(cachedList)
+                    _uiState.value = DiscoveryUIState.Courses(ArrayList(coursesList), cachedList.size)
                 }
-                _uiState.value = DiscoveryUIState.Courses(ArrayList(coursesList))
             } catch (e: Exception) {
                 if (e.isInternetError()) {
                     _uiMessage.value =
@@ -127,7 +131,10 @@ class NativeDiscoveryViewModel(
                 }
                 coursesList.clear()
                 coursesList.addAll(response.results)
-                _uiState.value = DiscoveryUIState.Courses(ArrayList(coursesList))
+                _uiState.value = DiscoveryUIState.Courses(
+                    ArrayList(coursesList),
+                    response.pagination.count
+                )
             } catch (e: Exception) {
                 if (e.isInternetError()) {
                     _uiMessage.value =

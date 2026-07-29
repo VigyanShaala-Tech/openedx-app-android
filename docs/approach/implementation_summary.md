@@ -131,3 +131,14 @@ This document outlines the recent changes made to the project to address build i
 - Restored the active filter chips in `LogistrationFilters.kt`.
 - When a filter is selected, a chip with a "Close" icon appears below the filter dropdowns, allowing users to easily remove individual filters.
 - Re-implemented `ActiveFilterChip` component with appropriate styling and click handling.
+
+## 12. Discovery Search and Pagination Refinements
+
+### Search Query Persistence
+- Fixed an issue in `LogistrationFragment.kt` where the search query would be wiped out upon submitting the search.
+- Set `clearOnSubmit = false` in the `SearchBar` component to ensure the query remains visible after the user presses search.
+
+### Correct Course Count Display
+- Updated `DiscoveryUIState.kt` to include a `totalCount` field in the `Courses` state.
+- Modified `LogistrationViewModel.kt` and `NativeDiscoveryViewModel.kt` to extract the total count from the API response (pagination metadata) and pass it to the UI.
+- Updated the display text in `LogistrationFragment.kt` to show "Showing X of Y courses", where Y is the actual total count from the server (e.g., 14 instead of just the page size).

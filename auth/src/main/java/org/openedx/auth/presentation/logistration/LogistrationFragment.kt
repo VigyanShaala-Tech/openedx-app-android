@@ -396,7 +396,7 @@ private fun LogistrationScreen(
                                     label = "Search courses...",
                                     requestFocus = false,
                                     searchValue = textFieldValue,
-                                    clearOnSubmit = true,
+                                    clearOnSubmit = false,
                                     keyboardActions = {
                                         focusManager.clearFocus()
                                         onSearchSubmit(textFieldValue.text)
@@ -417,7 +417,7 @@ private fun LogistrationScreen(
                             Spacer(Modifier.height(16.dp))
                             if (state is DiscoveryUIState.Courses) {
                                 Text(
-                                    text = "Showing ${state.courses.size} of ${state.courses.size} courses",
+                                    text = "Showing ${state.courses.size} of ${state.totalCount} courses",
                                     style = MaterialTheme.appTypography.bodySmall.copy(
                                         fontWeight = FontWeight.SemiBold,
                                         fontSize = 12.sp

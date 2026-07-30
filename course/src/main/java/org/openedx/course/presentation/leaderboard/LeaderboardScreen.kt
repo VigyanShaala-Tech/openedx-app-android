@@ -58,151 +58,127 @@ private fun LeaderboardUI(
     val scaffoldState = rememberScaffoldState()
     HandleUIMessage(uiMessage = uiMessage, scaffoldState = scaffoldState)
 
-    LazyColumn(
+    Box(
         modifier = Modifier
             .fillMaxSize()
-            .padding(horizontal = 24.dp)
+            .background(MaterialTheme.appColors.background)
     ) {
-        item {
-            Spacer(modifier = Modifier.height(24.dp))
-            Text(
-                text = "Leaderboard",
-                style = MaterialTheme.appTypography.titleMedium.copy(
-                    fontWeight = FontWeight.Bold,
-                    color = MaterialTheme.appColors.textDark,
-                )
-            )
-
-            Spacer(modifier = Modifier.height(24.dp))
-
-            // Current User Rank Card
-            Card(
-                modifier = Modifier.fillMaxWidth(),
-                shape = RoundedCornerShape(12.dp),
-                elevation = 2.dp,
-                backgroundColor = MaterialTheme.appColors.background,
-                border = androidx.compose.foundation.BorderStroke(
-                    1.dp,
-                    Color.LightGray.copy(alpha = 0.5f)
-                )
-            ) {
-                Row(
-                    modifier = Modifier.padding(24.dp),
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-                    Surface(
-                        modifier = Modifier.size(56.dp),
-                        shape = androidx.compose.foundation.shape.CircleShape,
-                        color = Color(0xFFF1F8E9)
-                    ) {
-                        Box(contentAlignment = Alignment.Center) {
-                            Icon(
-                                imageVector = Icons.Default.EmojiEvents,
-                                contentDescription = null,
-                                tint = MaterialTheme.appColors.primary,
-                                modifier = Modifier.size(32.dp)
-                            )
-                        }
-                    }
-                    Spacer(modifier = Modifier.width(16.dp))
-                    Column {
-                        Text(
-                            text = "YOUR CURRENT POSITION",
-                            style = MaterialTheme.appTypography.bodySmall,
-                            color = MaterialTheme.appColors.textSecondary
-                        )
-                        Row(verticalAlignment = Alignment.CenterVertically) {
-                            Text(
-                                text = "Rank #${uiState.userRanking?.rank ?: 0}",
-                                style = MaterialTheme.appTypography.titleLarge.copy(fontWeight = FontWeight.Bold),
-                                color = MaterialTheme.appColors.textDark
-                            )
-                            Spacer(modifier = Modifier.width(8.dp))
-                            Text(
-                                text = "with",
-                                style = MaterialTheme.appTypography.bodyMedium,
-                                color = MaterialTheme.appColors.textSecondary
-                            )
-                            Spacer(modifier = Modifier.width(4.dp))
-                            Text(
-                                text = "${uiState.userRanking?.points ?: 0}",
-                                style = MaterialTheme.appTypography.bodyMedium.copy(fontWeight = FontWeight.Bold),
-                                color = MaterialTheme.appColors.primary
-                            )
-                            Spacer(modifier = Modifier.width(4.dp))
-                            Text(
-                                text = "points",
-                                style = MaterialTheme.appTypography.bodyMedium,
-                                color = MaterialTheme.appColors.textSecondary
-                            )
-                        }
-                    }
-                }
-            }
-
-            Spacer(modifier = Modifier.height(24.dp))
-
-            // University Filter
-            LeaderboardFilter(
-                label = uiState.selectedUniversity?.name ?: "All Colleges",
-                title = "Select College",
-                options = uiState.universities,
-                labelExtractor = { it.name },
-                onSelected = onUniversitySelected
-            )
-
-            Spacer(modifier = Modifier.height(12.dp))
-
-            // Ranking Filter
-            LeaderboardFilter(
-                label = uiState.selectedRankingOption.label,
-                title = "Select Filter",
-                options = uiState.rankingOptions,
-                labelExtractor = { it.label },
-                onSelected = onRankingOptionSelected
-            )
-
-            Spacer(modifier = Modifier.height(24.dp))
-        }
-
-        item {
-            LeaderboardHeader()
-        }
-
-        if (uiState.isLoading && uiState.leaderboardEntries.isEmpty()) {
+        LazyColumn(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(horizontal = 24.dp)
+        ) {
             item {
-                Box(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(32.dp),
-                    contentAlignment = Alignment.Center
-                ) {
-                    CircularProgressIndicator(color = MaterialTheme.appColors.primary)
-                }
-            }
-        } else if (uiState.leaderboardEntries.isEmpty()) {
-            item {
-                Box(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(32.dp),
-                    contentAlignment = Alignment.Center
-                ) {
-                    Text(
-                        text = "No rankings available",
-                        style = MaterialTheme.appTypography.bodyMedium,
-                        color = MaterialTheme.appColors.textSecondary
+                Spacer(modifier = Modifier.height(24.dp))
+                Text(
+                    text = "Leaderboard",
+                    style = MaterialTheme.appTypography.titleMedium.copy(
+                        fontWeight = FontWeight.Bold,
+                        color = MaterialTheme.appColors.textDark,
                     )
+                )
+
+                Spacer(modifier = Modifier.height(24.dp))
+
+                // Current User Rank Card
+                Card(
+                    modifier = Modifier.fillMaxWidth(),
+                    shape = RoundedCornerShape(12.dp),
+                    elevation = 2.dp,
+                    backgroundColor = MaterialTheme.appColors.background,
+                    border = androidx.compose.foundation.BorderStroke(
+                        1.dp,
+                        Color.LightGray.copy(alpha = 0.5f)
+                    )
+                ) {
+                    Row(
+                        modifier = Modifier.padding(24.dp),
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Surface(
+                            modifier = Modifier.size(56.dp),
+                            shape = androidx.compose.foundation.shape.CircleShape,
+                            color = Color(0xFFF1F8E9)
+                        ) {
+                            Box(contentAlignment = Alignment.Center) {
+                                Icon(
+                                    imageVector = Icons.Default.EmojiEvents,
+                                    contentDescription = null,
+                                    tint = MaterialTheme.appColors.primary,
+                                    modifier = Modifier.size(32.dp)
+                                )
+                            }
+                        }
+                        Spacer(modifier = Modifier.width(16.dp))
+                        Column {
+                            Text(
+                                text = "YOUR CURRENT POSITION",
+                                style = MaterialTheme.appTypography.bodySmall,
+                                color = MaterialTheme.appColors.textSecondary
+                            )
+                            Row(verticalAlignment = Alignment.CenterVertically) {
+                                Text(
+                                    text = "Rank #${uiState.userRanking?.rank ?: 0}",
+                                    style = MaterialTheme.appTypography.titleLarge.copy(fontWeight = FontWeight.Bold),
+                                    color = MaterialTheme.appColors.textDark
+                                )
+                                Spacer(modifier = Modifier.width(8.dp))
+                                Text(
+                                    text = "with",
+                                    style = MaterialTheme.appTypography.bodyMedium,
+                                    color = MaterialTheme.appColors.textSecondary
+                                )
+                                Spacer(modifier = Modifier.width(4.dp))
+                                Text(
+                                    text = "${uiState.userRanking?.points ?: 0}",
+                                    style = MaterialTheme.appTypography.bodyMedium.copy(fontWeight = FontWeight.Bold),
+                                    color = MaterialTheme.appColors.primary
+                                )
+                                Spacer(modifier = Modifier.width(4.dp))
+                                Text(
+                                    text = "points",
+                                    style = MaterialTheme.appTypography.bodyMedium,
+                                    color = MaterialTheme.appColors.textSecondary
+                                )
+                            }
+                        }
+                    }
                 }
+
+                Spacer(modifier = Modifier.height(24.dp))
+
+                // University Filter
+                LeaderboardFilter(
+                    label = uiState.selectedUniversity?.name ?: "All Colleges",
+                    title = "Select College",
+                    options = uiState.universities,
+                    labelExtractor = { it.name },
+                    onSelected = onUniversitySelected
+                )
+
+                Spacer(modifier = Modifier.height(12.dp))
+
+                // Ranking Filter
+                LeaderboardFilter(
+                    label = uiState.selectedRankingOption.label,
+                    title = "Select Filter",
+                    options = uiState.rankingOptions,
+                    labelExtractor = { it.label },
+                    onSelected = onRankingOptionSelected
+                )
+
+                Spacer(modifier = Modifier.height(24.dp))
             }
-        } else {
-            items(uiState.leaderboardEntries) { entry ->
+
+            item {
+                LeaderboardHeader()
+            }
+
+            itemsIndexed(uiState.leaderboardEntries) { index, entry ->
                 LeaderboardRow(entry)
                 Divider(color = Color.LightGray.copy(alpha = 0.5f))
-            }
 
-            item {
-                if (uiState.hasMore) {
+                if (index == uiState.leaderboardEntries.size - 1 && uiState.hasMore) {
                     LaunchedEffect(uiState.leaderboardEntries.size) {
                         onLoadMore()
                     }
@@ -224,78 +200,79 @@ private fun LeaderboardUI(
                         )
                     }
                 }
+            } else if (uiState.leaderboardEntries.isEmpty()) {
+                item {
+                    Box(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(32.dp),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        Text(
+                            text = "No rankings available",
+                            style = MaterialTheme.appTypography.bodyMedium,
+                            color = MaterialTheme.appColors.textSecondary
+                        )
+                    }
+                }
             }
-        }
 
-        item {
-            Spacer(modifier = Modifier.height(24.dp))
+            item {
+                Spacer(modifier = Modifier.height(24.dp))
+            }
         }
     }
 }
 
 @Composable
 private fun LeaderboardHeader() {
-    Surface(
-        modifier = Modifier.fillMaxWidth(),
-        shape = RoundedCornerShape(topStart = 12.dp, topEnd = 12.dp),
-        color = Color(0xFFF9FAFB),
-        border = androidx.compose.foundation.BorderStroke(1.dp, Color.LightGray.copy(alpha = 0.5f))
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .background(Color(0xFFF9FAFB))
+            .padding(horizontal = 16.dp, vertical = 12.dp)
     ) {
-        Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(horizontal = 16.dp, vertical = 12.dp)
-        ) {
-            Text(text = "Rank", modifier = Modifier.width(60.dp), style = MaterialTheme.appTypography.labelLarge, color = MaterialTheme.appColors.textSecondary)
-            Text(text = "User", modifier = Modifier.weight(1f), style = MaterialTheme.appTypography.labelLarge, color = MaterialTheme.appColors.textSecondary)
-            Text(text = "College", modifier = Modifier.weight(1f), style = MaterialTheme.appTypography.labelLarge, color = MaterialTheme.appColors.textSecondary)
-            Text(text = "Points", modifier = Modifier.width(60.dp), textAlign = TextAlign.End, style = MaterialTheme.appTypography.labelLarge, color = MaterialTheme.appColors.textSecondary)
-        }
+        Text(text = "Rank", modifier = Modifier.width(60.dp), style = MaterialTheme.appTypography.labelLarge, color = MaterialTheme.appColors.textSecondary)
+        Text(text = "User", modifier = Modifier.weight(1f), style = MaterialTheme.appTypography.labelLarge, color = MaterialTheme.appColors.textSecondary)
+        Text(text = "College", modifier = Modifier.weight(1f), style = MaterialTheme.appTypography.labelLarge, color = MaterialTheme.appColors.textSecondary)
+        Text(text = "Points", modifier = Modifier.width(60.dp), textAlign = TextAlign.End, style = MaterialTheme.appTypography.labelLarge, color = MaterialTheme.appColors.textSecondary)
     }
 }
 
 @Composable
 private fun LeaderboardRow(entry: LeaderboardEntry) {
-    Surface(
-        modifier = Modifier.fillMaxWidth(),
-        color = MaterialTheme.appColors.background,
-        border = androidx.compose.foundation.BorderStroke(
-            width = 1.dp,
-            color = Color.LightGray.copy(alpha = 0.5f)
-        )
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .background(MaterialTheme.appColors.background)
+            .padding(horizontal = 16.dp, vertical = 12.dp),
+        verticalAlignment = Alignment.CenterVertically
     ) {
-        Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(horizontal = 16.dp, vertical = 16.dp),
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            Text(
-                text = "#${entry.rank}",
-                modifier = Modifier.width(60.dp),
-                style = MaterialTheme.appTypography.bodyMedium.copy(fontWeight = FontWeight.Bold),
-                color = MaterialTheme.appColors.textDark
-            )
-            Text(
-                text = entry.name,
-                modifier = Modifier.weight(1f),
-                style = MaterialTheme.appTypography.bodyMedium.copy(fontWeight = FontWeight.Medium),
-                color = MaterialTheme.appColors.textDark
-            )
-            Text(
-                text = entry.university ?: "",
-                modifier = Modifier.weight(1f),
-                style = MaterialTheme.appTypography.bodySmall,
-                color = MaterialTheme.appColors.textSecondary
-            )
-            Text(
-                text = "${entry.points}",
-                modifier = Modifier.width(60.dp),
-                textAlign = TextAlign.End,
-                style = MaterialTheme.appTypography.bodyMedium.copy(fontWeight = FontWeight.Bold),
-                color = MaterialTheme.appColors.primary
-            )
-        }
+        Text(
+            text = "#${entry.rank}",
+            modifier = Modifier.width(60.dp),
+            style = MaterialTheme.appTypography.bodyMedium.copy(fontWeight = FontWeight.Bold),
+            color = MaterialTheme.appColors.textDark
+        )
+        Text(
+            text = entry.name,
+            modifier = Modifier.weight(1f),
+            style = MaterialTheme.appTypography.bodyMedium.copy(fontWeight = FontWeight.Medium),
+            color = MaterialTheme.appColors.textDark
+        )
+        Text(
+            text = entry.university ?: "",
+            modifier = Modifier.weight(1f),
+            style = MaterialTheme.appTypography.bodySmall,
+            color = MaterialTheme.appColors.textSecondary
+        )
+        Text(
+            text = "${entry.points}",
+            modifier = Modifier.width(60.dp),
+            textAlign = TextAlign.End,
+            style = MaterialTheme.appTypography.bodyMedium.copy(fontWeight = FontWeight.Bold),
+            color = MaterialTheme.appColors.primary
+        )
     }
 }
 

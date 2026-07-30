@@ -99,13 +99,13 @@ class LeaderboardViewModel(
     }
 
     private fun fetchLeaderboard() {
-        val currentState = _uiState.value
-        if (currentState.isLoading && currentState.page > 1) return
+        if (_uiState.value.isLoading && _uiState.value.page > 1) return
         
         _uiState.update { it.copy(isLoading = true) }
         
         viewModelScope.launch {
             try {
+                val currentState = _uiState.value
                 val response = interactor.getLeaderboard(
                     courseId = courseId,
                     page = currentState.page,
@@ -114,12 +114,12 @@ class LeaderboardViewModel(
                     university = if (currentState.selectedUniversity?.id == "0" || currentState.selectedUniversity?.id == null) null else currentState.selectedUniversity.name
                 )
 
-                _uiState.update {
-                    val newEntries = if (currentState.page == 1) response.results else it.leaderboardEntries + response.results
+                _uiState.update { state ->
+                    val newEntries = if (state.page == 1) response.results else state.leaderboardEntries + response.results
                     val pagination = response.pagination
-                    it.copy(
+                    state.copy(
                         leaderboardEntries = newEntries,
-                        hasMore = pagination != null && response.results.isNotEmpty() && (currentState.page < pagination.numPages),
+                        hasMore = pagination != null && response.results.isNotEmpty() && (state.page < pagination.numPages),
                         isLoading = false
                     )
                 }

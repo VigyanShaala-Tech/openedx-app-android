@@ -1,6 +1,8 @@
 package org.openedx.app
 
 import android.app.Application
+import android.webkit.WebView
+import android.os.Build
 import androidx.appcompat.app.AppCompatDelegate
 import com.braze.Braze
 import com.braze.configuration.BrazeConfig
@@ -25,6 +27,9 @@ class OpenEdXApp : Application() {
     override fun onCreate() {
         super.onCreate()
         AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_NO)
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
+            WebView.setWebContentsDebuggingEnabled(true)
+        }
         startKoin {
             androidContext(this@OpenEdXApp)
             modules(

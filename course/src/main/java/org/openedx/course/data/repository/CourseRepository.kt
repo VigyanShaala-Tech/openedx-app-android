@@ -475,7 +475,7 @@ class CourseRepository(
                     val displayName = obj.get("display_name")?.takeIf { it.isJsonPrimitive }?.asString
 
                     RankingOption(
-                        id = id ?: value ?: name ?: displayName ?: "unknown",
+                        id = value ?: id ?: name ?: displayName ?: "unknown",
                         label = label ?: displayName ?: name ?: ""
                     )
                 } else if (element.isJsonPrimitive && element.asJsonPrimitive.isString) {

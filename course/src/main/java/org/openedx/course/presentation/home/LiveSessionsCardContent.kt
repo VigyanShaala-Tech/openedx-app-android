@@ -1,5 +1,6 @@
 package org.openedx.course.presentation.home
 
+import android.net.Uri
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -81,7 +82,17 @@ fun LiveSessionsCardContent(
 
             OngoingSessionItem(
                 session = ongoingSession,
-                onJoinClick = { ongoingSession.link?.let { onJoinOngoingClick(it) } }
+                onJoinClick = { ongoingSession.link?.let {
+                    try {
+                        val joinUrl = Uri.parse(it).buildUpon()
+                            .appendQueryParameter("isMobile", "true")
+                            .build().toString()
+                        onJoinOngoingClick(joinUrl)
+                    }catch (e: Exception){
+                        onJoinOngoingClick(it)
+                    }
+                    }
+                }
             )
         }
     } else {

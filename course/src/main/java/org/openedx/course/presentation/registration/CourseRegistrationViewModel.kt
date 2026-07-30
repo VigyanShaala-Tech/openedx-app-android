@@ -62,7 +62,7 @@ class CourseRegistrationViewModel(
                     prefillData.forEach { (key, value) ->
                         if (value != null && value.toString() != "null") {
                             if (value is List<*>) {
-                                map[key] = value.joinToString(",")
+                                map[key] = value.joinToString("|")
                             } else {
                                 map[key] = value.toString()
                             }
@@ -235,8 +235,8 @@ class CourseRegistrationViewModel(
                     _answers.value.forEach { (key, value) ->
                         val field = allFields.find { it.name == key }
                         if (field?.type == "multi-select") {
-                            // Convert comma-separated string to list
-                            submissionBody[key] = value.split(",").filter { it.isNotEmpty() }
+                            // Convert pipe-separated string to list
+                            submissionBody[key] = value.split("|").filter { it.isNotEmpty() }
                         } else {
                             submissionBody[key] = value
                         }

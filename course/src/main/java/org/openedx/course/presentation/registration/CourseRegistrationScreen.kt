@@ -311,7 +311,7 @@ fun RegistrationFieldItem(
         "select", "multi-select" -> {
             val isMultiSelect = field.type == "multi-select"
             val selectedLabels = if (isMultiSelect) {
-                currentValue.split(",").filter { it.isNotEmpty() }.map { valId ->
+                currentValue.split("|").filter { it.isNotEmpty() }.map { valId ->
                     options.find { it.value == valId }?.label ?: valId
                 }.joinToString(", ")
             } else {
@@ -388,7 +388,7 @@ fun SelectionDialog(
     val selectedValues = remember {
         mutableStateListOf<String>().apply {
             if (initialValue.isNotEmpty()) {
-                addAll(initialValue.split(","))
+                addAll(initialValue.split("|"))
             }
         }
     }
@@ -468,7 +468,7 @@ fun SelectionDialog(
                 if (isMultiSelect) {
                     Spacer(modifier = Modifier.height(16.dp))
                     Button(
-                        onClick = { onSelect(selectedValues.joinToString(",")) },
+                        onClick = { onSelect(selectedValues.joinToString("|")) },
                         modifier = Modifier.fillMaxWidth().height(48.dp),
                         colors = ButtonDefaults.buttonColors(backgroundColor = MaterialTheme.appColors.primary),
                         shape = RoundedCornerShape(8.dp)

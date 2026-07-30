@@ -142,3 +142,11 @@ This document outlines the recent changes made to the project to address build i
 - Updated `DiscoveryUIState.kt` to include a `totalCount` field in the `Courses` state.
 - Modified `LogistrationViewModel.kt` and `NativeDiscoveryViewModel.kt` to extract the total count from the API response (pagination metadata) and pass it to the UI.
 - Updated the display text in `LogistrationFragment.kt` to show "Showing X of Y courses", where Y is the actual total count from the server (e.g., 14 instead of just the page size).
+
+## 13. Registration Form Multi-select Fix
+
+### Multi-select Delimiter Update
+- Fixed a bug in the registration form where multi-select fields incorrectly split values containing commas (e.g., "Data Science, AI and ML").
+- Switched the internal delimiter used for joining and splitting selected values from a comma (`,`) to a pipe (`|`).
+- Updated `CourseRegistrationScreen.kt` and `CourseRegistrationViewModel.kt` to ensure consistent use of the new delimiter in both the UI and the state management logic.
+- Ensured that submitted values are still correctly converted to a `List` before being sent to the API.

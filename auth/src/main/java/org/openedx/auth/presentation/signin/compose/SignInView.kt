@@ -141,38 +141,38 @@ internal fun LoginScreen(
 
             //TODO enable it after published
             // Google Sign In Button
-//            Surface(
-//                modifier = Modifier
-//                    .fillMaxWidth()
-//                    .height(56.dp)
-//                    .clickable { onEvent(AuthEvent.SocialSignIn(AuthType.GOOGLE)) },
-//                shape = RoundedCornerShape(12.dp),
-//                border = BorderStroke(1.dp, MaterialTheme.appColors.textFieldBorder),
-//                color = MaterialTheme.appColors.textFieldBackgroundVariant
-//            ) {
-//                Row(
-//                    verticalAlignment = Alignment.CenterVertically,
-//                    horizontalArrangement = Arrangement.Center
-//                ) {
-//                    Image(
-//                        painter = painterResource(id = R.drawable.auth_ic_google),
-//                        contentDescription = null,
-//                        modifier = Modifier.size(24.dp)
-//                    )
-//                    Spacer(modifier = Modifier.width(12.dp))
-//                    Text(
-//                        text = "Continue with Google",
-//                        style = MaterialTheme.appTypography.bodyLarge.copy(
-//                            fontWeight = FontWeight.Medium,
-//                            color = MaterialTheme.appColors.textDark
-//                        )
-//                    )
-//                }
-//            }
-//
-//            Spacer(modifier = Modifier.height(24.dp))
-//            DividerWithOrLabel()
-//            Spacer(modifier = Modifier.height(24.dp))
+            Surface(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(56.dp)
+                    .clickable { onEvent(AuthEvent.SocialSignIn(AuthType.GOOGLE)) },
+                shape = RoundedCornerShape(12.dp),
+                border = BorderStroke(1.dp, MaterialTheme.appColors.textFieldBorder),
+                color = MaterialTheme.appColors.textFieldBackgroundVariant
+            ) {
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.Center
+                ) {
+                    Image(
+                        painter = painterResource(id = R.drawable.auth_ic_google),
+                        contentDescription = null,
+                        modifier = Modifier.size(24.dp)
+                    )
+                    Spacer(modifier = Modifier.width(12.dp))
+                    Text(
+                        text = "Continue with Google",
+                        style = MaterialTheme.appTypography.bodyLarge.copy(
+                            fontWeight = FontWeight.Medium,
+                            color = MaterialTheme.appColors.textDark
+                        )
+                    )
+                }
+            }
+
+            Spacer(modifier = Modifier.height(24.dp))
+            DividerWithOrLabel()
+            Spacer(modifier = Modifier.height(24.dp))
 
             AuthForm(state, onEvent)
 

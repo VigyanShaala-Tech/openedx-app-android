@@ -131,14 +131,23 @@ class CourseRegistrationViewModel(
 
     fun updateAnswer(field: EnrollmentRegistrationField, answer: String) {
         val fieldName = field.name
-        _answers.update { it + (fieldName to answer) }
+        updateAnswer(fieldName, answer)
         
-        // Clear previous error for this field
-        _eligibilityErrors.update { it - fieldName }
+        val isOtherSelected = answer.split("|").any { it.lowercase() == "other" || it.lowercase() == "others" }
+        if (!isOtherSelected) {
+            _answers.update { it - (fieldName + "_other") }
+        }
 
         if (field.isEligibilityField && answer.isNotEmpty()) {
             checkEligibility(fieldName)
         }
+    }
+
+    fun updateAnswer(fieldName: String, answer: String) {
+        _answers.update { it + (fieldName to answer) }
+        
+        // Clear previous error for this field
+        _eligibilityErrors.update { it - fieldName }
     }
 
     private fun checkEligibility(triggerField: String) {
@@ -205,7 +214,14 @@ class CourseRegistrationViewModel(
             // Check required fields and eligibility errors
             stepFields.forEach { field ->
                 if (isFieldVisible(field)) {
-                    if (field.required && _answers.value[field.name].isNullOrBlank()) return false
+                    val answer = _answers.value[field.name] ?: ""
+                    if (field.required && answer.isBlank()) return false
+                    
+                    val isOtherSelected = answer.split("|").any { it.lowercase() == "other" || it.lowercase() == "others" }
+                    if (isOtherSelected && field.required) {
+                        if (_answers.value[field.name + "_other"].isNullOrBlank()) return false
+                    }
+
                     if (_eligibilityErrors.value[field.name] != null) return false
                     
                     if (field.type == "email") {

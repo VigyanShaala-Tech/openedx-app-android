@@ -34,11 +34,11 @@ import org.openedx.core.system.EdxError
 import org.openedx.core.system.notifier.app.AppNotifier
 import org.openedx.core.system.notifier.app.AppUpgradeEvent
 import org.openedx.core.system.notifier.app.SignInEvent
+import org.openedx.foundation.presentation.UIMessage
 import org.openedx.core.utils.Logger
 import org.openedx.foundation.extension.isInternetError
 import org.openedx.foundation.presentation.BaseViewModel
 import org.openedx.foundation.presentation.SingleEventLiveData
-import org.openedx.foundation.presentation.UIMessage
 import org.openedx.foundation.system.ResourceManager
 import org.openedx.core.R as CoreRes
 
@@ -219,7 +219,7 @@ class SignInViewModel(
                 val formattedPhone = validator.formatPhoneNumber(mobile)
                 val key = uiState.value.otpVerificationKey
                 val verify = interactor.verifyOtp(formattedPhone, otp, key)
-                
+
                 val updatedKey = verify.verification_key ?: key
                 _uiState.update { it.copy(otpVerificationKey = updatedKey) }
                 interactor.loginWithOtp(formattedPhone, otp, updatedKey)
@@ -300,8 +300,18 @@ class SignInViewModel(
             interactor.loginSocial(token, authType)
         }.onFailure { error ->
             logger.e { "Social login error: $error" }
-            if (authType == AuthType.GOOGLE) {
-                router.navigateToSignUp(fm, courseId, infoType, email, name)
+            if (error is EdxError.InvalidGrantException) {
+                // The social identity resolved on Google's side but is not linked to any
+                // account on this platform. The mobile token-exchange endpoint only signs in
+                // existing/linked users, so guide the user to register (mirrors iOS/web).
+                _uiMessage.value =
+                    UIMessage.SnackBarMessage(
+                        resourceManager.getString(
+                            R.string.auth_social_account_not_registered,
+                            authType.methodName,
+                            config.getPlatformName(),
+                        )
+                    )
                 _uiState.update { it.copy(showProgress = false) }
             } else {
                 onUnknownError()

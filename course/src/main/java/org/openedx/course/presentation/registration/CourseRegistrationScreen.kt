@@ -22,7 +22,6 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
@@ -55,6 +54,7 @@ fun CourseRegistrationScreen(
     onNextClick: () -> Unit,
     onPreviousClick: () -> Unit,
     onAnswerUpdate: (EnrollmentRegistrationField, String) -> Unit,
+    onAnswerUpdateByName: (String, String) -> Unit,
     isNextEnabled: Boolean,
     isFieldVisible: (EnrollmentRegistrationField) -> Boolean
 ) {
@@ -147,6 +147,7 @@ fun CourseRegistrationScreen(
                         eligibilityErrors = eligibilityErrors,
                         onNextClick = onNextClick,
                         onAnswerUpdate = onAnswerUpdate,
+                        onAnswerUpdateByName = onAnswerUpdateByName,
                         isNextEnabled = isNextEnabled,
                         isFieldVisible = isFieldVisible
                     )
@@ -197,6 +198,7 @@ fun CourseRegistrationContent(
     eligibilityErrors: Map<String, String>,
     onNextClick: () -> Unit,
     onAnswerUpdate: (EnrollmentRegistrationField, String) -> Unit,
+    onAnswerUpdateByName: (String, String) -> Unit,
     isNextEnabled: Boolean,
     isFieldVisible: (EnrollmentRegistrationField) -> Boolean
 ) {
@@ -235,7 +237,8 @@ fun CourseRegistrationContent(
                     currentValue = answers[field.name] ?: "",
                     errorText = eligibilityErrors[field.name],
                     answers = answers,
-                    onValueChange = { newValue -> onAnswerUpdate(field, newValue) }
+                    onValueChange = { newValue -> onAnswerUpdate(field, newValue) },
+                    onAnswerUpdateByName = onAnswerUpdateByName
                 )
                 Spacer(modifier = Modifier.height(24.dp))
             }
@@ -286,7 +289,8 @@ fun RegistrationFieldItem(
     currentValue: String,
     errorText: String?,
     answers: Map<String, String>,
-    onValueChange: (String) -> Unit
+    onValueChange: (String) -> Unit,
+    onAnswerUpdateByName: (String, String) -> Unit
 ) {
     val options = remember(field.options, answers[field.dependsOn]) {
         parseOptions(field, answers)
@@ -294,65 +298,84 @@ fun RegistrationFieldItem(
 
     var showDialog by remember { mutableStateOf(false) }
 
-    when (field.type) {
-        "text", "email", "textarea" -> {
+    val isOtherSelected = remember(currentValue) {
+        val selectedValues = currentValue.split("|").filter { it.isNotEmpty() }
+        selectedValues.any { it.lowercase() == "other" || it.lowercase() == "others" }
+    }
+
+    Column {
+        when (field.type) {
+            "text", "email", "textarea" -> {
+                VsRegistrationTextField(
+                    label = field.label,
+                    value = currentValue,
+                    onValueChange = onValueChange,
+                    placeholder = field.placeholder,
+                    isRequired = field.required,
+                    isTextArea = field.type == "textarea",
+                    helperText = field.helper.takeIf { it.isNotEmpty() },
+                    errorText = errorText,
+                    enabled = field.isEditable
+                )
+            }
+            "select", "multi-select" -> {
+                val isMultiSelect = field.type == "multi-select"
+                val selectedLabels = if (isMultiSelect) {
+                    currentValue.split("|").filter { it.isNotEmpty() }.map { valId ->
+                        options.find { it.value == valId }?.label ?: valId
+                    }.joinToString(", ")
+                } else {
+                    options.find { it.value == currentValue }?.label ?: currentValue
+                }
+                
+                VsRegistrationSelectField(
+                    label = field.label,
+                    value = selectedLabels,
+                    onClick = { showDialog = true },
+                    placeholder = field.placeholder,
+                    isRequired = field.required,
+                    helperText = field.helper.takeIf { it.isNotEmpty() },
+                    enabled = field.isEditable
+                )
+                if (errorText != null) {
+                    Text(
+                        text = errorText,
+                        style = MaterialTheme.appTypography.labelSmall,
+                        color = Color.Red,
+                        modifier = Modifier.padding(top = 4.dp)
+                    )
+                }
+            }
+            "radio" -> {
+                VsRegistrationRadioField(
+                    label = field.label,
+                    options = options,
+                    selectedValue = currentValue,
+                    onValueChange = onValueChange,
+                    isRequired = field.required,
+                    enabled = field.isEditable
+                )
+                if (errorText != null) {
+                    Text(
+                        text = errorText,
+                        style = MaterialTheme.appTypography.labelSmall,
+                        color = Color.Red,
+                        modifier = Modifier.padding(top = 4.dp)
+                    )
+                }
+            }
+        }
+
+        if (isOtherSelected) {
+            Spacer(modifier = Modifier.height(16.dp))
             VsRegistrationTextField(
-                label = field.label,
-                value = currentValue,
-                onValueChange = onValueChange,
-                placeholder = field.placeholder,
-                isRequired = field.required,
-                isTextArea = field.type == "textarea",
-                helperText = field.helper.takeIf { it.isNotEmpty() },
-                errorText = errorText,
-                enabled = field.isEditable
-            )
-        }
-        "select", "multi-select" -> {
-            val isMultiSelect = field.type == "multi-select"
-            val selectedLabels = if (isMultiSelect) {
-                currentValue.split("|").filter { it.isNotEmpty() }.map { valId ->
-                    options.find { it.value == valId }?.label ?: valId
-                }.joinToString(", ")
-            } else {
-                options.find { it.value == currentValue }?.label ?: currentValue
-            }
-            
-            VsRegistrationSelectField(
-                label = field.label,
-                value = selectedLabels,
-                onClick = { showDialog = true },
-                placeholder = field.placeholder,
-                isRequired = field.required,
-                helperText = field.helper.takeIf { it.isNotEmpty() },
-                enabled = field.isEditable
-            )
-            if (errorText != null) {
-                Text(
-                    text = errorText,
-                    style = MaterialTheme.appTypography.labelSmall,
-                    color = Color.Red,
-                    modifier = Modifier.padding(top = 4.dp)
-                )
-            }
-        }
-        "radio" -> {
-            VsRegistrationRadioField(
-                label = field.label,
-                options = options,
-                selectedValue = currentValue,
-                onValueChange = onValueChange,
+                label = "Please specify",
+                value = answers[field.name + "_other"] ?: "",
+                onValueChange = { onAnswerUpdateByName(field.name + "_other", it) },
+                placeholder = "Specify other",
                 isRequired = field.required,
                 enabled = field.isEditable
             )
-            if (errorText != null) {
-                Text(
-                    text = errorText,
-                    style = MaterialTheme.appTypography.labelSmall,
-                    color = Color.Red,
-                    modifier = Modifier.padding(top = 4.dp)
-                )
-            }
         }
     }
 

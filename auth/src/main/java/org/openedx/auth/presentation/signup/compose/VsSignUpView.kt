@@ -163,31 +163,32 @@ fun VsSignUpView(
 
             Spacer(modifier = Modifier.height(24.dp))
             //TODO enable after application published
-//            if (isSocialAuthEnabled && uiState.socialAuth == null) {
-//                SocialAuthView(
-//                    modifier = Modifier.fillMaxWidth(),
-//                    isGoogleAuthEnabled = isGoogleAuthEnabled,
-//                    isFacebookAuthEnabled = isFacebookAuthEnabled,
-//                    isMicrosoftAuthEnabled = isMicrosoftAuthEnabled,
-//                    isSignIn = false,
-//                    onEvent = {
-//                        onSocialRegisterClick(it)
-//                    }
-//                )
-//            }
-//            Spacer(modifier = Modifier.height(24.dp))
-//
-//            Row(verticalAlignment = Alignment.CenterVertically) {
-//                Divider(modifier = Modifier.weight(1f), color = MaterialTheme.appColors.divider)
-//                Text(
-//                    stringResource(id = R.string.auth_or),
-//                    modifier = Modifier.padding(horizontal = 16.dp),
-//                    color = MaterialTheme.appColors.textFieldHint,
-//                    fontSize = 14.sp
-//                )
-//                Divider(modifier = Modifier.weight(1f), color = MaterialTheme.appColors.divider)
-//            }
-//            Spacer(modifier = Modifier.height(24.dp))
+            if (isSocialAuthEnabled && uiState.socialAuth == null) {
+
+                SocialAuthView(
+                    modifier = Modifier.fillMaxWidth(),
+                    isGoogleAuthEnabled = isGoogleAuthEnabled,
+                    isFacebookAuthEnabled = isFacebookAuthEnabled,
+                    isMicrosoftAuthEnabled = isMicrosoftAuthEnabled,
+                    isSignIn = false,
+                    onEvent = {
+                        onSocialRegisterClick(it)
+                    }
+                )
+            }
+            Spacer(modifier = Modifier.height(24.dp))
+
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                Divider(modifier = Modifier.weight(1f), color = MaterialTheme.appColors.divider)
+                Text(
+                    stringResource(id = R.string.auth_or),
+                    modifier = Modifier.padding(horizontal = 16.dp),
+                    color = MaterialTheme.appColors.textFieldHint,
+                    fontSize = 14.sp
+                )
+                Divider(modifier = Modifier.weight(1f), color = MaterialTheme.appColors.divider)
+            }
+            Spacer(modifier = Modifier.height(24.dp))
 
             VsSignUpInputField(
                 label = stringResource(id = R.string.auth_full_name),

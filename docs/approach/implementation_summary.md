@@ -234,3 +234,12 @@ This document outlines the recent changes made to the project to address build i
 - Passwords must now be at least 8 characters long and contain at least one uppercase letter, one lowercase letter, one numeric digit, and one special character.
 - Centralized validation logic in `Validators.isValidPassword` utility for consistency across the application.
 - Added descriptive error messages to guide users in creating secure passwords.
+
+## 24. Social Registration Enhancements
+
+### Custom Registration Request for Social Auth
+- Modified the registration API request for social login flows to meet specific server requirements.
+- Social registration now skips local password validation and generates a tailored JSON request body.
+- Added new fields to `VsRegisterRequest`: `social_auth_provider` (e.g., "Continue with Google") and `total_registration_time` (seconds since screen was opened).
+- Implemented automatic `username` generation from the email prefix during social registration.
+- Switched `VsRegisterRequest` from form-encoded to JSON body format to support advanced fields and nested structures.

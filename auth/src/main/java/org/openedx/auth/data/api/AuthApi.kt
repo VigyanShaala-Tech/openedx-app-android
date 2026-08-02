@@ -80,6 +80,8 @@ interface AuthApi {
         @Field("username") username: String?,
         @Field("verification_key") verification_key: String?,
         @Field("gender") gender: String?,
+        @Field("social_auth_provider") social_auth_provider: String?,
+        @Field("total_registration_time") total_registration_time: String?,
     ): retrofit2.Response<Unit>
 
     @FormUrlEncoded

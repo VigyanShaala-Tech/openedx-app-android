@@ -387,13 +387,19 @@ fun VsSignUpView(
                             !android.util.Patterns.EMAIL_ADDRESS.matcher(email).matches() -> context.getString(R.string.auth_error_invalid_email)
                             else -> null
                         }
-                        passwordError = when {
-                            password.isEmpty() -> context.getString(R.string.auth_error_empty_password)
-                            !Validators.isValidPassword(password) -> context.getString(coreR.string.core_error_password_complexity)
-                            else -> null
+                        
+                        if (uiState.socialAuth == null) {
+                            passwordError = when {
+                                password.isEmpty() -> context.getString(R.string.auth_error_empty_password)
+                                !Validators.isValidPassword(password) -> context.getString(coreR.string.core_error_password_complexity)
+                                else -> null
+                            }
+                            confirmPasswordError =
+                                if (password != confirmPassword) context.getString(R.string.auth_error_passwords_not_match) else null
+                        } else {
+                            passwordError = null
+                            confirmPasswordError = null
                         }
-                        confirmPasswordError =
-                            if (password != confirmPassword) context.getString(R.string.auth_error_passwords_not_match) else null
 
                         if (fullNameError == null && emailError == null && passwordError == null && confirmPasswordError == null) {
                             if (selectedGender.isBlank()) {

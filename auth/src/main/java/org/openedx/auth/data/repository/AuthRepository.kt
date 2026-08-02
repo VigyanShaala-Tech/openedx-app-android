@@ -71,7 +71,6 @@ class AuthRepository(
     suspend fun register(mapFields: Map<String, String>) {
         return api.registerUser(mapFields)
     }
-
     suspend fun registerVs(body: VsRegisterRequest) {
         api.registerUserVs(
             email = body.email,
@@ -83,6 +82,8 @@ class AuthRepository(
             username = body.username,
             verification_key = body.verificationKey,
             gender = body.gender,
+            social_auth_provider = body.socialAuthProvider,
+            total_registration_time = body.totalRegistrationTime
         )
     }
 

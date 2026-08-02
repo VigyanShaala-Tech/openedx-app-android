@@ -55,6 +55,8 @@ class VsSignUpViewModel(
     ))
     val uiState = _uiState.asStateFlow()
 
+    private var registrationStartTime: Long = System.currentTimeMillis()
+
     private val _uiMessage = MutableSharedFlow<UIMessage>(
         replay = 0,
         extraBufferCapacity = 1,
@@ -79,16 +81,34 @@ class VsSignUpViewModel(
         _uiState.update { it.copy(isButtonLoading = true) }
         viewModelScope.launch {
             try {
+                val totalTime = (System.currentTimeMillis() - registrationStartTime) / 1000.0
+                val socialProvider = socialAuth?.let {
+                    when (it.authType) {
+                        AuthType.GOOGLE -> "Continue with Google"
+                        AuthType.FACEBOOK -> "Continue with Facebook"
+                        AuthType.MICROSOFT -> "Continue with Microsoft"
+                        else -> it.authType.methodName
+                    }
+                }
+                
+                val username = if (socialAuth != null) {
+                    email.substringBefore("@")
+                } else {
+                    email
+                }
+
                 val body = VsRegisterRequest(
                     email = email,
                     name = name,
-                    password = password,
+                    password = if (socialAuth != null) null else password,
                     phoneNumber = null,
                     termsOfService = true,
                     userRole = userRole.takeIf { it.isNotBlank() },
-                    username = email,
+                    username = username,
                     verificationKey = null,
-                    gender = gender
+                    gender = gender,
+                    socialAuthProvider = socialProvider,
+                    totalRegistrationTime = String.format(Locale.US, "%.3f", totalTime)
                 )
 
                 interactor.registerVs(body)

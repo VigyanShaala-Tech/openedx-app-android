@@ -151,6 +151,8 @@ This document outlines the recent changes made to the project to address build i
 - Updated `CourseRegistrationScreen.kt` and `CourseRegistrationViewModel.kt` to ensure consistent use of the new delimiter in both the UI and the state management logic.
 - Ensured that submitted values are still correctly converted to a `List` before being sent to the API.
 
+## 17. Registration Form Enhancements
+
 ### Registration Form "Other" Option Visibility
 **Issue:** When selecting "Other" or "Others" in a dropdown (select/multi-select) field in the registration form, the "Please specify" text input field was not appearing if the internal value of the option didn't exactly match "other" or "others" (even if the display label did).
 
@@ -168,7 +170,16 @@ This document outlines the recent changes made to the project to address build i
 - Improved prefill data processing to ensure that all prefilled values (including multi-select lists) are correctly stored in the ViewModel state.
 - Enhanced form validation logic to ensure that missing but required fields (previously unrendered) are now visible and correctly validated, allowing the "Next" button to enable when all visible required fields are filled.
 
-## 14. Course Dashboard Navigation Fixes
+### Registration Form File Upload and Prefill Logic
+**Issue:** The "file" field type lacked a functional file picker. Also, if the server sent prefilled data that didn't match the available dropdown options, the app wouldn't show that information or automatically select "Other".
+
+**Solution:**
+- Implemented a file picker for "file" type fields using `ActivityResultContracts.GetContent()`.
+- Added logic in `CourseRegistrationViewModel.kt` to handle prefilled values not present in the options list.
+- If a prefilled value is missing from options, the app now automatically selects the "Other" option (if available) and places the actual prefilled value into the "Please specify" text field.
+- Fixed a bug where manual "Other" values were overwriting the dropdown's "Other" selection due to sharing the same key; they now correctly use a `_other` suffix.
+
+## 18. Course Dashboard Navigation Fixes
 
 ### Announcement and About this Course Redirection
 **Issue:** In the course dashboard "More" section, both "Announcement" and "About this Course" were incorrectly redirecting to the same "Announcements" screen.
@@ -178,7 +189,7 @@ This document outlines the recent changes made to the project to address build i
 - Implemented `navigateToCourseDetail` in `AppRouter.kt` to show the native `CourseDetailsFragment`.
 - Updated `CourseContainerFragment.kt` to call `navigateToCourseDetail` when "About this Course" is clicked, ensuring it now correctly shows the course overview, curriculum, instructors, and reviews.
 
-## 15. Search Query Persistence in Explore Courses
+## 19. Search Query Persistence in Explore Courses
 
 ### Persisting Search Query in ViewModels
 **Issue:** When searching for courses in "Explore Courses" (Logistration or Discovery), navigating to course details, and then pressing back, the search results remained but the query text in the search bar was cleared.
@@ -189,7 +200,7 @@ This document outlines the recent changes made to the project to address build i
 - Implemented a `LaunchedEffect` in both screens to synchronize the `TextFieldValue` of the search bar with the persisted query from the ViewModel.
 - This ensures that the search bar always reflects the current search state, even after fragment re-creation when navigating back from course details.
 
-## 16. Search Refresh on Query Clear
+## 20. Search Refresh on Query Clear
 
 ### Automatic List Refresh
 **Issue:** Clearing the search query (either by clicking the 'X' button or manually deleting all text) did not refresh the course list to show the default/full results.
@@ -198,3 +209,9 @@ This document outlines the recent changes made to the project to address build i
 - Updated `LogistrationFragment.kt` and `CourseSearchFragment.kt` to trigger a search update whenever the search query is cleared.
 - Modified `LogistrationViewModel.kt` to revert to the default discovery list when the search term is empty.
 - Modified `CourseSearchViewModel.kt` to fetch the full course list when the search query is cleared, instead of showing an empty screen.
+
+## 21. Achievement Screen UI Fixes
+
+### Stat Card Text Alignment
+- Fixed the alignment of labels ("Badges", "Certificates", etc.) in the `StatCard` component on the Achievements screen.
+- Added `textAlign = TextAlign.Center` to ensure that text is correctly centered underneath the numeric values even when the labels wrap to multiple lines.

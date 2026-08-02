@@ -1,6 +1,8 @@
 package org.openedx.course.presentation.registration
 
 import androidx.activity.compose.BackHandler
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
 import android.webkit.WebView
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
@@ -299,6 +301,14 @@ fun RegistrationFieldItem(
 
     var showDialog by remember { mutableStateOf(false) }
 
+    val filePickerLauncher = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.GetContent()
+    ) { uri ->
+        uri?.let {
+            onValueChange(it.toString())
+        }
+    }
+
     val isOtherSelected = remember(currentValue, options) {
         val selectedValues = currentValue.split("|").filter { it.isNotEmpty() }
         selectedValues.any { valId ->
@@ -378,8 +388,8 @@ fun RegistrationFieldItem(
             "file" -> {
                 VsRegistrationFileField(
                     label = field.label,
-                    value = currentValue,
-                    onClick = { /* TODO: File picker */ },
+                    value = currentValue.substringAfterLast("/"),
+                    onClick = { filePickerLauncher.launch("*/*") },
                     placeholder = field.placeholder.ifEmpty { "Click to upload file" },
                     isRequired = field.required,
                     helperText = field.helper.takeIf { it.isNotEmpty() },
@@ -398,7 +408,6 @@ fun RegistrationFieldItem(
 
         if (isOtherSelected) {
             Spacer(modifier = Modifier.height(16.dp))
-            //TODO remove _other in value
             VsRegistrationTextField(
                 label = "Please specify",
                 value = answers[field.name ] ?: "",

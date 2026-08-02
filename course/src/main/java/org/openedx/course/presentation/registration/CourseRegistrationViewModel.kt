@@ -81,6 +81,39 @@ class CourseRegistrationViewModel(
 
                 // Check for full_name and email to prefill from user profile if not in prefill data
                 val allFields = enrollmentForm.categories.flatMap { it.fields }
+                
+                // Logic to handle prefilled data not in options
+                processedAnswers.forEach { (key, value) ->
+                    val field = allFields.find { it.name == key }
+                    if (field != null && (field.type == "select" || field.type == "multi-select")) {
+                        val options = parseOptions(field)
+                        val selectedValues = value.split("|").filter { it.isNotEmpty() }
+                        val validValues = mutableListOf<String>()
+                        var otherValue: String? = null
+                        
+                        selectedValues.forEach { valId ->
+                            if (options.any { it.value == valId }) {
+                                validValues.add(valId)
+                            } else {
+                                otherValue = valId
+                            }
+                        }
+                        
+                        if (otherValue != null) {
+                            val otherOption = options.find { 
+                                it.value.lowercase() == "other" || it.value.lowercase() == "others" || 
+                                        it.value.lowercase() == "__other__" ||
+                                        it.label.lowercase() == "other" || it.label.lowercase() == "others"
+                            }
+                            if (otherOption != null) {
+                                validValues.add(otherOption.value)
+                                finalAnswers[key] = otherValue
+                            }
+                        }
+                        finalAnswers[key] = validValues.joinToString("|")
+                    }
+                }
+
                 allFields.forEach { field ->
                     if (field.name == "full_name" || field.name == "email") {
                         var value = finalAnswers[field.name]

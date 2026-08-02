@@ -47,6 +47,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.fragment.app.FragmentManager
@@ -285,13 +286,15 @@ private fun StatCard(
                 Text(
                     text = value,
                     style = MaterialTheme.appTypography.titleMedium,
-                    color = MaterialTheme.appColors.textDark
+                    color = MaterialTheme.appColors.textDark,
+                    textAlign = TextAlign.Center
                 )
                 Text(
                     text = label,
                     style = MaterialTheme.appTypography.labelSmall,
                     color = MaterialTheme.appColors.textPrimary,
-                    maxLines = Int.MAX_VALUE
+                    maxLines = Int.MAX_VALUE,
+                    textAlign = TextAlign.Center
                 )
             }
         }

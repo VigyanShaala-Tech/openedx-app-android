@@ -61,6 +61,8 @@ import org.openedx.core.NoContentScreenType
 import org.openedx.core.data.model.LiveClassModel
 import org.openedx.core.domain.model.Block
 import org.openedx.core.domain.model.CourseDatesBannerInfo
+import androidx.compose.material.CircularProgressIndicator
+import org.openedx.core.ui.OpenEdXButton
 import org.openedx.core.ui.CircularProgress
 import org.openedx.core.ui.HandleUIMessage
 import org.openedx.core.ui.NoContentScreen
@@ -193,6 +195,9 @@ fun CourseHomeScreen(
         },
         onViewAllLiveSessionsClick = {
             onNavigateToContent(CourseContentTab.LIVE_SESSIONS)
+        },
+        onRetry = {
+            viewModel.getCourseData()
         }
     )
 }
@@ -220,6 +225,7 @@ private fun CourseHomeUI(
     onJoinClick: (LiveClassModel) -> Unit,
     onJoinOngoingClick: (String) -> Unit,
     onViewAllLiveSessionsClick: () -> Unit,
+    onRetry: () -> Unit,
 ) {
     val scaffoldState = rememberScaffoldState()
 
@@ -373,11 +379,58 @@ private fun CourseHomeUI(
                     }
 
                     CourseHomeUIState.Error -> {
-                        NoContentScreen(noContentScreenType = NoContentScreenType.COURSE_OUTLINE)
+                        Box(
+                            modifier = Modifier
+                                .fillMaxSize()
+                                .padding(horizontal = 32.dp),
+                            contentAlignment = Alignment.Center
+                        ) {
+                            Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                                Icon(
+                                    painter = painterResource(id = coreR.drawable.core_ic_warning),
+                                    contentDescription = null,
+                                    modifier = Modifier.size(80.dp),
+                                    tint = MaterialTheme.appColors.error
+                                )
+                                Spacer(Modifier.height(16.dp))
+                                Text(
+                                    text = "We encountered an error while loading the course data.",
+                                    style = MaterialTheme.appTypography.titleMedium,
+                                    color = MaterialTheme.appColors.textPrimary,
+                                    textAlign = TextAlign.Center
+                                )
+                                Spacer(Modifier.height(8.dp))
+                                Text(
+                                    text = "Please check your internet connection or try again later.",
+                                    style = MaterialTheme.appTypography.bodyMedium,
+                                    color = MaterialTheme.appColors.textSecondary,
+                                    textAlign = TextAlign.Center
+                                )
+                                Spacer(Modifier.height(24.dp))
+                                OpenEdXButton(
+                                    text = "Retry",
+                                    onClick = onRetry,
+                                    modifier = Modifier.width(160.dp)
+                                )
+                            }
+                        }
                     }
 
                     CourseHomeUIState.Loading -> {
-                        CircularProgress()
+                        Box(
+                            modifier = Modifier.fillMaxSize(),
+                            contentAlignment = Alignment.Center
+                        ) {
+                            Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                                CircularProgressIndicator(color = MaterialTheme.appColors.primary)
+                                Spacer(Modifier.height(16.dp))
+                                Text(
+                                    text = "Loading course data...",
+                                    style = MaterialTheme.appTypography.bodyMedium,
+                                    color = MaterialTheme.appColors.textPrimary
+                                )
+                            }
+                        }
                     }
 
                     CourseHomeUIState.Waiting -> {}
@@ -684,7 +737,8 @@ private fun CourseHomeScreenPreview() {
             onViewAllAnnouncementsClick = {},
             onJoinClick = {},
             onJoinOngoingClick = {},
-            onViewAllLiveSessionsClick = {}
+            onViewAllLiveSessionsClick = {},
+            onRetry = {}
         )
     }
 }

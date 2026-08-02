@@ -243,3 +243,22 @@ This document outlines the recent changes made to the project to address build i
 - Added new fields to `VsRegisterRequest`: `social_auth_provider` (e.g., "Continue with Google") and `total_registration_time` (seconds since screen was opened).
 - Implemented automatic `username` generation from the email prefix during social registration.
 - Switched `VsRegisterRequest` from form-encoded to JSON body format to support advanced fields and nested structures.
+
+## 25. Performance and UI Optimizations
+
+### Accelerated Course Home Loading
+**Issue:** The course home page was taking 6-10 seconds to load due to multiple sequential API calls and excessive ViewPager pre-loading.
+
+**Solution:**
+- **Incremental Loading**: Refactored `CourseHomeViewModel.kt` to fetch essential data (Course Structure and Status) first for an immediate UI render. All other data (Announcements, Live Sessions, Progress, etc.) is now fetched in parallel and populates the UI cards incrementally as it arrives.
+- **Pager Optimization**: Reduced `beyondViewportPageCount` to 1 in course and content pagers.
+- **App-wide Navigation Optimization**: Set `offscreenPageLimit = 1` for main app ViewPagers to prevent unnecessary section initialization.
+- **Improved Empty/Error States**: Replaced the generic "No data" screen with a descriptive "Loading course data..." state and a functional "Retry" button in case of failure.
+
+## 26. New User Experience
+
+### Automatic Redirection to Discovery
+- Implemented automatic redirection to the "Discover" (Explore Courses) tab for users with no active or completed course enrollments.
+- Added logic in `NewDashboardViewModel.kt` to check the enrollment status upon loading the dashboard.
+- If a user has no courses in progress and no completed courses, the app now automatically triggers a navigation event to the Discovery section.
+- This ensures that new users or users with empty dashboards are immediately presented with course options to explore, improving the onboarding experience.

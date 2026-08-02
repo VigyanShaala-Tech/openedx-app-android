@@ -4,6 +4,7 @@ import android.net.Uri
 import android.util.Log
 import androidx.fragment.app.FragmentManager
 import androidx.lifecycle.viewModelScope
+import androidx.core.net.toUri
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.async
 import kotlinx.coroutines.coroutineScope
@@ -183,59 +184,104 @@ class CourseHomeViewModel(
         _uiState.value = CourseHomeUIState.Loading
         viewModelScope.launch {
             try {
-                // Fetch structure first as it's critical
+                // 1. Fetch essential data (Structure and Status) first
                 val courseStructure = interactor.getCourseStructure(courseId, false)
                 val blocks = courseStructure.blockData
+                val courseStatus = interactor.getCourseStatus(courseId)
 
-                // Fetch other data in parallel
+                // 2. Initial render with essential data
+                initializeCourseData(
+                    blocks = blocks,
+                    courseStructure = courseStructure,
+                    courseStatus = courseStatus,
+                    datesBannerInfo = CourseDatesBannerInfo(
+                        missedDeadlines = false,
+                        missedGatedContent = false,
+                        verifiedUpgradeLink = "",
+                        contentTypeGatingEnabled = false,
+                        hasEnded = false
+                    ),
+                    courseProgress = null
+                )
+
+                // 3. Fetch auxiliary data in parallel and update UI incrementally
                 coroutineScope {
-                    val statusDeferred = async { interactor.getCourseStatus(courseId) }
-                    val datesDeferred = async { interactor.getCourseDates(courseId) }
-                    val progressDeferred = async { interactor.getCourseProgress(courseId, false, true).first() }
-                    
-                    val announcementsDeferred = async {
-                        runCatching { interactor.getAnnouncements(courseId) }.getOrDefault(emptyList())
-                    }
-                    
-                    val liveTodayDeferred = async {
-                        runCatching { interactor.getLiveClasses(courseId, "today", 1).results }.getOrDefault(emptyList())
-                    }
-                    val liveUpcomingDeferred = async {
-                        runCatching { interactor.getLiveClasses(courseId, "upcoming", 1).results }.getOrDefault(emptyList())
-                    }
-                    val livePastDeferred = async {
-                        runCatching { interactor.getLiveClasses(courseId, "past", 1).results }.getOrDefault(emptyList())
-                    }
-                    val ongoingSessionDeferred = async {
-                        runCatching { interactor.getOngoingSession(courseId).result }.getOrNull()
+                    launch {
+                        try {
+                            val datesResult = interactor.getCourseDates(courseId)
+                            updateUiData { it.copy(datesBannerInfo = datesResult.courseBanner) }
+                        } catch (e: Exception) {
+                            Log.e("CourseHomeViewModel", "Error fetching dates", e)
+                        }
                     }
 
-                    val courseStatus = statusDeferred.await()
-                    val datesResult = datesDeferred.await()
-                    val courseProgress = progressDeferred.await()
-                    val announcements = announcementsDeferred.await()
-                    val liveClassesToday = liveTodayDeferred.await()
-                    val liveClassesUpcoming = liveUpcomingDeferred.await()
-                    val liveClassesPast = livePastDeferred.await()
-                    val ongoingSession = ongoingSessionDeferred.await()
+                    launch {
+                        try {
+                            interactor.getCourseProgress(courseId, false, false)
+                                .collect { progress ->
+                                    updateUiData { it.copy(courseProgress = progress) }
+                                }
+                        } catch (e: Exception) {
+                            Log.e("CourseHomeViewModel", "Error fetching progress", e)
+                        }
+                    }
 
-                    initializeCourseData(
-                        blocks,
-                        courseStructure,
-                        courseStatus,
-                        datesResult.courseBanner,
-                        courseProgress,
-                        announcements,
-                        liveClassesToday,
-                        liveClassesUpcoming,
-                        liveClassesPast,
-                        ongoingSession
-                    )
+                    launch {
+                        try {
+                            val announcements = interactor.getAnnouncements(courseId)
+                            updateUiData { it.copy(announcements = announcements) }
+                        } catch (e: Exception) {
+                            Log.e("CourseHomeViewModel", "Error fetching announcements", e)
+                        }
+                    }
+
+                    launch {
+                        try {
+                            val liveToday = interactor.getLiveClasses(courseId, "today", 1).results
+                            updateUiData { it.copy(liveClassesToday = liveToday) }
+                        } catch (e: Exception) {
+                            Log.e("CourseHomeViewModel", "Error fetching live today", e)
+                        }
+                    }
+
+                    launch {
+                        try {
+                            val liveUpcoming = interactor.getLiveClasses(courseId, "upcoming", 1).results
+                            updateUiData { it.copy(liveClassesUpcoming = liveUpcoming) }
+                        } catch (e: Exception) {
+                            Log.e("CourseHomeViewModel", "Error fetching live upcoming", e)
+                        }
+                    }
+
+                    launch {
+                        try {
+                            val livePast = interactor.getLiveClasses(courseId, "past", 1).results
+                            updateUiData { it.copy(liveClassesPast = livePast) }
+                        } catch (e: Exception) {
+                            Log.e("CourseHomeViewModel", "Error fetching live past", e)
+                        }
+                    }
+
+                    launch {
+                        try {
+                            val ongoing = interactor.getOngoingSession(courseId).result
+                            updateUiData { it.copy(ongoingSession = ongoing) }
+                        } catch (e: Exception) {
+                            Log.e("CourseHomeViewModel", "Error fetching ongoing session", e)
+                        }
+                    }
                 }
             } catch (e: Exception) {
-                Log.e("CourseHomeViewModel", "Error fetching course data", e)
+                Log.e("CourseHomeViewModel", "Error fetching essential course data", e)
                 handleCourseDataError(e)
             }
+        }
+    }
+
+    private fun updateUiData(block: (CourseHomeUIState.CourseData) -> CourseHomeUIState.CourseData) {
+        val currentState = _uiState.value
+        if (currentState is CourseHomeUIState.CourseData) {
+            _uiState.value = block(currentState)
         }
     }
 
@@ -244,7 +290,7 @@ class CourseHomeViewModel(
         courseStructure: CourseStructure,
         courseStatus: CourseComponentStatus,
         datesBannerInfo: CourseDatesBannerInfo,
-        courseProgress: CourseProgress,
+        courseProgress: CourseProgress?,
         announcements: List<org.openedx.core.domain.model.AnnouncementModel> = emptyList(),
         liveClassesToday: List<org.openedx.core.data.model.LiveClassModel> = emptyList(),
         liveClassesUpcoming: List<org.openedx.core.data.model.LiveClassModel> = emptyList(),
@@ -740,7 +786,7 @@ class CourseHomeViewModel(
             _uiState.value = CourseHomeUIState.Waiting // To trigger state update back to CourseData
             getCourseData()
 
-            val joinUrl = Uri.parse(meetingUrl).buildUpon()
+            val joinUrl = meetingUrl.toUri().buildUpon()
                 .appendQueryParameter("isMobile", "true")
                 .build().toString()
 

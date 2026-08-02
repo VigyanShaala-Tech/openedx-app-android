@@ -20,6 +20,7 @@ import org.openedx.foundation.presentation.WindowSize
 import org.openedx.foundation.system.ResourceManager
 import org.openedx.core.system.notifier.CourseDashboardUpdate
 import org.openedx.core.system.notifier.DiscoveryNotifier
+import org.openedx.core.system.notifier.NavigationToDiscovery
 
 data class NewDashboardState(
     val loading: Boolean = true,
@@ -102,6 +103,21 @@ class NewDashboardViewModel(
                         continueLearning = contLearnVal,
                     )
 
+                    val inProgressVal = try {
+                        inProgress.await()
+                    } catch (e: Exception) {
+                        null
+                    }
+                    val completedVal = try {
+                        completed.await()
+                    } catch (e: Exception) {
+                        null
+                    }
+
+                    if (!isRefreshing && (inProgressVal?.results?.isEmpty() ?: true) && (completedVal?.results?.isEmpty() ?: true)) {
+                        discoveryNotifier.send(NavigationToDiscovery())
+                    }
+
                     _state.value = _state.value.copy(
                         refreshing = false,
                         achievements = try {
@@ -119,16 +135,8 @@ class NewDashboardViewModel(
                         } catch (e: Exception) {
                             null
                         },
-                        inProgress = try {
-                            inProgress.await()
-                        } catch (e: Exception) {
-                            null
-                        },
-                        completed = try {
-                            completed.await()
-                        } catch (e: Exception) {
-                            null
-                        },
+                        inProgress = inProgressVal,
+                        completed = completedVal,
                     )
                 }
             } catch (e: Exception) {

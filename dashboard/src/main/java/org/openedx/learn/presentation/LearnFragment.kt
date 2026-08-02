@@ -89,7 +89,7 @@ class LearnFragment : Fragment(R.layout.fragment_learn) {
 
     private fun initViewPager() {
         binding.viewPager.orientation = ViewPager2.ORIENTATION_HORIZONTAL
-        binding.viewPager.offscreenPageLimit = 2
+        binding.viewPager.offscreenPageLimit = 1
 
         adapter = NavigationFragmentAdapter(this).apply {
             addFragment { viewModel.getDashboardFragment }

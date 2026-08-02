@@ -181,7 +181,7 @@ class MainFragment : Fragment(R.layout.fragment_main) {
 
     private fun initViewPager(tabList: List<Pair<Int, () -> Fragment>>) {
         binding.viewPager.orientation = ViewPager2.ORIENTATION_HORIZONTAL
-        binding.viewPager.offscreenPageLimit = tabList.size
+        binding.viewPager.offscreenPageLimit = 1
         binding.viewPager.adapter = NavigationFragmentAdapter(this).apply {
             tabList.forEach { (_, fragmentFactory) ->
                 // Use fragment factory to prevent memory leaks

@@ -263,7 +263,7 @@ private fun ContentTabUI(
             HorizontalPager(
                 state = pagerState,
                 userScrollEnabled = false,
-                beyondViewportPageCount = CourseContentTab.entries.size,
+                beyondViewportPageCount = 1,
                 modifier = Modifier.fillMaxSize()
             ) { page ->
                 Box(modifier = Modifier.fillMaxSize()) {

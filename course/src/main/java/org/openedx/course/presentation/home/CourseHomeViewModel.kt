@@ -6,6 +6,7 @@ import androidx.fragment.app.FragmentManager
 import androidx.lifecycle.viewModelScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.async
+import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharedFlow
@@ -14,7 +15,7 @@ import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.collectLatest
-import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 import org.openedx.core.BlockType
 import org.openedx.core.R
@@ -181,88 +182,48 @@ class CourseHomeViewModel(
     private fun getCourseDataInternal() {
         _uiState.value = CourseHomeUIState.Loading
         viewModelScope.launch {
-            val courseStructureFlow = interactor.getCourseStructureFlow(courseId, false)
-                .catch {
-                    Log.e("CourseHomeViewModel", "Error fetching course structure", it)
-                    emit(null)
-                }
-            val courseStatusFlow = interactor.getCourseStatusFlow(courseId)
-            val courseDatesFlow = interactor.getCourseDatesFlow(courseId)
-            val courseProgressFlow = interactor.getCourseProgress(courseId, false, true)
-
-            combine(
-                courseStructureFlow,
-                courseStatusFlow,
-                courseDatesFlow,
-                courseProgressFlow
-            ) { courseStructure, courseStatus, courseDatesResult, courseProgress ->
-                Log.d("CourseHomeViewModel", "Combined flows: courseStructure=$courseStructure")
-                if (courseStructure == null) {
-                    Log.w("CourseHomeViewModel", "Course structure is null, returning early")
-                    return@combine
-                }
+            try {
+                // Fetch structure first as it's critical
+                val courseStructure = interactor.getCourseStructure(courseId, false)
                 val blocks = courseStructure.blockData
-                val datesBannerInfo = courseDatesResult.courseBanner
 
-                viewModelScope.launch {
-                    // Fetch announcements
+                // Fetch other data in parallel
+                coroutineScope {
+                    val statusDeferred = async { interactor.getCourseStatus(courseId) }
+                    val datesDeferred = async { interactor.getCourseDates(courseId) }
+                    val progressDeferred = async { interactor.getCourseProgress(courseId, false, true).first() }
+                    
                     val announcementsDeferred = async {
-                        try {
-                            interactor.getAnnouncements(courseId)
-                        } catch (e: Exception) {
-                            Log.e("CourseHomeViewModel", "Error fetching announcements", e)
-                            emptyList()
-                        }
+                        runCatching { interactor.getAnnouncements(courseId) }.getOrDefault(emptyList())
                     }
-
-                    // Fetch live classes
+                    
                     val liveTodayDeferred = async {
-                        try {
-                            interactor.getLiveClasses(courseId, "today", 1).results
-                        } catch (e: Exception) {
-                            Log.e("CourseHomeViewModel", "Error fetching live today", e)
-                            emptyList()
-                        }
+                        runCatching { interactor.getLiveClasses(courseId, "today", 1).results }.getOrDefault(emptyList())
                     }
                     val liveUpcomingDeferred = async {
-                        try {
-                            interactor.getLiveClasses(courseId, "upcoming", 1).results
-                        } catch (e: Exception) {
-                            Log.e("CourseHomeViewModel", "Error fetching live upcoming", e)
-                            emptyList()
-                        }
+                        runCatching { interactor.getLiveClasses(courseId, "upcoming", 1).results }.getOrDefault(emptyList())
                     }
                     val livePastDeferred = async {
-                        try {
-                            interactor.getLiveClasses(courseId, "past", 1).results
-                        } catch (e: Exception) {
-                            Log.e("CourseHomeViewModel", "Error fetching live past", e)
-                            emptyList()
-                        }
+                        runCatching { interactor.getLiveClasses(courseId, "past", 1).results }.getOrDefault(emptyList())
                     }
-
-                    // Fetch ongoing session
                     val ongoingSessionDeferred = async {
-                        try {
-                            interactor.getOngoingSession(courseId).result
-                        } catch (e: Exception) {
-                            Log.e("CourseHomeViewModel", "Error fetching ongoing session", e)
-                            null
-                        }
+                        runCatching { interactor.getOngoingSession(courseId).result }.getOrNull()
                     }
 
+                    val courseStatus = statusDeferred.await()
+                    val datesResult = datesDeferred.await()
+                    val courseProgress = progressDeferred.await()
                     val announcements = announcementsDeferred.await()
                     val liveClassesToday = liveTodayDeferred.await()
                     val liveClassesUpcoming = liveUpcomingDeferred.await()
                     val liveClassesPast = livePastDeferred.await()
                     val ongoingSession = ongoingSessionDeferred.await()
 
-                    Log.d("CourseHomeViewModel", "Initializing course data with ${blocks.size} blocks")
                     initializeCourseData(
                         blocks,
                         courseStructure,
                         courseStatus,
-                        datesBannerInfo,
+                        datesResult.courseBanner,
                         courseProgress,
                         announcements,
                         liveClassesToday,
@@ -271,10 +232,10 @@ class CourseHomeViewModel(
                         ongoingSession
                     )
                 }
-            }.catch { e ->
-                Log.e("CourseHomeViewModel", "Error in combine flow", e)
+            } catch (e: Exception) {
+                Log.e("CourseHomeViewModel", "Error fetching course data", e)
                 handleCourseDataError(e)
-            }.collect { }
+            }
         }
     }
 

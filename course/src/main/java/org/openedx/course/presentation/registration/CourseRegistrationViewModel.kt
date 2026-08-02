@@ -137,7 +137,7 @@ class CourseRegistrationViewModel(
         updateAnswer(fieldName, answer)
         
         if (!isOtherSelected(field, answer)) {
-            _answers.update { it - (fieldName + "_other") }
+            _answers.update { it - (fieldName) }
         }
 
         if (field.isEligibilityField && answer.isNotEmpty()) {
@@ -220,7 +220,7 @@ class CourseRegistrationViewModel(
                     if (field.required && answer.isBlank()) return false
                     
                     if (isOtherSelected(field, answer) && field.required) {
-                        if (_answers.value[field.name + "_other"].isNullOrBlank()) return false
+                        if (_answers.value[field.name].isNullOrBlank()) return false
                     }
 
                     if (_eligibilityErrors.value[field.name] != null) return false
@@ -287,7 +287,7 @@ class CourseRegistrationViewModel(
         if (selectedValues.isEmpty()) return false
 
         // Quick check on values
-        if (selectedValues.any { it.lowercase() == "other" || it.lowercase() == "others" }) return true
+        if (selectedValues.any { it.lowercase() == "other" || it.lowercase() == "others" || it.lowercase() == "__other__" }) return true
 
         // Deep check on labels
         val options = parseOptions(field)

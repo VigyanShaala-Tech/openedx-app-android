@@ -24,6 +24,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -303,13 +304,14 @@ fun RegistrationFieldItem(
         selectedValues.any { valId ->
             val label = options.find { it.value == valId }?.label ?: valId
             valId.lowercase() == "other" || valId.lowercase() == "others" ||
+                    valId.lowercase() == "__other__" ||
                     label.lowercase() == "other" || label.lowercase() == "others"
         }
     }
 
     Column {
         when (field.type) {
-            "text", "email", "textarea" -> {
+            "text", "email", "textarea", "number" -> {
                 VsRegistrationTextField(
                     label = field.label,
                     value = currentValue,
@@ -319,7 +321,12 @@ fun RegistrationFieldItem(
                     isTextArea = field.type == "textarea",
                     helperText = field.helper.takeIf { it.isNotEmpty() },
                     errorText = errorText,
-                    enabled = field.isEditable
+                    enabled = field.isEditable,
+                    keyboardType = when (field.type) {
+                        "number" -> KeyboardType.Number
+                        "email" -> KeyboardType.Email
+                        else -> KeyboardType.Text
+                    }
                 )
             }
             "select", "multi-select" -> {
@@ -368,14 +375,34 @@ fun RegistrationFieldItem(
                     )
                 }
             }
+            "file" -> {
+                VsRegistrationFileField(
+                    label = field.label,
+                    value = currentValue,
+                    onClick = { /* TODO: File picker */ },
+                    placeholder = field.placeholder.ifEmpty { "Click to upload file" },
+                    isRequired = field.required,
+                    helperText = field.helper.takeIf { it.isNotEmpty() },
+                    enabled = field.isEditable
+                )
+                if (errorText != null) {
+                    Text(
+                        text = errorText,
+                        style = MaterialTheme.appTypography.labelSmall,
+                        color = Color.Red,
+                        modifier = Modifier.padding(top = 4.dp)
+                    )
+                }
+            }
         }
 
         if (isOtherSelected) {
             Spacer(modifier = Modifier.height(16.dp))
+            //TODO remove _other in value
             VsRegistrationTextField(
                 label = "Please specify",
-                value = answers[field.name + "_other"] ?: "",
-                onValueChange = { onAnswerUpdateByName(field.name + "_other", it) },
+                value = answers[field.name ] ?: "",
+                onValueChange = { onAnswerUpdateByName(field.name, it) },
                 placeholder = "Specify other",
                 isRequired = field.required,
                 enabled = field.isEditable

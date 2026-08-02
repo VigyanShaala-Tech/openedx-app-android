@@ -6,9 +6,11 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowDropDown
+import androidx.compose.material.icons.filled.UploadFile
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -17,6 +19,7 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -109,7 +112,8 @@ fun VsRegistrationTextField(
     isTextArea: Boolean = false,
     helperText: String? = null,
     errorText: String? = null,
-    enabled: Boolean = true
+    enabled: Boolean = true,
+    keyboardType: KeyboardType = KeyboardType.Text
 ) {
     Column(modifier = Modifier.fillMaxWidth()) {
         Text(
@@ -157,7 +161,8 @@ fun VsRegistrationTextField(
             ),
             isError = errorText != null,
             minLines = if (isTextArea) 3 else 1,
-            maxLines = if (isTextArea) 5 else 1
+            maxLines = if (isTextArea) 5 else 1,
+            keyboardOptions = KeyboardOptions(keyboardType = keyboardType)
         )
         if (errorText != null) {
             Text(
@@ -288,6 +293,67 @@ fun VsRegistrationRadioField(
                         modifier = Modifier.padding(start = 4.dp)
                     )
                 }
+            }
+        }
+    }
+}
+
+@Composable
+fun VsRegistrationFileField(
+    label: String,
+    value: String,
+    onClick: () -> Unit,
+    placeholder: String,
+    isRequired: Boolean = false,
+    helperText: String? = null,
+    enabled: Boolean = true
+) {
+    Column(modifier = Modifier.fillMaxWidth()) {
+        Text(
+            text = buildAnnotatedString {
+                append(label)
+                if (isRequired) {
+                    withStyle(style = SpanStyle(color = Color.Red)) {
+                        append(" *")
+                    }
+                }
+            },
+            style = MaterialTheme.appTypography.bodyMedium.copy(fontWeight = FontWeight.Medium),
+            color = Color(0xFF424242)
+        )
+        if (!helperText.isNullOrEmpty()) {
+            Spacer(modifier = Modifier.height(4.dp))
+            Text(
+                text = helperText,
+                style = MaterialTheme.appTypography.bodySmall,
+                color = Color(0xFF757575),
+                lineHeight = 16.sp
+            )
+        }
+        Spacer(modifier = Modifier.height(8.dp))
+        Box(
+            modifier = Modifier
+                .fillMaxWidth()
+                .heightIn(min = 56.dp)
+                .background(if (enabled) Color.White else Color(0xFFF5F5F5), RoundedCornerShape(8.dp))
+                .border(1.dp, Color(0xFFE0E0E0), RoundedCornerShape(8.dp))
+                .clickable(enabled = enabled) { onClick() }
+                .padding(horizontal = 16.dp, vertical = 12.dp),
+            contentAlignment = Alignment.CenterStart
+        ) {
+            Text(
+                text = value.ifEmpty { placeholder },
+                style = MaterialTheme.appTypography.bodyMedium,
+                color = if (value.isEmpty()) Color(0xFF9E9E9E) else if (enabled) Color.Black else Color(0xFF757575),
+                modifier = Modifier.padding(end = 24.dp)
+            )
+            if (enabled) {
+                Icon(
+                    imageVector = Icons.Default.UploadFile,
+                    contentDescription = null,
+                    modifier = Modifier.align(Alignment.CenterEnd).size(24.dp),
+                    tint = Color.Gray
+                )
             }
         }
     }

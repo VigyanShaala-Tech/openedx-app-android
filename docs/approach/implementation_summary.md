@@ -157,7 +157,16 @@ This document outlines the recent changes made to the project to address build i
 **Solution:**
 - Enhanced the `isOtherSelected` check in both `CourseRegistrationScreen.kt` and `CourseRegistrationViewModel.kt`.
 - The check now looks at both the internal `value` and the display `label` of the selected options.
-- If either the value or the label (case-insensitive) matches "other" or "others", the "Please specify" text field is displayed and treated as a required field if the parent field is required.
+- If either the value or the label (case-insensitive) matches "other" or "others", or if the internal value is `"__other__"`, the "Please specify" text field is displayed and treated as a required field if the parent field is required.
+
+### Registration Form Field Support and Validation
+**Issue:** Some registration form fields were not being rendered because their types (`number`, `file`) were not implemented. Additionally, some prefilled fields were not properly activating the "Next" button.
+
+**Solution:**
+- Implemented `number` and `file` field types in `CourseRegistrationScreen.kt` and `CourseRegistrationUI.kt`.
+- Added support for `KeyboardType.Number` and `KeyboardType.Email` in `VsRegistrationTextField`.
+- Improved prefill data processing to ensure that all prefilled values (including multi-select lists) are correctly stored in the ViewModel state.
+- Enhanced form validation logic to ensure that missing but required fields (previously unrendered) are now visible and correctly validated, allowing the "Next" button to enable when all visible required fields are filled.
 
 ## 14. Course Dashboard Navigation Fixes
 

@@ -208,6 +208,10 @@ fun CourseRegistrationContent(
     val scrollState = rememberScrollState()
     val category = uiState.enrollmentForm.categories.getOrNull(uiState.currentStep - 1)
 
+    LaunchedEffect(uiState.currentStep) {
+        scrollState.scrollTo(0)
+    }
+
     Column(
         modifier = Modifier
             .fillMaxSize()

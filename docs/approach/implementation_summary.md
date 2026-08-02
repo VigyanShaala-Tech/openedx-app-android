@@ -179,6 +179,10 @@ This document outlines the recent changes made to the project to address build i
 - If a prefilled value is missing from options, the app now automatically selects the "Other" option (if available) and places the actual prefilled value into the "Please specify" text field.
 - Fixed a bug where manual "Other" values were overwriting the dropdown's "Other" selection due to sharing the same key; they now correctly use a `_other` suffix.
 
+### Registration Form Step Transition Fix
+- Fixed an issue where the scroll position was maintained when transitioning between steps in the registration form.
+- Added a `LaunchedEffect` to reset the scroll position to the top whenever the `currentStep` changes, ensuring a consistent starting point for each page.
+
 ## 18. Course Dashboard Navigation Fixes
 
 ### Announcement and About this Course Redirection

@@ -60,6 +60,8 @@ interface CourseRouter {
         type: HandoutsType
     )
 
+    fun navigateToCourseDetail(fm: FragmentManager, courseId: String)
+
     fun navigateToDownloadQueue(fm: FragmentManager, descendants: List<String> = arrayListOf())
 
     fun navigateToDiscover(fm: FragmentManager)

@@ -298,9 +298,13 @@ fun RegistrationFieldItem(
 
     var showDialog by remember { mutableStateOf(false) }
 
-    val isOtherSelected = remember(currentValue) {
+    val isOtherSelected = remember(currentValue, options) {
         val selectedValues = currentValue.split("|").filter { it.isNotEmpty() }
-        selectedValues.any { it.lowercase() == "other" || it.lowercase() == "others" }
+        selectedValues.any { valId ->
+            val label = options.find { it.value == valId }?.label ?: valId
+            valId.lowercase() == "other" || valId.lowercase() == "others" ||
+                    label.lowercase() == "other" || label.lowercase() == "others"
+        }
     }
 
     Column {

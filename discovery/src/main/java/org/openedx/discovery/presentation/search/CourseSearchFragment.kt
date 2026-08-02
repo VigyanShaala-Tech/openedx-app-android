@@ -109,6 +109,7 @@ class CourseSearchFragment : Fragment() {
                 val uiMessage by viewModel.uiMessage.observeAsState()
                 val canLoadMore by viewModel.canLoadMore.observeAsState(false)
                 val refreshing by viewModel.isUpdating.observeAsState(false)
+                val searchQuery by viewModel.searchQuery.observeAsState("")
                 val querySearch = arguments?.getString(ARG_SEARCH_QUERY) ?: ""
 
                 CourseSearchScreen(
@@ -118,7 +119,7 @@ class CourseSearchFragment : Fragment() {
                     apiHostUrl = viewModel.apiHostUrl,
                     canLoadMore = canLoadMore,
                     refreshing = refreshing,
-                    querySearch = querySearch,
+                    querySearch = searchQuery.ifEmpty { querySearch },
                     isUserLoggedIn = viewModel.isUserLoggedIn,
                     isRegistrationEnabled = viewModel.isRegistrationEnabled,
                     onBackClick = {
@@ -200,6 +201,16 @@ private fun CourseSearchScreen(
             )
         )
     }
+
+    LaunchedEffect(querySearch) {
+        if (textFieldValue.text != querySearch) {
+            textFieldValue = TextFieldValue(
+                text = querySearch,
+                selection = TextRange(querySearch.length)
+            )
+        }
+    }
+
     val keyboardController = LocalSoftwareKeyboardController.current
     val focusManager = LocalFocusManager.current
 

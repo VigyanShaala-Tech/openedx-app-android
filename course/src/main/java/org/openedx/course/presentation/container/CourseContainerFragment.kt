@@ -599,10 +599,9 @@ private fun DashboardPager(
                         )
                     },
                     onAboutCourseClick = {
-                        viewModel.courseRouter.navigateToHandoutsWebView(
+                        viewModel.courseRouter.navigateToCourseDetail(
                             fragmentManager,
-                            viewModel.courseId,
-                            HandoutsType.Announcements
+                            viewModel.courseId
                         )
                     },
                     onShareCourseClick = {

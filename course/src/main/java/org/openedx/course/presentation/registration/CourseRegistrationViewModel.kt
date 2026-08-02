@@ -11,6 +11,9 @@ import org.openedx.course.domain.interactor.CourseRegistrationInteractor
 import org.openedx.core.data.storage.CorePreferences
 import org.openedx.core.domain.model.EnrollmentForm
 import org.openedx.core.domain.model.EnrollmentRegistrationField
+import org.openedx.core.domain.model.EnrollmentRegistrationOption
+import com.google.gson.Gson
+import com.google.gson.reflect.TypeToken
 import org.openedx.core.system.notifier.CourseDashboardUpdate
 import org.openedx.core.system.notifier.DiscoveryNotifier
 import org.openedx.foundation.extension.isInternetError
@@ -133,8 +136,7 @@ class CourseRegistrationViewModel(
         val fieldName = field.name
         updateAnswer(fieldName, answer)
         
-        val isOtherSelected = answer.split("|").any { it.lowercase() == "other" || it.lowercase() == "others" }
-        if (!isOtherSelected) {
+        if (!isOtherSelected(field, answer)) {
             _answers.update { it - (fieldName + "_other") }
         }
 
@@ -217,8 +219,7 @@ class CourseRegistrationViewModel(
                     val answer = _answers.value[field.name] ?: ""
                     if (field.required && answer.isBlank()) return false
                     
-                    val isOtherSelected = answer.split("|").any { it.lowercase() == "other" || it.lowercase() == "others" }
-                    if (isOtherSelected && field.required) {
+                    if (isOtherSelected(field, answer) && field.required) {
                         if (_answers.value[field.name + "_other"].isNullOrBlank()) return false
                     }
 
@@ -279,6 +280,42 @@ class CourseRegistrationViewModel(
             e.message ?: resourceManager.getString(coreR.string.core_error_unknown_error)
         }
         _uiMessage.emit(UIMessage.SnackBarMessage(errorMessage))
+    }
+
+    private fun isOtherSelected(field: EnrollmentRegistrationField, answer: String): Boolean {
+        val selectedValues = answer.split("|").filter { it.isNotEmpty() }
+        if (selectedValues.isEmpty()) return false
+
+        // Quick check on values
+        if (selectedValues.any { it.lowercase() == "other" || it.lowercase() == "others" }) return true
+
+        // Deep check on labels
+        val options = parseOptions(field)
+        return selectedValues.any { valId ->
+            val option = options.find { it.value == valId }
+            option?.label?.lowercase() == "other" || option?.label?.lowercase() == "others"
+        }
+    }
+
+    private fun parseOptions(field: EnrollmentRegistrationField): List<EnrollmentRegistrationOption> {
+        val options = field.options ?: return emptyList()
+        if (options is List<*>) {
+            return options.filterIsInstance<EnrollmentRegistrationOption>()
+        }
+        return try {
+            val gson = Gson()
+            val json = gson.toJson(options)
+            if (field.dependsOn.isNotEmpty()) {
+                val type = object : TypeToken<Map<String, List<EnrollmentRegistrationOption>>>() {}.type
+                val map = gson.fromJson<Map<String, List<EnrollmentRegistrationOption>>>(json, type)
+                map[_answers.value[field.dependsOn]] ?: emptyList()
+            } else {
+                val type = object : TypeToken<List<EnrollmentRegistrationOption>>() {}.type
+                gson.fromJson(json, type)
+            }
+        } catch (_: Exception) {
+            emptyList()
+        }
     }
 }
 

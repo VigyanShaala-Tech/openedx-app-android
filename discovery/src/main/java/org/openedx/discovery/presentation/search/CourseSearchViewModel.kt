@@ -50,7 +50,10 @@ class CourseSearchViewModel(
         get() = _isUpdating
 
     private var nextPage: Int? = 1
-    private var currentQuery: String? = null
+    private val _currentQuery = MutableLiveData<String>("")
+    val searchQuery: LiveData<String>
+        get() = _currentQuery
+
     private val coursesList = mutableListOf<Course>()
     private var isLoading = false
 
@@ -68,10 +71,10 @@ class CourseSearchViewModel(
                 .debounce(SEARCH_DEBOUNCE)
                 .collect {
                     nextPage = 1
-                    currentQuery = it
+                    _currentQuery.value = it
                     coursesList.clear()
                     _uiState.value = CourseSearchUIState.Loading
-                    loadCoursesInternal(currentQuery!!, nextPage!!)
+                    loadCoursesInternal(_currentQuery.value!!, nextPage!!)
                 }
         }
     }
@@ -81,24 +84,25 @@ class CourseSearchViewModel(
             if (query.trim().isNotEmpty()) {
                 queryChannel.emit(query.trim())
             } else {
-                currentQuery = null
+                _currentQuery.value = ""
                 nextPage = 1
                 coursesList.clear()
-                _uiState.value = CourseSearchUIState.Courses(emptyList(), 0)
+                _uiState.value = CourseSearchUIState.Loading
+                loadCoursesInternal("", 1)
             }
         }
     }
 
     fun fetchMore() {
         if (!isLoading && nextPage != null) {
-            currentQuery?.let {
+            _currentQuery.value?.takeIf { it.isNotEmpty() }?.let {
                 loadCoursesInternal(it, nextPage!!)
             }
         }
     }
 
     fun updateSearchQuery() {
-        currentQuery?.let {
+        _currentQuery.value?.takeIf { it.isNotEmpty() }?.let {
             nextPage = 1
             isLoading = true
             _isUpdating.value = true

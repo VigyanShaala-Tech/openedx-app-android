@@ -38,6 +38,7 @@ import androidx.compose.material.pullrefresh.pullRefresh
 import androidx.compose.material.pullrefresh.rememberPullRefreshState
 import androidx.compose.material.rememberScaffoldState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.runtime.mutableIntStateOf
@@ -60,6 +61,7 @@ import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.semantics.testTagsAsResourceId
+import androidx.compose.ui.text.TextRange
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.text.style.TextAlign
@@ -121,12 +123,14 @@ class LogistrationFragment : Fragment() {
                 val uiMessage by viewModel.uiMessage.observeAsState()
                 val canLoadMore by viewModel.canLoadMore.observeAsState(false)
                 val refreshing by viewModel.isUpdating.observeAsState(false)
+                val searchQuery by viewModel.searchQuery.observeAsState("")
 
                 LogistrationScreen(
                     origin = arguments?.getString(ARG_ORIGIN),
                     windowSize = windowSize,
                     state = uiState!!,
                     uiMessage = uiMessage,
+                    searchQuery = searchQuery,
                     apiHostUrl = viewModel.apiHostUrl,
                     canLoadMore = canLoadMore,
                     refreshing = refreshing,
@@ -216,6 +220,7 @@ private fun LogistrationScreen(
     windowSize: WindowSize,
     state: DiscoveryUIState,
     uiMessage: UIMessage?,
+    searchQuery: String,
     apiHostUrl: String,
     canLoadMore: Boolean,
     refreshing: Boolean,
@@ -233,8 +238,18 @@ private fun LogistrationScreen(
     onBackClick: () -> Unit,
 ) {
     var textFieldValue by rememberSaveable(stateSaver = TextFieldValue.Saver) {
-        mutableStateOf(TextFieldValue(""))
+        mutableStateOf(TextFieldValue(searchQuery))
     }
+
+    LaunchedEffect(searchQuery) {
+        if (textFieldValue.text != searchQuery) {
+            textFieldValue = TextFieldValue(
+                text = searchQuery,
+                selection = TextRange(searchQuery.length)
+            )
+        }
+    }
+
     val scaffoldState = rememberScaffoldState()
     val scrollState = rememberLazyListState()
     val firstVisibleIndex = remember {
@@ -402,10 +417,15 @@ private fun LogistrationScreen(
                                         onSearchSubmit(textFieldValue.text)
                                     },
                                     onValueChanged = { text ->
+                                        val isClearing = textFieldValue.text.isNotEmpty() && text.text.isEmpty()
                                         textFieldValue = text
+                                        if (isClearing) {
+                                            onSearchSubmit("")
+                                        }
                                     },
                                     onClearValue = {
                                         textFieldValue = TextFieldValue("")
+                                        onSearchSubmit("")
                                     }
                                 )
                                 Spacer(Modifier.height(16.dp))
@@ -606,6 +626,7 @@ private fun LogistrationPreview() {
             onSignInClick = {},
             onRegisterClick = {},
             isRegistrationEnabled = true,
+            searchQuery = "",
             windowSize = WindowSize(WindowType.Medium, WindowType.Medium),
             state = DiscoveryUIState.Courses(
                 listOf(
@@ -645,6 +666,7 @@ private fun LogistrationRegistrationDisabledPreview() {
             onSignInClick = {},
             onRegisterClick = {},
             isRegistrationEnabled = false,
+            searchQuery = "",
             windowSize = WindowSize(WindowType.Medium, WindowType.Medium),
             state = DiscoveryUIState.Courses(
                 listOf(

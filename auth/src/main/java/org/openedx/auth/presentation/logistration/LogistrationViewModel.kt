@@ -63,6 +63,10 @@ class LogistrationViewModel(
     val isUpdating: LiveData<Boolean>
         get() = _isUpdating
 
+    private val _searchQuery = MutableLiveData<String>("")
+    val searchQuery: LiveData<String>
+        get() = _searchQuery
+
     val hasInternetConnection: Boolean
         get() = networkConnection.isOnline()
 
@@ -171,6 +175,12 @@ class LogistrationViewModel(
         searchTerm: String? = null,
         selected: Map<String, String> = emptyMap()
     ) {
+        _searchQuery.value = searchTerm ?: ""
+        if (searchTerm.isNullOrBlank() && selected.isEmpty()) {
+            page = 1
+            getCoursesList()
+            return
+        }
         viewModelScope.launch {
             try {
                 _uiState.value = DiscoveryUIState.Loading

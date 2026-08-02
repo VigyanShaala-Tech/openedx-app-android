@@ -150,3 +150,42 @@ This document outlines the recent changes made to the project to address build i
 - Switched the internal delimiter used for joining and splitting selected values from a comma (`,`) to a pipe (`|`).
 - Updated `CourseRegistrationScreen.kt` and `CourseRegistrationViewModel.kt` to ensure consistent use of the new delimiter in both the UI and the state management logic.
 - Ensured that submitted values are still correctly converted to a `List` before being sent to the API.
+
+### Registration Form "Other" Option Visibility
+**Issue:** When selecting "Other" or "Others" in a dropdown (select/multi-select) field in the registration form, the "Please specify" text input field was not appearing if the internal value of the option didn't exactly match "other" or "others" (even if the display label did).
+
+**Solution:**
+- Enhanced the `isOtherSelected` check in both `CourseRegistrationScreen.kt` and `CourseRegistrationViewModel.kt`.
+- The check now looks at both the internal `value` and the display `label` of the selected options.
+- If either the value or the label (case-insensitive) matches "other" or "others", the "Please specify" text field is displayed and treated as a required field if the parent field is required.
+
+## 14. Course Dashboard Navigation Fixes
+
+### Announcement and About this Course Redirection
+**Issue:** In the course dashboard "More" section, both "Announcement" and "About this Course" were incorrectly redirecting to the same "Announcements" screen.
+
+**Solution:**
+- Added `navigateToCourseDetail(fm, courseId)` method to `CourseRouter.kt`.
+- Implemented `navigateToCourseDetail` in `AppRouter.kt` to show the native `CourseDetailsFragment`.
+- Updated `CourseContainerFragment.kt` to call `navigateToCourseDetail` when "About this Course" is clicked, ensuring it now correctly shows the course overview, curriculum, instructors, and reviews.
+
+## 15. Search Query Persistence in Explore Courses
+
+### Persisting Search Query in ViewModels
+**Issue:** When searching for courses in "Explore Courses" (Logistration or Discovery), navigating to course details, and then pressing back, the search results remained but the query text in the search bar was cleared.
+
+**Solution:**
+- Updated `LogistrationViewModel.kt` and `CourseSearchViewModel.kt` to store the search query in a `MutableLiveData` property.
+- Updated `LogistrationFragment.kt` and `CourseSearchFragment.kt` to observe this `searchQuery` from the ViewModel.
+- Implemented a `LaunchedEffect` in both screens to synchronize the `TextFieldValue` of the search bar with the persisted query from the ViewModel.
+- This ensures that the search bar always reflects the current search state, even after fragment re-creation when navigating back from course details.
+
+## 16. Search Refresh on Query Clear
+
+### Automatic List Refresh
+**Issue:** Clearing the search query (either by clicking the 'X' button or manually deleting all text) did not refresh the course list to show the default/full results.
+
+**Solution:**
+- Updated `LogistrationFragment.kt` and `CourseSearchFragment.kt` to trigger a search update whenever the search query is cleared.
+- Modified `LogistrationViewModel.kt` to revert to the default discovery list when the search term is empty.
+- Modified `CourseSearchViewModel.kt` to fetch the full course list when the search query is cleared, instead of showing an empty screen.

@@ -44,6 +44,7 @@ import org.openedx.core.system.notifier.CourseNotifier
 import org.openedx.core.system.notifier.CourseStructureUpdated
 import org.openedx.core.worker.CalendarSyncScheduler
 import org.openedx.course.domain.interactor.CourseInteractor
+import org.openedx.course.domain.interactor.LeaderboardInteractor
 import org.openedx.course.presentation.CourseAnalytics
 import org.openedx.course.presentation.CourseAnalyticsEvent
 import org.openedx.course.presentation.CourseRouter
@@ -68,6 +69,7 @@ class CourseContainerViewModelTest {
     private val corePreferences = mockk<CorePreferences>()
     private val mockBitmap = mockk<Bitmap>()
     private val imageProcessor = mockk<ImageProcessor>()
+    private val leaderboardInteractor = mockk<LeaderboardInteractor>()
     private val courseRouter = mockk<CourseRouter>()
     private val courseApi = mockk<CourseApi>()
     private val calendarSyncScheduler = mockk<CalendarSyncScheduler>()
@@ -210,6 +212,9 @@ class CourseContainerViewModelTest {
         coEvery { interactor.getEnrollmentDetails(any()) } returns courseDetails
         every { imageProcessor.loadImage(any(), any(), any()) } returns Unit
         every { imageProcessor.applyBlur(any(), any()) } returns mockBitmap
+        coEvery { leaderboardInteractor.getCourseNotifications(any()) } returns mockk {
+            every { notifications } returns emptyList()
+        }
     }
 
     @After
@@ -226,6 +231,7 @@ class CourseContainerViewModelTest {
             "",
             config,
             interactor,
+            leaderboardInteractor,
             resourceManager,
             courseNotifier,
             networkConnection,
@@ -282,6 +288,7 @@ class CourseContainerViewModelTest {
             "",
             config,
             interactor,
+            leaderboardInteractor,
             resourceManager,
             courseNotifier,
             networkConnection,
@@ -335,6 +342,7 @@ class CourseContainerViewModelTest {
             "",
             config,
             interactor,
+            leaderboardInteractor,
             resourceManager,
             courseNotifier,
             networkConnection,
@@ -388,6 +396,7 @@ class CourseContainerViewModelTest {
             "",
             config,
             interactor,
+            leaderboardInteractor,
             resourceManager,
             courseNotifier,
             networkConnection,
@@ -417,6 +426,7 @@ class CourseContainerViewModelTest {
             "",
             config,
             interactor,
+            leaderboardInteractor,
             resourceManager,
             courseNotifier,
             networkConnection,

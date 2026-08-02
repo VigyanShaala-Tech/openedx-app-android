@@ -225,3 +225,12 @@ This document outlines the recent changes made to the project to address build i
 ### Quiz Score Chart Labels
 - Fixed an issue where the "Assignment" label in the Quiz Score chart was wrapping into two lines.
 - Increased the label width to `80.dp` and set `maxLines = 1` to ensure labels stay on a single line and align properly with the chart bars.
+
+## 23. Security Enhancements
+
+### Enhanced Password Complexity Validation
+- Improved password validation for both Account Creation (Sign Up) and Reset Password screens.
+- Replaced the simple length-only check with a comprehensive complexity requirement.
+- Passwords must now be at least 8 characters long and contain at least one uppercase letter, one lowercase letter, one numeric digit, and one special character.
+- Centralized validation logic in `Validators.isValidPassword` utility for consistency across the application.
+- Added descriptive error messages to guide users in creating secure passwords.

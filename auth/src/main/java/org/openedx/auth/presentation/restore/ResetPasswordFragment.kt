@@ -53,6 +53,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.FocusDirection
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.ComposeView
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
@@ -89,6 +90,7 @@ import org.openedx.core.ui.theme.OpenEdXTheme
 import org.openedx.core.ui.theme.appColors
 import org.openedx.core.ui.theme.appShapes
 import org.openedx.core.ui.theme.appTypography
+import org.openedx.core.utils.Validators
 import org.openedx.foundation.presentation.UIMessage
 import org.openedx.foundation.presentation.WindowSize
 import org.openedx.foundation.presentation.rememberWindowSize
@@ -172,7 +174,10 @@ private fun ResetPasswordScreen(
     val scrollState = rememberScrollState()
     var password by rememberSaveable { mutableStateOf("") }
     var confirmPassword by rememberSaveable { mutableStateOf("") }
+    var passwordError by rememberSaveable { mutableStateOf<String?>(null) }
+    var confirmPasswordError by rememberSaveable { mutableStateOf<String?>(null) }
     val keyboardController = LocalSoftwareKeyboardController.current
+    val context = LocalContext.current
 
     Scaffold(
         scaffoldState = scaffoldState,
@@ -290,18 +295,34 @@ private fun ResetPasswordScreen(
                                 PasswordTextField(
                                     modifier = Modifier.fillMaxWidth(),
                                     title = stringResource(id = authR.string.auth_new_password),
-                                    onValueChanged = { password = it },
+                                    onValueChanged = { 
+                                        password = it
+                                        passwordError = null
+                                    },
+                                    errorText = passwordError,
                                     imeAction = ImeAction.Next
                                 )
                                 Spacer(Modifier.height(16.dp))
                                 PasswordTextField(
                                     modifier = Modifier.fillMaxWidth(),
                                     title = stringResource(id = authR.string.auth_confirm_new_password),
-                                    onValueChanged = { confirmPassword = it },
+                                    onValueChanged = { 
+                                        confirmPassword = it
+                                        confirmPasswordError = null
+                                    },
+                                    errorText = confirmPasswordError,
                                     imeAction = ImeAction.Done,
                                     keyboardActions = {
                                         keyboardController?.hide()
-                                        if (password.isNotEmpty() && confirmPassword.isNotEmpty()) {
+                                        passwordError = when {
+                                            password.isEmpty() -> context.getString(authR.string.auth_error_empty_password)
+                                            !Validators.isValidPassword(password) -> context.getString(org.openedx.core.R.string.core_error_password_complexity)
+                                            else -> null
+                                        }
+                                        confirmPasswordError =
+                                            if (password != confirmPassword) context.getString(authR.string.auth_error_passwords_not_match) else null
+
+                                        if (passwordError == null && confirmPasswordError == null) {
                                             onResetButtonClick(password, confirmPassword)
                                         }
                                     }
@@ -315,7 +336,17 @@ private fun ResetPasswordScreen(
                                         text = stringResource(id = authR.string.auth_reset_password),
                                         onClick = {
                                             keyboardController?.hide()
-                                            onResetButtonClick(password, confirmPassword)
+                                            passwordError = when {
+                                                password.isEmpty() -> context.getString(authR.string.auth_error_empty_password)
+                                                !Validators.isValidPassword(password) -> context.getString(org.openedx.core.R.string.core_error_password_complexity)
+                                                else -> null
+                                            }
+                                            confirmPasswordError =
+                                                if (password != confirmPassword) context.getString(authR.string.auth_error_passwords_not_match) else null
+
+                                            if (passwordError == null && confirmPasswordError == null) {
+                                                onResetButtonClick(password, confirmPassword)
+                                            }
                                         }
                                     )
                                 }
@@ -447,6 +478,7 @@ fun PasswordTextField(
     onValueChanged: (String) -> Unit,
     imeAction: ImeAction = ImeAction.Next,
     keyboardActions: () -> Unit = {},
+    errorText: String? = null
 ) {
     var passwordVisible by rememberSaveable { mutableStateOf(false) }
     var text by rememberSaveable { mutableStateOf("") }
@@ -475,13 +507,23 @@ fun PasswordTextField(
                     Icon(imageVector = image, contentDescription = null)
                 }
             },
+            isError = errorText != null,
             colors = TextFieldDefaults.outlinedTextFieldColors(
                 textColor = MaterialTheme.appColors.textFieldText,
                 backgroundColor = MaterialTheme.appColors.textFieldBackground,
                 unfocusedBorderColor = MaterialTheme.appColors.textFieldBorder,
                 cursorColor = MaterialTheme.appColors.textFieldText,
+                errorBorderColor = MaterialTheme.appColors.error
             ),
             shape = MaterialTheme.appShapes.textFieldShape
         )
+        if (errorText != null) {
+            Text(
+                text = errorText,
+                color = MaterialTheme.appColors.error,
+                style = MaterialTheme.appTypography.labelSmall,
+                modifier = Modifier.padding(top = 4.dp)
+            )
+        }
     }
 }

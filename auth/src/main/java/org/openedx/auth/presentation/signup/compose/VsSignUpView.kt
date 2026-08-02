@@ -50,6 +50,7 @@ import org.openedx.core.ui.HandleUIMessage
 import org.openedx.core.ui.OpenEdXButton
 import org.openedx.core.ui.theme.appColors
 import org.openedx.core.ui.theme.appTypography
+import org.openedx.core.utils.Validators
 import org.openedx.foundation.presentation.UIMessage
 import org.openedx.foundation.presentation.WindowSize
 import org.openedx.core.R as coreR
@@ -386,8 +387,11 @@ fun VsSignUpView(
                             !android.util.Patterns.EMAIL_ADDRESS.matcher(email).matches() -> context.getString(R.string.auth_error_invalid_email)
                             else -> null
                         }
-                        passwordError =
-                            if (password.length < 8) context.getString(R.string.auth_error_password_length) else null
+                        passwordError = when {
+                            password.isEmpty() -> context.getString(R.string.auth_error_empty_password)
+                            !Validators.isValidPassword(password) -> context.getString(coreR.string.core_error_password_complexity)
+                            else -> null
+                        }
                         confirmPasswordError =
                             if (password != confirmPassword) context.getString(R.string.auth_error_passwords_not_match) else null
 

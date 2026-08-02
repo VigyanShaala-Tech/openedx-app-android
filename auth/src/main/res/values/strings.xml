@@ -80,7 +80,7 @@
     <string name="auth_i_agree_to">I agree to the VigyanShaala International </string>
     <string name="auth_terms_of_service">Terms of Service</string>
     <string name="auth_already_have_account">Already have an account? </string>
-    <string name="auth_sign_in_link">Sign in</string>
+    <string name="auth_sign_in_link">Login</string>
     <string name="auth_verify_email_title">Verify your email</string>
     <string name="auth_verify_email_desc">Please verify your email to login.</string>
     <string name="auth_gender">Gender</string>

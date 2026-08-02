@@ -423,7 +423,7 @@ fun VsSignUpView(
                     fontSize = 16.sp
                 )
                 Text(
-                    stringResource(id = R.string.auth_sign_in_link),
+                    " "+stringResource(id = R.string.auth_sign_in_link),
                     color = MaterialTheme.appColors.primary,
                     modifier = Modifier.clickable { onSignInClick() },
                     fontWeight = FontWeight.Bold,

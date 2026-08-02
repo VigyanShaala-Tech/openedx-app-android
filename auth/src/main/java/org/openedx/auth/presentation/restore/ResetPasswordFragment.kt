@@ -137,6 +137,10 @@ class ResetPasswordFragment : Fragment() {
                     },
                     onResetButtonClick = { p1, p2 ->
                         viewModel.resetPassword(token, p1, p2)
+                    },
+                    onSignInClick = {
+                        router.clearBackStack(requireActivity().supportFragmentManager)
+                        router.navigateToSignIn(requireActivity().supportFragmentManager, null, null)
                     }
                 )
             }
@@ -162,6 +166,7 @@ private fun ResetPasswordScreen(
     isButtonLoading: Boolean,
     onBackClick: () -> Unit,
     onResetButtonClick: (String, String) -> Unit,
+    onSignInClick: () -> Unit,
 ) {
     val scaffoldState = rememberScaffoldState()
     val scrollState = rememberScrollState()
@@ -424,7 +429,7 @@ private fun ResetPasswordScreen(
                                 OpenEdXButton(
                                     modifier = buttonWidth,
                                     text = stringResource(id = R.string.core_sign_in),
-                                    onClick = { onBackClick() }
+                                    onClick = { onSignInClick() }
                                 )
                             }
                         }

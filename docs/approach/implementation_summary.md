@@ -219,3 +219,9 @@ This document outlines the recent changes made to the project to address build i
 ### Stat Card Text Alignment
 - Fixed the alignment of labels ("Badges", "Certificates", etc.) in the `StatCard` component on the Achievements screen.
 - Added `textAlign = TextAlign.Center` to ensure that text is correctly centered underneath the numeric values even when the labels wrap to multiple lines.
+
+## 22. Course Progress UI Fixes
+
+### Quiz Score Chart Labels
+- Fixed an issue where the "Assignment" label in the Quiz Score chart was wrapping into two lines.
+- Increased the label width to `80.dp` and set `maxLines = 1` to ensure labels stay on a single line and align properly with the chart bars.

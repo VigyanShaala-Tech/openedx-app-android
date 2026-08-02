@@ -792,9 +792,9 @@ private fun QuizScoreChart(quizScores: List<DashboardProgress.QuizScoreData>) {
                         text = quiz.name,
                         style = MaterialTheme.appTypography.bodySmall,
                         color = MaterialTheme.appColors.textSecondary,
-                        modifier = Modifier.width(60.dp),
+                        modifier = Modifier.width(80.dp),
                         textAlign = TextAlign.Center,
-                        maxLines = 2
+                        maxLines = 1
                     )
                 }
             }

@@ -61,7 +61,7 @@ fun VsSignUpView(
     uiState: VsSignUpUIState,
     uiMessage: UIMessage?,
     onBackClick: () -> Unit,
-    onRegisterClick: (String, String, String, String, String) -> Unit,
+    onRegisterClick: (String, String, String, String, String, Boolean, Boolean) -> Unit,
     onSocialRegisterClick: (AuthType) -> Unit,
     onSignInClick: () -> Unit,
     onValidationError: (String) -> Unit,
@@ -405,7 +405,7 @@ fun VsSignUpView(
                             if (selectedGender.isBlank()) {
                                 onValidationError(context.getString(R.string.auth_error_select_gender))
                             } else if (isAgreed) {
-                                onRegisterClick(email, fullName, password, selectedRole, selectedGender)
+                                onRegisterClick(email, fullName, password, selectedRole, selectedGender, isAgreed, isAgreed)
                             } else {
                                 onValidationError(context.getString(R.string.auth_error_agree_tos))
                             }

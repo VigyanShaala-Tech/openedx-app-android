@@ -60,8 +60,8 @@ class VsSignUpFragment : Fragment() {
                             activity?.supportFragmentManager?.popBackStackImmediate()
                         }
                     },
-                    onRegisterClick = { email, name, password, role, gender ->
-                        viewModel.register(email, name, password, role, gender, signUpUiState.socialAuth)
+                    onRegisterClick = { email, name, password, role, gender, termsOfService, honorCode ->
+                        viewModel.register(email, name, password, role, gender, termsOfService, honorCode, signUpUiState.socialAuth)
                     },
                     onSocialRegisterClick = { authType ->
                         signUpViewModel.socialAuth(this@VsSignUpFragment, authType)

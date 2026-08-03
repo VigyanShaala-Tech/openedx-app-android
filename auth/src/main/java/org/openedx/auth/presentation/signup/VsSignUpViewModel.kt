@@ -77,6 +77,8 @@ class VsSignUpViewModel(
         password: String,
         userRole: String,
         gender: String,
+        termsOfService: Boolean,
+        honorCode: Boolean,
         socialAuth: SocialAuthResponse? = null
     ) {
         _uiState.update { it.copy(isButtonLoading = true) }
@@ -93,8 +95,8 @@ class VsSignUpViewModel(
                     ApiConstants.NAME to name,
                     "username" to username,
                     ApiConstants.EMAIL to email,
-                    ApiConstants.RegistrationFields.HONOR_CODE to "true",
-                    "terms_of_service" to "true",
+                    ApiConstants.RegistrationFields.HONOR_CODE to honorCode.toString(),
+                    "terms_of_service" to termsOfService.toString(),
                     "user_role" to userRole,
                     "gender" to gender
                 )
@@ -123,8 +125,8 @@ class VsSignUpViewModel(
                     name = name,
                     password = if (socialAuth != null) null else password,
                     phoneNumber = null,
-                    termsOfService = true,
-                    honorCode = true,
+                    termsOfService = termsOfService,
+                    honorCode = honorCode,
                     userRole = userRole.takeIf { it.isNotBlank() },
                     username = username,
                     verificationKey = null,

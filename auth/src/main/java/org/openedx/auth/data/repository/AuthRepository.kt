@@ -78,12 +78,16 @@ class AuthRepository(
             password = body.password,
             phone_number = body.phoneNumber,
             terms_of_service = body.termsOfService,
+            honor_code = body.honorCode,
             user_role = body.userRole,
             username = body.username,
             verification_key = body.verificationKey,
             gender = body.gender,
             social_auth_provider = body.socialAuthProvider,
-            total_registration_time = body.totalRegistrationTime
+            total_registration_time = body.totalRegistrationTime,
+            access_token = body.accessToken,
+            provider = body.provider,
+            client_id = body.clientId
         )
     }
 

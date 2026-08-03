@@ -19,12 +19,14 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.Search
+import androidx.compose.material.icons.filled.Clear
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.style.TextAlign
@@ -430,6 +432,7 @@ fun RegistrationFieldItem(
             isMultiSelect = field.type == "multi-select",
             maxSelections = field.maxSelections,
             initialValue = currentValue,
+            allowOther = field.allowOther,
             onDismiss = { showDialog = false },
             onSelect = { 
                 onValueChange(it)
@@ -446,6 +449,7 @@ fun SelectionDialog(
     isMultiSelect: Boolean,
     maxSelections: Int,
     initialValue: String,
+    allowOther: Boolean = false,
     onDismiss: () -> Unit,
     onSelect: (String) -> Unit
 ) {
@@ -488,8 +492,18 @@ fun SelectionDialog(
                     value = searchQuery,
                     onValueChange = { searchQuery = it },
                     modifier = Modifier.fillMaxWidth(),
-                    placeholder = { Text(text = "Search...") },
+                    placeholder = { Text(text = stringResource(id = org.openedx.core.R.string.core_search)) },
                     leadingIcon = { Icon(imageVector = Icons.Default.Search, contentDescription = null) },
+                    trailingIcon = {
+                        if (searchQuery.isNotEmpty()) {
+                            IconButton(onClick = { searchQuery = "" }) {
+                                Icon(
+                                    imageVector = Icons.Default.Clear,
+                                    contentDescription = stringResource(id = org.openedx.core.R.string.core_clear_search)
+                                )
+                            }
+                        }
+                    },
                     shape = RoundedCornerShape(12.dp)
                 )
 
@@ -529,6 +543,32 @@ fun SelectionDialog(
                             )
                         }
                         Divider(color = Color.LightGray)
+                    }
+                    if (filteredOptions.isEmpty()) {
+                        item {
+                            Column(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .padding(vertical = 32.dp),
+                                horizontalAlignment = Alignment.CenterHorizontally
+                            ) {
+                                Text(
+                                    text = stringResource(id = org.openedx.core.R.string.core_no_results_found),
+                                    style = MaterialTheme.appTypography.bodyMedium,
+                                    color = Color.Gray
+                                )
+                                if (allowOther) {
+                                    Spacer(modifier = Modifier.height(16.dp))
+                                    Button(
+                                        onClick = { onSelect("other") },
+                                        colors = ButtonDefaults.buttonColors(backgroundColor = MaterialTheme.appColors.primary),
+                                        shape = RoundedCornerShape(8.dp)
+                                    ) {
+                                        Text(text = stringResource(id = org.openedx.core.R.string.core_other), color = Color.White)
+                                    }
+                                }
+                            }
+                        }
                     }
                 }
                 

@@ -220,4 +220,7 @@
     <string name="core_explore_other_parts_when_reconnect_or_download">Explore other parts of this course or download this when you reconnect.</string>
     <string name="core_authorization">Authorization</string>
     <string name="core_authorization_request">Please enter the system to continue with course enrollment.</string>
+    <string name="core_clear_search">Clear search</string>
+    <string name="core_other">Other</string>
+    <string name="core_no_results_found">No results found</string>
 </resources>

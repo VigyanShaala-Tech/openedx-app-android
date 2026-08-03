@@ -76,12 +76,16 @@ interface AuthApi {
         @Field("password") password: String?,
         @Field("phone_number") phone_number: String?,
         @Field("terms_of_service") terms_of_service: Boolean?,
+        @Field("honor_code") honor_code: Boolean?,
         @Field("user_role") user_role: String?,
         @Field("username") username: String?,
         @Field("verification_key") verification_key: String?,
         @Field("gender") gender: String?,
         @Field("social_auth_provider") social_auth_provider: String?,
         @Field("total_registration_time") total_registration_time: String?,
+        @Field("access_token") access_token: String?,
+        @Field("provider") provider: String?,
+        @Field("client_id") client_id: String?,
     ): retrofit2.Response<Unit>
 
     @FormUrlEncoded

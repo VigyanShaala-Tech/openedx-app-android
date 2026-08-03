@@ -20,6 +20,7 @@ import org.openedx.foundation.extension.isInternetError
 import org.openedx.foundation.presentation.BaseViewModel
 import org.openedx.foundation.presentation.UIMessage
 import org.openedx.foundation.system.ResourceManager
+import java.io.File
 import org.openedx.core.R as coreR
 
 class CourseRegistrationViewModel(
@@ -42,6 +43,9 @@ class CourseRegistrationViewModel(
 
     private val _eligibilityErrors = MutableStateFlow<Map<String, String>>(emptyMap())
     val eligibilityErrors = _eligibilityErrors.asStateFlow()
+
+    private val _isUploading = MutableStateFlow(false)
+    val isUploading = _isUploading.asStateFlow()
 
     init {
         getEnrollmentForm()
@@ -167,10 +171,28 @@ class CourseRegistrationViewModel(
 
     fun updateAnswer(field: EnrollmentRegistrationField, answer: String) {
         val fieldName = field.name
-        updateAnswer(fieldName, answer)
+        
+        if (field.type == "file" && answer.isNotEmpty()) {
+            val file = File(answer)
+            if (file.exists()) {
+                _isUploading.value = true
+                viewModelScope.launch {
+                    try {
+                        interactor.uploadFile(formId, fieldName, file)
+                        updateAnswer(fieldName, file.name)
+                    } catch (e: Exception) {
+                        handleError(e)
+                    } finally {
+                        _isUploading.value = false
+                    }
+                }
+            }
+        } else {
+            updateAnswer(fieldName, answer)
+        }
         
         if (!isOtherSelected(field, answer)) {
-            _answers.update { it - (fieldName) }
+            _answers.update { it - (fieldName + "_other") }
         }
 
         if (field.isEligibilityField && answer.isNotEmpty()) {

@@ -1,6 +1,7 @@
 package org.openedx.core.data.api
 
 import okhttp3.MultipartBody
+import okhttp3.RequestBody
 import okhttp3.ResponseBody
 import org.openedx.core.data.model.AnnouncementModel
 import org.openedx.core.data.model.BlocksCompletionBody
@@ -31,9 +32,11 @@ import retrofit2.http.GET
 import retrofit2.http.Header
 import retrofit2.http.Multipart
 import retrofit2.http.POST
+import retrofit2.http.PUT
 import retrofit2.http.Part
 import retrofit2.http.Path
 import retrofit2.http.Query
+import retrofit2.http.Url
 
 interface CourseApi {
 
@@ -179,8 +182,16 @@ interface CourseApi {
     @GET("/api/v1/options/rankings/")
     suspend fun getRankingOptions(): ResponseBody
 
-    @GET("/api/v1/get/notifications/course/{course_id}/")
+    @POST("/api/v1/get/notifications/course/{course_id}/")
     suspend fun getCourseNotifications(@Path("course_id") courseId: String): CourseNotificationsResponse
+
+    @Multipart
+    @POST("/api/v1/cohort-registration/{form_id}/upload/")
+    suspend fun uploadFile(
+        @Path("form_id") formId: String,
+        @Part("field_key") fieldKey: RequestBody,
+        @Part file: MultipartBody.Part
+    ): ResponseBody
 
     @GET("/api/v1/course/{course_id}/ranking/")
     suspend fun getUserRanking(@Path("course_id") courseId: String): UserRankingResponse

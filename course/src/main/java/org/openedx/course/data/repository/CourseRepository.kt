@@ -3,7 +3,10 @@ package org.openedx.course.data.repository
 import com.google.gson.JsonParser
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
+import okhttp3.MediaType.Companion.toMediaTypeOrNull
 import okhttp3.MultipartBody
+import okhttp3.RequestBody.Companion.asRequestBody
+import okhttp3.RequestBody.Companion.toRequestBody
 import org.openedx.core.ApiConstants
 import org.openedx.core.data.api.CourseApi
 import org.openedx.core.data.model.BlocksCompletionBody
@@ -33,6 +36,7 @@ import org.openedx.core.exception.NoCachedDataException
 import org.openedx.core.extension.channelFlowWithAwait
 import org.openedx.core.module.db.DownloadDao
 import org.openedx.core.system.connection.NetworkConnection
+import java.io.File
 import java.net.URLDecoder
 import java.nio.charset.StandardCharsets
 
@@ -330,6 +334,13 @@ class CourseRepository(
 
     suspend fun submitRegistration(formId: String, body: Map<String, Any>): RegistrationSubmitResponse {
         return api.submitRegistration(formId, body)
+    }
+
+    suspend fun uploadFile(formId: String, fieldKey: String, file: File) {
+        val requestFile = file.asRequestBody("multipart/form-data".toMediaTypeOrNull())
+        val filePart = MultipartBody.Part.createFormData("file", file.name, requestFile)
+        val fieldKeyPart = fieldKey.toRequestBody("text/plain".toMediaTypeOrNull())
+        api.uploadFile(formId, fieldKeyPart, filePart)
     }
 
     suspend fun getCourseNotifications(courseId: String): NotificationListResponse {

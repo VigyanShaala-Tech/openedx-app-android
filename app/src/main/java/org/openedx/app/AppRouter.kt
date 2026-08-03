@@ -108,7 +108,7 @@ class AppRouter :
         name: String?
     ) {
         // Comment out current signup screen redirection and redirect to new created signup screen
-        // replaceFragmentWithBackStack(fm, SignUpFragment.newInstance(courseId, infoType))
+//         replaceFragmentWithBackStack(fm, SignUpFragment.newInstance(courseId, infoType))
         replaceFragmentWithBackStack(fm, VsSignUpFragment.newInstance(courseId, infoType, email, name))
     }
 

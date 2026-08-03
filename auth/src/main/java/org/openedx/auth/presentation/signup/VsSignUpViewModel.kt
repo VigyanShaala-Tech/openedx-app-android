@@ -14,6 +14,7 @@ import org.openedx.auth.domain.interactor.AuthInteractor
 import org.openedx.auth.domain.model.SocialAuthResponse
 import org.openedx.auth.presentation.AuthAnalytics
 import org.openedx.auth.presentation.AuthRouter
+import org.openedx.core.ApiConstants
 import org.openedx.core.config.Config
 import org.openedx.core.data.storage.CorePreferences
 import org.openedx.core.system.EdxError
@@ -81,6 +82,32 @@ class VsSignUpViewModel(
         _uiState.update { it.copy(isButtonLoading = true) }
         viewModelScope.launch {
             try {
+                val username = if (socialAuth != null) {
+                    email.substringBefore("@")
+                } else {
+                    email
+                }
+
+                // Validation
+                val mapFields = mutableMapOf(
+                    ApiConstants.NAME to name,
+                    "username" to username,
+                    ApiConstants.EMAIL to email,
+                    ApiConstants.RegistrationFields.HONOR_CODE to "true",
+                    "terms_of_service" to "true",
+                    "user_role" to userRole,
+                    "gender" to gender
+                )
+                val validationFields = interactor.validateRegistrationFields(mapFields)
+                if (validationFields.hasValidationError()) {
+                    val error = validationFields.validationResult.values.firstOrNull { it.isNotBlank() }
+                    if (error != null) {
+                        _uiMessage.emit(UIMessage.SnackBarMessage(error))
+                        _uiState.update { it.copy(isButtonLoading = false) }
+                        return@launch
+                    }
+                }
+
                 val totalTime = (System.currentTimeMillis() - registrationStartTime) / 1000.0
                 val socialProvider = socialAuth?.let {
                     when (it.authType) {
@@ -90,12 +117,6 @@ class VsSignUpViewModel(
                         else -> it.authType.methodName
                     }
                 }
-                
-                val username = if (socialAuth != null) {
-                    email.substringBefore("@")
-                } else {
-                    email
-                }
 
                 val body = VsRegisterRequest(
                     email = email,
@@ -103,12 +124,16 @@ class VsSignUpViewModel(
                     password = if (socialAuth != null) null else password,
                     phoneNumber = null,
                     termsOfService = true,
+                    honorCode = true,
                     userRole = userRole.takeIf { it.isNotBlank() },
                     username = username,
                     verificationKey = null,
                     gender = gender,
-                    socialAuthProvider = socialProvider,
-                    totalRegistrationTime = String.format(Locale.US, "%.3f", totalTime)
+                    socialAuthProvider = if (socialAuth != null) null else socialProvider,
+                    totalRegistrationTime = String.format(Locale.US, "%.3f", totalTime),
+                    accessToken = socialAuth?.accessToken,
+                    provider = socialAuth?.authType?.postfix,
+                    clientId = config.getOAuthClientId()
                 )
 
                 interactor.registerVs(body)

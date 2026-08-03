@@ -4,6 +4,7 @@ import org.openedx.core.data.model.RegistrationSubmitResponse
 import org.openedx.core.domain.model.EligibilityResult
 import org.openedx.core.domain.model.EnrollmentForm
 import org.openedx.course.data.repository.CourseRepository
+import java.io.File
 
 class CourseRegistrationInteractor(
     private val repository: CourseRepository
@@ -22,5 +23,9 @@ class CourseRegistrationInteractor(
 
     suspend fun submitRegistration(formId: String, body: Map<String, Any>): RegistrationSubmitResponse {
         return repository.submitRegistration(formId, body)
+    }
+
+    suspend fun uploadFile(formId: String, fieldKey: String, file: File) {
+        repository.uploadFile(formId, fieldKey, file)
     }
 }

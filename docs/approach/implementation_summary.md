@@ -183,6 +183,32 @@ This document outlines the recent changes made to the project to address build i
 - Fixed an issue where the scroll position was maintained when transitioning between steps in the registration form.
 - Added a `LaunchedEffect` to reset the scroll position to the top whenever the `currentStep` changes, ensuring a consistent starting point for each page.
 
+### Registration Form Dropdown Improvements
+**Issue:** Users were getting stuck in searchable dropdowns (like University/College name) when their search returned no results, as there was no easy way to clear the search or select an "Other" option if the desired item was missing.
+
+**Solution:**
+- Added a "Clear" (X) icon to the search field in the `SelectionDialog` to allow users to quickly reset their search.
+- Implemented a "No results found" state in the dropdown list when a search query doesn't match any options.
+- If the registration field is configured to `allowOther`, an "Other" button is now displayed within the "No results found" state. Clicking this button automatically selects the "other" value, allowing users to proceed by manually entering their information in the "Please specify" field.
+
+### New Enrollment Journey Implementation
+**Issue:** The enrollment journey was updated with new API endpoints and requirements, including a new course catalog endpoint with `cohort_form_id`, explicit form retrieval, prefilling, eligibility checks, and file upload support.
+
+**Solution:**
+- **Course API Updates**: Updated `CourseApi.kt` with new endpoints:
+    - `GET /api/v1/cohort-registration/{form_id}/form/` for form retrieval.
+    - `POST /api/v1/cohort-registration/{form_id}/prefill/` for prefilling data.
+    - `POST /api/v1/cohort-registration/{form_id}/check-eligibility/` for eligibility validation.
+    - `POST /api/v1/cohort-registration/{form_id}/prepare-auth/` for submission.
+    - `POST /api/v1/cohort-registration/{form_id}/upload/` (Multipart) for file uploads.
+- **Repository and Interactor**: Implemented corresponding methods in `CourseRepository.kt` and `CourseRegistrationInteractor.kt`. The `uploadFile` method handles the creation of `MultipartBody.Part` and `RequestBody` for file transmission.
+- **ViewModel Logic**:
+    - Updated `CourseRegistrationViewModel.kt` to trigger file uploads automatically when a "file" type field is updated.
+    - Added `isUploading` state to track and display file upload progress.
+    - Refined the "Other" option logic to correctly manage `_other` suffix in submitted answers.
+    - Ensured `cohort_form_id` from the updated catalog API is used to fetch the correct registration form.
+- **Data Models**: Updated `CourseDetails` to include `cohort_form_id`.
+
 ## 18. Course Dashboard Navigation Fixes
 
 ### Announcement and About this Course Redirection

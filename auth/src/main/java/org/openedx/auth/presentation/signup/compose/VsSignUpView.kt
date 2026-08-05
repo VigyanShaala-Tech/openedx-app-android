@@ -41,7 +41,6 @@ import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import org.openedx.auth.R
 import org.openedx.auth.data.model.AuthType
 import org.openedx.auth.presentation.signup.VsSignUpUIState
@@ -149,16 +148,14 @@ fun VsSignUpView(
                 text = stringResource(id = R.string.auth_create_account_title),
                 style = MaterialTheme.appTypography.headlineSmall.copy(
                     fontWeight = FontWeight.Bold,
-                    color = MaterialTheme.appColors.textDark,
-                    fontSize = 32.sp
+                    color = MaterialTheme.appColors.textDark
                 )
             )
             Spacer(modifier = Modifier.height(8.dp))
             Text(
                 text = stringResource(id = R.string.auth_join_vigyanshaala),
                 style = MaterialTheme.appTypography.bodyMedium.copy(
-                    color = MaterialTheme.appColors.textSecondary,
-                    fontSize = 16.sp
+                    color = MaterialTheme.appColors.textSecondary
                 )
             )
 
@@ -185,7 +182,7 @@ fun VsSignUpView(
                     stringResource(id = R.string.auth_or),
                     modifier = Modifier.padding(horizontal = 16.dp),
                     color = MaterialTheme.appColors.textFieldHint,
-                    fontSize = 14.sp
+                    style = MaterialTheme.appTypography.labelMedium
                 )
                 Divider(modifier = Modifier.weight(1f), color = MaterialTheme.appColors.divider)
             }
@@ -346,8 +343,7 @@ fun VsSignUpView(
                 Text(
                     text = annotatedText,
                     style = MaterialTheme.appTypography.bodyMedium.copy(
-                        color = MaterialTheme.appColors.textSecondary,
-                        fontSize = 14.sp
+                        color = MaterialTheme.appColors.textSecondary
                     ),
                     modifier = Modifier
                         .weight(1f)
@@ -430,14 +426,14 @@ fun VsSignUpView(
                 Text(
                     stringResource(id = R.string.auth_already_have_account),
                     color = MaterialTheme.appColors.textSecondary,
-                    fontSize = 16.sp
+                    style = MaterialTheme.appTypography.bodyLarge
                 )
                 Text(
                     " "+stringResource(id = R.string.auth_sign_in_link),
                     color = MaterialTheme.appColors.primary,
                     modifier = Modifier.clickable { onSignInClick() },
                     fontWeight = FontWeight.Bold,
-                    fontSize = 16.sp
+                    style = MaterialTheme.appTypography.bodyLarge
                 )
             }
         }
@@ -512,7 +508,7 @@ fun VsSignUpInputField(
                 Text(
                     text = placeholder,
                     color = MaterialTheme.appColors.textFieldHint,
-                    fontSize = 15.sp
+                    style = MaterialTheme.appTypography.bodyMedium
                 )
             },
             trailingIcon = if (isPassword) {
@@ -580,7 +576,7 @@ fun VsRoleButton(
                 text = text,
                 color = if (isSelected) selectedColor else MaterialTheme.appColors.textSecondary,
                 fontWeight = if (isSelected) FontWeight.SemiBold else FontWeight.Normal,
-                fontSize = 14.sp,
+                style = MaterialTheme.appTypography.bodySmall,
                 textAlign = TextAlign.Center
             )
         }

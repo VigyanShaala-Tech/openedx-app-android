@@ -249,7 +249,14 @@ class CourseUnitContainerViewModel(
         val block = _descendantsBlocks.value.getOrNull(currentIndex) ?: blocks[currentVerticalIndex]
         _currentBlock.value = block
         _hierarchyPath.value = buildHierarchyPath(block)
+        markTopicCompleted(block.id)
         return block
+    }
+
+    private fun markTopicCompleted(blockId: String) {
+        viewModelScope.launch {
+            interactor.markTopicCompleted(courseId, blockId)
+        }
     }
 
     fun moveToNextBlock(): Block? {

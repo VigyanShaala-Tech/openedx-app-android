@@ -288,3 +288,16 @@ This document outlines the recent changes made to the project to address build i
 - Added logic in `NewDashboardViewModel.kt` to check the enrollment status upon loading the dashboard.
 - If a user has no courses in progress and no completed courses, the app now automatically triggers a navigation event to the Discovery section.
 - This ensures that new users or users with empty dashboards are immediately presented with course options to explore, improving the onboarding experience.
+
+## 27. Topic Completion and UI Architectural Refactoring
+
+### Topic Completion API
+- Implemented `POST /api/v1/courses/{course_id}/xblock/{block_id}/mark_completed` in `CourseApi.kt`.
+- Updated `CourseRepository.kt` and `CourseInteractor.kt` to support marking units as completed.
+- Integrated automatic completion triggering in `CourseUnitContainerViewModel.kt` whenever a course unit is opened.
+
+### UI Refactoring for Consistency
+- Refactored `VsSignUpView.kt` and `SignInView.kt` to strictly follow the project's design system.
+- Replaced all hardcoded colors, typography, and dimensions with theme-aware properties from `MaterialTheme.appColors` and `MaterialTheme.appTypography`.
+- Centralized remaining hardcoded strings in the Auth module to `strings.xml`.
+- Improved maintainability and Dark Mode support for the authentication screens.

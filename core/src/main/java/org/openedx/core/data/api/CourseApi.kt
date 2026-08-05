@@ -204,4 +204,10 @@ interface CourseApi {
         @Query("range_type") rangeType: String,
         @Query("university") university: String? = null
     ): LeaderboardResponse
+
+    @POST("/api/v1/courses/{course_id}/xblock/{block_id}/mark_completed")
+    suspend fun markTopicCompleted(
+        @Path("course_id") courseId: String,
+        @Path("block_id") blockId: String
+    ): ResponseBody
 }

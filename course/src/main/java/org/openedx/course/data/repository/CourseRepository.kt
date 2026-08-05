@@ -522,4 +522,12 @@ class CourseRepository(
             LeaderboardList(emptyList(), null)
         }
     }
+
+    suspend fun markTopicCompleted(courseId: String, blockId: String) {
+        try {
+            api.markTopicCompleted(courseId, blockId)
+        } catch (e: Exception) {
+            e.printStackTrace()
+        }
+    }
 }

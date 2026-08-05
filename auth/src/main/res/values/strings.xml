@@ -94,4 +94,10 @@
     <string name="auth_error_passwords_not_match">Passwords do not match</string>
     <string name="auth_error_select_gender">Please select your gender</string>
     <string name="auth_error_agree_tos">Please agree to the Terms of Service</string>
+    <string name="auth_sign_up">Sign up</string>
+    <string name="auth_dont_have_account">Don\'t have an account? </string>
+    <string name="auth_whats_app_number">WhatsApp Number</string>
+    <string name="auth_enter_whats_app_number">Enter WhatsApp number</string>
+    <string name="auth_invalid_mobile_number">Please enter a valid mobile number</string>
+    <string name="auth_invalid_otp">Please enter a valid OTP</string>
 </resources>

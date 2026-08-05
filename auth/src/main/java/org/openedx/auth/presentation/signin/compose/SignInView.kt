@@ -121,19 +121,17 @@ internal fun LoginScreen(
         ) {
             Spacer(modifier = Modifier.height(24.dp))
             Text(
-                text = "Log In",
+                text = stringResource(id = coreR.string.core_log_in),
                 style = MaterialTheme.appTypography.headlineSmall.copy(
                     fontWeight = FontWeight.Bold,
-                    color = MaterialTheme.appColors.textDark,
-                    fontSize = 32.sp
+                    color = MaterialTheme.appColors.textDark
                 )
             )
             Spacer(modifier = Modifier.height(8.dp))
             Text(
-                text = "Welcome back! Log in to access your courses.",
+                text = stringResource(id = R.string.auth_welcome_back),
                 style = MaterialTheme.appTypography.bodyMedium.copy(
-                    color = MaterialTheme.appColors.textSecondary,
-                    fontSize = 16.sp
+                    color = MaterialTheme.appColors.textSecondary
                 )
             )
 
@@ -161,7 +159,7 @@ internal fun LoginScreen(
                     )
                     Spacer(modifier = Modifier.width(12.dp))
                     Text(
-                        text = "Continue with Google",
+                        text = stringResource(id = R.string.auth_continue_google),
                         style = MaterialTheme.appTypography.bodyLarge.copy(
                             fontWeight = FontWeight.Medium,
                             color = MaterialTheme.appColors.textDark
@@ -184,16 +182,14 @@ internal fun LoginScreen(
                 horizontalArrangement = Arrangement.Center
             ) {
             Text(
-                    "Don't have an account? ",
-                    color = MaterialTheme.appColors.textSecondary,
-                    fontSize = 16.sp
+                    stringResource(id = R.string.auth_dont_have_account),
+                    color = MaterialTheme.appColors.textSecondary
                 )
                 Text(
-                    "Sign up",
+                    stringResource(id = R.string.auth_sign_up),
                     color = MaterialTheme.appColors.primary,
                     modifier = Modifier.clickable { onEvent(AuthEvent.RegisterClick) },
-                    fontWeight = FontWeight.Bold,
-                    fontSize = 16.sp
+                    fontWeight = FontWeight.Bold
                 )
             }
         }
@@ -214,13 +210,13 @@ private fun AuthForm(
     Column(horizontalAlignment = Alignment.CenterHorizontally) {
         if (!state.isBrowserLoginEnabled) {
             SignInInputField(
-                label = "Email Address",
+                label = stringResource(id = R.string.auth_email),
                 value = login,
                 onValueChange = {
                     login = it
                     isEmailError = false
                 },
-                placeholder = "kalpna.chawla@example.com",
+                placeholder = stringResource(id = R.string.auth_email_placeholder),
                 leadingIcon = Icons.Default.PersonOutline,
                 errorText = if (isEmailError) stringResource(id = R.string.auth_error_empty_username_email) else null,
                 imeAction = ImeAction.Next
@@ -228,13 +224,13 @@ private fun AuthForm(
 
             Spacer(modifier = Modifier.height(18.dp))
             SignInInputField(
-                label = "Password",
+                label = stringResource(id = coreR.string.core_password),
                 value = password,
                 onValueChange = {
                     password = it
                     isPasswordError = false
                 },
-                placeholder = "Enter your password",
+                placeholder = stringResource(id = coreR.string.core_password),
                 isPassword = true,
                 errorText = if (isPasswordError) stringResource(id = R.string.auth_error_empty_password) else null,
                 imeAction = ImeAction.Done,
@@ -314,7 +310,7 @@ private fun AuthMethodTabs(
             )
             ToggleItem(
                 modifier = Modifier.weight(1f).fillMaxHeight(),
-                text = "Mobile",
+                text = stringResource(id = coreR.string.core_mobile),
                 icon = Icons.Filled.PhoneAndroid,
                 isSelected = !isEmailSelected,
                 onClick = onSelectOtp
@@ -468,28 +464,28 @@ private fun MobileOtpSection(
 ) {
     Column(modifier = Modifier.fillMaxWidth()) {
         SignInInputField(
-            label = "WhatsApp Number",
+            label = stringResource(id = R.string.auth_whats_app_number),
             value = mobile,
             onValueChange = {
                 val raw = it.trim()
                 val normalized = if (raw.startsWith("+91")) raw else "+91${raw.removePrefix("+")}"
                 onMobileChanged(normalized)
             },
-            placeholder = "Enter WhatsApp number",
+            placeholder = stringResource(id = R.string.auth_enter_whats_app_number),
             leadingIcon = Icons.Default.PhoneAndroid,
-            errorText = if (isMobileError) "Please enter a valid mobile number" else null,
+            errorText = if (isMobileError) stringResource(id = R.string.auth_invalid_mobile_number) else null,
             imeAction = ImeAction.Next
         )
 
         if (isOtpSent) {
             Spacer(modifier = Modifier.height(18.dp))
             SignInInputField(
-                label = "OTP",
+                label = stringResource(id = R.string.auth_enter_otp),
                 value = otp,
                 onValueChange = onOtpChanged,
-                placeholder = "Enter OTP",
+                placeholder = stringResource(id = R.string.auth_enter_otp_placeholder),
                 leadingIcon = Icons.Default.PhonelinkLock,
-                errorText = if (isOtpError) "Please enter a valid OTP" else null,
+                errorText = if (isOtpError) stringResource(id = R.string.auth_invalid_otp) else null,
                 imeAction = ImeAction.Done
             )
             Spacer(modifier = Modifier.height(8.dp))

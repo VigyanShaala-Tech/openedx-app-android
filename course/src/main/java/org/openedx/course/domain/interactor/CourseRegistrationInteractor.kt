@@ -25,7 +25,7 @@ class CourseRegistrationInteractor(
         return repository.submitRegistration(formId, body)
     }
 
-    suspend fun uploadFile(formId: String, fieldKey: String, file: File) {
-        repository.uploadFile(formId, fieldKey, file)
+    suspend fun uploadFile(formId: String, fieldKey: String, courseId: String, email: String, file: File) {
+        repository.uploadFile(formId, fieldKey, courseId, email, file)
     }
 }

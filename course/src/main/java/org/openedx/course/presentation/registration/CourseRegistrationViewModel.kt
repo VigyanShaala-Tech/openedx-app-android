@@ -86,38 +86,6 @@ class CourseRegistrationViewModel(
                 // Check for full_name and email to prefill from user profile if not in prefill data
                 val allFields = enrollmentForm.categories.flatMap { it.fields }
                 
-                // Logic to handle prefilled data not in options
-                processedAnswers.forEach { (key, value) ->
-                    val field = allFields.find { it.name == key }
-                    if (field != null && (field.type == "select" || field.type == "multi-select")) {
-                        val options = parseOptions(field)
-                        val selectedValues = value.split("|").filter { it.isNotEmpty() }
-                        val validValues = mutableListOf<String>()
-                        var otherValue: String? = null
-                        
-                        selectedValues.forEach { valId ->
-                            if (options.any { it.value == valId }) {
-                                validValues.add(valId)
-                            } else {
-                                otherValue = valId
-                            }
-                        }
-                        
-                        if (otherValue != null) {
-                            val otherOption = options.find { 
-                                it.value.lowercase() == "other" || it.value.lowercase() == "others" || 
-                                        it.value.lowercase() == "__other__" ||
-                                        it.label.lowercase() == "other" || it.label.lowercase() == "others"
-                            }
-                            if (otherOption != null) {
-                                validValues.add(otherOption.value)
-                                finalAnswers[key] = otherValue
-                            }
-                        }
-                        finalAnswers[key] = validValues.joinToString("|")
-                    }
-                }
-
                 allFields.forEach { field ->
                     if (field.name == "full_name" || field.name == "email") {
                         var value = finalAnswers[field.name]
@@ -175,10 +143,19 @@ class CourseRegistrationViewModel(
         if (field.type == "file" && answer.isNotEmpty()) {
             val file = File(answer)
             if (file.exists()) {
+                val validationError = validateFile(file)
+                if (validationError != null) {
+                    viewModelScope.launch {
+                        _uiMessage.emit(UIMessage.SnackBarMessage(validationError))
+                    }
+                    return
+                }
+
                 _isUploading.value = true
                 viewModelScope.launch {
                     try {
-                        interactor.uploadFile(formId, fieldName, file)
+                        val email = corePreferences.user?.email ?: ""
+                        interactor.uploadFile(formId, fieldName, courseId, email, file)
                         updateAnswer(fieldName, file.name)
                     } catch (e: Exception) {
                         handleError(e)
@@ -189,10 +166,6 @@ class CourseRegistrationViewModel(
             }
         } else {
             updateAnswer(fieldName, answer)
-        }
-        
-        if (!isOtherSelected(field, answer)) {
-            _answers.update { it - (fieldName + "_other") }
         }
 
         if (field.isEligibilityField && answer.isNotEmpty()) {
@@ -205,6 +178,21 @@ class CourseRegistrationViewModel(
         
         // Clear previous error for this field
         _eligibilityErrors.update { it - fieldName }
+    }
+
+    private fun validateFile(file: File): String? {
+        val maxSizeInBytes = 5 * 1024 * 1024 // 5MB
+        if (file.length() > maxSizeInBytes) {
+            return "File size exceeds 5MB limit"
+        }
+        
+        val allowedExtensions = listOf("pdf", "jpg", "jpeg", "png", "doc", "docx")
+        val extension = file.extension.lowercase()
+        if (extension !in allowedExtensions) {
+            return "Unsupported file type. Please upload PDF, JPG, PNG or DOC file."
+        }
+        
+        return null
     }
 
     private fun checkEligibility(triggerField: String) {
@@ -275,13 +263,13 @@ class CourseRegistrationViewModel(
                     if (field.required && answer.isBlank()) return false
                     
                     if (isOtherSelected(field, answer) && field.required) {
-                        if (_answers.value[field.name].isNullOrBlank()) return false
+                        // The 'answer' itself is the manual input if Other is selected
+                        if (answer.isBlank() || isDefaultOtherValue(answer)) return false
                     }
 
                     if (_eligibilityErrors.value[field.name] != null) return false
                     
                     if (field.type == "email") {
-                        val answer = _answers.value[field.name] ?: ""
                         if (answer.isNotEmpty() && !android.util.Patterns.EMAIL_ADDRESS.matcher(answer).matches()) {
                             return false
                         }
@@ -337,18 +325,24 @@ class CourseRegistrationViewModel(
         _uiMessage.emit(UIMessage.SnackBarMessage(errorMessage))
     }
 
+    private fun isDefaultOtherValue(value: String): Boolean {
+        return value.lowercase() == "other" || value.lowercase() == "others" || value.lowercase() == "__other__"
+    }
+
     private fun isOtherSelected(field: EnrollmentRegistrationField, answer: String): Boolean {
+        // Only relevant for fields with predefined options
+        if (field.type !in listOf("select", "multi-select", "radio")) return false
+
         val selectedValues = answer.split("|").filter { it.isNotEmpty() }
         if (selectedValues.isEmpty()) return false
 
         // Quick check on values
-        if (selectedValues.any { it.lowercase() == "other" || it.lowercase() == "others" || it.lowercase() == "__other__" }) return true
+        if (selectedValues.any { isDefaultOtherValue(it) }) return true
 
-        // Deep check on labels
+        // Check if any selected value is NOT in the predefined options list (it's a custom manual value)
         val options = parseOptions(field)
         return selectedValues.any { valId ->
-            val option = options.find { it.value == valId }
-            option?.label?.lowercase() == "other" || option?.label?.lowercase() == "others"
+            options.none { it.value == valId }
         }
     }
 

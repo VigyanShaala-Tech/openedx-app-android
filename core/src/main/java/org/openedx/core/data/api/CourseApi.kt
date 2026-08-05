@@ -190,6 +190,8 @@ interface CourseApi {
     suspend fun uploadFile(
         @Path("form_id") formId: String,
         @Part("field_key") fieldKey: RequestBody,
+        @Part("course_id") courseId: RequestBody,
+        @Part("email") email: RequestBody,
         @Part file: MultipartBody.Part
     ): ResponseBody
 

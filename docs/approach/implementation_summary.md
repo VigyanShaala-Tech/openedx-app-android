@@ -298,6 +298,24 @@ This document outlines the recent changes made to the project to address build i
 - **Centralized Logic**: Refactored `CourseUnitContainerViewModel.kt` to ensure consistent triggering during any unit navigation or selection event.
 - **Full-screen Support**: Explicitly added triggers to full-screen video fragments to mark completion on open.
 
+## 28. Registration Form Enhancements and Fixes
+
+### File Upload API Update
+- Updated the `uploadFile` endpoint in `CourseApi.kt` to include `course_id` and `email` as part of the multipart request.
+- Propagated these parameters through the repository and interactor layers.
+
+### Frontend File Validation
+- Implemented a `validateFile` method in `CourseRegistrationViewModel.kt`.
+- **Size Limit**: Maximum file size allowed is 5MB.
+- **Type Restrictions**: Only PDF, JPG, JPEG, PNG, DOC, and DOCX files are accepted.
+- Users receive immediate feedback via SnackBar if a file fails validation.
+
+### "Other" Option Manual Input Fix
+- Resolved an issue where manual input for the "Other" option was overwriting the primary field selection.
+- Introduced a separate storage key (`field_name_other`) for manual input text.
+- Updated `CourseRegistrationScreen.kt` to bind the manual input field to this new key.
+- Adjusted validation logic in `CourseRegistrationViewModel.kt` to properly require and validate this manual input when the "Other" option is selected.
+
 ### UI Refactoring for Consistency
 - Refactored `VsSignUpView.kt` and `SignInView.kt` to strictly follow the project's design system.
 - Replaced all hardcoded colors, typography, and dimensions with theme-aware properties from `MaterialTheme.appColors` and `MaterialTheme.appTypography`.

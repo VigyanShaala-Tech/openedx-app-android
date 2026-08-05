@@ -59,7 +59,6 @@ fun CourseRegistrationScreen(
     onNextClick: () -> Unit,
     onPreviousClick: () -> Unit,
     onAnswerUpdate: (EnrollmentRegistrationField, String) -> Unit,
-    onAnswerUpdateByName: (String, String) -> Unit,
     isNextEnabled: Boolean,
     isFieldVisible: (EnrollmentRegistrationField) -> Boolean
 ) {
@@ -152,7 +151,6 @@ fun CourseRegistrationScreen(
                         eligibilityErrors = eligibilityErrors,
                         onNextClick = onNextClick,
                         onAnswerUpdate = onAnswerUpdate,
-                        onAnswerUpdateByName = onAnswerUpdateByName,
                         isNextEnabled = isNextEnabled,
                         isFieldVisible = isFieldVisible
                     )
@@ -203,7 +201,6 @@ fun CourseRegistrationContent(
     eligibilityErrors: Map<String, String>,
     onNextClick: () -> Unit,
     onAnswerUpdate: (EnrollmentRegistrationField, String) -> Unit,
-    onAnswerUpdateByName: (String, String) -> Unit,
     isNextEnabled: Boolean,
     isFieldVisible: (EnrollmentRegistrationField) -> Boolean
 ) {
@@ -246,8 +243,7 @@ fun CourseRegistrationContent(
                     currentValue = answers[field.name] ?: "",
                     errorText = eligibilityErrors[field.name],
                     answers = answers,
-                    onValueChange = { newValue -> onAnswerUpdate(field, newValue) },
-                    onAnswerUpdateByName = onAnswerUpdateByName
+                    onValueChange = { newValue -> onAnswerUpdate(field, newValue) }
                 )
                 Spacer(modifier = Modifier.height(24.dp))
             }
@@ -298,8 +294,7 @@ fun RegistrationFieldItem(
     currentValue: String,
     errorText: String?,
     answers: Map<String, String>,
-    onValueChange: (String) -> Unit,
-    onAnswerUpdateByName: (String, String) -> Unit
+    onValueChange: (String) -> Unit
 ) {
     val options = remember(field.options, answers[field.dependsOn]) {
         parseOptions(field, answers)
@@ -315,14 +310,27 @@ fun RegistrationFieldItem(
         }
     }
 
-    val isOtherSelected = remember(currentValue, options) {
+    val isOtherSelected = remember(currentValue, options, field.type) {
+        // Only relevant for fields with predefined options
+        if (field.type !in listOf("select", "multi-select", "radio")) return@remember false
+
         val selectedValues = currentValue.split("|").filter { it.isNotEmpty() }
+        if (selectedValues.isEmpty()) return@remember false
+        
+        // Return true if "Other" keyword is found or any value is not in options
         selectedValues.any { valId ->
-            val label = options.find { it.value == valId }?.label ?: valId
-            valId.lowercase() == "other" || valId.lowercase() == "others" ||
-                    valId.lowercase() == "__other__" ||
-                    label.lowercase() == "other" || label.lowercase() == "others"
+            valId.lowercase() == "other" || valId.lowercase() == "others" || valId.lowercase() == "__other__" ||
+            options.none { it.value == valId }
         }
+    }
+    
+    val otherManualValue = remember(currentValue, options) {
+        val selectedValues = currentValue.split("|").filter { it.isNotEmpty() }
+        // Find the first value that is NOT an option ID and is NOT a default "Other" keyword
+        selectedValues.find { valId ->
+            valId.lowercase() != "other" && valId.lowercase() != "others" && valId.lowercase() != "__other__" &&
+            options.none { it.value == valId }
+        } ?: ""
     }
 
     Column {
@@ -416,8 +424,22 @@ fun RegistrationFieldItem(
             Spacer(modifier = Modifier.height(16.dp))
             VsRegistrationTextField(
                 label = "Please specify",
-                value = answers[field.name ] ?: "",
-                onValueChange = { onAnswerUpdateByName(field.name, it) },
+                value = otherManualValue,
+                onValueChange = { newValue ->
+                    // Logic to replace the "Other" token or update the custom value
+                    val selectedValues = currentValue.split("|").filter { it.isNotEmpty() }.toMutableList()
+                    val otherIndex = selectedValues.indexOfFirst { 
+                        it.lowercase() == "other" || it.lowercase() == "others" || it.lowercase() == "__other__" ||
+                        options.none { opt -> opt.value == it }
+                    }
+                    
+                    if (otherIndex != -1) {
+                        selectedValues[otherIndex] = newValue
+                    } else {
+                        selectedValues.add(newValue)
+                    }
+                    onValueChange(selectedValues.joinToString("|"))
+                },
                 placeholder = "Specify other",
                 isRequired = field.required,
                 enabled = field.isEditable
@@ -474,6 +496,7 @@ fun SelectionDialog(
                 .background(Color.White),
             color = Color.White
         ) {
+            @Suppress("FoldableIf")
             Column(modifier = Modifier.fillMaxSize().padding(16.dp)) {
                 Row(
                     modifier = Modifier.fillMaxWidth(),

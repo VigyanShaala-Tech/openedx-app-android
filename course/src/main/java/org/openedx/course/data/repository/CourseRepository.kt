@@ -336,11 +336,13 @@ class CourseRepository(
         return api.submitRegistration(formId, body)
     }
 
-    suspend fun uploadFile(formId: String, fieldKey: String, file: File) {
+    suspend fun uploadFile(formId: String, fieldKey: String, courseId: String, email: String, file: File) {
         val requestFile = file.asRequestBody("multipart/form-data".toMediaTypeOrNull())
         val filePart = MultipartBody.Part.createFormData("file", file.name, requestFile)
         val fieldKeyPart = fieldKey.toRequestBody("text/plain".toMediaTypeOrNull())
-        api.uploadFile(formId, fieldKeyPart, filePart)
+        val courseIdPart = courseId.toRequestBody("text/plain".toMediaTypeOrNull())
+        val emailPart = email.toRequestBody("text/plain".toMediaTypeOrNull())
+        api.uploadFile(formId, fieldKeyPart, courseIdPart, emailPart, filePart)
     }
 
     suspend fun getCourseNotifications(courseId: String): NotificationListResponse {

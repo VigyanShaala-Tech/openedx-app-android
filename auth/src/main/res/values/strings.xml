@@ -11,7 +11,7 @@
     <string name="auth_invalid_email_username" tools:ignore="MissingTranslation">Invalid email</string>
     <string name="auth_invalid_password">Password is too short</string>
     <string name="auth_social_account_not_registered">This %1$s account is not linked with any %2$s account. Please register.</string>
-    <string name="auth_welcome_back">Welcome back! Sign in to access your courses.</string>
+    <string name="auth_welcome_back">Welcome back! Log in to access your courses.</string>
     <string name="auth_show_optional_fields">Show optional fields</string>
     <string name="auth_hide_optional_fields">Hide optional fields</string>
     <string name="auth_create_account">Create account</string>
@@ -28,9 +28,9 @@
     <string name="auth_error_empty_password">Please enter your password and try again.</string>
     <string name="auth_create_new_account">Create an account to start learning today!</string>
     <string name="auth_compete_registration" translatable="false">Complete your registration</string>
-    <string name="auth_google" tools:ignore="ExtraTranslation">Sign in with Google</string>
-    <string name="auth_facebook" tools:ignore="ExtraTranslation">Sign in with Facebook</string>
-    <string name="auth_microsoft" tools:ignore="ExtraTranslation">Sign in with Microsoft</string>
+    <string name="auth_google" tools:ignore="ExtraTranslation">Log in with Google</string>
+    <string name="auth_facebook" tools:ignore="ExtraTranslation">Log in with Facebook</string>
+    <string name="auth_microsoft" tools:ignore="ExtraTranslation">Log in with Microsoft</string>
     <string name="auth_continue_google" tools:ignore="ExtraTranslation">Sign up with Google</string>
     <string name="auth_continue_facebook" tools:ignore="ExtraTranslation">Continue with Facebook</string>
     <string name="auth_continue_microsoft" tools:ignore="ExtraTranslation">Continue with Microsoft</string>
@@ -52,7 +52,7 @@
     <string name="auth_otp_sent_to">OTP sent to</string>
     <string name="auth_change_number">Change number</string>
     <string name="auth_send_otp">Send OTP</string>
-    <string name="auth_verify_and_sign_in">Verify &amp; Sign in</string>
+    <string name="auth_verify_and_sign_in">Verify &amp; Log in</string>
     <string name="auth_or">or</string>
     <string name="auth_resend_otp">Resend OTP</string>
     <string name="auth_resend_in">Resend in</string>
@@ -62,8 +62,8 @@
     <string name="auth_confirm_new_password">Confirm New Password</string>
     <string name="auth_invalid_password_reset_link">Invalid password reset link</string>
     <string name="auth_invalid_password_reset_link_desc">This password reset link is invalid. It may have been used already. Enter your email below to receive a new link.</string>
-    <string name="auth_back_to_sign_in">Back to Sign In</string>
-    <string name="auth_remember_password_sign_in">Remember your password? Sign In</string>
+    <string name="auth_back_to_sign_in">Back to Log in</string>
+    <string name="auth_remember_password_sign_in">Remember your password? Log in</string>
     <string name="auth_password_reset_success">Password has been reset successfully.</string>
 
     <!-- VS Signup Strings -->

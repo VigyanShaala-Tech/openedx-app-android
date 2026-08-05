@@ -364,7 +364,7 @@ private fun RestorePasswordScreen(
                                 Spacer(Modifier.height(48.dp))
                                 OpenEdXButton(
                                     modifier = buttonWidth,
-                                    text = "Sign in",
+                                    text = "Log in",
                                     onClick = {
                                         onBackClick()
                                     }

@@ -76,9 +76,9 @@ android:
 
 ## Available Third-Party Services
 - **Firebase:** Analytics, Crashlytics, Cloud Messaging
-- **Google:** Sign in and Sign up via Google
-- **Microsoft:** Sign in and Sign up via Microsoft
-- **Facebook:** Sign in and Sign up via Facebook
+- **Google:** Log in and Sign up via Google
+- **Microsoft:** Log in and Sign up via Microsoft
+- **Facebook:** Log in and Sign up via Facebook
 - **Branch:** Deeplinks
 - **Braze:** Cloud Messaging
 - **Bugsee:** Bug reporting and crash analysis

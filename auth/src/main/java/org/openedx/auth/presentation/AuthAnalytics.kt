@@ -21,7 +21,7 @@ enum class AuthAnalyticsEvent(val eventName: String, val biValue: String) {
         "edx.bi.app.logistration.explore.all.courses"
     ),
     SIGN_IN(
-        "Logistration:Sign In",
+        "Logistration:Log in",
         "edx.bi.app.logistration.signin"
     ),
     REGISTER(
@@ -41,15 +41,15 @@ enum class AuthAnalyticsEvent(val eventName: String, val biValue: String) {
         "edx.bi.app.user.register.success"
     ),
     SIGN_IN_CLICKED(
-        "Logistration:Sign In Clicked",
+        "Logistration:Log in Clicked",
         "edx.bi.app.logistration.signin.clicked"
     ),
     USER_SIGN_IN_CLICKED(
-        "Logistration:User Sign In Clicked",
+        "Logistration:User Log in Clicked",
         "edx.bi.app.logistration.user.signin.clicked"
     ),
     SIGN_IN_SUCCESS(
-        "Logistration:Sign In Success",
+        "Logistration:Log in Success",
         "edx.bi.app.user.signin.success"
     ),
     FORGOT_PASSWORD_CLICKED(

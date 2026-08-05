@@ -140,7 +140,7 @@ internal fun LoginScreen(
             Spacer(modifier = Modifier.height(32.dp))
 
             //TODO enable it after published
-            // Google Sign In Button
+            // Google Log in Button
             Surface(
                 modifier = Modifier
                     .fillMaxWidth()

@@ -422,7 +422,7 @@ private fun ResetPasswordScreen(
                                         append("Remember your password? ")
                                     }
                                     withStyle(style = SpanStyle(color = MaterialTheme.appColors.primary, fontWeight = FontWeight.SemiBold, fontSize = MaterialTheme.appTypography.bodyMedium.fontSize)) {
-                                        append("Sign In")
+                                        append("Log in")
                                     }
                                 }
                                 Text(

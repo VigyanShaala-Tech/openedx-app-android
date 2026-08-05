@@ -12,6 +12,7 @@ import org.openedx.discussion.data.model.response.CommentsResponse
 import org.openedx.discussion.data.model.response.ThreadsResponse
 import org.openedx.discussion.data.model.response.ThreadsResponse.Thread
 import org.openedx.discussion.data.model.response.TopicsResponse
+import okhttp3.ResponseBody
 import retrofit2.http.Body
 import retrofit2.http.GET
 import retrofit2.http.Headers
@@ -137,4 +138,10 @@ interface DiscussionApi {
         @Body
         blocksCompletionBody: BlocksCompletionBody
     )
+
+    @POST("/api/v1/courses/{course_id}/xblock/{block_id}/mark_completed")
+    suspend fun markTopicCompleted(
+        @Path("course_id") courseId: String,
+        @Path("block_id") blockId: String
+    ): ResponseBody
 }

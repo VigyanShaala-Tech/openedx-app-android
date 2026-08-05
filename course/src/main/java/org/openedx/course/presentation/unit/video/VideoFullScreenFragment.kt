@@ -75,6 +75,7 @@ class VideoFullScreenFragment : Fragment(R.layout.fragment_video_full_screen) {
         if (viewModel.isPlaying == null) {
             viewModel.isPlaying = requireArguments().getBoolean(ARG_IS_PLAYING)
         }
+        viewModel.markTopicCompleted(blockId)
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {

@@ -27,22 +27,28 @@ suspend fun markTopicCompleted(
 
 ### 3. ViewModel Integration
 
-The `CourseUnitContainerViewModel` is responsible for managing the display of course units.
+To ensure the completion is triggered whenever any xblock related screen is opened, the logic has been integrated at multiple levels:
 
-- Added a private `markTopicCompleted(blockId: String)` method that launches a coroutine to call the interactor.
-- Integrated this call into `getCurrentBlock()`. This ensures that every time a block becomes "active" (either by initial load or navigation), the completion API is triggered.
+#### Centralized Container Trigger
+The `CourseUnitContainerViewModel` is the primary manager for course units. It now includes a centralized `updateCurrentBlock(block: Block)` method that updates the current block state and triggers the completion API. This covers:
+- Initial unit load.
+- Manual navigation (Next/Previous).
+- Selecting a specific unit from the video or sub-section list.
 
-```kotlin
-fun getCurrentBlock(): Block {
-    val block = _descendantsBlocks.value.getOrNull(currentIndex) ?: blocks[currentVerticalIndex]
-    _currentBlock.value = block
-    _hierarchyPath.value = buildHierarchyPath(block)
-    markTopicCompleted(block.id) // Trigger completion
-    return block
-}
-```
+#### Individual Unit Triggers
+For robustness and to cover scenarios where units might be opened independently, the completion trigger has been added to individual unit ViewModels:
+- **HtmlUnitViewModel**: Triggers in `init`.
+- **PdfUnitViewModel**: Triggers in `init`.
+- **VideoUnitViewModel**: Triggers in `init` (covers standard and encoded videos).
+- **VideoViewModel**: Triggers in `markTopicCompleted` (covers full-screen video players).
+- **DiscussionThreadsViewModel**: Updated `markBlockCompleted` to call the new API.
 
-## Architectural Refactoring
+#### Full-screen Video Triggers
+Triggers were specifically added to the `onCreate` methods of full-screen fragments to ensure completion is marked as soon as the player opens:
+- **VideoFullScreenFragment**
+- **YoutubeVideoFullScreenFragment**
+
+## UI Improvements
 
 Alongside the API implementation, several UI components were refactored to better align with the project's architecture:
 
@@ -54,3 +60,10 @@ Alongside the API implementation, several UI components were refactored to bette
     - Centralized hardcoded strings to `strings.xml`.
 - **Global Resources**:
     - Added `core_mobile` and other shared strings to `core/strings.xml` and `auth/strings.xml`.
+
+## UI Improvements
+
+### Course Content Title Visibility
+Improved the visibility of long course unit titles by allowing them to wrap across two lines instead of being truncated after the first line.
+- **CourseUnitToolbar**: Increased `maxLines` to 2 and added `textAlign = TextAlign.Center`.
+- **SubSectionUnitsTitle**: Increased `maxLines` to 2.

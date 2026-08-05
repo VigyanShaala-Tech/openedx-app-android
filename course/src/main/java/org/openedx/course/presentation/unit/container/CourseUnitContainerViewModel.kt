@@ -176,7 +176,7 @@ class CourseUnitContainerViewModel(
                     _indexInContainer.value = currentIndex
                 }
                 // Initialize current block
-                _currentBlock.value = getCurrentBlock()
+                updateCurrentBlock(getCurrentBlock())
                 return
             }
         }
@@ -246,11 +246,13 @@ class CourseUnitContainerViewModel(
     }
 
     fun getCurrentBlock(): Block {
-        val block = _descendantsBlocks.value.getOrNull(currentIndex) ?: blocks[currentVerticalIndex]
+        return _descendantsBlocks.value.getOrNull(currentIndex) ?: blocks[currentVerticalIndex]
+    }
+
+    private fun updateCurrentBlock(block: Block) {
         _currentBlock.value = block
         _hierarchyPath.value = buildHierarchyPath(block)
         markTopicCompleted(block.id)
-        return block
     }
 
     private fun markTopicCompleted(blockId: String) {
@@ -273,8 +275,7 @@ class CourseUnitContainerViewModel(
             if (currentVerticalIndex != -1) {
                 _indexInContainer.value = currentIndex
             }
-            _currentBlock.value = block
-            _hierarchyPath.value = buildHierarchyPath(block)
+            updateCurrentBlock(block)
             return block
         }
         return null
@@ -382,8 +383,7 @@ class CourseUnitContainerViewModel(
         if (blockIndex != -1) {
             currentIndex = blockIndex
             _indexInContainer.value = currentIndex
-            _currentBlock.value = videoBlock
-            _hierarchyPath.value = buildHierarchyPath(videoBlock)
+            updateCurrentBlock(videoBlock)
         }
         viewModelScope.launch {
             loadVideoProgress()

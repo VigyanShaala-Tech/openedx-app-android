@@ -63,6 +63,7 @@ open class VideoUnitViewModel(
 
     init {
         initVideoProgress()
+        markTopicCompleted()
     }
 
     override fun onCreate(owner: LifecycleOwner) {
@@ -133,12 +134,19 @@ open class VideoUnitViewModel(
                         courseId,
                         listOf(blockId)
                     )
+                    courseRepository.markTopicCompleted(courseId, blockId)
                     notifier.send(CourseCompletionSet())
                 } catch (e: Exception) {
                     e.printStackTrace()
                     isBlockAlreadyCompleted = false
                 }
             }
+        }
+    }
+
+    private fun markTopicCompleted() {
+        viewModelScope.launch {
+            courseRepository.markTopicCompleted(courseId, blockId)
         }
     }
 

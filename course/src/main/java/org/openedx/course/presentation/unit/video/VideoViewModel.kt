@@ -40,6 +40,12 @@ class VideoViewModel(
         }
     }
 
+    fun markTopicCompleted(blockId: String) {
+        viewModelScope.launch {
+            courseRepository.markTopicCompleted(courseId, blockId)
+        }
+    }
+
     fun markBlockCompleted(blockId: String, medium: String) {
         if (!isBlockAlreadyCompleted) {
             logLoadedCompletedEvent(videoUrl, false, currentVideoTime, medium)
@@ -50,6 +56,7 @@ class VideoViewModel(
                         courseId,
                         listOf(blockId)
                     )
+                    courseRepository.markTopicCompleted(courseId, blockId)
                     notifier.send(CourseCompletionSet())
                 } catch (e: Exception) {
                     e.printStackTrace()

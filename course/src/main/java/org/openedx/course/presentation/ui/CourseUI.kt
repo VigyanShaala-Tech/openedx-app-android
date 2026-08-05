@@ -1184,8 +1184,9 @@ fun CourseUnitToolbar(
                 text = title ?: "",
                 color = MaterialTheme.appColors.textPrimary,
                 style = MaterialTheme.appTypography.titleSmall,
-                maxLines = 1,
-                overflow = TextOverflow.Ellipsis
+                maxLines = 2,
+                overflow = TextOverflow.Ellipsis,
+                textAlign = TextAlign.Center
             )
         }
     }
@@ -1222,7 +1223,7 @@ fun SubSectionUnitsTitle(
             text = unitName,
             color = MaterialTheme.appColors.textPrimary,
             style = textStyle,
-            maxLines = 1,
+            maxLines = 2,
             overflow = TextOverflow.Ellipsis,
             textAlign = TextAlign.Start
         )

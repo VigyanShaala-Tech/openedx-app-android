@@ -582,8 +582,11 @@ val screenModule = module {
         )
     }
 
-    viewModel {
+    viewModel { (courseId: String, blockId: String) ->
         PdfUnitViewModel(
+            courseId,
+            blockId,
+            get(),
             get()
         )
     }

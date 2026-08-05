@@ -164,6 +164,7 @@ class CourseUnitContainerAdapter(
     private fun createPdfUnitFragment(block: Block): Fragment {
         return PdfUnitFragment.newInstance(
             block.id,
+            viewModel.courseId,
             block.pdfWebUrl ?: "",
             block.displayName
         )

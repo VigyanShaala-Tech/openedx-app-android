@@ -292,12 +292,18 @@ This document outlines the recent changes made to the project to address build i
 ## 27. Topic Completion and UI Architectural Refactoring
 
 ### Topic Completion API
-- Implemented `POST /api/v1/courses/{course_id}/xblock/{block_id}/mark_completed` in `CourseApi.kt`.
+- Implemented `POST /api/v1/courses/{course_id}/xblock/{block_id}/mark_completed` in `CourseApi.kt` and `DiscussionApi.kt`.
 - Updated `CourseRepository.kt` and `CourseInteractor.kt` to support marking units as completed.
-- Integrated automatic completion triggering in `CourseUnitContainerViewModel.kt` whenever a course unit is opened.
+- **Comprehensive Triggering**: Integrated automatic completion triggering across all unit-related ViewModels (`HtmlUnitViewModel`, `PdfUnitViewModel`, `VideoUnitViewModel`, `VideoViewModel`, `DiscussionThreadsViewModel`).
+- **Centralized Logic**: Refactored `CourseUnitContainerViewModel.kt` to ensure consistent triggering during any unit navigation or selection event.
+- **Full-screen Support**: Explicitly added triggers to full-screen video fragments to mark completion on open.
 
 ### UI Refactoring for Consistency
 - Refactored `VsSignUpView.kt` and `SignInView.kt` to strictly follow the project's design system.
 - Replaced all hardcoded colors, typography, and dimensions with theme-aware properties from `MaterialTheme.appColors` and `MaterialTheme.appTypography`.
 - Centralized remaining hardcoded strings in the Auth module to `strings.xml`.
 - Improved maintainability and Dark Mode support for the authentication screens.
+
+### Course Content Title Visibility
+- Increased `maxLines` from 1 to 2 for course unit titles in the top toolbar and the sub-section header in `CourseUI.kt`.
+- This ensures that long titles (common in STEM courses) are fully legible and not cut off.

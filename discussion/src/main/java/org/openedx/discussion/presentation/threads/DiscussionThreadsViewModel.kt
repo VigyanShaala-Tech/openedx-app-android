@@ -238,6 +238,7 @@ class DiscussionThreadsViewModel(
                         courseId,
                         listOf(blockId)
                     )
+                    interactor.markTopicCompleted(courseId, blockId)
                 } catch (e: Exception) {
                     isBlockAlreadyCompleted = false
                     e.printStackTrace()

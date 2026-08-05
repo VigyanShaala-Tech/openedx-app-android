@@ -41,6 +41,7 @@ class HtmlUnitViewModel(
 
     init {
         tryToSyncProgress()
+        markTopicCompleted()
     }
 
     fun onWebPageLoading() {
@@ -85,6 +86,12 @@ class HtmlUnitViewModel(
         viewModelScope.launch {
             courseInteractor.saveXBlockProgress(blockId, courseId, jsonProgress)
             offlineProgressSyncScheduler.scheduleSync()
+        }
+    }
+
+    private fun markTopicCompleted() {
+        viewModelScope.launch {
+            courseInteractor.markTopicCompleted(courseId, blockId)
         }
     }
 

@@ -29,6 +29,7 @@ import com.ahmer.pdfviewer.PDFView
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import org.koin.androidx.viewmodel.ext.android.viewModel
+import org.koin.core.parameter.parametersOf
 import org.openedx.core.ui.theme.OpenEdXTheme
 import org.openedx.core.ui.theme.appColors
 import org.openedx.core.ui.theme.appTypography
@@ -38,14 +39,21 @@ import java.net.URL
 
 class PdfUnitFragment : Fragment() {
 
-    private val viewModel: PdfUnitViewModel by viewModel()
+    private val viewModel: PdfUnitViewModel by viewModel {
+        parametersOf(
+            requireArguments().getString(ARG_COURSE_ID, ""),
+            requireArguments().getString(ARG_BLOCK_ID, "")
+        )
+    }
     private var blockId: String = ""
+    private var courseId: String = ""
     private var pdfUrl: String = ""
     private var title: String = ""
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         blockId = requireArguments().getString(ARG_BLOCK_ID, "")
+        courseId = requireArguments().getString(ARG_COURSE_ID, "")
         pdfUrl = requireArguments().getString(ARG_PDF_URL, "")
         title = requireArguments().getString(ARG_TITLE, "")
     }
@@ -70,17 +78,20 @@ class PdfUnitFragment : Fragment() {
 
     companion object {
         private const val ARG_BLOCK_ID = "blockId"
+        private const val ARG_COURSE_ID = "courseId"
         private const val ARG_PDF_URL = "pdfUrl"
         private const val ARG_TITLE = "title"
 
         fun newInstance(
             blockId: String,
+            courseId: String,
             pdfUrl: String,
             title: String
         ): PdfUnitFragment {
             val fragment = PdfUnitFragment()
             fragment.arguments = bundleOf(
                 ARG_BLOCK_ID to blockId,
+                ARG_COURSE_ID to courseId,
                 ARG_PDF_URL to pdfUrl,
                 ARG_TITLE to title
             )

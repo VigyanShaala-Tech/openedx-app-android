@@ -606,7 +606,7 @@ private fun CollapsingLayoutMobile(
                     },
                 bitmap = courseImage.asImageBitmap(),
                 contentDescription = null,
-                contentScale = ContentScale.Crop
+                contentScale = ContentScale.FillBounds
             )
             Box(
                 modifier = Modifier

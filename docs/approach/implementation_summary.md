@@ -325,3 +325,7 @@ This document outlines the recent changes made to the project to address build i
 ### Course Content Title Visibility
 - Increased `maxLines` from 1 to 2 for course unit titles in the top toolbar and the sub-section header in `CourseUI.kt`.
 - This ensures that long titles (common in STEM courses) are fully legible and not cut off.
+
+### Course Banner Display Fix
+- Updated `CollapsingLayout.kt` to use `ContentScale.Crop` and `Alignment.TopCenter` for the course banner image.
+- This configuration ensures that the banner fully fills its designated height (240dp) without any white gaps, while specifically keeping the top portion of the image visible (cropping from the bottom).

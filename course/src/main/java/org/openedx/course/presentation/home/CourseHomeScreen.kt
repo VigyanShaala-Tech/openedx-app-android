@@ -18,7 +18,6 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.widthIn
-import androidx.compose.foundation.pager.PagerState
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -90,7 +89,6 @@ fun CourseHomeScreen(
     windowSize: WindowSize,
     viewModel: CourseHomeViewModel,
     fragmentManager: FragmentManager,
-    homePagerState: PagerState,
     onResetDatesClick: () -> Unit,
     onNavigateToContent: (CourseContentTab) -> Unit = {},
     onNavigateToProgress: () -> Unit = {},

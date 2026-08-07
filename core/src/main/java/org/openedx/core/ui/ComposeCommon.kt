@@ -551,7 +551,7 @@ fun SheetContent(
     val focusManager = LocalFocusManager.current
     Column(
         Modifier
-            .height(400.dp)
+            .height(500.dp)
             .padding(top = 16.dp)
             .background(MaterialTheme.appColors.background)
     ) {
@@ -584,14 +584,12 @@ fun SheetContent(
         )
         Spacer(Modifier.height(10.dp))
         LazyColumn(
-            modifier = Modifier.fillMaxSize(),
-            state = listState
+            modifier = Modifier.fillMaxWidth().heightIn(max = 500.dp)
         ) {
-            items(
-                expandedList.filter {
-                    it.name.startsWith(searchValue.text, true)
-                }
-            ) { item ->
+            val filteredList = expandedList.filter {
+                it.name.contains(searchValue.text, true)
+            }
+            items(filteredList) { item ->
                 Text(
                     modifier = Modifier
                         .testTag("txt_${item.value.tagId()}_title")
@@ -608,6 +606,33 @@ fun SheetContent(
                 )
                 Divider(modifier = Modifier.padding(horizontal = 16.dp))
             }
+            if (searchValue.text.isNotBlank()) {
+                val hasExactMatch = filteredList.any { it.name.equals(searchValue.text, true) }
+                if (!hasExactMatch) {
+                    item {
+                        Text(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(horizontal = 16.dp)
+                                .clickable {
+                                    onItemClick(
+                                        RegistrationField.Option(
+                                            searchValue.text,
+                                            searchValue.text,
+                                            ""
+                                        )
+                                    )
+                                }
+                                .padding(vertical = 12.dp),
+                            color = MaterialTheme.appColors.primary,
+                            text = "${stringResource(id = R.string.core_other)}: ${searchValue.text}",
+                            style = MaterialTheme.appTypography.bodyLarge,
+                            textAlign = TextAlign.Center
+                        )
+                        Divider(modifier = Modifier.padding(horizontal = 16.dp))
+                    }
+                }
+            }
         }
     }
 }
@@ -623,7 +648,7 @@ fun SheetContent(
     val focusManager = LocalFocusManager.current
     Column(
         Modifier
-            .height(400.dp)
+            .height(500.dp)
             .padding(top = 16.dp)
             .background(MaterialTheme.appColors.background)
     ) {
@@ -653,13 +678,12 @@ fun SheetContent(
         )
         Spacer(Modifier.height(10.dp))
         LazyColumn(
-            Modifier.fillMaxWidth()
+            modifier = Modifier.fillMaxWidth().heightIn(max = 500.dp)
         ) {
-            items(
-                expandedList.filter {
-                    it.first.startsWith(searchValue.text, true)
-                }
-            ) { item ->
+            val filteredList = expandedList.filter {
+                it.first.contains(searchValue.text, true)
+            }
+            items(filteredList) { item ->
                 Text(
                     modifier = Modifier
                         .fillMaxWidth()
@@ -673,6 +697,27 @@ fun SheetContent(
                     textAlign = TextAlign.Center
                 )
                 Divider(modifier = Modifier.padding(horizontal = 16.dp))
+            }
+            if (searchValue.text.isNotBlank()) {
+                val hasExactMatch = filteredList.any { it.first.equals(searchValue.text, true) }
+                if (!hasExactMatch) {
+                    item {
+                        Text(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(horizontal = 16.dp)
+                                .clickable {
+                                    onItemClick(Pair(searchValue.text, searchValue.text))
+                                }
+                                .padding(vertical = 12.dp),
+                            color = MaterialTheme.appColors.primary,
+                            text = "${stringResource(id = R.string.core_other)}: ${searchValue.text}",
+                            style = MaterialTheme.appTypography.bodyLarge,
+                            textAlign = TextAlign.Center
+                        )
+                        Divider(modifier = Modifier.padding(horizontal = 16.dp))
+                    }
+                }
             }
         }
     }

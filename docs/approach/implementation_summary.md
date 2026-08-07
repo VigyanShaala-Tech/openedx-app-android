@@ -329,3 +329,15 @@ This document outlines the recent changes made to the project to address build i
 ### Course Banner Display Fix
 - Updated `CollapsingLayout.kt` to use `ContentScale.Crop` and `Alignment.TopCenter` for the course banner image.
 - This configuration ensures that the banner fully fills its designated height (240dp) without any white gaps, while specifically keeping the top portion of the image visible (cropping from the bottom).
+
+## 29. Selection Dialog and University Search Improvements
+
+### Enhanced Search Filtering
+- Updated `SheetContent` in `ComposeCommon.kt` to use `contains` instead of `startsWith` for filtering options.
+- This allows for more flexible matching (e.g., searching for "garwar" will now correctly find "Garware").
+
+### Manual "Other" Option Fallback
+- Implemented an automatic "Other" option within the selection dialog when a user's search query doesn't match any existing items.
+- If the search query is not blank and no exact match is found in the list, an "${Other}: [query]" item is displayed at the bottom of the list.
+- Clicking this item allows the user to use their search query as a manual entry, solving the issue of being stuck when a specific university or college is not in the predefined list.
+- This implementation follows the project architecture by using central theme colors and string resources.

@@ -328,8 +328,7 @@ private fun ToggleItem(
     onClick: () -> Unit,
 ) {
     val bg = if (isSelected) MaterialTheme.appColors.background else Color.Transparent
-    val tint = if (isSelected) Color(0xFF455A64) else Color(0xFF90A4AE)
-//    val tint = if (isSelected) MaterialTheme.appColors.tabSelectedBtnContent else MaterialTheme.appColors.tabUnselectedBtnContent
+    val tint = if (isSelected) MaterialTheme.appColors.textDark else MaterialTheme.appColors.textSecondary
     Row(
         modifier = modifier
             .background(bg, shape = RoundedCornerShape(8.dp))
@@ -442,7 +441,7 @@ private fun SignInInputField(
             Text(
                 text = errorText,
                 style = MaterialTheme.appTypography.bodySmall,
-                color = Color.Red,
+                color = MaterialTheme.appColors.error,
                 modifier = Modifier.padding(top = 4.dp)
             )
         }

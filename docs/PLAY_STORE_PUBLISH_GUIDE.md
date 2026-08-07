@@ -40,6 +40,7 @@ After updating the declaration and applying the code changes:
 
 ## 4. Architecture & UI Improvements
 As part of this update, we have also refactored the following to align with the project's architecture:
-- Removed hardcoded colors in `CollapsingLayout.kt`.
+- Removed hardcoded colors in `CollapsingLayout.kt`, `SignInView.kt`, and `VsSignUpView.kt`.
 - Standardized UI components to use `MaterialTheme.appColors`.
-- This ensures the app correctly supports both **Light** and **Dark** modes across all screens.
+- Enhanced Google Sign-In flow to automatically redirect unregistered users to the Sign-Up screen with pre-filled details.
+- This ensures the app correctly supports both **Light** and **Dark** modes across all screens and provides a smoother onboarding experience.

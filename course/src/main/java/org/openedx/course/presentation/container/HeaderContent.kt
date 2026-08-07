@@ -80,9 +80,9 @@ internal fun ExpandedHeaderContent(
         ) {
             Box {
                 Icon(
-                    painter = painterResource(id = R.drawable.ic_triangle_alert),
+                    painter = painterResource(id = R.drawable.ic_course_notification_bell),
                     contentDescription = null,
-                    tint = MaterialTheme.appColors.warningRed,
+                    tint = Color.Unspecified,
                     modifier = Modifier.size(24.dp)
                 )
                 // Red dot

@@ -59,6 +59,7 @@ import androidx.compose.ui.platform.ComposeView
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalLifecycleOwner
 import androidx.compose.ui.platform.ViewCompositionStrategy
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
@@ -73,10 +74,12 @@ import org.koin.android.ext.android.inject
 import org.koin.androidx.compose.koinViewModel
 import org.koin.core.parameter.parametersOf
 import org.openedx.auth.presentation.AuthRouter
+import org.openedx.core.ui.AutoSizeText
 import org.openedx.core.ui.theme.OpenEdXTheme
 import org.openedx.core.ui.theme.appColors
 import org.openedx.core.ui.theme.appShapes
 import org.openedx.core.ui.theme.appTypography
+import org.openedx.dashboard.R
 import org.openedx.dashboard.data.model.AchievementDto
 import org.openedx.dashboard.data.model.CourseCardData
 import org.openedx.dashboard.data.model.CourseItemDto
@@ -348,7 +351,7 @@ private fun NewDashboardScreenContent(
 
                 item {
                     Text(
-                        text = "My Courses",
+                        text = stringResource(R.string.dashboard_my_courses),
                         style = MaterialTheme.appTypography.titleMedium.copy(
                             fontWeight = FontWeight.Bold,
                             color = MaterialTheme.appColors.textDark,
@@ -372,7 +375,7 @@ private fun NewDashboardScreenContent(
                 if (achievements.isNotEmpty()) {
                     item {
                         SectionHeader(
-                            title = "Achievements",
+                            title = stringResource(R.string.dashboard_my_achievements),
                             showViewAll = true,
                             onViewAllClick = onAchievementsViewAllClick
                         )
@@ -429,7 +432,7 @@ private fun NewDashboardScreenContent(
                 if (recommendations.isNotEmpty()) {
                     item {
                         SectionHeader(
-                            title = androidx.compose.ui.res.stringResource(org.openedx.dashboard.R.string.dashboard_recommended_for_you),
+                            title = stringResource(R.string.dashboard_recommended_for_you),
                             showViewAll = true,
                             onViewAllClick = onRecommendedViewAllClick
                         )
@@ -479,7 +482,7 @@ private fun SectionHeader(
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 Text(
-                    text = androidx.compose.ui.res.stringResource(org.openedx.dashboard.R.string.dashboard_view_all),
+                    text = stringResource(R.string.dashboard_view_all),
                     style = MaterialTheme.appTypography.bodySmall,
                     color = MaterialTheme.appColors.primary
                 )
@@ -506,9 +509,9 @@ private fun CoursesTabs(
 ) {
     var selectedTab by rememberSaveable { mutableStateOf(0) }
     val tabs = listOf(
-        androidx.compose.ui.res.stringResource(org.openedx.dashboard.R.string.dashboard_continue_learning),
-        androidx.compose.ui.res.stringResource(org.openedx.dashboard.R.string.dashboard_wishlist),
-        androidx.compose.ui.res.stringResource(org.openedx.dashboard.R.string.dashboard_completed)
+        stringResource(R.string.dashboard_continue_learning),
+        stringResource(R.string.dashboard_wishlist),
+        stringResource(R.string.dashboard_completed)
     )
 
     Row(
@@ -531,15 +534,15 @@ private fun CoursesTabs(
                     .padding(vertical = 10.dp, horizontal = 4.dp),
                 contentAlignment = Alignment.Center
             ) {
-                Text(
+                AutoSizeText(
                     text = label,
                     style = MaterialTheme.appTypography.labelMedium.copy(
                         fontWeight = if (selected) FontWeight.SemiBold else FontWeight.Medium,
                         fontSize = 11.sp
                     ),
-                    color = if (selected) Color.White else Color(0xFF78909C),
+                    color = if (selected) Color.White else MaterialTheme.appColors.tabUnselectedBtnContent,
                     maxLines = 1,
-                    softWrap = false
+                    minSize = 8f
                 )
             }
         }
@@ -565,7 +568,7 @@ private fun CoursesTabs(
                 Spacer(Modifier.height(12.dp))
                 ViewAllLink(onClick = onContinueViewAllClick)
             } else {
-                EmptyTabContent(androidx.compose.ui.res.stringResource(org.openedx.dashboard.R.string.dashboard_no_courses_in_progress))
+                EmptyTabContent(stringResource(R.string.dashboard_no_courses_in_progress))
             }
         }
 
@@ -577,7 +580,7 @@ private fun CoursesTabs(
                 Spacer(Modifier.height(12.dp))
                 ViewAllLink(onClick = onWishlistViewAllClick)
             } else {
-                EmptyTabContent(androidx.compose.ui.res.stringResource(org.openedx.dashboard.R.string.dashboard_wishlist_empty))
+                EmptyTabContent(stringResource(R.string.dashboard_wishlist_empty))
             }
         }
 
@@ -600,7 +603,7 @@ private fun CoursesTabs(
                 Spacer(Modifier.height(12.dp))
                 ViewAllLink(onClick = onCompletedViewAllClick)
             } else {
-                EmptyTabContent(androidx.compose.ui.res.stringResource(org.openedx.dashboard.R.string.dashboard_no_completed_courses))
+                EmptyTabContent(stringResource(R.string.dashboard_no_completed_courses))
             }
         }
     }

@@ -88,7 +88,7 @@ class AuthRepository(
             access_token = body.accessToken,
             provider = body.provider,
             client_id = body.clientId
-        )
+        ).handleResponse()
     }
 
     suspend fun validateRegistrationFields(mapFields: Map<String, String>): ValidationFields {

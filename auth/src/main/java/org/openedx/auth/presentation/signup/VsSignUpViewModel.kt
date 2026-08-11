@@ -100,6 +100,9 @@ class VsSignUpViewModel(
                     "user_role" to userRole,
                     "gender" to gender
                 )
+                if (socialAuth == null) {
+                    mapFields[ApiConstants.PASSWORD] = password
+                }
                 val validationFields = interactor.validateRegistrationFields(mapFields)
                 if (validationFields.hasValidationError()) {
                     val error = validationFields.validationResult.values.firstOrNull { it.isNotBlank() }
@@ -131,7 +134,7 @@ class VsSignUpViewModel(
                     username = username,
                     verificationKey = null,
                     gender = gender,
-                    socialAuthProvider = if (socialAuth != null) null else socialProvider,
+                    socialAuthProvider = if (socialAuth != null) socialProvider else null,
                     totalRegistrationTime = String.format(Locale.US, "%.3f", totalTime),
                     accessToken = socialAuth?.accessToken,
                     provider = socialAuth?.authType?.postfix,

@@ -40,6 +40,7 @@ import androidx.compose.ui.zIndex
 import org.openedx.core.ui.theme.appColors
 import org.openedx.core.utils.EmailUtil
 import org.openedx.core.extension.addMobileQueryParam
+import org.openedx.core.extension.applyFullAccessSettings
 import org.openedx.foundation.extension.applyDarkModeIfEnabled
 import org.openedx.foundation.extension.isEmailValid
 import org.openedx.foundation.extension.replaceLinkTags
@@ -173,18 +174,28 @@ private fun WebViewContent(
                     override fun onPermissionRequest(request: PermissionRequest?) {
                         request?.grant(request.resources)
                     }
+
+                    override fun onGeolocationPermissionsShowPrompt(
+                        origin: String?,
+                        callback: android.webkit.GeolocationPermissions.Callback?
+                    ) {
+                        callback?.invoke(origin, true, false)
+                    }
+
+                    override fun onCreateWindow(
+                        view: WebView?,
+                        isDialog: Boolean,
+                        isUserGesture: Boolean,
+                        resultMsg: android.os.Message?
+                    ): Boolean {
+                        val transport = resultMsg?.obj as? WebView.WebViewTransport
+                        transport?.webView = WebView(context)
+                        resultMsg?.sendToTarget()
+                        return true
+                    }
                 }
-                with(settings) {
-                    javaScriptEnabled = true
-                    loadWithOverviewMode = true
-                    builtInZoomControls = false
-                    setSupportZoom(true)
-                    loadsImagesAutomatically = true
-                    domStorageEnabled = true
-                    allowFileAccess = true
-                    allowContentAccess = true
-                    mediaPlaybackRequiresUserGesture = false
-                }
+                applyFullAccessSettings(contentUrl ?: "")
+                settings.mediaPlaybackRequiresUserGesture = false
                 isVerticalScrollBarEnabled = false
                 isHorizontalScrollBarEnabled = false
                 body?.let {

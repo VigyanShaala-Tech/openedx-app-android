@@ -62,6 +62,7 @@ import org.koin.androidx.viewmodel.ext.android.viewModel
 import org.koin.core.parameter.parametersOf
 import org.openedx.core.AppDataConstants
 import org.openedx.core.extension.addMobileQueryParam
+import org.openedx.core.extension.applyFullAccessSettings
 import org.openedx.core.extension.loadUrl
 import org.openedx.core.system.AppCookieManager
 import org.openedx.core.ui.FullScreenErrorView
@@ -459,30 +460,31 @@ private fun HTMLContentView(
                     override fun onPermissionRequest(request: PermissionRequest?) {
                         request?.grant(request.resources)
                     }
+
+                    override fun onGeolocationPermissionsShowPrompt(
+                        origin: String?,
+                        callback: android.webkit.GeolocationPermissions.Callback?
+                    ) {
+                        callback?.invoke(origin, true, false)
+                    }
+
+                    override fun onCreateWindow(
+                        view: WebView?,
+                        isDialog: Boolean,
+                        isUserGesture: Boolean,
+                        resultMsg: android.os.Message?
+                    ): Boolean {
+                        val transport = resultMsg?.obj as? WebView.WebViewTransport
+                        transport?.webView = WebView(context)
+                        resultMsg?.sendToTarget()
+                        return true
+                    }
                 }
                 @Suppress("DEPRECATION")
+                applyFullAccessSettings(url)
                 with(settings) {
-                    javaScriptEnabled = true
-                    loadWithOverviewMode = true
-                    builtInZoomControls = false
-                    setSupportZoom(true)
-                    loadsImagesAutomatically = true
-                    domStorageEnabled = true
-                    allowFileAccess = true
-                    allowContentAccess = true
-                    useWideViewPort = true
-                    databaseEnabled = true
-                    javaScriptCanOpenWindowsAutomatically = true
-                    allowFileAccessFromFileURLs = true
-                    allowUniversalAccessFromFileURLs = true
-                    setSupportMultipleWindows(false)
-                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
-                        mixedContentMode = WebSettings.MIXED_CONTENT_ALWAYS_ALLOW
-                    }
+                    mediaPlaybackRequiresUserGesture = false
                     cacheMode = WebSettings.LOAD_NO_CACHE
-                    if (url.contains("google-calendar")) {
-                        userAgentString = AppDataConstants.DESKTOP_USER_AGENT
-                    }
                 }
                 if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
                     android.webkit.CookieManager.getInstance().setAcceptThirdPartyCookies(this, true)

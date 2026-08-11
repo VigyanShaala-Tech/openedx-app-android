@@ -341,3 +341,27 @@ This document outlines the recent changes made to the project to address build i
 - If the search query is not blank and no exact match is found in the list, an "${Other}: [query]" item is displayed at the bottom of the list.
 - Clicking this item allows the user to use their search query as a manual entry, solving the issue of being stuck when a specific university or college is not in the predefined list.
 - This implementation follows the project architecture by using central theme colors and string resources.
+
+## 30. Zoom Meeting Experience Optimization
+
+### Global WebView "Full Access" Optimization
+- Centralized WebView configuration into a new extension helper: `applyFullAccessSettings(url)` in `ViewExt.kt`.
+- **Comprehensive Support across App**: Applied these optimized settings to `HtmlUnitFragment` (Course Units), `CatalogWebView` (Discovery), and `WebContentScreen` (General Web Content).
+- **Mobile Chrome Experience**: All meeting-related URLs (`zoom.us`, `/meeting/`, `/join/`) now consistently use a modern `MOBILE_CHROME_USER_AGENT`. 
+- **Pure Identity**: Implemented logic to ensure meeting links use a "pure" Mobile Chrome User Agent without any app-specific identifiers appended, preventing platform detection from downgrading the UI.
+- **Advanced Capabilities**:
+    - **Hardware Acceleration**: Enabled `android:hardwareAccelerated="true"` in the `AndroidManifest.xml` to ensure complex UIs (like Zoom's chat and overlays) render smoothly.
+    - **Multiple Windows (Popups)**: Enabled `setSupportMultipleWindows(true)` and implemented `onCreateWindow` in `WebChromeClient` to support web apps that use secondary windows for authentication or specialized features.
+    - **Third-Party Cookies**: Enabled support for cross-domain cookies, ensuring feature parity for embedded meeting clients.
+    - **Standardized Prompts**: Automatically handle permission prompts like geolocation across all web screens.
+- **Universal Media Auto-Playback**: Standardized `mediaPlaybackRequiresUserGesture = false` app-wide to ensure audio/video starts automatically.
+
+## 31. Registration and Social Auth Stability Fixes
+
+### Corrected Registration Data
+- **Social Provider Logic**: Fixed a bug in `VsSignUpViewModel.kt` where the `social_auth_provider` was being sent as `null` during social registration. It now correctly passes the provider name (e.g., "Continue with Google"), ensuring the server accepts the social signup.
+- **Validation Completeness**: Ensured the `password` field is included in the registration validation step for standard (non-social) signups, preventing silent validation failures.
+
+### Robust API Error Handling
+- **Repository Integration**: Updated `AuthRepository.kt` to use the `.handleResponse()` helper in the `registerVs` method. This ensures that any non-success responses from the registration API (like "User already exists" or "Invalid data") are correctly caught and thrown as exceptions rather than being ignored.
+- **User Feedback**: With proper exception propagation, the UI now correctly shows meaningful error messages in a SnackBar when registration fails, rather than leaving the user stuck on the signup screen.

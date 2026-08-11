@@ -105,11 +105,12 @@ class AppRouter :
         courseId: String?,
         infoType: String?,
         email: String?,
-        name: String?
+        name: String?,
+        token: String?
     ) {
         // Comment out current signup screen redirection and redirect to new created signup screen
 //         replaceFragmentWithBackStack(fm, SignUpFragment.newInstance(courseId, infoType))
-        replaceFragmentWithBackStack(fm, VsSignUpFragment.newInstance(courseId, infoType, email, name))
+        replaceFragmentWithBackStack(fm, VsSignUpFragment.newInstance(courseId, infoType, email, name, token))
     }
 
     override fun navigateToLogistration(fm: FragmentManager, courseId: String?) {

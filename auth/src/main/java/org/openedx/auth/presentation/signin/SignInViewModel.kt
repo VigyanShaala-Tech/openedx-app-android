@@ -304,7 +304,7 @@ class SignInViewModel(
                 // The social identity resolved on Google's side but is not linked to any
                 // account on this platform. The mobile token-exchange endpoint only signs in
                 // existing/linked users, so guide the user to register (mirrors iOS/web).
-                router.navigateToSignUp(fm, courseId, infoType, email, name)
+                router.navigateToSignUp(fm, courseId, infoType, email, name, token)
                 _uiState.update { it.copy(showProgress = false) }
             } else {
                 onUnknownError()

@@ -13,55 +13,55 @@ enum class AuthAnalyticsEvent(val eventName: String, val biValue: String) {
         "edx.bi.app.logistration"
     ),
     DISCOVERY_COURSES_SEARCH(
-        "Logistration:Courses Search",
+        "Logistration_Courses_Search",
         "edx.bi.app.logistration.courses_search"
     ),
     EXPLORE_ALL_COURSES(
-        "Logistration:Explore All Courses",
+        "Logistration_Explore_All_Courses",
         "edx.bi.app.logistration.explore.all.courses"
     ),
     SIGN_IN(
-        "Logistration:Log in",
+        "Logistration_Log_in",
         "edx.bi.app.logistration.signin"
     ),
     REGISTER(
-        "Logistration:Register",
+        "Logistration_Register",
         "edx.bi.app.logistration.register"
     ),
     REGISTER_CLICKED(
-        "Logistration:Register Clicked",
+        "Logistration_Register_Clicked",
         "edx.bi.app.logistration.register.clicked"
     ),
     CREATE_ACCOUNT_CLICKED(
-        "Logistration:Create Account Clicked",
+        "Logistration_Create_Account_Clicked",
         "edx.bi.app.logistration.user.create_account.clicked"
     ),
     REGISTER_SUCCESS(
-        "Logistration:Register Success",
+        "Logistration_Register_Success",
         "edx.bi.app.user.register.success"
     ),
     SIGN_IN_CLICKED(
-        "Logistration:Log in Clicked",
+        "Logistration_Log_in_Clicked",
         "edx.bi.app.logistration.signin.clicked"
     ),
     USER_SIGN_IN_CLICKED(
-        "Logistration:User Log in Clicked",
+        "Logistration_User_Log_in_Clicked",
         "edx.bi.app.logistration.user.signin.clicked"
     ),
     SIGN_IN_SUCCESS(
-        "Logistration:Log in Success",
+        "Logistration_Log_in_Success",
         "edx.bi.app.user.signin.success"
     ),
     FORGOT_PASSWORD_CLICKED(
-        "Logistration:Forgot Password Clicked",
+        "Logistration_Forgot_Password_Clicked",
         "edx.bi.app.logistration.forgot_password.clicked"
     ),
     RESET_PASSWORD_CLICKED(
-        "Logistration:Reset Password Clicked",
+        "Logistration_Reset_Password_Clicked",
         "edx.bi.app.user.reset_password.clicked"
     ),
     RESET_PASSWORD_SUCCESS(
-        "Logistration:Reset Password Success",
+        "Logistration_Reset_Password_Success",
         "edx.bi.app.user.reset_password.success"
     ),
 }

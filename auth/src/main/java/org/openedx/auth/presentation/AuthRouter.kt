@@ -22,7 +22,8 @@ interface AuthRouter {
         courseId: String?,
         infoType: String?,
         email: String? = null,
-        name: String? = null
+        name: String? = null,
+        token: String? = null
     )
 
     fun navigateToRestorePassword(fm: FragmentManager)

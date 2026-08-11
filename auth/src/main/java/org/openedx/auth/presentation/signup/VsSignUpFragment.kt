@@ -26,7 +26,8 @@ class VsSignUpFragment : Fragment() {
             requireArguments().getString(ARG_COURSE_ID, ""),
             requireArguments().getString(ARG_INFO_TYPE, ""),
             requireArguments().getString(ARG_EMAIL, ""),
-            requireArguments().getString(ARG_NAME, "")
+            requireArguments().getString(ARG_NAME, ""),
+            requireArguments().getString(ARG_TOKEN, "")
         )
     }
     private val signUpViewModel by viewModel<SignUpViewModel> {
@@ -61,7 +62,16 @@ class VsSignUpFragment : Fragment() {
                         }
                     },
                     onRegisterClick = { email, name, password, role, gender, termsOfService, honorCode ->
-                        viewModel.register(email, name, password, role, gender, termsOfService, honorCode, signUpUiState.socialAuth)
+                        viewModel.register(
+                            email,
+                            name,
+                            password,
+                            role,
+                            gender,
+                            termsOfService,
+                            honorCode,
+                            uiState.socialAuth ?: signUpUiState.socialAuth
+                        )
                     },
                     onSocialRegisterClick = { authType ->
                         signUpViewModel.socialAuth(this@VsSignUpFragment, authType)
@@ -141,19 +151,22 @@ class VsSignUpFragment : Fragment() {
         private const val ARG_INFO_TYPE = "info_type"
         private const val ARG_EMAIL = "email"
         private const val ARG_NAME = "name"
+        private const val ARG_TOKEN = "token"
 
         fun newInstance(
             courseId: String?,
             infoType: String?,
             email: String? = null,
-            name: String? = null
+            name: String? = null,
+            token: String? = null
         ): VsSignUpFragment {
             val fragment = VsSignUpFragment()
             fragment.arguments = bundleOf(
                 ARG_COURSE_ID to courseId,
                 ARG_INFO_TYPE to infoType,
                 ARG_EMAIL to email,
-                ARG_NAME to name
+                ARG_NAME to name,
+                ARG_TOKEN to token
             )
             return fragment
         }

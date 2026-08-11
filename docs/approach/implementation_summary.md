@@ -360,8 +360,23 @@ This document outlines the recent changes made to the project to address build i
 
 ### Corrected Registration Data
 - **Social Provider Logic**: Fixed a bug in `VsSignUpViewModel.kt` where the `social_auth_provider` was being sent as `null` during social registration. It now correctly passes the provider name (e.g., "Continue with Google"), ensuring the server accepts the social signup.
-- **Validation Completeness**: Ensured the `password` field is included in the registration validation step for standard (non-social) signups, preventing silent validation failures.
-
-### Robust API Error Handling
-- **Repository Integration**: Updated `AuthRepository.kt` to use the `.handleResponse()` helper in the `registerVs` method. This ensures that any non-success responses from the registration API (like "User already exists" or "Invalid data") are correctly caught and thrown as exceptions rather than being ignored.
+- **Validation Completeness**: Updated `VsSignUpViewModel.kt` to include `access_token`, `provider`, and `client_id` in the registration validation step for social signups. This informs the server that it's a social registration, bypassing the mandatory password requirement and preventing "password too short" errors.
+- **Robust API Error Handling**: Updated `AuthRepository.kt` to use the `.handleResponse()` helper in the `registerVs` method. This ensures that any non-success responses from the registration API (like "User already exists" or "Invalid data") are correctly caught and thrown as exceptions rather than being ignored.
 - **User Feedback**: With proper exception propagation, the UI now correctly shows meaningful error messages in a SnackBar when registration fails, rather than leaving the user stuck on the signup screen.
+
+## 32. Social Auth Redirection and Username Fixes
+
+### Persistence of Social Identity
+- **Access Token Forwarding**: Updated `AuthRouter.kt` and `AppRouter.kt` to include the `accessToken` in the `navigateToSignUp` navigation event.
+- **SignIn Redirection**: Modified `SignInViewModel.kt` to capture the Google/Social token upon a failed token exchange (indicating a new user) and forward it to the signup screen.
+- **Signup Initialization**: Refactored `VsSignUpFragment.kt` and `VsSignUpViewModel.kt` to accept and utilize this `initialToken`, ensuring the registration API call has the necessary social credentials.
+
+### Robust Username Generation
+- **Valid Social Usernames**: Improved the username generation logic in `VsSignUpViewModel.kt` for social signups. It now extracts the alphanumeric prefix from the email, preventing the full email address (e.g., `user@gmail.com`) from being sent as a username, which previously caused server validation failures.
+## 33. Dependency Injection Fixes
+
+### VsSignUpViewModel Configuration
+- Updated `ScreenModule.kt` to correctly pass the `initialToken` parameter to `VsSignUpViewModel`.
+- Fixed a compilation error where the `VsSignUpViewModel` Koin definition was missing the new `token` parameter added during the social auth refactoring.
+- Updated the `viewModel` lambda to accept `token` as a parameter and pass it to the constructor.
+

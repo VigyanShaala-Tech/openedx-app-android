@@ -39,13 +39,14 @@ class VsSignUpViewModel(
     val infoType: String?,
     val initialEmail: String?,
     val initialName: String?,
+    val initialToken: String?,
 ) : BaseViewModel() {
 
     private val _uiState = MutableStateFlow(VsSignUpUIState(
         tosUrl = config.getAgreement(Locale.getDefault().language).tosUrl,
         socialAuth = if (!initialEmail.isNullOrBlank() || !initialName.isNullOrBlank()) {
             SocialAuthResponse(
-                accessToken = "",
+                accessToken = initialToken ?: "",
                 name = initialName ?: "",
                 email = initialEmail ?: "",
                 authType = AuthType.GOOGLE // Assuming Google for now as per requirement
@@ -79,8 +80,9 @@ class VsSignUpViewModel(
         gender: String,
         termsOfService: Boolean,
         honorCode: Boolean,
-        socialAuth: SocialAuthResponse? = null
+        providedSocialAuth: SocialAuthResponse? = null
     ) {
+        val socialAuth = providedSocialAuth ?: uiState.value.socialAuth
         _uiState.update { it.copy(isButtonLoading = true) }
         viewModelScope.launch {
             try {
@@ -95,13 +97,17 @@ class VsSignUpViewModel(
                     ApiConstants.NAME to name,
                     "username" to username,
                     ApiConstants.EMAIL to email,
-                    ApiConstants.RegistrationFields.HONOR_CODE to honorCode.toString(),
-                    "terms_of_service" to termsOfService.toString(),
+                    ApiConstants.RegistrationFields.HONOR_CODE to "true",
+                    "terms_of_service" to "true",
                     "user_role" to userRole,
                     "gender" to gender
                 )
                 if (socialAuth == null) {
                     mapFields[ApiConstants.PASSWORD] = password
+                } else {
+                    mapFields[ApiConstants.ACCESS_TOKEN] = socialAuth.accessToken
+                    mapFields[ApiConstants.PROVIDER] = socialAuth.authType.postfix
+                    mapFields[ApiConstants.CLIENT_ID] = config.getOAuthClientId()
                 }
                 val validationFields = interactor.validateRegistrationFields(mapFields)
                 if (validationFields.hasValidationError()) {
@@ -128,13 +134,13 @@ class VsSignUpViewModel(
                     name = name,
                     password = if (socialAuth != null) null else password,
                     phoneNumber = null,
-                    termsOfService = termsOfService,
-                    honorCode = honorCode,
+                    termsOfService = true,
+                    honorCode = true,
                     userRole = userRole.takeIf { it.isNotBlank() },
                     username = username,
                     verificationKey = null,
                     gender = gender,
-                    socialAuthProvider = if (socialAuth != null) socialProvider else null,
+                    socialAuthProvider = if (socialAuth != null) null else socialProvider,
                     totalRegistrationTime = String.format(Locale.US, "%.3f", totalTime),
                     accessToken = socialAuth?.accessToken,
                     provider = socialAuth?.authType?.postfix,

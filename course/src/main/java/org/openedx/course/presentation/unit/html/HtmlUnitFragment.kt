@@ -240,8 +240,9 @@ fun HtmlUnitView(
 
         val configuration = LocalConfiguration.current
 
+        val isMeetingUrl = url.contains("zoom.us") || url.contains("/meeting/") || url.contains("/join/")
         val bottomPadding =
-            if (configuration.orientation == Configuration.ORIENTATION_PORTRAIT) {
+            if (configuration.orientation == Configuration.ORIENTATION_PORTRAIT && !isMeetingUrl) {
                 72.dp
             } else {
                 0.dp

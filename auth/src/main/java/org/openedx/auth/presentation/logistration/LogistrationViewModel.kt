@@ -194,7 +194,21 @@ class LogistrationViewModel(
                     level = level,
                     subject = subject
                 )
-                val mapped = resp.results.map { c ->
+
+                // Client-side ranking: Prioritize exact/substring matches in name or description
+                val sortedResults = if (!searchTerm.isNullOrBlank()) {
+                    resp.results.sortedByDescending { c ->
+                        var score = 0
+                        if (c.name.contains(searchTerm, ignoreCase = true)) score += 10
+                        if (c.short_description?.contains(searchTerm, ignoreCase = true) == true) score += 5
+                        if (c.name.startsWith(searchTerm, ignoreCase = true)) score += 10
+                        score
+                    }
+                } else {
+                    resp.results
+                }
+
+                val mapped = sortedResults.map { c ->
                     Course(
                         id = c.id,
                         blocksUrl = "",

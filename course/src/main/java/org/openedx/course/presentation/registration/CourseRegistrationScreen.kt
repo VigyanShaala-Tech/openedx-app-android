@@ -567,29 +567,57 @@ fun SelectionDialog(
                         }
                         Divider(color = Color.LightGray)
                     }
-                    if (filteredOptions.isEmpty()) {
+
+                    if (allowOther) {
+                        item(key = "other_option") {
+                            Row(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .clickable {
+                                        if (isMultiSelect) {
+                                            if (selectedValues.contains("other")) {
+                                                selectedValues.remove("other")
+                                            } else if (selectedValues.size < maxSelections) {
+                                                selectedValues.add("other")
+                                            }
+                                        } else {
+                                            onSelect("other")
+                                        }
+                                    }
+                                    .padding(vertical = 16.dp, horizontal = 8.dp),
+                                verticalAlignment = Alignment.CenterVertically
+                            ) {
+                                if (isMultiSelect) {
+                                    Checkbox(
+                                        checked = selectedValues.contains("other"),
+                                        onCheckedChange = null,
+                                        colors = CheckboxDefaults.colors(checkedColor = MaterialTheme.appColors.primary)
+                                    )
+                                    Spacer(modifier = Modifier.width(8.dp))
+                                }
+                                Text(
+                                    text = stringResource(id = org.openedx.core.R.string.core_other),
+                                    style = MaterialTheme.appTypography.bodyMedium.copy(fontWeight = FontWeight.Bold),
+                                    color = MaterialTheme.appColors.primary
+                                )
+                            }
+                            Divider(color = Color.LightGray)
+                        }
+                    }
+
+                    if (filteredOptions.isEmpty() && !allowOther) {
                         item {
-                            Column(
+                            Box(
                                 modifier = Modifier
                                     .fillMaxWidth()
                                     .padding(vertical = 32.dp),
-                                horizontalAlignment = Alignment.CenterHorizontally
+                                contentAlignment = Alignment.Center
                             ) {
                                 Text(
                                     text = stringResource(id = org.openedx.core.R.string.core_no_results_found),
                                     style = MaterialTheme.appTypography.bodyMedium,
                                     color = Color.Gray
                                 )
-                                if (allowOther) {
-                                    Spacer(modifier = Modifier.height(16.dp))
-                                    Button(
-                                        onClick = { onSelect("other") },
-                                        colors = ButtonDefaults.buttonColors(backgroundColor = MaterialTheme.appColors.primary),
-                                        shape = RoundedCornerShape(8.dp)
-                                    ) {
-                                        Text(text = stringResource(id = org.openedx.core.R.string.core_other), color = Color.White)
-                                    }
-                                }
                             }
                         }
                     }

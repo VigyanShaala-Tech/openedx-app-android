@@ -378,7 +378,7 @@ fun VsSignUpView(
                             fontWeight = FontWeight.Bold
                         )
                     ) {
-                        append(stringResource(id = R.string.auth_terms_of_service))
+                        append(" ${stringResource(id = R.string.auth_terms_of_service)}")
                     }
                 }
                 Text(

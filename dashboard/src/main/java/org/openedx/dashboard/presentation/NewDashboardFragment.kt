@@ -214,49 +214,59 @@ private fun NewDashboardScreenContent(
         return
     }
 
-    val statCards = uiState.summary.map {
-        val (icon, color) = when (it.icon) {
-            "faBookOpen" -> Icons.Filled.ImportContacts to Color(0xFF69AB4A)
-            "faCheckCircle" -> Icons.Filled.CheckCircle to Color(0xFF4CAF50)
-            "faChartLine" -> Icons.Filled.Alarm to Color(0xFF3F51B5)
-            "faAward" -> Icons.Filled.EmojiEvents to Color(0xFFFFA000)
-            else -> Icons.Filled.Book to MaterialTheme.appColors.primary
+    val primaryColor = MaterialTheme.appColors.primary
+    val statCards = remember(uiState.summary, primaryColor) {
+        uiState.summary.map {
+            val (icon, color) = when (it.icon) {
+                "faBookOpen" -> Icons.Filled.ImportContacts to Color(0xFF69AB4A)
+                "faCheckCircle" -> Icons.Filled.CheckCircle to Color(0xFF4CAF50)
+                "faChartLine" -> Icons.Filled.Alarm to Color(0xFF3F51B5)
+                "faAward" -> Icons.Filled.EmojiEvents to Color(0xFFFFA000)
+                else -> Icons.Filled.Book to primaryColor
+            }
+            StatCardData(icon, it.number.toString(), it.label, color)
         }
-        StatCardData(icon, it.number.toString(), it.label, color)
     }
 
-    val continueCourses = uiState.continueLearning.map { course ->
-        CourseCardData(
-            course.id,
-            course.title,
-            course.category ?: "",
-            sanitizeUrl(course.course_image),
-            course.progress
-        )
+    val continueCourses = remember(uiState.continueLearning) {
+        uiState.continueLearning.map { course ->
+            CourseCardData(
+                course.id,
+                course.title,
+                course.category ?: "",
+                sanitizeUrl(course.course_image),
+                course.progress
+            )
+        }
     }
-    val completedCourses = uiState.completed?.results?.map { course ->
-        CourseCardData(
-            course.id,
-            course.title,
-            course.category ?: "",
-            sanitizeUrl(course.course_image),
-            course.progress
-        )
-    } ?: emptyList()
-    val wishlistItems =
+    val completedCourses = remember(uiState.completed) {
+        uiState.completed?.results?.map { course ->
+            CourseCardData(
+                course.id,
+                course.title,
+                course.category ?: "",
+                sanitizeUrl(course.course_image),
+                course.progress
+            )
+        } ?: emptyList()
+    }
+    val wishlistItems = remember(uiState.wishlist) {
         uiState.wishlist?.results?.map { it.copy(image = sanitizeUrl(it.image)) } ?: emptyList()
+    }
 
     val achievements = uiState.achievements
 
-    val recommendations = uiState.recommended.map { rec ->
-        RecommendationData(
-            rec.id,
-            rec.title,
-            rec.category ?: "",
-            (rec.rating ?: 0).toString(),
-            rec.description ?: "",
-            sanitizeUrl(rec.image)
-        )
+    val recommendations = remember(uiState.recommended) {
+        uiState.recommended.map { rec ->
+            RecommendationData(
+                rec.id,
+                rec.title,
+                rec.category ?: "",
+                (rec.rating ?: 0).toString(),
+                rec.description ?: "",
+                sanitizeUrl(rec.image)
+            )
+        }
     }
 
     Box(modifier = Modifier.fillMaxSize()) {
@@ -274,92 +284,95 @@ private fun NewDashboardScreenContent(
                 verticalArrangement = Arrangement.spacedBy(16.dp)
             ) {
 
-            if (statCards.isNotEmpty()) {
-                item {
-                    val cards = statCards.take(4)
-                    Row(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .height(IntrinsicSize.Max),
-                        horizontalArrangement = Arrangement.spacedBy(12.dp)
-                    ) {
-                        cards.forEach { item ->
-                            Card(
-                                backgroundColor = MaterialTheme.appColors.background,
-                                elevation = 4.dp,
-                                shape = MaterialTheme.appShapes.cardShape,
-                                modifier = Modifier
-                                    .weight(1f)
-                                    .fillMaxHeight()
-                            ) {
-                                Column(
+                if (statCards.isNotEmpty()) {
+                    item(key = "stat_cards") {
+                        val cards = statCards.take(4)
+                        Row(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .height(IntrinsicSize.Max),
+                            horizontalArrangement = Arrangement.spacedBy(12.dp)
+                        ) {
+                            cards.forEach { item ->
+                                Card(
+                                    backgroundColor = MaterialTheme.appColors.background,
+                                    elevation = 4.dp,
+                                    shape = MaterialTheme.appShapes.cardShape,
                                     modifier = Modifier
-                                        .fillMaxWidth()
-                                        .padding(vertical = 16.dp, horizontal = 4.dp),
-                                    horizontalAlignment = Alignment.CenterHorizontally,
-                                    verticalArrangement = Arrangement.Center
+                                        .weight(1f)
+                                        .fillMaxHeight()
                                 ) {
-                                    Box(
+                                    Column(
                                         modifier = Modifier
-                                            .size(36.dp)
-                                            .background(
-                                                item.color.copy(alpha = 0.1f),
-                                                CircleShape
-                                            ),
-                                        contentAlignment = Alignment.Center
+                                            .fillMaxWidth()
+                                            .padding(vertical = 16.dp, horizontal = 4.dp),
+                                        horizontalAlignment = Alignment.CenterHorizontally,
+                                        verticalArrangement = Arrangement.Center
                                     ) {
-                                        Icon(
-                                            imageVector = item.icon,
-                                            contentDescription = null,
-                                            tint = item.color,
-                                            modifier = Modifier.size(20.dp)
+                                        Box(
+                                            modifier = Modifier
+                                                .size(36.dp)
+                                                .background(
+                                                    item.color.copy(alpha = 0.1f),
+                                                    CircleShape
+                                                ),
+                                            contentAlignment = Alignment.Center
+                                        ) {
+                                            Icon(
+                                                imageVector = item.icon,
+                                                contentDescription = null,
+                                                tint = item.color,
+                                                modifier = Modifier.size(20.dp)
+                                            )
+                                        }
+                                        Spacer(Modifier.height(12.dp))
+                                        Text(
+                                            text = item.value,
+                                            style = MaterialTheme.appTypography.titleLarge.copy(
+                                                fontWeight = FontWeight.Bold,
+                                                fontSize = 22.sp
+                                            ),
+                                            color = MaterialTheme.appColors.textDark
+                                        )
+                                        Spacer(Modifier.height(4.dp))
+                                        Text(
+                                            text = item.label,
+                                            style = MaterialTheme.appTypography.labelSmall.copy(
+                                                fontSize = 10.sp
+                                            ),
+                                            color = MaterialTheme.appColors.textPrimary,
+                                            textAlign = TextAlign.Center,
+                                            maxLines = 2,
+                                            overflow = TextOverflow.Ellipsis
                                         )
                                     }
-                                    Spacer(Modifier.height(12.dp))
-                                    Text(
-                                        text = item.value,
-                                        style = MaterialTheme.appTypography.titleLarge.copy(
-                                            fontWeight = FontWeight.Bold,
-                                            fontSize = 22.sp
-                                        ),
-                                        color = MaterialTheme.appColors.textDark
-                                    )
-                                    Spacer(Modifier.height(4.dp))
-                                    Text(
-                                        text = item.label,
-                                        style = MaterialTheme.appTypography.labelSmall.copy(fontSize = 10.sp),
-                                        color = MaterialTheme.appColors.textPrimary,
-                                        textAlign = TextAlign.Center,
-                                        maxLines = 2,
-                                        overflow = TextOverflow.Ellipsis
+                                }
+                            }
+                            if (cards.size < 4) {
+                                repeat(4 - cards.size) {
+                                    Spacer(
+                                        modifier = Modifier
+                                            .weight(1f)
+                                            .height(110.dp)
                                     )
                                 }
                             }
                         }
-                        if (cards.size < 4) {
-                            repeat(4 - cards.size) {
-                                Spacer(
-                                    modifier = Modifier
-                                        .weight(1f)
-                                        .height(110.dp)
-                                )
-                            }
-                        }
                     }
                 }
-            }
 
-                item {
+                item(key = "my_courses_header") {
                     Text(
                         text = stringResource(R.string.dashboard_my_courses),
                         style = MaterialTheme.appTypography.titleMedium.copy(
                             fontWeight = FontWeight.Bold,
                             color = MaterialTheme.appColors.textDark,
-//                            fontSize = 20.sp
                         ),
                         modifier = Modifier.padding(top = 8.dp)
                     )
-                    Spacer(Modifier.height(12.dp))
+                }
+
+                item(key = "course_tabs") {
                     CoursesTabs(
                         continueCourses = continueCourses,
                         wishlistItems = wishlistItems,
@@ -373,7 +386,7 @@ private fun NewDashboardScreenContent(
                 }
 
                 if (achievements.isNotEmpty()) {
-                    item {
+                    item(key = "achievements_section") {
                         SectionHeader(
                             title = stringResource(R.string.dashboard_my_achievements),
                             showViewAll = true,
@@ -384,7 +397,10 @@ private fun NewDashboardScreenContent(
                             modifier = Modifier.fillMaxWidth(),
                             horizontalArrangement = Arrangement.spacedBy(12.dp)
                         ) {
-                            items(achievements) { a ->
+                            items(
+                                items = achievements,
+                                key = { it.id }
+                            ) { a ->
                                 Card(
                                     backgroundColor = MaterialTheme.appColors.surface,
                                     elevation = 0.dp,
@@ -430,17 +446,18 @@ private fun NewDashboardScreenContent(
                 }
 
                 if (recommendations.isNotEmpty()) {
-                    item {
+                    item(key = "recommendations_header") {
                         SectionHeader(
                             title = stringResource(R.string.dashboard_recommended_for_you),
                             showViewAll = true,
                             onViewAllClick = onRecommendedViewAllClick
                         )
-                        Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
-                            recommendations.forEach { r ->
-                                RecommendationItem(r) { onRecommendationClick(r.id) }
-                            }
-                        }
+                    }
+                    items(
+                        items = recommendations,
+                        key = { it.id }
+                    ) { r ->
+                        RecommendationItem(r) { onRecommendationClick(r.id) }
                     }
                 }
             }

@@ -9,6 +9,7 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
@@ -18,10 +19,10 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.widthIn
-import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.Card
 import androidx.compose.material.Icon
 import androidx.compose.material.MaterialTheme
@@ -257,122 +258,138 @@ private fun CourseHomeUI(
             ) {
                 when (uiState) {
                     is CourseHomeUIState.CourseData -> {
-                        Column(
+                        LazyColumn(
                             modifier = Modifier
                                 .fillMaxSize()
-                                .verticalScroll(rememberScrollState())
                                 .padding(horizontal = 16.dp),
-                            verticalArrangement = Arrangement.spacedBy(16.dp)
+                            state = rememberLazyListState(),
+                            verticalArrangement = Arrangement.spacedBy(16.dp),
+                            contentPadding = PaddingValues(top = 8.dp, bottom = 24.dp)
                         ) {
-                            Spacer(modifier = Modifier.height(8.dp))
                             if (uiState.datesBannerInfo.isBannerAvailableForDashboard()) {
-                                if (windowSize.isTablet) {
-                                    CourseDatesBannerTablet(
-                                        banner = uiState.datesBannerInfo,
-                                        resetDates = onResetDatesClick,
-                                    )
-                                } else {
-                                    CourseDatesBanner(
-                                        banner = uiState.datesBannerInfo,
-                                        resetDates = onResetDatesClick,
-                                    )
+                                item(key = "dates_banner") {
+                                    if (windowSize.isTablet) {
+                                        CourseDatesBannerTablet(
+                                            banner = uiState.datesBannerInfo,
+                                            resetDates = onResetDatesClick,
+                                        )
+                                    } else {
+                                        CourseDatesBanner(
+                                            banner = uiState.datesBannerInfo,
+                                            resetDates = onResetDatesClick,
+                                        )
+                                    }
                                 }
                             }
 
                             val certificate = uiState.courseStructure.certificate
                             if (certificate?.isCertificateEarned() == true) {
-                                CourseMessage(
-                                    modifier = Modifier.fillMaxWidth(),
-                                    icon = painterResource(R.drawable.course_ic_certificate),
-                                    message = stringResource(
-                                        R.string.course_you_earned_certificate,
-                                        uiState.courseStructure.name
-                                    ),
-                                    action = stringResource(R.string.course_view_certificate),
-                                    onActionClick = {
-                                        onCertificateClick(
-                                            certificate.certificateURL ?: ""
-                                        )
-                                    }
-                                )
+                                item(key = "certificate") {
+                                    CourseMessage(
+                                        modifier = Modifier.fillMaxWidth(),
+                                        icon = painterResource(R.drawable.course_ic_certificate),
+                                        message = stringResource(
+                                            R.string.course_you_earned_certificate,
+                                            uiState.courseStructure.name
+                                        ),
+                                        action = stringResource(R.string.course_view_certificate),
+                                        onActionClick = {
+                                            onCertificateClick(
+                                                certificate.certificateURL ?: ""
+                                            )
+                                        }
+                                    )
+                                }
                             }
 
                             if (uiState.resumeComponent != null) {
-                                ResumeButton(
-                                    displayName = uiState.resumeUnitTitle,
-                                    onClick = { onResumeClick(uiState.resumeComponent.id) }
-                                )
+                                item(key = "resume") {
+                                    ResumeButton(
+                                        displayName = uiState.resumeUnitTitle,
+                                        onClick = { onResumeClick(uiState.resumeComponent.id) }
+                                    )
+                                }
                             }
 
                             // Live Sessions Card
-                            DashboardCard {
-                                LiveSessionsCardContent(
-                                    isHomeScreen = true,
-                                    uiState = uiState,
-                                    onJoinClick = onJoinClick,
-                                    onJoinOngoingClick = onJoinOngoingClick,
-                                    onViewAllLiveSessionsClick = onViewAllLiveSessionsClick
-                                )
+                            item(key = "live_sessions") {
+                                DashboardCard {
+                                    LiveSessionsCardContent(
+                                        isHomeScreen = true,
+                                        uiState = uiState,
+                                        onJoinClick = onJoinClick,
+                                        onJoinOngoingClick = onJoinOngoingClick,
+                                        onViewAllLiveSessionsClick = onViewAllLiveSessionsClick
+                                    )
+                                }
                             }
 
                             // Course Completion Card
-                            DashboardCard {
-                                CourseCompletionHomePagerCardContent(
-                                    uiState = uiState,
-                                    onViewAllContentClick = {
-                                        onViewAllContentClick()
-                                        onNavigateToContent(CourseContentTab.ALL)
-                                    },
-                                    onDownloadClick = onDownloadClick,
-                                    onSubSectionClick = onSubSectionClick
-                                )
+                            item(key = "course_completion") {
+                                DashboardCard {
+                                    CourseCompletionHomePagerCardContent(
+                                        uiState = uiState,
+                                        onViewAllContentClick = {
+                                            onViewAllContentClick()
+                                            onNavigateToContent(CourseContentTab.ALL)
+                                        },
+                                        onDownloadClick = onDownloadClick,
+                                        onSubSectionClick = onSubSectionClick
+                                    )
+                                }
                             }
 
                             // Announcements Card
-                            DashboardCard {
-                                CourseAnnouncementsCardContent(
-                                    announcements = uiState.announcements,
-                                    onViewAllAnnouncementsClick = onViewAllAnnouncementsClick
-                                )
+                            item(key = "announcements") {
+                                DashboardCard {
+                                    CourseAnnouncementsCardContent(
+                                        announcements = uiState.announcements,
+                                        onViewAllAnnouncementsClick = onViewAllAnnouncementsClick
+                                    )
+                                }
                             }
 
                             // Videos Card
-                            DashboardCard {
-                                VideosHomePagerCardContent(
-                                    uiState = uiState,
-                                    onVideoClick = onVideoClick,
-                                    onViewAllVideosClick = {
-                                        onViewAllVideosClick()
-                                        onNavigateToContent(CourseContentTab.VIDEOS)
-                                    }
-                                )
+                            item(key = "videos") {
+                                DashboardCard {
+                                    VideosHomePagerCardContent(
+                                        uiState = uiState,
+                                        onVideoClick = onVideoClick,
+                                        onViewAllVideosClick = {
+                                            onViewAllVideosClick()
+                                            onNavigateToContent(CourseContentTab.VIDEOS)
+                                        }
+                                    )
+                                }
                             }
 
                             // Assignments Card
-                            DashboardCard {
-                                AssignmentsHomePagerCardContent(
-                                    uiState = uiState,
-                                    onAssignmentClick = onAssignmentClick,
-                                    getBlockParent = getBlockParent,
-                                    onViewAllAssignmentsClick = {
-                                        onViewAllAssignmentsClick()
-                                        onNavigateToContent(CourseContentTab.ASSIGNMENTS)
-                                    }
-                                )
+                            item(key = "assignments") {
+                                DashboardCard {
+                                    AssignmentsHomePagerCardContent(
+                                        uiState = uiState,
+                                        onAssignmentClick = onAssignmentClick,
+                                        getBlockParent = getBlockParent,
+                                        onViewAllAssignmentsClick = {
+                                            onViewAllAssignmentsClick()
+                                            onNavigateToContent(CourseContentTab.ASSIGNMENTS)
+                                        }
+                                    )
+                                }
                             }
 
                             // Grades Card
-                            DashboardCard {
-                                GradesHomePagerCardContent(
-                                    uiState = uiState,
-                                    onViewProgressClick = {
-                                        onViewProgressClick()
-                                        onNavigateToProgress()
-                                    }
-                                )
+                            item(key = "grades") {
+                                DashboardCard {
+                                    GradesHomePagerCardContent(
+                                        uiState = uiState,
+                                        onViewProgressClick = {
+                                            onViewProgressClick()
+                                            onNavigateToProgress()
+                                        }
+                                    )
+                                }
                             }
-                            
-                            Spacer(modifier = Modifier.height(24.dp))
                         }
                     }
 

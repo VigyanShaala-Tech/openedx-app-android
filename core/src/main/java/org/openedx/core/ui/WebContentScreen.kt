@@ -60,10 +60,11 @@ fun WebContentScreen(
     canShowBackBtn: Boolean = true,
 ) {
     val scaffoldState = rememberScaffoldState()
+    val isMeetingUrl = contentUrl?.let { it.contains("zoom.us") || it.contains("/meeting/") || it.contains("/join/") } ?: false
     Scaffold(
         modifier = Modifier
             .fillMaxSize()
-            .padding(bottom = 24.dp)
+            .then(if (isMeetingUrl) Modifier else Modifier.padding(bottom = 24.dp))
             .semantics {
                 testTagsAsResourceId = true
             },

@@ -278,6 +278,10 @@ This document outlines the recent changes made to the project to address build i
 **Solution:**
 - **Incremental Loading**: Refactored `CourseHomeViewModel.kt` to fetch essential data (Course Structure and Status) first for an immediate UI render. All other data (Announcements, Live Sessions, Progress, etc.) is now fetched in parallel and populates the UI cards incrementally as it arrives.
 - **Pager Optimization**: Reduced `beyondViewportPageCount` to 1 in course and content pagers.
+- **Lazy List Optimization**: 
+    - Converted `CourseHomeScreen.kt` from a standard `Column` to a `LazyColumn` with unique item keys. This ensures only visible dashboard cards are composed, significantly improving scrolling performance.
+    - Updated `LogistrationFragment.kt` (Discover Courses) to use stable item keys (`it.id`) in its course list, reducing redundant recompositions and layout passes.
+    - Moved expensive list creations (like onboarding carousel items) inside `remember` blocks to prevent re-allocation during every scroll frame.
 - **App-wide Navigation Optimization**: Set `offscreenPageLimit = 1` for main app ViewPagers to prevent unnecessary section initialization.
 - **Improved Empty/Error States**: Replaced the generic "No data" screen with a descriptive "Loading course data..." state and a functional "Retry" button in case of failure.
 

@@ -35,6 +35,7 @@ fun WebView.applyFullAccessSettings(url: String): Boolean {
         if (url.contains("zoom.us") || url.contains("/meeting/") || url.contains("/join/")) {
             userAgentString = AppDataConstants.MOBILE_CHROME_USER_AGENT
             isSpecializedUA = true
+            setSupportMultipleWindows(false) // Zoom 'More' button needs single window behavior in some environments
         } else if (url.contains("google-calendar")) {
             userAgentString = AppDataConstants.DESKTOP_USER_AGENT
             isSpecializedUA = true

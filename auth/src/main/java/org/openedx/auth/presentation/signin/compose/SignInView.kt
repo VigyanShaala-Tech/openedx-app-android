@@ -159,7 +159,7 @@ internal fun LoginScreen(
                     )
                     Spacer(modifier = Modifier.width(12.dp))
                     Text(
-                        text = stringResource(id = R.string.auth_continue_google),
+                        text = stringResource(id = R.string.auth_google),
                         style = MaterialTheme.appTypography.bodyLarge.copy(
                             fontWeight = FontWeight.Medium,
                             color = MaterialTheme.appColors.textDark

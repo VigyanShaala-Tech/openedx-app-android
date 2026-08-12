@@ -346,19 +346,22 @@ This document outlines the recent changes made to the project to address build i
 - Clicking this item allows the user to use their search query as a manual entry, solving the issue of being stuck when a specific university or college is not in the predefined list.
 - This implementation follows the project architecture by using central theme colors and string resources.
 
-## 30. Zoom Meeting Experience Optimization
+## 30. WebView "Google Chrome" Compatibility Optimization
 
 ### Global WebView "Full Access" Optimization
 - Centralized WebView configuration into a new extension helper: `applyFullAccessSettings(url)` in `ViewExt.kt`.
 - **Comprehensive Support across App**: Applied these optimized settings to `HtmlUnitFragment` (Course Units), `CatalogWebView` (Discovery), and `WebContentScreen` (General Web Content).
-- **Mobile Chrome Experience**: All meeting-related URLs (`zoom.us`, `/meeting/`, `/join/`) now consistently use a modern `MOBILE_CHROME_USER_AGENT`. 
-- **Pure Identity**: Implemented logic to ensure meeting links use a "pure" Mobile Chrome User Agent without any app-specific identifiers appended, preventing platform detection from downgrading the UI.
+- **Mobile Chrome Identity**: Standardized `userAgentString` to a modern `MOBILE_CHROME_USER_AGENT` for **all** URLs. This ensures websites recognize the app as a full Google Chrome browser and provide their complete mobile experience.
+- **Visual Stability**: Set `textZoom = 100` to prevent Android's system font size scaling from breaking responsive web layouts.
+- **Interactive Parity**:
+    - Enabled `builtInZoomControls = true` with `displayZoomControls = false` to support pinch-to-zoom without the dated UI buttons.
+    - Set `cacheMode = WebSettings.LOAD_DEFAULT` for optimal performance and cookie persistence.
 - **Advanced Capabilities**:
-    - **Hardware Acceleration**: Enabled `android:hardwareAccelerated="true"` in the `AndroidManifest.xml` to ensure complex UIs (like Zoom's chat and overlays) render smoothly.
-    - **Multiple Windows (Popups)**: Enabled `setSupportMultipleWindows(true)` and implemented `onCreateWindow` in `WebChromeClient` to support web apps that use secondary windows for authentication or specialized features.
-    - **Third-Party Cookies**: Enabled support for cross-domain cookies, ensuring feature parity for embedded meeting clients.
-    - **Standardized Prompts**: Automatically handle permission prompts like geolocation across all web screens.
-- **Universal Media Auto-Playback**: Standardized `mediaPlaybackRequiresUserGesture = false` app-wide to ensure audio/video starts automatically.
+    - **Hardware Acceleration**: Enabled `android:hardwareAccelerated="true"` in the `AndroidManifest.xml` to ensure complex UIs render smoothly.
+    - **Multiple Windows (Popups)**: Enabled `setSupportMultipleWindows(true)` by default to support auth popups and secondary windows.
+    - **Third-Party Cookies**: Enabled support for cross-domain cookies across all versions from Lollipop onwards.
+- **Meeting Specific Logic**: Specifically disabled `setSupportMultipleWindows` for Zoom/Meeting links to ensure the "More" menu and "Leave" confirmation modals function correctly within the primary view.
+
 
 ## 31. Registration and Social Auth Stability Fixes
 

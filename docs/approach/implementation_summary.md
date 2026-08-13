@@ -387,3 +387,14 @@ This document outlines the recent changes made to the project to address build i
 - Fixed a compilation error where the `VsSignUpViewModel` Koin definition was missing the new `token` parameter added during the social auth refactoring.
 - Updated the `viewModel` lambda to accept `token` as a parameter and pass it to the constructor.
 
+## 34. Zoom Exit Confirmation Prompt
+
+### Accidental Exit Prevention
+- Implemented a confirmation prompt when the user attempts to leave a Zoom live session by pressing the back button (both in-app and hardware/gesture back).
+- **Meeting Detection**: Added logic in `CourseUnitContainerFragment` to detect if the current active unit is a Zoom meeting or a meeting-related URL.
+- **Custom Dialog**: Created `MeetingExitFragmentDialog` which displays the message: "Are you sure you want to leave the meeting?" with "Yes" and "No" options.
+- **Navigation Flow**:
+    - Selecting **Yes**: Confirms the exit and navigates the user back to the Course Outline screen.
+    - Selecting **No**: Dismisses the dialog and keeps the user in the live session without interruption.
+- **Centralized Handling**: Integrated this logic into `handleBackNavigation()` which is called by both the Android back press callback and the custom toolbar back button.
+

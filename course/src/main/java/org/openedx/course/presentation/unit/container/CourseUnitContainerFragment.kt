@@ -55,6 +55,8 @@ import org.openedx.course.databinding.FragmentCourseUnitContainerBinding
 import org.openedx.course.presentation.ChapterEndFragmentDialog
 import org.openedx.course.presentation.CourseRouter
 import org.openedx.course.presentation.DialogListener
+import org.openedx.course.presentation.MeetingExitDialogListener
+import org.openedx.course.presentation.MeetingExitFragmentDialog
 import org.openedx.course.presentation.ui.CourseUnitToolbar
 import org.openedx.course.presentation.ui.CourseVideoItem
 import org.openedx.course.presentation.ui.HorizontalPageIndicator
@@ -129,6 +131,31 @@ class CourseUnitContainerFragment : Fragment(R.layout.fragment_course_unit_conta
     // was replaced with another using the 'FragmentManager.replace()' function
     private val onBackPressedCallback = object : OnBackPressedCallback(true) {
         override fun handleOnBackPressed() {
+            handleBackNavigation()
+        }
+    }
+
+    private fun isCurrentBlockMeeting(): Boolean {
+        val currentBlock = viewModel.currentBlock.value
+        return currentBlock?.isZoomxBlock == true ||
+                currentBlock?.studentViewUrl?.contains("zoom.us") == true ||
+                currentBlock?.studentViewUrl?.contains("/meeting/") == true ||
+                currentBlock?.studentViewUrl?.contains("/join/") == true
+    }
+
+    private fun handleBackNavigation() {
+        if (isCurrentBlockMeeting()) {
+            val dialog = MeetingExitFragmentDialog.newInstance()
+            dialog.listener = object : MeetingExitDialogListener {
+                override fun onConfirm() {
+                    navigateToParentFragment()
+                }
+            }
+            dialog.show(
+                requireActivity().supportFragmentManager,
+                MeetingExitFragmentDialog::class.simpleName
+            )
+        } else {
             navigateToParentFragment()
         }
     }
@@ -272,7 +299,7 @@ class CourseUnitContainerFragment : Fragment(R.layout.fragment_course_unit_conta
 
             CourseUnitToolbar(
                 title = title,
-                onBackClick = { navigateToParentFragment() }
+                onBackClick = { handleBackNavigation() }
             )
         }
     }

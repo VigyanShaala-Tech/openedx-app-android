@@ -54,6 +54,7 @@ import org.openedx.core.system.connection.NetworkConnection
 import org.openedx.core.system.notifier.CourseNotifier
 import org.openedx.core.system.notifier.DiscoveryNotifier
 import org.openedx.core.system.notifier.DownloadNotifier
+import org.openedx.core.system.notifier.MeetingNotifier
 import org.openedx.core.system.notifier.VideoNotifier
 import org.openedx.core.system.notifier.app.AppNotifier
 import org.openedx.core.system.notifier.calendar.CalendarNotifier
@@ -118,6 +119,7 @@ val appModule = module {
     single { VideoNotifier() }
     single { DiscoveryNotifier() }
     single { CalendarNotifier() }
+    single { MeetingNotifier() }
 
     single { AppRouter() }
     single<AuthRouter> { get<AppRouter>() }

@@ -83,14 +83,7 @@ fun LiveSessionsCardContent(
             OngoingSessionItem(
                 session = ongoingSession,
                 onJoinClick = { ongoingSession.link?.let {
-                    try {
-                        val joinUrl = Uri.parse(it).buildUpon()
-                            .appendQueryParameter("isMobile", "true")
-                            .build().toString()
-                        onJoinOngoingClick(joinUrl)
-                    }catch (e: Exception){
                         onJoinOngoingClick(it)
-                    }
                     }
                 }
             )

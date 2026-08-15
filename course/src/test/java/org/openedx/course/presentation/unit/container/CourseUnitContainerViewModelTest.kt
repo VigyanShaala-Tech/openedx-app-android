@@ -311,6 +311,7 @@ class CourseUnitContainerViewModelTest {
         )
         coEvery { interactor.getCourseStructure(any()) } returns courseStructure
         coEvery { interactor.getCourseStructureForVideos(any()) } returns courseStructure
+        coEvery { interactor.markTopicCompleted(any(), any()) } returns Unit
 
         viewModel.loadBlocks("id3")
 
@@ -337,6 +338,7 @@ class CourseUnitContainerViewModelTest {
         )
         coEvery { interactor.getCourseStructure(any()) } returns courseStructure
         coEvery { interactor.getCourseStructureForVideos(any()) } returns courseStructure
+        coEvery { interactor.markTopicCompleted(any(), any()) } returns Unit
 
         viewModel.loadBlocks("id1")
 
@@ -363,6 +365,7 @@ class CourseUnitContainerViewModelTest {
         )
         coEvery { interactor.getCourseStructure(any()) } returns courseStructure
         coEvery { interactor.getCourseStructureForVideos(any()) } returns courseStructure
+        coEvery { interactor.markTopicCompleted(any(), any()) } returns Unit
 
         viewModel.loadBlocks("id3")
 
@@ -389,6 +392,7 @@ class CourseUnitContainerViewModelTest {
         )
         coEvery { interactor.getCourseStructure("") } returns courseStructure
         coEvery { interactor.getCourseStructureForVideos("") } returns courseStructure
+        coEvery { interactor.markTopicCompleted(any(), any()) } returns Unit
 
         viewModel.loadBlocks("id")
 
@@ -415,6 +419,7 @@ class CourseUnitContainerViewModelTest {
         )
         coEvery { interactor.getCourseStructure(any()) } returns courseStructure
         coEvery { interactor.getCourseStructureForVideos(any()) } returns courseStructure
+        coEvery { interactor.markTopicCompleted(any(), any()) } returns Unit
 
         viewModel.loadBlocks("id3")
 

@@ -27,7 +27,20 @@ fun WebView.applyFullAccessSettings(url: String): Boolean {
         useWideViewPort = true
         databaseEnabled = true
         javaScriptCanOpenWindowsAutomatically = true
-        setSupportMultipleWindows(true)
+        setGeolocationEnabled(true)
+        saveFormData = true
+        mediaPlaybackRequiresUserGesture = false
+        
+        @Suppress("DEPRECATION")
+        allowFileAccessFromFileURLs = true
+        @Suppress("DEPRECATION")
+        allowUniversalAccessFromFileURLs = true
+        
+        // Browser-like capabilities
+        databaseEnabled = true
+        domStorageEnabled = true
+        loadWithOverviewMode = true
+        useWideViewPort = true
         setGeolocationEnabled(true)
         saveFormData = true
         
@@ -45,9 +58,14 @@ fun WebView.applyFullAccessSettings(url: String): Boolean {
         // This makes sites treat the WebView as a full Chrome browser
         userAgentString = AppDataConstants.MOBILE_CHROME_USER_AGENT
 
-        if (url.contains("zoom.us") || url.contains("/meeting/") || url.contains("/join/")) {
+        if (AppDataConstants.ZOOM_URL_PATTERNS.any { url.contains(it) }) {
+            userAgentString = AppDataConstants.DESKTOP_USER_AGENT
             isSpecializedUA = true
-            setSupportMultipleWindows(false) // Zoom 'More' button needs single window behavior in some environments
+            setSupportMultipleWindows(true)
+            javaScriptCanOpenWindowsAutomatically = true
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                safeBrowsingEnabled = false
+            }
         } else if (url.contains("google-calendar")) {
             userAgentString = AppDataConstants.DESKTOP_USER_AGENT
             isSpecializedUA = true

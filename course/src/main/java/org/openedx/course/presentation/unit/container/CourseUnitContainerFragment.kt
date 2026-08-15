@@ -1,7 +1,10 @@
 package org.openedx.course.presentation.unit.container
 
+import android.app.PictureInPictureParams
+import android.os.Build
 import android.os.Bundle
 import android.os.SystemClock
+import android.util.Rational
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -47,6 +50,7 @@ import org.koin.core.parameter.parametersOf
 import org.openedx.core.BlockType
 import org.openedx.core.domain.model.Block
 import org.openedx.core.presentation.global.InsetHolder
+import org.openedx.core.system.notifier.MeetingNotifier
 import org.openedx.core.ui.theme.OpenEdXTheme
 import org.openedx.core.ui.theme.appColors
 import org.openedx.core.ui.theme.appTypography
@@ -55,8 +59,8 @@ import org.openedx.course.databinding.FragmentCourseUnitContainerBinding
 import org.openedx.course.presentation.ChapterEndFragmentDialog
 import org.openedx.course.presentation.CourseRouter
 import org.openedx.course.presentation.DialogListener
-import org.openedx.course.presentation.MeetingExitDialogListener
-import org.openedx.course.presentation.MeetingExitFragmentDialog
+import org.openedx.core.presentation.dialog.MeetingExitDialogListener
+import org.openedx.core.presentation.dialog.MeetingExitFragmentDialog
 import org.openedx.course.presentation.ui.CourseUnitToolbar
 import org.openedx.course.presentation.ui.CourseVideoItem
 import org.openedx.course.presentation.ui.HorizontalPageIndicator
@@ -82,6 +86,8 @@ class CourseUnitContainerFragment : Fragment(R.layout.fragment_course_unit_conta
 
     private val router by inject<CourseRouter>()
 
+    private val meetingNotifier by inject<MeetingNotifier>()
+
     private var componentId: String = ""
 
     private lateinit var adapter: CourseUnitContainerAdapter
@@ -91,13 +97,7 @@ class CourseUnitContainerFragment : Fragment(R.layout.fragment_course_unit_conta
     private val onPageChangeCallback = object : ViewPager2.OnPageChangeCallback() {
         override fun onPageSelected(position: Int) {
             super.onPageSelected(position)
-            val blocks = viewModel.getUnitBlocks()
-            blocks.getOrNull(position)?.let { currentBlock ->
-                val encodedVideo = currentBlock.studentViewData?.encodedVideos
-                binding.mediaRouteButton.isVisible = currentBlock.type == BlockType.VIDEO &&
-                        encodedVideo?.hasNonYoutubeVideo == true &&
-                        !encodedVideo.videoUrl.endsWith(".m3u8")
-            }
+            binding.mediaRouteButton.isVisible = isMediaRouteButtonVisible()
         }
     }
 
@@ -127,20 +127,10 @@ class CourseUnitContainerFragment : Fragment(R.layout.fragment_course_unit_conta
         }
     }
 
-    // Start workaround to fix an issue when onDestroy is not called after one fragment
-    // was replaced with another using the 'FragmentManager.replace()' function
     private val onBackPressedCallback = object : OnBackPressedCallback(true) {
         override fun handleOnBackPressed() {
             handleBackNavigation()
         }
-    }
-
-    private fun isCurrentBlockMeeting(): Boolean {
-        val currentBlock = viewModel.currentBlock.value
-        return currentBlock?.isZoomxBlock == true ||
-                currentBlock?.studentViewUrl?.contains("zoom.us") == true ||
-                currentBlock?.studentViewUrl?.contains("/meeting/") == true ||
-                currentBlock?.studentViewUrl?.contains("/join/") == true
     }
 
     private fun handleBackNavigation() {
@@ -149,6 +139,18 @@ class CourseUnitContainerFragment : Fragment(R.layout.fragment_course_unit_conta
             dialog.listener = object : MeetingExitDialogListener {
                 override fun onConfirm() {
                     navigateToParentFragment()
+                }
+
+                override fun onMinimize() {
+                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                        val paramsBuilder = PictureInPictureParams.Builder()
+                            .setAspectRatio(Rational(16, 9))
+                        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+                            paramsBuilder.setAutoEnterEnabled(true)
+                            paramsBuilder.setSeamlessResizeEnabled(true)
+                        }
+                        requireActivity().enterPictureInPictureMode(paramsBuilder.build())
+                    }
                 }
             }
             dialog.show(
@@ -204,6 +206,52 @@ class CourseUnitContainerFragment : Fragment(R.layout.fragment_course_unit_conta
         setupVideoList()
         checkUnitsListShown()
         setupChapterEndDialogListener()
+        observeCurrentBlock()
+        observePipMode()
+    }
+
+    private fun observePipMode() {
+        lifecycleScope.launch {
+            meetingNotifier.isInPipMode.collect { isInPip ->
+                binding.btnBack.isVisible = !isInPip
+                binding.cvNavigationBar.isVisible = !isInPip
+                if (viewModel.isCourseUnitProgressEnabled) {
+                    binding.horizontalProgress.isVisible = !isInPip
+                } else {
+                    binding.cvCount.isVisible = !isInPip
+                }
+                if (viewModel.isCourseExpandableSectionsEnabled) {
+                    binding.subSectionUnitsTitle.isVisible = !isInPip
+                }
+                binding.mediaRouteButton.isVisible = !isInPip && isMediaRouteButtonVisible()
+            }
+        }
+    }
+
+    private fun isMediaRouteButtonVisible(): Boolean {
+        val position = binding.viewPager.currentItem
+        val blocks = viewModel.getUnitBlocks()
+        val currentBlock = blocks.getOrNull(position)
+        val encodedVideo = currentBlock?.studentViewData?.encodedVideos
+        return currentBlock?.type == BlockType.VIDEO &&
+                encodedVideo?.hasNonYoutubeVideo == true &&
+                !encodedVideo.videoUrl.endsWith(".m3u8")
+    }
+
+    private fun observeCurrentBlock() {
+        lifecycleScope.launch {
+            viewModel.currentBlock.collect { block ->
+                val isMeeting = isCurrentBlockMeeting(block)
+                meetingNotifier.send(isMeeting)
+            }
+        }
+    }
+
+    private fun isCurrentBlockMeeting(block: Block? = viewModel.currentBlock.value): Boolean {
+        return block?.isZoomxBlock == true ||
+                block?.studentViewUrl?.let { url ->
+                    org.openedx.core.AppDataConstants.ZOOM_URL_PATTERNS.any { url.contains(it) }
+                } == true
     }
 
     private fun setupViewPagerInsets() {
@@ -405,11 +453,21 @@ class CourseUnitContainerFragment : Fragment(R.layout.fragment_course_unit_conta
     override fun onResume() {
         super.onResume()
         activity?.onBackPressedDispatcher?.addCallback(onBackPressedCallback)
+        lifecycleScope.launch {
+            meetingNotifier.send(isCurrentBlockMeeting())
+        }
     }
 
     override fun onPause() {
         onBackPressedCallback.remove()
         super.onPause()
+    }
+
+    override fun onDestroy() {
+        lifecycleScope.launch {
+            meetingNotifier.send(false)
+        }
+        super.onDestroy()
     }
 
     override fun onDestroyView() {

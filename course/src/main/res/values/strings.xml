@@ -131,8 +131,4 @@
     <string name="course_live_sessions_no_sessions">No sessions found</string>
 
     <!-- Meeting Exit UI -->
-    <string name="course_leave_meeting_title">Leave Meeting?</string>
-    <string name="course_leave_meeting_message">Are you sure you want to leave the meeting?</string>
-    <string name="course_leave_meeting_yes">Yes</string>
-    <string name="course_leave_meeting_no">No</string>
 </resources>

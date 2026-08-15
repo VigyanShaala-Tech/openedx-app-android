@@ -786,9 +786,7 @@ class CourseHomeViewModel(
             _uiState.value = CourseHomeUIState.Waiting // To trigger state update back to CourseData
             getCourseData()
 
-            val joinUrl = meetingUrl.toUri().buildUpon()
-                .appendQueryParameter("isMobile", "true")
-                .build().toString()
+            val joinUrl = meetingUrl
 
             courseRouter.navigateToWebContent(fragmentManager, topic, joinUrl)
         } catch (e: Exception) {

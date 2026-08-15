@@ -120,9 +120,12 @@ fun CatalogWebViewScreen(
                     resultMsg: android.os.Message?
                 ): Boolean {
                     val transport = resultMsg?.obj as? WebView.WebViewTransport
-                    transport?.webView = WebView(context)
-                    resultMsg?.sendToTarget()
-                    return true
+                    if (transport != null) {
+                        transport.webView = view
+                        resultMsg.sendToTarget()
+                        return true
+                    }
+                    return false
                 }
             }
 

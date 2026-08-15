@@ -1,10 +1,12 @@
 package org.openedx.app
 
+import android.app.PictureInPictureParams
 import android.content.Intent
 import android.content.res.Configuration
 import android.net.Uri
 import android.os.Build
 import android.os.Bundle
+import android.util.Rational
 import android.view.View
 import android.view.WindowManager
 import androidx.appcompat.app.AppCompatActivity
@@ -51,6 +53,7 @@ import androidx.window.layout.WindowMetricsCalculator
 import com.braze.support.toStringMap
 import io.branch.referral.Branch
 import io.branch.referral.Branch.BranchUniversalReferralInitListener
+import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
 import org.koin.android.ext.android.inject
 import org.koin.androidx.viewmodel.ext.android.viewModel
@@ -63,6 +66,7 @@ import org.openedx.auth.presentation.signin.SignInFragment
 import org.openedx.core.ApiConstants
 import org.openedx.core.data.storage.CorePreferences
 import org.openedx.core.presentation.dialog.downloaddialog.DownloadDialogManager
+import org.openedx.core.system.notifier.MeetingNotifier
 import org.openedx.core.presentation.global.InsetHolder
 import org.openedx.core.presentation.global.WindowSizeHolder
 import org.openedx.core.ui.OpenEdXButton
@@ -99,6 +103,7 @@ class AppActivity : AppCompatActivity(), InsetHolder, WindowSizeHolder {
     private val authRouter by inject<AuthRouter>()
     private val downloadDialogManager by inject<DownloadDialogManager>()
     private val calendarSyncScheduler by inject<CalendarSyncScheduler>()
+    private val meetingNotifier by inject<MeetingNotifier>()
 
     private val branchLogger = Logger(BRANCH_TAG)
 
@@ -108,6 +113,7 @@ class AppActivity : AppCompatActivity(), InsetHolder, WindowSizeHolder {
 
     private var _windowSize = WindowSize(WindowType.Compact, WindowType.Compact)
     private var activationComposeView: androidx.compose.ui.platform.ComposeView? = null
+    private var isInMeeting = false
 
     private val authCode: String?
         get() {
@@ -158,6 +164,7 @@ class AppActivity : AppCompatActivity(), InsetHolder, WindowSizeHolder {
         observeLogoutEvent()
         observeDownloadFailedDialog()
         observeAccountActivation()
+        observeMeetingState()
 
         calendarSyncScheduler.scheduleDailySync()
 
@@ -500,6 +507,80 @@ class AppActivity : AppCompatActivity(), InsetHolder, WindowSizeHolder {
                         )
                     }
                 }
+            }
+        }
+    }
+
+    override fun onResume() {
+        super.onResume()
+    }
+
+    private fun observeMeetingState() {
+        lifecycleScope.launch {
+            meetingNotifier.isMeetingActive.collectLatest { active ->
+                isInMeeting = active
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                    val paramsBuilder = PictureInPictureParams.Builder()
+                        .setAspectRatio(Rational(16, 9))
+                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+                        paramsBuilder.setAutoEnterEnabled(active)
+                        paramsBuilder.setSeamlessResizeEnabled(true)
+                    }
+                    try {
+                        setPictureInPictureParams(paramsBuilder.build())
+                    } catch (e: Exception) {
+                        // Ignore
+                    }
+                }
+            }
+        }
+    }
+
+    override fun onUserLeaveHint() {
+        super.onUserLeaveHint()
+        if (isInMeeting && Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            val paramsBuilder = PictureInPictureParams.Builder()
+                .setAspectRatio(Rational(16, 9))
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+                paramsBuilder.setAutoEnterEnabled(true)
+                paramsBuilder.setSeamlessResizeEnabled(true)
+            }
+            try {
+                enterPictureInPictureMode(paramsBuilder.build())
+            } catch (e: Exception) {
+                // Ignore
+            }
+        }
+    }
+
+    override fun onPictureInPictureModeChanged(
+        isInPictureInPictureMode: Boolean,
+        newConfig: Configuration
+    ) {
+        super.onPictureInPictureModeChanged(isInPictureInPictureMode, newConfig)
+        lifecycleScope.launch {
+            meetingNotifier.setPipMode(isInPictureInPictureMode)
+        }
+        if (isInPictureInPictureMode) {
+            // Hide navigation bar and status bar in PiP mode
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
+                window.insetsController?.hide(WindowInsetsCompat.Type.systemBars())
+            } else {
+                @Suppress("DEPRECATION")
+                window.decorView.systemUiVisibility = View.SYSTEM_UI_FLAG_LOW_PROFILE or
+                        View.SYSTEM_UI_FLAG_FULLSCREEN or
+                        View.SYSTEM_UI_FLAG_LAYOUT_STABLE or
+                        View.SYSTEM_UI_FLAG_IMMERSIVE_STICKY or
+                        View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION or
+                        View.SYSTEM_UI_FLAG_HIDE_NAVIGATION
+            }
+        } else {
+            // Show navigation bar and status bar when exiting PiP mode
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
+                window.insetsController?.show(WindowInsetsCompat.Type.systemBars())
+            } else {
+                @Suppress("DEPRECATION")
+                window.decorView.systemUiVisibility = View.SYSTEM_UI_FLAG_VISIBLE
             }
         }
     }

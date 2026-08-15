@@ -239,10 +239,11 @@ fun HtmlUnitView(
         val uiState by viewModel.uiState.collectAsState()
 
         val configuration = LocalConfiguration.current
+        val isInPip = (context as? android.app.Activity)?.isInPictureInPictureMode ?: false
 
-        val isMeetingUrl = url.contains("zoom.us") || url.contains("/meeting/") || url.contains("/join/")
+        val isMeetingUrl = org.openedx.core.AppDataConstants.ZOOM_URL_PATTERNS.any { url.contains(it) }
         val bottomPadding =
-            if (configuration.orientation == Configuration.ORIENTATION_PORTRAIT && !isMeetingUrl) {
+            if (configuration.orientation == Configuration.ORIENTATION_PORTRAIT && !isMeetingUrl && !isInPip) {
                 72.dp
             } else {
                 0.dp
@@ -401,18 +402,14 @@ private fun HTMLContentView(
                         request: WebResourceRequest?
                     ): Boolean {
                         val clickUrl = request?.url?.toString() ?: ""
-                        return /*if (clickUrl.isNotEmpty() && clickUrl.startsWith("http")) {
-                            context.startActivity(Intent(Intent.ACTION_VIEW, Uri.parse(clickUrl)))
+                        if (clickUrl.startsWith("http://") || clickUrl.startsWith("https://")) {
+                            return false
+                        }
+                        return try {
+                            val intent = Intent(Intent.ACTION_VIEW, Uri.parse(clickUrl))
+                            context.startActivity(intent)
                             true
-                        } else*/ if (clickUrl.startsWith("mailto:")) {
-                            val email = clickUrl.replace("mailto:", "")
-                            if (email.isEmailValid()) {
-                                EmailUtil.sendEmailIntent(context, email, "", "")
-                                true
-                            } else {
-                                false
-                            }
-                        } else {
+                        } catch (e: Exception) {
                             false
                         }
                     }
@@ -476,16 +473,45 @@ private fun HTMLContentView(
                         resultMsg: android.os.Message?
                     ): Boolean {
                         val transport = resultMsg?.obj as? WebView.WebViewTransport
-                        transport?.webView = WebView(context)
-                        resultMsg?.sendToTarget()
-                        return true
+                        if (transport != null) {
+                            transport.webView = view
+                            resultMsg.sendToTarget()
+                            return true
+                        }
+                        return false
+                    }
+
+                    override fun onShowCustomView(view: android.view.View?, callback: CustomViewCallback?) {
+                        (context as? android.app.Activity)?.window?.decorView?.let { decor ->
+                            (decor as ViewGroup).addView(view, ViewGroup.LayoutParams(
+                                ViewGroup.LayoutParams.MATCH_PARENT,
+                                ViewGroup.LayoutParams.MATCH_PARENT
+                            ))
+                        }
+                    }
+
+                    override fun onHideCustomView() {
+                        // Handled by activity or automatically
+                    }
+                }
+                
+                setDownloadListener { url, _, _, _, _ ->
+                    try {
+                        val intent = Intent(Intent.ACTION_VIEW, Uri.parse(url))
+                        context.startActivity(intent)
+                    } catch (e: Exception) {
+                        // Ignore
                     }
                 }
                 @Suppress("DEPRECATION")
                 applyFullAccessSettings(url)
                 with(settings) {
-                    mediaPlaybackRequiresUserGesture = false
-                    cacheMode = WebSettings.LOAD_NO_CACHE
+                    val isMeeting = org.openedx.core.AppDataConstants.ZOOM_URL_PATTERNS.any { url.contains(it) }
+                    cacheMode = if (isMeeting) WebSettings.LOAD_DEFAULT else WebSettings.LOAD_NO_CACHE
+                    if (isMeeting) {
+                        setSupportMultipleWindows(true)
+                        javaScriptCanOpenWindowsAutomatically = true
+                    }
                 }
                 if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
                     android.webkit.CookieManager.getInstance().setAcceptThirdPartyCookies(this, true)

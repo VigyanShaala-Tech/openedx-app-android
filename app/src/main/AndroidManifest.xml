@@ -55,8 +55,11 @@
             android:fitsSystemWindows="false"
             android:theme="@style/Theme.App.Starting"
             android:windowSoftInputMode="adjustPan"
-            android:screenOrientation="portrait"
-            android:launchMode="singleInstance">
+            android:screenOrientation="fullSensor"
+            android:launchMode="singleInstance"
+            android:supportsPictureInPicture="true"
+            android:resizeableActivity="true"
+            android:configChanges="screenSize|smallestScreenSize|screenLayout|orientation|keyboardHidden|keyboard|navigation|uiMode|density">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
@@ -101,6 +104,7 @@
                 <data android:scheme="https" />
                 <data android:host="apps.uat.vigyanshaala.com" />
                 <data android:host="uat.vigyanshaala.com" />
+                <data android:host="apps.mycommunity.vigyanshaala.com" />
                 <data android:pathPrefix="/learner-dashboard" />
                 <data android:pathPrefix="/dashboard" />
                 <data android:pathPrefix="/courses" />

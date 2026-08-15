@@ -79,6 +79,7 @@ import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.focus.FocusDirection
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.zIndex
 import androidx.compose.ui.platform.ComposeView
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
@@ -472,14 +473,7 @@ private fun EditProfileScreen(
         ModalBottomSheetLayout(
             modifier = Modifier
                 .testTag("btn_bottom_sheet_edit_profile")
-                .padding(bottom = if (isImeVisible && bottomSheetScaffoldState.isVisible) 120.dp else 0.dp)
-                .noRippleClickable {
-                    if (bottomSheetScaffoldState.isVisible) {
-                        coroutine.launch {
-                            bottomSheetScaffoldState.hide()
-                        }
-                    }
-                },
+                .padding(bottom = if (isImeVisible && bottomSheetScaffoldState.isVisible) 120.dp else 0.dp),
             sheetShape = MaterialTheme.appShapes.screenBackgroundShape,
             sheetState = bottomSheetScaffoldState,
             scrimColor = Color.Black.copy(alpha = 0.4f),
@@ -721,6 +715,8 @@ private fun EditProfileScreen(
                             ProfileFields(
                                 disabled = uiState.isLimited,
                                 onFieldClick = { field, title ->
+                                    bottomDialogTitle = title
+                                    keyboardController?.hide()
                                     when (field) {
                                         YEAR_OF_BIRTH -> {
                                             serverFieldName.value = YEAR_OF_BIRTH
@@ -746,23 +742,19 @@ private fun EditProfileScreen(
                                             expandedList = LocaleUtils.getLanguages()
                                         }
                                     }
-                                    bottomDialogTitle = title
-                                    keyboardController?.hide()
                                     coroutine.launch {
+                                        bottomSheetScaffoldState.show()
                                         val index = expandedList.indexOfFirst { option ->
                                             if (serverFieldName.value == LANGUAGE) {
                                                 option.value ==
                                                         (mapFields[serverFieldName.value] as List<LanguageProficiency>)
                                                             .getOrNull(0)?.code
                                             } else {
-                                                option.value == mapFields[serverFieldName.value]
+                                                option.value == mapFields[serverFieldName.value].toString()
                                             }
                                         }
-                                        modalListState.scrollToItem(if (index > 0) index else 0)
-                                        if (bottomSheetScaffoldState.isVisible) {
-                                            bottomSheetScaffoldState.hide()
-                                        } else {
-                                            bottomSheetScaffoldState.show()
+                                        if (index >= 0) {
+                                            modalListState.scrollToItem(index)
                                         }
                                     }
                                 },
@@ -1081,6 +1073,7 @@ private fun ProfileFields(
         SelectableField(
             name = stringResource(id = R.string.profile_year),
             initialValue = mapFields[YEAR_OF_BIRTH].toString(),
+            disabled = false,
             onClick = {
                 onFieldClick(YEAR_OF_BIRTH, context.getString(R.string.profile_year))
             }
@@ -1138,22 +1131,6 @@ private fun SelectableField(
     disabled: Boolean = false,
     onClick: () -> Unit,
 ) {
-    val colors = if (disabled) {
-        TextFieldDefaults.outlinedTextFieldColors(
-            unfocusedBorderColor = MaterialTheme.appColors.textFieldBorder,
-            backgroundColor = MaterialTheme.appColors.textFieldBackground
-        )
-    } else {
-        TextFieldDefaults.outlinedTextFieldColors(
-            textColor = MaterialTheme.appColors.textFieldText,
-            backgroundColor = MaterialTheme.appColors.textFieldBackground,
-            unfocusedBorderColor = MaterialTheme.appColors.textFieldBorder,
-            cursorColor = MaterialTheme.appColors.textFieldText,
-            disabledBorderColor = MaterialTheme.appColors.textFieldBorder,
-            disabledTextColor = MaterialTheme.appColors.textFieldHint,
-            disabledPlaceholderColor = MaterialTheme.appColors.textFieldHint
-        )
-    }
     Column {
         Text(
             modifier = Modifier
@@ -1164,36 +1141,46 @@ private fun SelectableField(
             color = MaterialTheme.appColors.textPrimary
         )
         Spacer(modifier = Modifier.height(8.dp))
-        OutlinedTextField(
-            readOnly = true,
-            enabled = false,
-            value = initialValue ?: "",
-            colors = colors,
-            shape = MaterialTheme.appShapes.textFieldShape,
-            textStyle = MaterialTheme.appTypography.bodyMedium,
-            onValueChange = { },
-            trailingIcon = {
-                Icon(
-                    imageVector = Icons.Filled.ExpandMore,
-                    contentDescription = null,
-                    tint = MaterialTheme.appColors.textPrimaryVariant
-                )
-            },
-            modifier = Modifier
-                .testTag("tf_select_${name.tagId()}")
-                .fillMaxWidth()
-                .noRippleClickable {
-                    onClick()
+        Box(modifier = Modifier.fillMaxWidth()) {
+            OutlinedTextField(
+                value = if (initialValue.isNullOrEmpty() || initialValue == "null") "" else initialValue,
+                onValueChange = {},
+                readOnly = true,
+                enabled = false,
+                placeholder = {
+                    Text(
+                        text = name,
+                        color = MaterialTheme.appColors.textFieldHint,
+                        style = MaterialTheme.appTypography.bodyMedium
+                    )
                 },
-            placeholder = {
-                Text(
-                    modifier = Modifier.testTag("txt_placeholder_${name.tagId()}"),
-                    text = name,
-                    color = MaterialTheme.appColors.textFieldText,
-                    style = MaterialTheme.appTypography.bodyMedium
-                )
-            }
-        )
+                trailingIcon = {
+                    Icon(
+                        imageVector = Icons.Filled.ExpandMore,
+                        contentDescription = null,
+                        tint = MaterialTheme.appColors.textPrimaryVariant
+                    )
+                },
+                modifier = Modifier.fillMaxWidth(),
+                colors = TextFieldDefaults.outlinedTextFieldColors(
+                    textColor = MaterialTheme.appColors.textFieldText,
+                    backgroundColor = MaterialTheme.appColors.textFieldBackground,
+                    unfocusedBorderColor = MaterialTheme.appColors.textFieldBorder,
+                    disabledBorderColor = MaterialTheme.appColors.textFieldBorder,
+                ),
+                shape = MaterialTheme.appShapes.textFieldShape,
+                textStyle = MaterialTheme.appTypography.bodyMedium
+            )
+            Box(
+                modifier = Modifier
+                    .matchParentSize()
+                    .zIndex(1f)
+                    .clickable(
+                        enabled = !disabled,
+                        onClick = onClick
+                    )
+            )
+        }
     }
 }
 

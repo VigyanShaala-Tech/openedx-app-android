@@ -105,6 +105,7 @@
                 <data android:host="apps.uat.vigyanshaala.com" />
                 <data android:host="uat.vigyanshaala.com" />
                 <data android:host="apps.mycommunity.vigyanshaala.com" />
+                <data android:host="mycommunity.vigyanshaala.com" />
                 <data android:pathPrefix="/learner-dashboard" />
                 <data android:pathPrefix="/dashboard" />
                 <data android:pathPrefix="/courses" />

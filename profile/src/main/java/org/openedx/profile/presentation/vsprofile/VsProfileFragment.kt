@@ -342,7 +342,7 @@ private fun VsProfileScreen(
             VsProfileItem(
                 icon = Icons.AutoMirrored.Filled.HelpOutline,
                 title = stringResource(id = R.string.profile_help_and_support),
-                onClick = {}
+                onClick = onTechnicalSupportClick
             )
             VsProfileItem(
                 icon = Icons.Filled.Info,

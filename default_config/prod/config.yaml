@@ -3,16 +3,16 @@ APPLICATION_ID: 'org.app.vigyanshaala.stemchampions'
 ENVIRONMENT_DISPLAY_NAME: 'VigyanShaala'
 URI_SCHEME: 'uat.vigyanshaala.com'
 FEEDBACK_EMAIL_ADDRESS: 'sales@titaned.com'
-CONTACT_US_URL: ' https://mycommunity.vigyanshaala.com/public//public/contact?mobile=true'
-FAQ_URL: ' https://mycommunity.vigyanshaala.com/public//public/faq?mobile=true'
+CONTACT_US_URL: 'https://apps.mycommunity.vigyanshaala.com/public/contact?mobile=true'
+FAQ_URL: 'https://apps.mycommunity.vigyanshaala.com/public/faq?mobile=true'
 OAUTH_CLIENT_ID: 'cFd8Le3wxWJU7uRppAx1UggW99BQXzVIibQuB5Wq'
 
 # Keep empty to hide setting
 AGREEMENT_URLS:
-  PRIVACY_POLICY_URL: ' https://mycommunity.vigyanshaala.com/public//public/privacy?mobile=true'
-  COOKIE_POLICY_URL: ' https://mycommunity.vigyanshaala.com/public//public/privacy?mobile=true'
-  DATA_SELL_CONSENT_URL: ' https://mycommunity.vigyanshaala.com/complaints-policy?mobile=true'
-  TOS_URL: ' https://mycommunity.vigyanshaala.com/public//public/terms?mobile=true'
+  PRIVACY_POLICY_URL: 'https://apps.mycommunity.vigyanshaala.com/public/privacy?mobile=true'
+  COOKIE_POLICY_URL: 'https://mycommunity.vigyanshaala.com/public//public/privacy?mobile=true'
+  DATA_SELL_CONSENT_URL: 'https://mycommunity.vigyanshaala.com/complaints-policy?mobile=true'
+  TOS_URL: 'https://apps.mycommunity.vigyanshaala.com/public/terms?mobile=true'
   EULA_URL: ''
   SUPPORTED_LANGUAGES: [ ] #en is default language
 

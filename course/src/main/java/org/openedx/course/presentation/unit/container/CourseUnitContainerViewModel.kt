@@ -256,7 +256,8 @@ class CourseUnitContainerViewModel(
         val skipMarkCompleted = block.type == BlockType.QUICKQUIZMAKER ||
                 block.type == BlockType.OPENASSESSMENT ||
                 block.type == BlockType.PROBLEM ||
-                block.type == BlockType.VIDEO
+                block.type == BlockType.VIDEO ||
+                block.type == BlockType.TAS
 
         if (!skipMarkCompleted) {
             markTopicCompleted(block.id)

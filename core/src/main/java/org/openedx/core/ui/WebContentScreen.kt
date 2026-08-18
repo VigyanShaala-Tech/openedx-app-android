@@ -62,16 +62,12 @@ fun WebContentScreen(
     contentUrl: String? = null,
     canShowBackBtn: Boolean = true,
 ) {
-    val context = LocalContext.current
-    val isInPip = (context as? Activity)?.isInPictureInPictureMode ?: false
     val scaffoldState = rememberScaffoldState()
-    val isMeetingUrl = contentUrl?.let { url ->
-        org.openedx.core.AppDataConstants.ZOOM_URL_PATTERNS.any { url.contains(it) }
-    } ?: false
+    val isMeetingUrl = contentUrl?.let { it.contains("zoom.us") || it.contains("/meeting/") || it.contains("/join/") } ?: false
     Scaffold(
         modifier = Modifier
             .fillMaxSize()
-            .then(if (isMeetingUrl || isInPip) Modifier else Modifier.padding(bottom = 24.dp))
+            .then(if (isMeetingUrl) Modifier else Modifier.padding(bottom = 24.dp))
             .semantics {
                 testTagsAsResourceId = true
             },
@@ -96,7 +92,7 @@ fun WebContentScreen(
             contentAlignment = Alignment.TopCenter
         ) {
             Column(screenWidth) {
-                if (!isInPip && (title?.isNotEmpty() == true || canShowBackBtn)) {
+                if (title?.isNotEmpty() == true || canShowBackBtn) {
                     Box(
                         Modifier
                             .fillMaxWidth()
@@ -148,7 +144,6 @@ private fun WebViewContent(
 ) {
     val context = LocalContext.current
     val isDarkTheme = isSystemInDarkTheme()
-    
     AndroidView(
         factory = {
             WebView(context).apply {
@@ -163,22 +158,22 @@ private fun WebViewContent(
                         request: WebResourceRequest?
                     ): Boolean {
                         val clickUrl = request?.url?.toString() ?: ""
-                        if (clickUrl.startsWith("http://") || clickUrl.startsWith("https://")) {
-                            return false
-                        }
-                        return try {
-                            val intent = Intent(Intent.ACTION_VIEW, Uri.parse(clickUrl))
-                            context.startActivity(intent)
+                        return if (clickUrl.isNotEmpty() && clickUrl.startsWith("http")) {
+                            context.startActivity(Intent(Intent.ACTION_VIEW, Uri.parse(clickUrl)))
                             true
-                        } catch (e: Exception) {
+                        } else if (clickUrl.startsWith("mailto:")) {
+                            val email = clickUrl.replace("mailto:", "")
+                            if (email.isEmailValid()) {
+                                EmailUtil.sendEmailIntent(context, email, "", "")
+                                true
+                            } else {
+                                false
+                            }
+                        } else {
                             false
                         }
                     }
                 }
-                
-                var customView: android.view.View? = null
-                var customViewCallback: WebChromeClient.CustomViewCallback? = null
-                
                 webChromeClient = object : WebChromeClient() {
                     override fun onPermissionRequest(request: PermissionRequest?) {
                         request?.grant(request.resources)
@@ -198,52 +193,15 @@ private fun WebViewContent(
                         resultMsg: android.os.Message?
                     ): Boolean {
                         val transport = resultMsg?.obj as? WebView.WebViewTransport
-                        if (transport != null) {
-                            transport.webView = view
-                            resultMsg.sendToTarget()
-                            return true
-                        }
-                        return false
-                    }
-
-                    override fun onShowCustomView(view: android.view.View?, callback: CustomViewCallback?) {
-                        if (customView != null) {
-                            callback?.onCustomViewHidden()
-                            return
-                        }
-                        customView = view
-                        customViewCallback = callback
-                        (context as? Activity)?.window?.decorView?.let { decor ->
-                            (decor as ViewGroup).addView(view, ViewGroup.LayoutParams(
-                                ViewGroup.LayoutParams.MATCH_PARENT,
-                                ViewGroup.LayoutParams.MATCH_PARENT
-                            ))
-                        }
-                    }
-
-                    override fun onHideCustomView() {
-                        (context as? Activity)?.window?.decorView?.let { decor ->
-                            (decor as ViewGroup).removeView(customView)
-                        }
-                        customView = null
-                        customViewCallback?.onCustomViewHidden()
+                        transport?.webView = WebView(context)
+                        resultMsg?.sendToTarget()
+                        return true
                     }
                 }
-                
-                setDownloadListener { url, _, _, _, _ ->
-                    try {
-                        val intent = Intent(Intent.ACTION_VIEW, Uri.parse(url))
-                        context.startActivity(intent)
-                    } catch (e: Exception) {
-                        // Ignore
-                    }
-                }
-                
                 applyFullAccessSettings(contentUrl ?: "")
                 settings.mediaPlaybackRequiresUserGesture = false
                 isVerticalScrollBarEnabled = false
                 isHorizontalScrollBarEnabled = false
-
                 body?.let {
                     loadDataWithBaseURL(
                         apiHostUrl,

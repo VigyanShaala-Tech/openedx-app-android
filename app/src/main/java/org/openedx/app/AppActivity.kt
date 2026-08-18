@@ -164,7 +164,7 @@ class AppActivity : AppCompatActivity(), InsetHolder, WindowSizeHolder {
         observeLogoutEvent()
         observeDownloadFailedDialog()
         observeAccountActivation()
-        observeMeetingState()
+//        observeMeetingState()
 
         calendarSyncScheduler.scheduleDailySync()
 
@@ -515,75 +515,75 @@ class AppActivity : AppCompatActivity(), InsetHolder, WindowSizeHolder {
         super.onResume()
     }
 
-    private fun observeMeetingState() {
-        lifecycleScope.launch {
-            meetingNotifier.isMeetingActive.collectLatest { active ->
-                isInMeeting = active
-                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-                    val paramsBuilder = PictureInPictureParams.Builder()
-                        .setAspectRatio(Rational(16, 9))
-                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
-                        paramsBuilder.setAutoEnterEnabled(active)
-                        paramsBuilder.setSeamlessResizeEnabled(true)
-                    }
-                    try {
-                        setPictureInPictureParams(paramsBuilder.build())
-                    } catch (e: Exception) {
-                        // Ignore
-                    }
-                }
-            }
-        }
-    }
+//    private fun observeMeetingState() {
+//        lifecycleScope.launch {
+//            meetingNotifier.isMeetingActive.collectLatest { active ->
+//                isInMeeting = active
+//                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+//                    val paramsBuilder = PictureInPictureParams.Builder()
+//                        .setAspectRatio(Rational(16, 9))
+//                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+//                        paramsBuilder.setAutoEnterEnabled(active)
+//                        paramsBuilder.setSeamlessResizeEnabled(true)
+//                    }
+//                    try {
+//                        setPictureInPictureParams(paramsBuilder.build())
+//                    } catch (e: Exception) {
+//                        // Ignore
+//                    }
+//                }
+//            }
+//        }
+//    }
 
-    override fun onUserLeaveHint() {
-        super.onUserLeaveHint()
-        if (isInMeeting && Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            val paramsBuilder = PictureInPictureParams.Builder()
-                .setAspectRatio(Rational(16, 9))
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
-                paramsBuilder.setAutoEnterEnabled(true)
-                paramsBuilder.setSeamlessResizeEnabled(true)
-            }
-            try {
-                enterPictureInPictureMode(paramsBuilder.build())
-            } catch (e: Exception) {
-                // Ignore
-            }
-        }
-    }
+//    override fun onUserLeaveHint() {
+//        super.onUserLeaveHint()
+//        if (isInMeeting && Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+//            val paramsBuilder = PictureInPictureParams.Builder()
+//                .setAspectRatio(Rational(16, 9))
+//            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+//                paramsBuilder.setAutoEnterEnabled(true)
+//                paramsBuilder.setSeamlessResizeEnabled(true)
+//            }
+//            try {
+//                enterPictureInPictureMode(paramsBuilder.build())
+//            } catch (e: Exception) {
+//                // Ignore
+//            }
+//        }
+//    }
 
-    override fun onPictureInPictureModeChanged(
-        isInPictureInPictureMode: Boolean,
-        newConfig: Configuration
-    ) {
-        super.onPictureInPictureModeChanged(isInPictureInPictureMode, newConfig)
-        lifecycleScope.launch {
-            meetingNotifier.setPipMode(isInPictureInPictureMode)
-        }
-        if (isInPictureInPictureMode) {
-            // Hide navigation bar and status bar in PiP mode
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
-                window.insetsController?.hide(WindowInsetsCompat.Type.systemBars())
-            } else {
-                @Suppress("DEPRECATION")
-                window.decorView.systemUiVisibility = View.SYSTEM_UI_FLAG_LOW_PROFILE or
-                        View.SYSTEM_UI_FLAG_FULLSCREEN or
-                        View.SYSTEM_UI_FLAG_LAYOUT_STABLE or
-                        View.SYSTEM_UI_FLAG_IMMERSIVE_STICKY or
-                        View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION or
-                        View.SYSTEM_UI_FLAG_HIDE_NAVIGATION
-            }
-        } else {
-            // Show navigation bar and status bar when exiting PiP mode
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
-                window.insetsController?.show(WindowInsetsCompat.Type.systemBars())
-            } else {
-                @Suppress("DEPRECATION")
-                window.decorView.systemUiVisibility = View.SYSTEM_UI_FLAG_VISIBLE
-            }
-        }
-    }
+//    override fun onPictureInPictureModeChanged(
+//        isInPictureInPictureMode: Boolean,
+//        newConfig: Configuration
+//    ) {
+//        super.onPictureInPictureModeChanged(isInPictureInPictureMode, newConfig)
+//        lifecycleScope.launch {
+//            meetingNotifier.setPipMode(isInPictureInPictureMode)
+//        }
+//        if (isInPictureInPictureMode) {
+//            // Hide navigation bar and status bar in PiP mode
+//            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
+//                window.insetsController?.hide(WindowInsetsCompat.Type.systemBars())
+//            } else {
+//                @Suppress("DEPRECATION")
+//                window.decorView.systemUiVisibility = View.SYSTEM_UI_FLAG_LOW_PROFILE or
+//                        View.SYSTEM_UI_FLAG_FULLSCREEN or
+//                        View.SYSTEM_UI_FLAG_LAYOUT_STABLE or
+//                        View.SYSTEM_UI_FLAG_IMMERSIVE_STICKY or
+//                        View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION or
+//                        View.SYSTEM_UI_FLAG_HIDE_NAVIGATION
+//            }
+//        } else {
+//            // Show navigation bar and status bar when exiting PiP mode
+//            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
+//                window.insetsController?.show(WindowInsetsCompat.Type.systemBars())
+//            } else {
+//                @Suppress("DEPRECATION")
+//                window.decorView.systemUiVisibility = View.SYSTEM_UI_FLAG_VISIBLE
+//            }
+//        }
+//    }
 
     private fun handlePushNotification(data: Bundle) {
         val deepLink = DeepLink(data.toStringMap())

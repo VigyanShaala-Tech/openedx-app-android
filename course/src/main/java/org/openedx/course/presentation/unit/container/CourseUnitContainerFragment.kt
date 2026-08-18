@@ -141,17 +141,8 @@ class CourseUnitContainerFragment : Fragment(R.layout.fragment_course_unit_conta
                     navigateToParentFragment()
                 }
 
-                override fun onMinimize() {
-                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-                        val paramsBuilder = PictureInPictureParams.Builder()
-                            .setAspectRatio(Rational(16, 9))
-                        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
-                            paramsBuilder.setAutoEnterEnabled(true)
-                            paramsBuilder.setSeamlessResizeEnabled(true)
-                        }
-                        requireActivity().enterPictureInPictureMode(paramsBuilder.build())
-                    }
-                }
+//                override fun onMinimize() {
+//                }
             }
             dialog.show(
                 requireActivity().supportFragmentManager,
@@ -206,27 +197,25 @@ class CourseUnitContainerFragment : Fragment(R.layout.fragment_course_unit_conta
         setupVideoList()
         checkUnitsListShown()
         setupChapterEndDialogListener()
-        observeCurrentBlock()
-        observePipMode()
     }
 
-    private fun observePipMode() {
-        lifecycleScope.launch {
-            meetingNotifier.isInPipMode.collect { isInPip ->
-                binding.btnBack.isVisible = !isInPip
-                binding.cvNavigationBar.isVisible = !isInPip
-                if (viewModel.isCourseUnitProgressEnabled) {
-                    binding.horizontalProgress.isVisible = !isInPip
-                } else {
-                    binding.cvCount.isVisible = !isInPip
-                }
-                if (viewModel.isCourseExpandableSectionsEnabled) {
-                    binding.subSectionUnitsTitle.isVisible = !isInPip
-                }
-                binding.mediaRouteButton.isVisible = !isInPip && isMediaRouteButtonVisible()
-            }
-        }
-    }
+//    private fun observePipMode() {
+//        lifecycleScope.launch {
+//            meetingNotifier.isInPipMode.collect { isInPip ->
+//                binding.btnBack.isVisible = !isInPip
+//                binding.cvNavigationBar.isVisible = !isInPip
+//                if (viewModel.isCourseUnitProgressEnabled) {
+//                    binding.horizontalProgress.isVisible = !isInPip
+//                } else {
+//                    binding.cvCount.isVisible = !isInPip
+//                }
+//                if (viewModel.isCourseExpandableSectionsEnabled) {
+//                    binding.subSectionUnitsTitle.isVisible = !isInPip
+//                }
+//                binding.mediaRouteButton.isVisible = !isInPip && isMediaRouteButtonVisible()
+//            }
+//        }
+//    }
 
     private fun isMediaRouteButtonVisible(): Boolean {
         val position = binding.viewPager.currentItem
@@ -238,20 +227,21 @@ class CourseUnitContainerFragment : Fragment(R.layout.fragment_course_unit_conta
                 !encodedVideo.videoUrl.endsWith(".m3u8")
     }
 
-    private fun observeCurrentBlock() {
-        lifecycleScope.launch {
-            viewModel.currentBlock.collect { block ->
-                val isMeeting = isCurrentBlockMeeting(block)
-                meetingNotifier.send(isMeeting)
-            }
-        }
-    }
+//    private fun observeCurrentBlock() {
+//        lifecycleScope.launch {
+//            viewModel.currentBlock.collect { block ->
+//                val isMeeting = isCurrentBlockMeeting()
+//                meetingNotifier.send(isMeeting)
+//            }
+//        }
+//    }
 
-    private fun isCurrentBlockMeeting(block: Block? = viewModel.currentBlock.value): Boolean {
-        return block?.isZoomxBlock == true ||
-                block?.studentViewUrl?.let { url ->
-                    org.openedx.core.AppDataConstants.ZOOM_URL_PATTERNS.any { url.contains(it) }
-                } == true
+    private fun isCurrentBlockMeeting(): Boolean {
+        val currentBlock = viewModel.currentBlock.value
+        return currentBlock?.isZoomxBlock == true ||
+                currentBlock?.studentViewUrl?.contains("zoom.us") == true ||
+                currentBlock?.studentViewUrl?.contains("/meeting/") == true ||
+                currentBlock?.studentViewUrl?.contains("/join/") == true
     }
 
     private fun setupViewPagerInsets() {

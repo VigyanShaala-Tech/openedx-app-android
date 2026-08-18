@@ -239,11 +239,10 @@ fun HtmlUnitView(
         val uiState by viewModel.uiState.collectAsState()
 
         val configuration = LocalConfiguration.current
-        val isInPip = (context as? android.app.Activity)?.isInPictureInPictureMode ?: false
 
-        val isMeetingUrl = org.openedx.core.AppDataConstants.ZOOM_URL_PATTERNS.any { url.contains(it) }
+        val isMeetingUrl = url.contains("zoom.us") || url.contains("/meeting/") || url.contains("/join/")
         val bottomPadding =
-            if (configuration.orientation == Configuration.ORIENTATION_PORTRAIT && !isMeetingUrl && !isInPip) {
+            if (configuration.orientation == Configuration.ORIENTATION_PORTRAIT && !isMeetingUrl) {
                 72.dp
             } else {
                 0.dp
@@ -473,45 +472,20 @@ private fun HTMLContentView(
                         resultMsg: android.os.Message?
                     ): Boolean {
                         val transport = resultMsg?.obj as? WebView.WebViewTransport
-                        if (transport != null) {
-                            transport.webView = view
-                            resultMsg.sendToTarget()
-                            return true
-                        }
-                        return false
-                    }
-
-                    override fun onShowCustomView(view: android.view.View?, callback: CustomViewCallback?) {
-                        (context as? android.app.Activity)?.window?.decorView?.let { decor ->
-                            (decor as ViewGroup).addView(view, ViewGroup.LayoutParams(
-                                ViewGroup.LayoutParams.MATCH_PARENT,
-                                ViewGroup.LayoutParams.MATCH_PARENT
-                            ))
-                        }
+                        transport?.webView = WebView(context)
+                        resultMsg?.sendToTarget()
+                        return true
                     }
 
                     override fun onHideCustomView() {
                         // Handled by activity or automatically
                     }
                 }
-                
-                setDownloadListener { url, _, _, _, _ ->
-                    try {
-                        val intent = Intent(Intent.ACTION_VIEW, Uri.parse(url))
-                        context.startActivity(intent)
-                    } catch (e: Exception) {
-                        // Ignore
-                    }
-                }
                 @Suppress("DEPRECATION")
                 applyFullAccessSettings(url)
                 with(settings) {
-                    val isMeeting = org.openedx.core.AppDataConstants.ZOOM_URL_PATTERNS.any { url.contains(it) }
-                    cacheMode = if (isMeeting) WebSettings.LOAD_DEFAULT else WebSettings.LOAD_NO_CACHE
-                    if (isMeeting) {
-                        setSupportMultipleWindows(true)
-                        javaScriptCanOpenWindowsAutomatically = true
-                    }
+                    mediaPlaybackRequiresUserGesture = false
+                    cacheMode = WebSettings.LOAD_NO_CACHE
                 }
                 if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
                     android.webkit.CookieManager.getInstance().setAcceptThirdPartyCookies(this, true)

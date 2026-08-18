@@ -50,10 +50,7 @@
         android:theme="@style/Theme.App.Starting"
         tools:targetApi="tiramisu"
         android:screenOrientation="portrait"
-        android:launchMode="singleInstance"
-        android:supportsPictureInPicture="true"
-        android:resizeableActivity="true"
-        android:configChanges="screenSize|smallestScreenSize|screenLayout|orientation|keyboardHidden|keyboard|navigation|uiMode|density">
+        android:launchMode="singleInstance">
         <activity
             android:name=".AppActivity"
             android:exported="true"
@@ -61,10 +58,7 @@
             android:theme="@style/Theme.App.Starting"
             android:windowSoftInputMode="adjustPan"
             android:screenOrientation="portrait"
-            android:launchMode="singleInstance"
-            android:supportsPictureInPicture="true"
-            android:resizeableActivity="true"
-            android:configChanges="screenSize|smallestScreenSize|screenLayout|orientation|keyboardHidden|keyboard|navigation|uiMode|density">
+            android:launchMode="singleInstance">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 

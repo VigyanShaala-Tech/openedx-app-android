@@ -10,47 +10,27 @@ import org.openedx.core.system.AppCookieManager
 
 fun WebView.applyFullAccessSettings(url: String): Boolean {
     var isSpecializedUA = false
-    settings.apply {
+    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+        android.webkit.CookieManager.getInstance().setAcceptThirdPartyCookies(this, true)
+    }
+
+    with(settings) {
         javaScriptEnabled = true
         loadWithOverviewMode = true
-        builtInZoomControls = true
-        displayZoomControls = false
+        builtInZoomControls = false
         setSupportZoom(true)
         loadsImagesAutomatically = true
         domStorageEnabled = true
-        allowFileAccess = true
-        allowContentAccess = true
-        useWideViewPort = true
         databaseEnabled = true
         javaScriptCanOpenWindowsAutomatically = true
-        setSupportMultipleWindows(true)
-        setGeolocationEnabled(true)
-        saveFormData = true
-        
-        @Suppress("DEPRECATION")
-        allowFileAccessFromFileURLs = true
-        @Suppress("DEPRECATION")
-        allowUniversalAccessFromFileURLs = true
-        
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN_MR1) {
-            mediaPlaybackRequiresUserGesture = false
-        }
-        
-        textZoom = 100
-        cacheMode = WebSettings.LOAD_DEFAULT
-        
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
-            mixedContentMode = WebSettings.MIXED_CONTENT_ALWAYS_ALLOW
-        }
 
+        // Apply a modern Mobile Chrome User Agent for ALL URLs by default
+        // This makes sites treat the WebView as a full Chrome browser
         userAgentString = AppDataConstants.MOBILE_CHROME_USER_AGENT
 
-        if (AppDataConstants.ZOOM_URL_PATTERNS.any { url.contains(it) }) {
-            userAgentString = AppDataConstants.DESKTOP_USER_AGENT
+        if (url.contains("zoom.us") || url.contains("/meeting/") || url.contains("/join/")) {
             isSpecializedUA = true
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-                safeBrowsingEnabled = false
-            }
+            setSupportMultipleWindows(false) // Zoom 'More' button needs single window behavior in some environments
         } else if (url.contains("google-calendar")) {
             userAgentString = AppDataConstants.DESKTOP_USER_AGENT
             isSpecializedUA = true

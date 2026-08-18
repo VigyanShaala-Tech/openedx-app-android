@@ -43,21 +43,21 @@ class WebContentFragment : Fragment() {
                         requireActivity().supportFragmentManager.popBackStack()
                     }
 
-                    override fun onMinimize() {
-                        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-                            val paramsBuilder = PictureInPictureParams.Builder()
-                                .setAspectRatio(Rational(16, 9))
-                            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
-                                paramsBuilder.setAutoEnterEnabled(true)
-                                paramsBuilder.setSeamlessResizeEnabled(true)
-                            }
-                            try {
-                                requireActivity().enterPictureInPictureMode(paramsBuilder.build())
-                            } catch (e: Exception) {
-                                // Ignore
-                            }
-                        }
-                    }
+//                    override fun onMinimize() {
+//                        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+//                            val paramsBuilder = PictureInPictureParams.Builder()
+//                                .setAspectRatio(Rational(16, 9))
+//                            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+//                                paramsBuilder.setAutoEnterEnabled(true)
+//                                paramsBuilder.setSeamlessResizeEnabled(true)
+//                            }
+//                            try {
+//                                requireActivity().enterPictureInPictureMode(paramsBuilder.build())
+//                            } catch (e: Exception) {
+//                                // Ignore
+//                            }
+//                        }
+//                    }
                 }
                 dialog.show(
                     requireActivity().supportFragmentManager,
@@ -113,13 +113,6 @@ class WebContentFragment : Fragment() {
         container: ViewGroup?,
         savedInstanceState: Bundle?
     ) = ComposeView(requireContext()).apply {
-        val url = requireArguments().getString(ARG_URL, "")
-        val isMeeting = org.openedx.core.AppDataConstants.ZOOM_URL_PATTERNS.any { url.contains(it) }
-        if (isMeeting) {
-            lifecycleScope.launch {
-                meetingNotifier.send(true)
-            }
-        }
         setViewCompositionStrategy(ViewCompositionStrategy.DisposeOnViewTreeLifecycleDestroyed)
         setContent {
             OpenEdXTheme {

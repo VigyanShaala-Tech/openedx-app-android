@@ -174,10 +174,10 @@ class AppActivity : AppCompatActivity(), InsetHolder, WindowSizeHolder {
     private fun handleDeepLink(data: Uri?) {
         if (data == null) return
         val isVigyanShaalaDeepLink =
-            (data.host == "apps.uat.vigyanshaala.com" && (data.path?.contains("learner-dashboard") == true || data.path?.contains(
+            ((data.host == "apps.uat.vigyanshaala.com" || data.host == "apps.mycommunity.vigyanshaala.com") && (data.path?.contains("learner-dashboard") == true || data.path?.contains(
                 "authn"
             ) == true || data.path?.contains("learning") == true)) ||
-                    (data.host == "uat.vigyanshaala.com" && (data.path?.contains("dashboard") == true || data.path?.contains(
+                    ((data.host == "uat.vigyanshaala.com" || data.host == "mycommunity.vigyanshaala.com") && (data.path?.contains("dashboard") == true || data.path?.contains(
                         "courses"
                     ) == true || data.path?.contains("register") == true || data.path?.contains("activate") == true || data.path?.contains(
                         "login"

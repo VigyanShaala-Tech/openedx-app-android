@@ -252,7 +252,15 @@ class CourseUnitContainerViewModel(
     private fun updateCurrentBlock(block: Block) {
         _currentBlock.value = block
         _hierarchyPath.value = buildHierarchyPath(block)
-        markTopicCompleted(block.id)
+
+        val skipMarkCompleted = block.type == BlockType.QUICKQUIZMAKER ||
+                block.type == BlockType.OPENASSESSMENT ||
+                block.type == BlockType.PROBLEM ||
+                block.type == BlockType.VIDEO
+
+        if (!skipMarkCompleted) {
+            markTopicCompleted(block.id)
+        }
     }
 
     private fun markTopicCompleted(blockId: String) {

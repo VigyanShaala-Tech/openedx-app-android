@@ -60,7 +60,7 @@
             android:fitsSystemWindows="false"
             android:theme="@style/Theme.App.Starting"
             android:windowSoftInputMode="adjustPan"
-            android:screenOrientation="fullSensor"
+            android:screenOrientation="portrait"
             android:launchMode="singleInstance"
             android:supportsPictureInPicture="true"
             android:resizeableActivity="true"
@@ -111,15 +111,23 @@
                 <data android:host="uat.vigyanshaala.com" />
                 <data android:host="apps.mycommunity.vigyanshaala.com" />
                 <data android:host="mycommunity.vigyanshaala.com" />
-                <data android:pathPrefix="/learner-dashboard" />
-                <data android:pathPrefix="/dashboard" />
-                <data android:pathPrefix="/courses" />
-                <data android:pathPrefix="/courses/" />
-                <data android:pathPrefix="/register" />
-                <data android:pathPrefix="/authn" />
-                <data android:pathPrefix="/activate" />
-                <data android:pathPrefix="/login" />
-                <data android:pathPrefix="/learning" />
+
+                <data android:pathPattern="/learner-dashboard/.*" />
+                <data android:pathPattern="/learner-dashboard" />
+                <data android:pathPattern="/dashboard/.*" />
+                <data android:pathPattern="/dashboard" />
+                <data android:pathPattern="/courses/.*" />
+                <data android:pathPattern="/courses" />
+                <data android:pathPattern="/register/.*" />
+                <data android:pathPattern="/register" />
+                <data android:pathPattern="/authn/.*" />
+                <data android:pathPattern="/authn" />
+                <data android:pathPattern="/activate/.*" />
+                <data android:pathPattern="/activate" />
+                <data android:pathPattern="/login/.*" />
+                <data android:pathPattern="/login" />
+                <data android:pathPattern="/learning/.*" />
+                <data android:pathPattern="/learning" />
             </intent-filter>
         </activity>
 

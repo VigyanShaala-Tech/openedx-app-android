@@ -588,7 +588,7 @@ val screenModule = module {
             courseId,
             blockId,
             get(),
-            get()
+//            get()
         )
     }
 

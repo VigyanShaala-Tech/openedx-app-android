@@ -13,20 +13,12 @@ class PdfUnitViewModel(
     val courseId: String,
     val blockId: String,
     private val notifier: CourseNotifier,
-    private val interactor: CourseInteractor,
 ) : BaseViewModel() {
 
     private val _uiState = MutableStateFlow<PdfUnitUIState>(PdfUnitUIState.Loading)
     val uiState = _uiState.asStateFlow()
 
     init {
-        markTopicCompleted()
-    }
-
-    private fun markTopicCompleted() {
-        viewModelScope.launch {
-            interactor.markTopicCompleted(courseId, blockId)
-        }
     }
 
     fun notifyCompletionSet() {

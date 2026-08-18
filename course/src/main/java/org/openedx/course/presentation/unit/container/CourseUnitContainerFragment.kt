@@ -516,10 +516,14 @@ class CourseUnitContainerFragment : Fragment(R.layout.fragment_course_unit_conta
 
     private fun handleNextClick(buttonChanged: (String, Boolean, Boolean) -> Unit) {
         if (!restrictDoubleClick()) {
-            val block = viewModel.moveToNextBlock()
-            if (block != null) {
-                viewModel.nextBlockClickedEvent(block.blockId, block.displayName)
-                if (!block.type.isContainer()) {
+            val currentBlock = viewModel.getCurrentBlock()
+            val nextBlock = viewModel.moveToNextBlock()
+            if (nextBlock != null) {
+                if (!viewModel.isSkipMarkCompleted(currentBlock)) {
+                    viewModel.markTopicCompleted(currentBlock.id)
+                }
+                viewModel.nextBlockClickedEvent(nextBlock.blockId, nextBlock.displayName)
+                if (!nextBlock.type.isContainer()) {
                     val nextIndex = binding.viewPager.currentItem + 1
                     binding.viewPager.setCurrentItem(nextIndex, true)
                     updateNavigationButtons { next, hasPrev, hasNext ->

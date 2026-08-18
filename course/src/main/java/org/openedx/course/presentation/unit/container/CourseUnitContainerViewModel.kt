@@ -252,22 +252,20 @@ class CourseUnitContainerViewModel(
     private fun updateCurrentBlock(block: Block) {
         _currentBlock.value = block
         _hierarchyPath.value = buildHierarchyPath(block)
+    }
 
-        val skipMarkCompleted = block.type == BlockType.QUICKQUIZMAKER ||
+    fun markTopicCompleted(blockId: String) {
+        viewModelScope.launch {
+            interactor.markTopicCompleted(courseId, blockId)
+        }
+    }
+
+    fun isSkipMarkCompleted(block: Block): Boolean {
+        return block.type == BlockType.QUICKQUIZMAKER ||
                 block.type == BlockType.OPENASSESSMENT ||
                 block.type == BlockType.PROBLEM ||
                 block.type == BlockType.VIDEO ||
                 block.type == BlockType.TAS
-
-        if (!skipMarkCompleted) {
-            markTopicCompleted(block.id)
-        }
-    }
-
-    private fun markTopicCompleted(blockId: String) {
-        viewModelScope.launch {
-            interactor.markTopicCompleted(courseId, blockId)
-        }
     }
 
     fun moveToNextBlock(): Block? {

@@ -44,6 +44,15 @@ android {
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
     }
 
+    signingConfigs {
+        release {
+            storeFile file("../release_Vigyan@1234.jks")
+            storePassword "Vigyan@1234"
+            keyAlias "vigyan"
+            keyPassword "Vigyan@1234"
+        }
+    }
+
 
     flavorDimensions += "env"
     productFlavors {
@@ -78,9 +87,10 @@ android {
 
     buildTypes {
         release {
-            minifyEnabled true
+            minifyEnabled false
+            debuggable true
             proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
-            signingConfig signingConfigs.debug
+            signingConfig signingConfigs.release
 
             if (firebaseEnabled) {
                 firebaseCrashlytics {

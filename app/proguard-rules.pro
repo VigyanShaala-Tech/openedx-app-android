@@ -182,3 +182,15 @@
 -dontwarn net.jcip.annotations.GuardedBy
 -dontwarn net.jcip.annotations.Immutable
 -dontwarn net.jcip.annotations.ThreadSafe
+
+# CUSTOM: Keep OkHttp Logging Interceptor for release debugging
+-keep class okhttp3.logging.** { *; }
+
+# CUSTOM: Prevent ProGuard from stripping Log calls in release
+-keepclassmembers class android.util.Log {
+    public static *** d(...);
+    public static *** v(...);
+    public static *** i(...);
+    public static *** w(...);
+    public static *** e(...);
+}

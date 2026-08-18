@@ -742,6 +742,7 @@ private fun EditProfileScreen(
                                             expandedList = LocaleUtils.getLanguages()
                                         }
                                     }
+                                    searchValue = TextFieldValue("")
                                     coroutine.launch {
                                         bottomSheetScaffoldState.show()
                                         val index = expandedList.indexOfFirst { option ->
@@ -1174,11 +1175,11 @@ private fun SelectableField(
             Box(
                 modifier = Modifier
                     .matchParentSize()
-                    .zIndex(1f)
-                    .clickable(
-                        enabled = !disabled,
-                        onClick = onClick
-                    )
+                    .noRippleClickable {
+                        if (!disabled) {
+                            onClick()
+                        }
+                    }
             )
         }
     }

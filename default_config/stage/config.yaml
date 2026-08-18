@@ -46,7 +46,7 @@ BRAZE:
 
 GOOGLE:
   ENABLED: true
-  CLIENT_ID: '376483552852-n7m70rndehmbp1tcmpec39jh8d35hpcj.apps.googleusercontent.com'
+  CLIENT_ID: '929595939098-b52cqrgjpbjvotqssp6v5p7m9hb7t7ms.apps.googleusercontent.com'
 
 MICROSOFT:
   ENABLED: false

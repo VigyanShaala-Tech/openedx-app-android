@@ -268,9 +268,11 @@ class SignInViewModel(
             }
                 .onFailure {
                     logger.e { "OAuth2 code error: $it" }
+                    it.printStackTrace()
                     onUnknownError()
                     _uiState.update { it.copy(loginFailure = true) }
                 }.onSuccess {
+                    logger.d { "OAuth2 code success" }
                     _uiState.update { it.copy(loginSuccess = true) }
                     setUserId()
                     appNotifier.send(SignInEvent())
@@ -300,6 +302,7 @@ class SignInViewModel(
             interactor.loginSocial(token, authType)
         }.onFailure { error ->
             logger.e { "Social login error: $error" }
+            error.printStackTrace()
             if (error is EdxError.InvalidGrantException) {
                 // The social identity resolved on Google's side but is not linked to any
                 // account on this platform. The mobile token-exchange endpoint only signs in

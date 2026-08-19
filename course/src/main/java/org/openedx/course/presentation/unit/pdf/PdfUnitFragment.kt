@@ -69,7 +69,7 @@ class PdfUnitFragment : Fragment() {
                 PdfUnitScreen(
                     pdfUrl = pdfUrl,
                     onDownloadComplete = {
-                        viewModel.notifyCompletionSet()
+                        viewModel.markBlockCompleted()
                     }
                 )
             }

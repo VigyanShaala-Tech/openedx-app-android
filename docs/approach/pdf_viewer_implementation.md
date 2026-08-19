@@ -24,8 +24,9 @@ The `Block` model (and its Data/Room counterparts) has been updated to include:
 ### 3. PDF Unit Fragment and ViewModel
 
 #### PdfUnitViewModel
-A lightweight ViewModel that handles business logic and interaction with the course system.
-- `notifyCompletionSet()`: Signals that the student has viewed the PDF unit, which can be used to track course progress.
+Handles business logic and interaction with the course system.
+- `markBlockCompleted()`: Marks the PDF unit as completed on the server using `CourseRepository.markBlocksCompletion` and `CourseRepository.markTopicCompleted`. It also notifies the system via `CourseCompletionSet` to update the local UI.
+- **Completion Logic**: Completion is triggered automatically once the PDF file is successfully downloaded and ready for viewing.
 
 #### PdfUnitFragment
 A Compose-based fragment that serves as the entry point for PDF units.

@@ -1,4 +1,4 @@
-API_HOST_URL: ' https://mycommunity.vigyanshaala.com'
+API_HOST_URL: 'https://mycommunity.vigyanshaala.com'
 APPLICATION_ID: 'org.app.vigyanshaala.stemchampions'
 ENVIRONMENT_DISPLAY_NAME: 'VigyanShaala'
 URI_SCHEME: 'uat.vigyanshaala.com'

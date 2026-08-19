@@ -38,8 +38,8 @@ The `CourseUnitContainerViewModel` is the primary manager for course units. It n
 #### Individual Unit Triggers
 For robustness and to cover scenarios where units might be opened independently, the completion trigger has been added to individual unit ViewModels:
 - **HtmlUnitViewModel**: Triggers in `init`.
-- **PdfUnitViewModel**: Triggers in `init`.
-- **VideoUnitViewModel**: Triggers in `init` (covers standard and encoded videos).
+- **PdfUnitViewModel**: Triggers in `markBlockCompleted` when the PDF is successfully loaded.
+- **VideoUnitViewModel**: Triggers in `markBlockCompleted` when the video reaches the completion threshold.
 - **VideoViewModel**: Triggers in `markTopicCompleted` (covers full-screen video players).
 - **DiscussionThreadsViewModel**: Updated `markBlockCompleted` to call the new API.
 

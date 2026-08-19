@@ -6,24 +6,34 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 import org.openedx.core.system.notifier.CourseCompletionSet
 import org.openedx.core.system.notifier.CourseNotifier
-import org.openedx.course.domain.interactor.CourseInteractor
+import org.openedx.course.data.repository.CourseRepository
 import org.openedx.foundation.presentation.BaseViewModel
 
 class PdfUnitViewModel(
     val courseId: String,
     val blockId: String,
+    private val repository: CourseRepository,
     private val notifier: CourseNotifier,
 ) : BaseViewModel() {
 
     private val _uiState = MutableStateFlow<PdfUnitUIState>(PdfUnitUIState.Loading)
     val uiState = _uiState.asStateFlow()
 
-    init {
-    }
+    private var isBlockAlreadyCompleted = false
 
-    fun notifyCompletionSet() {
-        viewModelScope.launch {
-            notifier.send(CourseCompletionSet())
+    fun markBlockCompleted() {
+        if (!isBlockAlreadyCompleted) {
+            viewModelScope.launch {
+                try {
+                    isBlockAlreadyCompleted = true
+                    repository.markBlocksCompletion(courseId, listOf(blockId))
+                    repository.markTopicCompleted(courseId, blockId)
+                    notifier.send(CourseCompletionSet())
+                } catch (e: Exception) {
+                    e.printStackTrace()
+                    isBlockAlreadyCompleted = false
+                }
+            }
         }
     }
 }

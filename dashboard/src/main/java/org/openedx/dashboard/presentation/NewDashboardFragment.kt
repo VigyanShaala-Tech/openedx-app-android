@@ -690,7 +690,7 @@ private fun CourseCard(c: CourseCardData, onClick: () -> Unit) {
                         .fillMaxWidth()
                         .height(120.dp)
                         .clip(RoundedCornerShape(topStart = 12.dp, topEnd = 12.dp)),
-                    contentScale = ContentScale.Crop,
+                    contentScale = ContentScale.FillBounds,
                     model = ImageRequest.Builder(LocalContext.current)
                         .data(c.imageUrl)
                         .error(CoreR.drawable.core_no_image_course)
@@ -849,7 +849,7 @@ private fun RecommendationItem(r: RecommendationData, onClick: () -> Unit) {
                 modifier = Modifier
                     .size(80.dp)
                     .clip(MaterialTheme.appShapes.cardShape),
-                contentScale = ContentScale.Crop,
+                contentScale = ContentScale.FillBounds,
                 model = ImageRequest.Builder(LocalContext.current)
                     .data(r.imageUrl)
                     .error(CoreR.drawable.core_no_image_course)

@@ -476,7 +476,8 @@ private fun CourseListItem(
                         .placeholder(CoreR.drawable.core_no_image_course)
                         .build(),
                     contentDescription = null,
-                    contentScale = ContentScale.Crop,
+                    contentScale = ContentScale.FillBounds,
+                    alignment = Alignment.Center,
                     modifier = Modifier
                         .fillMaxWidth()
                         .height(90.dp)
@@ -731,7 +732,8 @@ private fun PrimaryCourseCaption(
                 .placeholder(CoreR.drawable.core_no_image_course)
                 .build(),
             contentDescription = null,
-            contentScale = ContentScale.Crop,
+            contentScale = ContentScale.FillBounds,
+            alignment = Alignment.Center,
             modifier = imageModifier,
         )
         LinearProgressIndicator(

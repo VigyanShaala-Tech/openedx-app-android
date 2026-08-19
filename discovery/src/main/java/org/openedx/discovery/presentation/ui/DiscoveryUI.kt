@@ -60,14 +60,7 @@ fun ImageHeader(
     courseImage: String?,
     courseName: String,
 ) {
-    val configuration = LocalConfiguration.current
-    val windowSize = rememberWindowSize()
-    val contentScale =
-        if (!windowSize.isTablet && configuration.orientation == Configuration.ORIENTATION_LANDSCAPE) {
-            ContentScale.Fit
-        } else {
-            ContentScale.Crop
-        }
+    val contentScale = ContentScale.FillBounds
     Box(modifier = modifier, contentAlignment = Alignment.Center) {
         AsyncImage(
             model = ImageRequest.Builder(LocalContext.current)
@@ -80,6 +73,7 @@ fun ImageHeader(
                 courseName
             ),
             contentScale = contentScale,
+            alignment = Alignment.CenterStart,
             modifier = Modifier
                 .fillMaxSize()
                 .clip(MaterialTheme.appShapes.cardShape)
@@ -124,7 +118,8 @@ fun DiscoveryCourseItem(
                     .placeholder(сoreR.drawable.core_no_image_course)
                     .build(),
                 contentDescription = null,
-                contentScale = ContentScale.Crop,
+                contentScale = ContentScale.FillBounds,
+                alignment = Alignment.Center,
                 modifier = Modifier
                     .width(imageWidth)
                     .height(105.dp)

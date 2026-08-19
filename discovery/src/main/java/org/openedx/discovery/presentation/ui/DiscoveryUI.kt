@@ -113,7 +113,7 @@ fun DiscoveryCourseItem(
         ) {
             AsyncImage(
                 model = ImageRequest.Builder(LocalContext.current)
-                    .data(course.media?.courseImage?.uri?.toImageLink(apiHostUrl) ?: "")
+                    .data((course.media?.image?.small ?: course.media?.image?.large ?: course.media?.courseImage?.uri)?.toImageLink(apiHostUrl) ?: "")
                     .error(сoreR.drawable.core_no_image_course)
                     .placeholder(сoreR.drawable.core_no_image_course)
                     .build(),

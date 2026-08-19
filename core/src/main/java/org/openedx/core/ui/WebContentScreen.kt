@@ -27,6 +27,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableFloatStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
@@ -44,6 +45,7 @@ import org.openedx.core.ui.theme.appColors
 import org.openedx.core.utils.EmailUtil
 import org.openedx.core.extension.addMobileQueryParam
 import org.openedx.core.extension.applyFullAccessSettings
+import org.openedx.core.extension.loadUrl
 import org.openedx.foundation.extension.applyDarkModeIfEnabled
 import org.openedx.foundation.extension.isEmailValid
 import org.openedx.foundation.extension.replaceLinkTags
@@ -56,6 +58,7 @@ import java.nio.charset.StandardCharsets
 fun WebContentScreen(
     windowSize: WindowSize,
     apiHostUrl: String? = null,
+    cookieManager: org.openedx.core.system.AppCookieManager? = null,
     title: String?,
     onBackClick: () -> Unit,
     htmlBody: String? = null,
@@ -120,6 +123,7 @@ fun WebContentScreen(
                         ) {
                             WebViewContent(
                                 apiHostUrl = apiHostUrl,
+                                cookieManager = cookieManager,
                                 body = htmlBody,
                                 contentUrl = contentUrl,
                                 onWebPageLoaded = {
@@ -138,10 +142,12 @@ fun WebContentScreen(
 @SuppressLint("SetJavaScriptEnabled")
 private fun WebViewContent(
     apiHostUrl: String? = null,
+    cookieManager: org.openedx.core.system.AppCookieManager? = null,
     body: String? = null,
     contentUrl: String? = null,
     onWebPageLoaded: () -> Unit
 ) {
+    val coroutineScope = rememberCoroutineScope()
     val context = LocalContext.current
     val isDarkTheme = isSystemInDarkTheme()
     AndroidView(
@@ -164,7 +170,7 @@ private fun WebViewContent(
                         } else if (clickUrl.startsWith("mailto:")) {
                             val email = clickUrl.replace("mailto:", "")
                             if (email.isEmailValid()) {
-                                EmailUtil.sendEmailIntent(context, email, "", "")
+                                org.openedx.core.utils.EmailUtil.sendEmailIntent(context, email, "", "")
                                 true
                             } else {
                                 false
@@ -211,8 +217,12 @@ private fun WebViewContent(
                         null
                     )
                 }
-                contentUrl?.let {
-                    loadUrl(it.addMobileQueryParam())
+                contentUrl?.let { url ->
+                    if (cookieManager != null) {
+                        loadUrl(url, coroutineScope, cookieManager)
+                    } else {
+                        loadUrl(url.addMobileQueryParam())
+                    }
                 }
                 applyDarkModeIfEnabled(isDarkTheme)
             }
@@ -227,9 +237,13 @@ private fun WebViewContent(
                     null
                 )
             }
-            contentUrl?.let {
-                webView.loadUrl(it.addMobileQueryParam())
-            }
+                contentUrl?.let { url ->
+                    if (cookieManager != null) {
+                        webView.loadUrl(url, coroutineScope, cookieManager)
+                    } else {
+                        webView.loadUrl(url.addMobileQueryParam())
+                    }
+                }
         }
     )
 }

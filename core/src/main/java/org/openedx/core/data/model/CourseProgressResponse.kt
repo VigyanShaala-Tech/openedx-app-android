@@ -93,31 +93,34 @@ data class CourseProgressResponse(
         @SerializedName("assignment_colors") val assignmentColors: List<String>?
     ) {
         // TODO Temporary solution. Backend will returns color list later
-        val defaultColors = listOf(
-            "#D24242",
-            "#7B9645",
-            "#5A5AD8",
-            "#B0842C",
-            "#2E90C2",
-            "#D13F88",
-            "#36A17D",
-            "#AE5AD8",
-            "#3BA03B"
-        )
 
         fun mapToRoomEntity() = GradingPolicyDb(
-            assignmentPolicies = assignmentPolicies?.map { it.mapToRoomEntity() } ?: emptyList(),
+            assignmentPolicies = assignmentPolicies?.mapNotNull { it.mapToRoomEntity() } ?: emptyList(),
             gradeRange = gradeRange ?: emptyMap(),
             assignmentColors = assignmentColors ?: defaultColors
         )
 
         fun mapToDomain() = CourseProgress.GradingPolicy(
-            assignmentPolicies = assignmentPolicies?.map { it.mapToDomain() } ?: emptyList(),
+            assignmentPolicies = assignmentPolicies?.mapNotNull { it.mapToDomain() } ?: emptyList(),
             gradeRange = gradeRange ?: emptyMap(),
-            assignmentColors = assignmentColors?.map { colorString ->
+            assignmentColors = (assignmentColors?.takeIf { it.isNotEmpty() } ?: defaultColors).map { colorString ->
                 Color(colorString.toColorInt())
-            } ?: defaultColors.map { Color(it.toColorInt()) }
+            }
         )
+
+        companion object {
+            val defaultColors = listOf(
+                "#D24242",
+                "#7B9645",
+                "#5A5AD8",
+                "#B0842C",
+                "#2E90C2",
+                "#D13F88",
+                "#36A17D",
+                "#AE5AD8",
+                "#3BA03B"
+            )
+        }
 
         data class AssignmentPolicy(
             @SerializedName("num_droppable") val numDroppable: Int?,
@@ -150,12 +153,12 @@ data class CourseProgressResponse(
     ) {
         fun mapToRoomEntity() = SectionScoreDb(
             displayName = displayName.orEmpty(),
-            subsections = subsections?.map { it.mapToRoomEntity() } ?: emptyList()
+            subsections = subsections?.mapNotNull { it.mapToRoomEntity() } ?: emptyList()
         )
 
         fun mapToDomain() = CourseProgress.SectionScore(
             displayName = displayName ?: "",
-            subsections = subsections?.map { it.mapToDomain() } ?: emptyList()
+            subsections = subsections?.mapNotNull { it.mapToDomain() } ?: emptyList()
         )
 
         data class Subsection(
@@ -183,7 +186,7 @@ data class CourseProgressResponse(
                 numPointsEarned = numPointsEarned ?: 0f,
                 numPointsPossible = numPointsPossible ?: 0f,
                 percentGraded = percentGraded ?: 0.0,
-                problemScores = problemScores?.map { it.mapToRoomEntity() } ?: emptyList(),
+                problemScores = problemScores?.mapNotNull { it.mapToRoomEntity() } ?: emptyList(),
                 showCorrectness = showCorrectness.orEmpty(),
                 showGrades = showGrades ?: false,
                 url = url.orEmpty()
@@ -199,7 +202,7 @@ data class CourseProgressResponse(
                 numPointsEarned = numPointsEarned ?: 0f,
                 numPointsPossible = numPointsPossible ?: 0f,
                 percentGraded = percentGraded ?: 0.0,
-                problemScores = problemScores?.map { it.mapToDomain() } ?: emptyList(),
+                problemScores = problemScores?.mapNotNull { it.mapToDomain() } ?: emptyList(),
                 showCorrectness = showCorrectness ?: "",
                 showGrades = showGrades ?: false,
                 url = url ?: ""
@@ -252,7 +255,7 @@ data class CourseProgressResponse(
             enrollmentMode = enrollmentMode ?: "",
             gradingPolicy = gradingPolicy?.mapToDomain(),
             hasScheduledContent = hasScheduledContent ?: false,
-            sectionScores = sectionScores?.map { it.mapToDomain() } ?: emptyList(),
+            sectionScores = sectionScores?.mapNotNull { it.mapToDomain() } ?: emptyList(),
             studioUrl = studioUrl ?: "",
             username = username ?: "",
             userHasPassingGrade = userHasPassingGrade ?: false,
@@ -274,7 +277,7 @@ data class CourseProgressResponse(
             enrollmentMode = enrollmentMode.orEmpty(),
             gradingPolicy = gradingPolicy?.mapToRoomEntity(),
             hasScheduledContent = hasScheduledContent ?: false,
-            sectionScores = sectionScores?.map { it.mapToRoomEntity() } ?: emptyList(),
+            sectionScores = sectionScores?.mapNotNull { it.mapToRoomEntity() } ?: emptyList(),
             studioUrl = studioUrl.orEmpty(),
             username = username.orEmpty(),
             userHasPassingGrade = userHasPassingGrade ?: false,

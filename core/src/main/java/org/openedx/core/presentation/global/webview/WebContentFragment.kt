@@ -31,6 +31,7 @@ class WebContentFragment : Fragment() {
 
     private val config: Config by inject()
     private val meetingNotifier: MeetingNotifier by inject()
+    private val cookieManager: org.openedx.core.system.AppCookieManager by inject()
 
     private val onBackPressedCallback = object : OnBackPressedCallback(true) {
         override fun handleOnBackPressed() {
@@ -120,6 +121,7 @@ class WebContentFragment : Fragment() {
                 WebContentScreen(
                     apiHostUrl = config.getApiHostURL(),
                     windowSize = windowSize,
+                    cookieManager = cookieManager,
                     title = requireArguments().getString(ARG_TITLE, ""),
                     contentUrl = requireArguments().getString(ARG_URL, ""),
                     onBackClick = {

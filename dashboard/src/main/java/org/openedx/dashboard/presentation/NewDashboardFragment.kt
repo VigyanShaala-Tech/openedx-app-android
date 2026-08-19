@@ -90,6 +90,7 @@ import org.openedx.dashboard.data.model.RecommendationDto
 import org.openedx.dashboard.data.model.StatCardData
 import org.openedx.dashboard.data.model.SummaryCardDto
 import org.openedx.dashboard.data.model.WishlistItemData
+import org.openedx.foundation.extension.toImageLink
 import org.openedx.foundation.presentation.rememberWindowSize
 import org.openedx.foundation.presentation.windowSizeValue
 import org.openedx.core.R as CoreR
@@ -173,6 +174,7 @@ private fun NewDashboardScreen(
     val uiState by viewModel.state.collectAsState(NewDashboardState())
     NewDashboardScreenContent(
         uiState,
+        viewModel.apiHostUrl,
         onWishlistViewAllClick,
         onAchievementsViewAllClick,
         onRecommendedViewAllClick,
@@ -188,6 +190,7 @@ private fun NewDashboardScreen(
 @Composable
 private fun NewDashboardScreenContent(
     uiState: NewDashboardState,
+    apiHostUrl: String,
     onWishlistViewAllClick: () -> Unit,
     onAchievementsViewAllClick: () -> Unit,
     onRecommendedViewAllClick: () -> Unit,
@@ -377,6 +380,7 @@ private fun NewDashboardScreenContent(
                         continueCourses = continueCourses,
                         wishlistItems = wishlistItems,
                         completedCourses = completedCourses,
+                        apiHostUrl = apiHostUrl,
                         onWishlistViewAllClick = onWishlistViewAllClick,
                         onCourseClick = onCourseClick,
                         onContinueViewAllClick = onContinueViewAllClick,
@@ -457,7 +461,7 @@ private fun NewDashboardScreenContent(
                         items = recommendations,
                         key = { it.id }
                     ) { r ->
-                        RecommendationItem(r) { onRecommendationClick(r.id) }
+                        RecommendationItem(r, apiHostUrl) { onRecommendationClick(r.id) }
                     }
                 }
             }
@@ -518,6 +522,7 @@ private fun CoursesTabs(
     continueCourses: List<CourseCardData>,
     wishlistItems: List<WishlistItemData>,
     completedCourses: List<CourseCardData>,
+    apiHostUrl: String,
     onWishlistViewAllClick: () -> Unit,
     onCourseClick: (String, String) -> Unit,
     onContinueViewAllClick: () -> Unit,
@@ -573,7 +578,7 @@ private fun CoursesTabs(
                         Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
                             rowItems.forEach { c ->
                                 Box(modifier = Modifier.weight(1f)) {
-                                    CourseCard(c) { onCourseClick(c.id, c.title) }
+                                    CourseCard(c, apiHostUrl) { onCourseClick(c.id, c.title) }
                                 }
                             }
                             if (rowItems.size == 1) {
@@ -592,7 +597,7 @@ private fun CoursesTabs(
         1 -> {
             if (wishlistItems.isNotEmpty()) {
                 Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
-                    wishlistItems.forEach { WishlistItem(it, onRemove = onRemoveWishlist) }
+                    wishlistItems.forEach { WishlistItem(it, apiHostUrl, onRemove = onRemoveWishlist) }
                 }
                 Spacer(Modifier.height(12.dp))
                 ViewAllLink(onClick = onWishlistViewAllClick)
@@ -608,7 +613,7 @@ private fun CoursesTabs(
                         Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
                             rowItems.forEach { c ->
                                 Box(modifier = Modifier.weight(1f)) {
-                                    CourseCard(c) { onCourseClick(c.id, c.title) }
+                                    CourseCard(c, apiHostUrl) { onCourseClick(c.id, c.title) }
                                 }
                             }
                             if (rowItems.size == 1) {
@@ -675,7 +680,7 @@ private fun ViewAllLink(onClick: () -> Unit) {
 }
 
 @Composable
-private fun CourseCard(c: CourseCardData, onClick: () -> Unit) {
+private fun CourseCard(c: CourseCardData, apiHostUrl: String, onClick: () -> Unit) {
     Card(
         backgroundColor = MaterialTheme.appColors.surface,
         elevation = 0.dp,
@@ -692,7 +697,7 @@ private fun CourseCard(c: CourseCardData, onClick: () -> Unit) {
                         .clip(RoundedCornerShape(topStart = 12.dp, topEnd = 12.dp)),
                     contentScale = ContentScale.FillBounds,
                     model = ImageRequest.Builder(LocalContext.current)
-                        .data(c.imageUrl)
+                        .data(c.imageUrl.toImageLink(apiHostUrl))
                         .error(CoreR.drawable.core_no_image_course)
                         .placeholder(CoreR.drawable.core_no_image_course)
                         .crossfade(true)
@@ -752,7 +757,7 @@ private fun CourseCard(c: CourseCardData, onClick: () -> Unit) {
 }
 
 @Composable
-private fun WishlistItem(w: WishlistItemData, onRemove: (String) -> Unit) {
+private fun WishlistItem(w: WishlistItemData, apiHostUrl: String, onRemove: (String) -> Unit) {
     Card(
         backgroundColor = MaterialTheme.appColors.surface,
         elevation = 0.dp,
@@ -769,7 +774,7 @@ private fun WishlistItem(w: WishlistItemData, onRemove: (String) -> Unit) {
                         .clip(MaterialTheme.appShapes.cardShape),
                     contentScale = ContentScale.Crop,
                     model = ImageRequest.Builder(LocalContext.current)
-                        .data(w.image)
+                        .data(w.image.toImageLink(apiHostUrl))
                         .error(CoreR.drawable.core_no_image_course)
                         .placeholder(CoreR.drawable.core_no_image_course)
                         .crossfade(true)
@@ -833,7 +838,7 @@ private fun WishlistItem(w: WishlistItemData, onRemove: (String) -> Unit) {
 }
 
 @Composable
-private fun RecommendationItem(r: RecommendationData, onClick: () -> Unit) {
+private fun RecommendationItem(r: RecommendationData, apiHostUrl: String, onClick: () -> Unit) {
     Card(
         backgroundColor = MaterialTheme.appColors.surface,
         elevation = 0.dp,
@@ -851,7 +856,7 @@ private fun RecommendationItem(r: RecommendationData, onClick: () -> Unit) {
                     .clip(MaterialTheme.appShapes.cardShape),
                 contentScale = ContentScale.FillBounds,
                 model = ImageRequest.Builder(LocalContext.current)
-                    .data(r.imageUrl)
+                    .data(r.imageUrl.toImageLink(apiHostUrl))
                     .error(CoreR.drawable.core_no_image_course)
                     .placeholder(CoreR.drawable.core_no_image_course)
                     .crossfade(true)
@@ -1008,6 +1013,7 @@ private fun NewDashboardScreenPreview() {
                     pagination = PaginationDto(null, null, 1, 1)
                 )
             ),
+            apiHostUrl = "https://example.com",
             onWishlistViewAllClick = {},
             onAchievementsViewAllClick = {},
             onRecommendedViewAllClick = {},
@@ -1026,6 +1032,7 @@ private fun NewDashboardScreenLoadingPreview() {
     OpenEdXTheme {
         NewDashboardScreenContent(
             uiState = NewDashboardState(loading = true),
+            apiHostUrl = "https://example.com",
             onWishlistViewAllClick = {},
             onAchievementsViewAllClick = {},
             onRecommendedViewAllClick = {},
@@ -1044,6 +1051,7 @@ private fun NewDashboardScreenEmptyPreview() {
     OpenEdXTheme {
         NewDashboardScreenContent(
             uiState = NewDashboardState(loading = false),
+            apiHostUrl = "https://example.com",
             onWishlistViewAllClick = {},
             onAchievementsViewAllClick = {},
             onRecommendedViewAllClick = {},

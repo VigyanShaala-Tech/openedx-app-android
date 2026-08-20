@@ -279,10 +279,30 @@ fun HtmlUnitView(
             Modifier
         }
 
+        val screenWidth by remember(key1 = windowSize, key2 = isMeetingUrl, key3 = configuration.orientation) {
+            mutableStateOf(
+                if (isMeetingUrl && configuration.orientation == Configuration.ORIENTATION_LANDSCAPE) {
+                    Modifier.fillMaxWidth()
+                } else {
+                    windowSize.windowSizeValue(
+                        expanded = Modifier.widthIn(Dp.Unspecified, 560.dp),
+                        compact = Modifier.fillMaxWidth()
+                    )
+                }
+            )
+        }
+
+        val isLandscapeMeeting = isMeetingUrl && configuration.orientation == Configuration.ORIENTATION_LANDSCAPE
+        val shape = if (isLandscapeMeeting) {
+            androidx.compose.ui.graphics.RectangleShape
+        } else {
+            RoundedCornerShape(topStart = 24.dp, topEnd = 24.dp)
+        }
+
         Surface(
             modifier = Modifier
-                .clip(RoundedCornerShape(topStart = 24.dp, topEnd = 24.dp))
-                .navigationBarsInset(),
+                .clip(shape)
+                .then(if (isLandscapeMeeting) Modifier else Modifier.navigationBarsInset()),
             color = MaterialTheme.colors.background
         ) {
             Box(
@@ -297,7 +317,7 @@ fun HtmlUnitView(
                     if (hasInternetConnection || fromDownloadedContent) {
                         HTMLContentView(
                             uiState = uiState,
-                            windowSize = windowSize,
+                            screenWidth = screenWidth,
                             url = url,
                             cookieManager = viewModel.cookieManager,
                             apiHostURL = viewModel.apiHostURL,
@@ -352,7 +372,7 @@ fun HtmlUnitView(
 @SuppressLint("SetJavaScriptEnabled")
 private fun HTMLContentView(
     uiState: HtmlUnitUIState,
-    windowSize: WindowSize,
+    screenWidth: Modifier,
     url: String,
     cookieManager: AppCookieManager,
     apiHostURL: String,
@@ -368,168 +388,179 @@ private fun HTMLContentView(
     val coroutineScope = rememberCoroutineScope()
     val context = LocalContext.current
 
-    val screenWidth by remember(key1 = windowSize) {
-        mutableStateOf(
-            windowSize.windowSizeValue(
-                expanded = Modifier.widthIn(Dp.Unspecified, 560.dp),
-                compact = Modifier.fillMaxWidth()
-            )
-        )
-    }
-
     val isDarkTheme = isSystemInDarkTheme()
+
+    val webView = remember {
+        WebView(context).apply {
+            addJavascriptInterface(
+                object {
+                    @Suppress("unused")
+                    @JavascriptInterface
+                    fun completionSet() {
+                        onCompletionSet()
+                    }
+                },
+                "callback"
+            )
+            addJavascriptInterface(
+                JSBridge(
+                    postMessageCallback = {
+                        coroutineScope.launch {
+                            saveXBlockProgress(it)
+                            setupOfflineProgress(it)
+                        }
+                    }
+                ),
+                "AndroidBridge"
+            )
+            webViewClient = object : WebViewClient() {
+
+                override fun onPageStarted(view: WebView?, url: String?, favicon: Bitmap?) {
+                    super.onPageStarted(view, url, favicon)
+                    onWebPageLoading()
+                }
+
+                override fun onPageCommitVisible(view: WebView?, url: String?) {
+                    super.onPageCommitVisible(view, url)
+                    Log.d("HTML", "onPageCommitVisible")
+                    onWebPageLoaded()
+                }
+
+                override fun shouldOverrideUrlLoading(
+                    view: WebView?,
+                    request: WebResourceRequest?
+                ): Boolean {
+                    val clickUrl = request?.url?.toString() ?: ""
+                    if (clickUrl.startsWith("http://") || clickUrl.startsWith("https://")) {
+                        return false
+                    }
+                    return try {
+                        val intent = Intent(Intent.ACTION_VIEW, Uri.parse(clickUrl))
+                        context.startActivity(intent)
+                        true
+                    } catch (e: Exception) {
+                        false
+                    }
+                }
+
+                override fun onReceivedHttpError(
+                    view: WebView,
+                    request: WebResourceRequest,
+                    errorResponse: WebResourceResponse,
+                ) {
+                    if (request.url.toString().startsWith(apiHostURL)) {
+                        when (errorResponse.statusCode) {
+                            403, 401, 404 -> {
+                                coroutineScope.launch {
+                                    cookieManager.tryToRefreshSessionCookie()
+                                    loadUrl(url.addMobileQueryParam())
+                                }
+                            }
+                        }
+                    }
+                    super.onReceivedHttpError(view, request, errorResponse)
+                }
+
+                override fun onReceivedError(
+                    view: WebView,
+                    request: WebResourceRequest,
+                    error: WebResourceError
+                ) {
+                    if (request.url.toString() == view.url) {
+                        onWebPageLoadError()
+                    }
+                    super.onReceivedError(view, request, error)
+                }
+            }
+            webChromeClient = object : WebChromeClient() {
+                override fun onShowFileChooser(
+                    webView: WebView?,
+                    filePathCallback: ValueCallback<Array<Uri>>?,
+                    fileChooserParams: FileChooserParams?
+                ): Boolean {
+                    if (filePathCallback != null && fileChooserParams != null) {
+                        onShowFileChooser(filePathCallback, fileChooserParams)
+                    }
+                    return true
+                }
+
+                override fun onPermissionRequest(request: PermissionRequest?) {
+                    val resources = request?.resources ?: arrayOf()
+                    request?.grant(resources)
+                }
+
+                override fun onGeolocationPermissionsShowPrompt(
+                    origin: String?,
+                    callback: android.webkit.GeolocationPermissions.Callback?
+                ) {
+                    callback?.invoke(origin, true, false)
+                }
+
+                override fun onCreateWindow(
+                    view: WebView?,
+                    isDialog: Boolean,
+                    isUserGesture: Boolean,
+                    resultMsg: android.os.Message?
+                ): Boolean {
+                    val chromeClient = this
+                    val newWebView = WebView(context).apply {
+                        settings.javaScriptEnabled = true
+                        settings.domStorageEnabled = true
+                        settings.javaScriptCanOpenWindowsAutomatically = true
+                        settings.setSupportMultipleWindows(true)
+                        webChromeClient = chromeClient
+                    }
+                    val transport = resultMsg?.obj as? WebView.WebViewTransport
+                    transport?.webView = newWebView
+                    resultMsg?.sendToTarget()
+                    return true
+                }
+
+                override fun onHideCustomView() {
+                    // Handled by activity or automatically
+                }
+            }
+            @Suppress("DEPRECATION")
+            applyFullAccessSettings(url)
+            with(settings) {
+                mediaPlaybackRequiresUserGesture = false
+                cacheMode = WebSettings.LOAD_NO_CACHE
+            }
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+                android.webkit.CookieManager.getInstance().setAcceptThirdPartyCookies(this, true)
+            }
+            isVerticalScrollBarEnabled = false
+            isHorizontalScrollBarEnabled = false
+            isFocusable = true
+            isFocusableInTouchMode = true
+
+            loadUrl(url, coroutineScope, cookieManager)
+            applyDarkModeIfEnabled(isDarkTheme)
+        }
+    }
 
     AndroidView(
         modifier = Modifier
             .then(screenWidth)
             .background(MaterialTheme.appColors.background),
         factory = {
-            WebView(context).apply {
-                addJavascriptInterface(
-                    object {
-                        @Suppress("unused")
-                        @JavascriptInterface
-                        fun completionSet() {
-                            onCompletionSet()
-                        }
-                    },
-                    "callback"
-                )
-                addJavascriptInterface(
-                    JSBridge(
-                        postMessageCallback = {
-                            coroutineScope.launch {
-                                saveXBlockProgress(it)
-                                setupOfflineProgress(it)
-                            }
-                        }
-                    ),
-                    "AndroidBridge"
-                )
-                webViewClient = object : WebViewClient() {
-
-                    override fun onPageStarted(view: WebView?, url: String?, favicon: Bitmap?) {
-                        super.onPageStarted(view, url, favicon)
-                        onWebPageLoading()
-                    }
-
-                    override fun onPageCommitVisible(view: WebView?, url: String?) {
-                        super.onPageCommitVisible(view, url)
-                        Log.d("HTML", "onPageCommitVisible")
-                        onWebPageLoaded()
-                    }
-
-                    override fun shouldOverrideUrlLoading(
-                        view: WebView?,
-                        request: WebResourceRequest?
-                    ): Boolean {
-                        val clickUrl = request?.url?.toString() ?: ""
-                        if (clickUrl.startsWith("http://") || clickUrl.startsWith("https://")) {
-                            return false
-                        }
-                        return try {
-                            val intent = Intent(Intent.ACTION_VIEW, Uri.parse(clickUrl))
-                            context.startActivity(intent)
-                            true
-                        } catch (e: Exception) {
-                            false
-                        }
-                    }
-
-                    override fun onReceivedHttpError(
-                        view: WebView,
-                        request: WebResourceRequest,
-                        errorResponse: WebResourceResponse,
-                    ) {
-                        if (request.url.toString().startsWith(apiHostURL)) {
-                            when (errorResponse.statusCode) {
-                                403, 401, 404 -> {
-                                    coroutineScope.launch {
-                                        cookieManager.tryToRefreshSessionCookie()
-                                        loadUrl(url.addMobileQueryParam())
-                                    }
-                                }
-                            }
-                        }
-                        super.onReceivedHttpError(view, request, errorResponse)
-                    }
-
-                    override fun onReceivedError(
-                        view: WebView,
-                        request: WebResourceRequest,
-                        error: WebResourceError
-                    ) {
-                        if (request.url.toString() == view.url) {
-                            onWebPageLoadError()
-                        }
-                        super.onReceivedError(view, request, error)
-                    }
-                }
-                webChromeClient = object : WebChromeClient() {
-                    override fun onShowFileChooser(
-                        webView: WebView?,
-                        filePathCallback: ValueCallback<Array<Uri>>?,
-                        fileChooserParams: FileChooserParams?
-                    ): Boolean {
-                        if (filePathCallback != null && fileChooserParams != null) {
-                            onShowFileChooser(filePathCallback, fileChooserParams)
-                        }
-                        return true
-                    }
-
-                    override fun onPermissionRequest(request: PermissionRequest?) {
-                        request?.grant(request.resources)
-                    }
-
-                    override fun onGeolocationPermissionsShowPrompt(
-                        origin: String?,
-                        callback: android.webkit.GeolocationPermissions.Callback?
-                    ) {
-                        callback?.invoke(origin, true, false)
-                    }
-
-                    override fun onCreateWindow(
-                        view: WebView?,
-                        isDialog: Boolean,
-                        isUserGesture: Boolean,
-                        resultMsg: android.os.Message?
-                    ): Boolean {
-                        val transport = resultMsg?.obj as? WebView.WebViewTransport
-                        transport?.webView = WebView(context)
-                        resultMsg?.sendToTarget()
-                        return true
-                    }
-
-                    override fun onHideCustomView() {
-                        // Handled by activity or automatically
-                    }
-                }
-                @Suppress("DEPRECATION")
-                applyFullAccessSettings(url)
-                with(settings) {
-                    mediaPlaybackRequiresUserGesture = false
-                    cacheMode = WebSettings.LOAD_NO_CACHE
-                }
-                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
-                    android.webkit.CookieManager.getInstance().setAcceptThirdPartyCookies(this, true)
-                }
-                isVerticalScrollBarEnabled = false
-                isHorizontalScrollBarEnabled = false
-                isFocusable = true
-                isFocusableInTouchMode = true
-
-                loadUrl(url, coroutineScope, cookieManager)
-                applyDarkModeIfEnabled(isDarkTheme)
-            }
+            webView
         },
-        update = { webView ->
+        update = {
             if (!isLoading && injectJSList.isNotEmpty()) {
-                injectJSList.forEach { webView.evaluateJavascript(it, null) }
+                injectJSList.forEach { js -> it.evaluateJavascript(js, null) }
                 val jsonProgress = (uiState as? HtmlUnitUIState.Loaded)?.jsonProgress
                 if (!jsonProgress.isNullOrEmpty()) {
-                    webView.setupOfflineProgress(jsonProgress)
+                    it.setupOfflineProgress(jsonProgress)
                 }
             }
+        },
+        onRelease = {
+            it.stopLoading()
+            it.loadUrl("about:blank")
+            it.clearHistory()
+            it.removeAllViews()
+            it.destroy()
         }
     )
 }

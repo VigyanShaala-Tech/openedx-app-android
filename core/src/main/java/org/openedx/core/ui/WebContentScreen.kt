@@ -74,35 +74,38 @@ fun WebContentScreen(
             it.contains(pattern)
         }
     } ?: false
+    val configuration = LocalConfiguration.current
+    val isLandscape = configuration.orientation == Configuration.ORIENTATION_LANDSCAPE
+    val screenWidth by remember(key1 = windowSize, key2 = isMeetingUrl, key3 = isLandscape) {
+        mutableStateOf(
+            if (isMeetingUrl && isLandscape) {
+                Modifier.fillMaxWidth()
+            } else {
+                windowSize.windowSizeValue(
+                    expanded = Modifier.widthIn(Dp.Unspecified, 560.dp),
+                    compact = Modifier.fillMaxWidth()
+                )
+            }
+        )
+    }
     Scaffold(
         modifier = Modifier
             .fillMaxSize()
-            .then(if (isMeetingUrl) Modifier.navigationBarsInset() else Modifier.padding(bottom = 24.dp))
+            .then(if (isMeetingUrl && isLandscape) Modifier else if (isMeetingUrl) Modifier.navigationBarsInset() else Modifier.padding(bottom = 24.dp))
             .semantics {
                 testTagsAsResourceId = true
             },
         scaffoldState = scaffoldState,
         backgroundColor = MaterialTheme.appColors.background
     ) {
-        val screenWidth by remember(key1 = windowSize) {
-            mutableStateOf(
-                windowSize.windowSizeValue(
-                    expanded = Modifier.widthIn(Dp.Unspecified, 560.dp),
-                    compact = Modifier.fillMaxWidth()
-                )
-            )
-        }
-
         Box(
             modifier = Modifier
                 .fillMaxWidth()
                 .padding(it)
-                .statusBarsInset()
+                .then(if (isMeetingUrl && isLandscape) Modifier else Modifier.statusBarsInset())
                 .displayCutoutForLandscape(),
             contentAlignment = Alignment.TopCenter
         ) {
-            val configuration = LocalConfiguration.current
-            val isLandscape = configuration.orientation == Configuration.ORIENTATION_LANDSCAPE
             Column(screenWidth) {
                 if (((title?.isNotEmpty() == true) || canShowBackBtn) && !(isMeetingUrl && isLandscape)) {
                     Box(
@@ -159,82 +162,103 @@ private fun WebViewContent(
     val coroutineScope = rememberCoroutineScope()
     val context = LocalContext.current
     val isDarkTheme = isSystemInDarkTheme()
-    AndroidView(
-        factory = {
-            WebView(context).apply {
-                webViewClient = object : WebViewClient() {
-                    override fun onPageCommitVisible(view: WebView?, url: String?) {
-                        super.onPageCommitVisible(view, url)
-                        onWebPageLoaded()
+    val webView = remember {
+        WebView(context).apply {
+            webViewClient = object : WebViewClient() {
+                override fun onPageCommitVisible(view: WebView?, url: String?) {
+                    super.onPageCommitVisible(view, url)
+                    onWebPageLoaded()
+                }
+
+                override fun shouldOverrideUrlLoading(
+                    view: WebView?,
+                    request: WebResourceRequest?
+                ): Boolean {
+                    val clickUrl = request?.url?.toString() ?: ""
+                    if (clickUrl.isEmpty()) return false
+
+                    // Don't override Zoom URLs, let them load in the WebView
+                    val isZoomUrl = AppDataConstants.ZOOM_URL_PATTERNS.any { clickUrl.contains(it) }
+                    if (isZoomUrl) {
+                        return false
                     }
 
-                    override fun shouldOverrideUrlLoading(
-                        view: WebView?,
-                        request: WebResourceRequest?
-                    ): Boolean {
-                        val clickUrl = request?.url?.toString() ?: ""
-                        return if (clickUrl.isNotEmpty() && clickUrl.startsWith("http")) {
-                            context.startActivity(Intent(Intent.ACTION_VIEW, Uri.parse(clickUrl)))
+                    return if (clickUrl.startsWith("http")) {
+                        context.startActivity(Intent(Intent.ACTION_VIEW, Uri.parse(clickUrl)))
+                        true
+                    } else if (clickUrl.startsWith("mailto:")) {
+                        val email = clickUrl.replace("mailto:", "")
+                        if (email.isEmailValid()) {
+                            org.openedx.core.utils.EmailUtil.sendEmailIntent(context, email, "", "")
                             true
-                        } else if (clickUrl.startsWith("mailto:")) {
-                            val email = clickUrl.replace("mailto:", "")
-                            if (email.isEmailValid()) {
-                                org.openedx.core.utils.EmailUtil.sendEmailIntent(context, email, "", "")
-                                true
-                            } else {
-                                false
-                            }
                         } else {
                             false
                         }
-                    }
-                }
-                webChromeClient = object : WebChromeClient() {
-                    override fun onPermissionRequest(request: PermissionRequest?) {
-                        request?.grant(request.resources)
-                    }
-
-                    override fun onGeolocationPermissionsShowPrompt(
-                        origin: String?,
-                        callback: android.webkit.GeolocationPermissions.Callback?
-                    ) {
-                        callback?.invoke(origin, true, false)
-                    }
-
-                    override fun onCreateWindow(
-                        view: WebView?,
-                        isDialog: Boolean,
-                        isUserGesture: Boolean,
-                        resultMsg: android.os.Message?
-                    ): Boolean {
-                        val transport = resultMsg?.obj as? WebView.WebViewTransport
-                        transport?.webView = WebView(context)
-                        resultMsg?.sendToTarget()
-                        return true
-                    }
-                }
-                applyFullAccessSettings(contentUrl ?: "")
-                settings.mediaPlaybackRequiresUserGesture = false
-                isVerticalScrollBarEnabled = false
-                isHorizontalScrollBarEnabled = false
-                body?.let {
-                    loadDataWithBaseURL(
-                        apiHostUrl,
-                        body.replaceLinkTags(isDarkTheme),
-                        "text/html",
-                        StandardCharsets.UTF_8.name(),
-                        null
-                    )
-                }
-                contentUrl?.let { url ->
-                    if (cookieManager != null) {
-                        loadUrl(url, coroutineScope, cookieManager)
                     } else {
-                        loadUrl(url.addMobileQueryParam())
+                        false
                     }
                 }
-                applyDarkModeIfEnabled(isDarkTheme)
             }
+            webChromeClient = object : WebChromeClient() {
+                override fun onPermissionRequest(request: PermissionRequest?) {
+                    val resources = request?.resources ?: arrayOf()
+                    request?.grant(resources)
+                }
+
+                override fun onGeolocationPermissionsShowPrompt(
+                    origin: String?,
+                    callback: android.webkit.GeolocationPermissions.Callback?
+                ) {
+                    callback?.invoke(origin, true, false)
+                }
+
+                override fun onCreateWindow(
+                    view: WebView?,
+                    isDialog: Boolean,
+                    isUserGesture: Boolean,
+                    resultMsg: android.os.Message?
+                ): Boolean {
+                    val chromeClient = this
+                    val newWebView = WebView(context).apply {
+                        settings.javaScriptEnabled = true
+                        settings.domStorageEnabled = true
+                        settings.javaScriptCanOpenWindowsAutomatically = true
+                        settings.setSupportMultipleWindows(true)
+                        webChromeClient = chromeClient
+                    }
+                    val transport = resultMsg?.obj as? WebView.WebViewTransport
+                    transport?.webView = newWebView
+                    resultMsg?.sendToTarget()
+                    return true
+                }
+            }
+            applyFullAccessSettings(contentUrl ?: "")
+            settings.mediaPlaybackRequiresUserGesture = false
+            isVerticalScrollBarEnabled = false
+            isHorizontalScrollBarEnabled = false
+            body?.let {
+                loadDataWithBaseURL(
+                    apiHostUrl,
+                    body.replaceLinkTags(isDarkTheme),
+                    "text/html",
+                    StandardCharsets.UTF_8.name(),
+                    null
+                )
+            }
+            contentUrl?.let { url ->
+                if (cookieManager != null) {
+                    loadUrl(url, coroutineScope, cookieManager)
+                } else {
+                    loadUrl(url.addMobileQueryParam())
+                }
+            }
+            applyDarkModeIfEnabled(isDarkTheme)
+        }
+    }
+
+    AndroidView(
+        factory = {
+            webView
         },
         update = { webView ->
             body?.let {
@@ -246,13 +270,24 @@ private fun WebViewContent(
                     null
                 )
             }
-                contentUrl?.let { url ->
+            contentUrl?.let { url ->
+                val currentUrl = webView.url
+                val mobileUrl = url.addMobileQueryParam()
+                if (currentUrl != mobileUrl && (currentUrl == null || !currentUrl.contains(url))) {
                     if (cookieManager != null) {
                         webView.loadUrl(url, coroutineScope, cookieManager)
                     } else {
-                        webView.loadUrl(url.addMobileQueryParam())
+                        webView.loadUrl(mobileUrl)
                     }
                 }
+            }
+        },
+        onRelease = {
+            it.stopLoading()
+            it.loadUrl("about:blank")
+            it.clearHistory()
+            it.removeAllViews()
+            it.destroy()
         }
     )
 }

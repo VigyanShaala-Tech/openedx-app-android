@@ -17,21 +17,30 @@ fun WebView.applyFullAccessSettings(url: String): Boolean {
     with(settings) {
         javaScriptEnabled = true
         loadWithOverviewMode = true
-        builtInZoomControls = false
+        useWideViewPort = true
+        textZoom = 100
+        builtInZoomControls = true
+        displayZoomControls = false
         setSupportZoom(true)
         loadsImagesAutomatically = true
         domStorageEnabled = true
         databaseEnabled = true
         javaScriptCanOpenWindowsAutomatically = true
+        allowFileAccess = true
+        allowContentAccess = true
+        mixedContentMode = WebSettings.MIXED_CONTENT_COMPATIBILITY_MODE
 
         // Apply a modern Mobile Chrome User Agent for ALL URLs by default
         // This makes sites treat the WebView as a full Chrome browser
         userAgentString = AppDataConstants.MOBILE_CHROME_USER_AGENT
 
-        if (url.contains("zoom.us") || url.contains("/meeting/") || url.contains("/join/")) {
+        if (url.contains("zoom.us") || url.contains("zoom.com") || url.contains("/meeting/") || url.contains("/join/")) {
             isSpecializedUA = true
-            setSupportMultipleWindows(false) // Zoom 'More' button needs single window behavior in some environments
-        } else if (url.contains("google-calendar")) {
+            setSupportMultipleWindows(true)
+            // Use a clean, modern Chrome UA with explicit device info to unlock all Zoom features
+            userAgentString = "Mozilla/5.0 (Linux; Android 10; K) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/127.0.0.0 Mobile Safari/537.36"
+        }
+ else if (url.contains("google-calendar")) {
             userAgentString = AppDataConstants.DESKTOP_USER_AGENT
             isSpecializedUA = true
         }

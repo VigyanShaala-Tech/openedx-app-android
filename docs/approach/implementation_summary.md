@@ -56,22 +56,25 @@ This document outlines the recent changes made to the project to address build i
 
 ## 6. WebView Enhancements
 
-### Improved XBlock Support (Google Calendar, SGA, Surveys)
+### Improved XBlock and Zoom Support (Google Calendar, SGA, Surveys, Zoom Meetings)
 **Issues:**
 - Google Calendar not loading in course units.
 - Staff Graded Assignment (SGA) "Upload" button not opening file manager.
 - Survey blocks having interaction issues (selecting options).
+- Zoom meetings missing dialogs (More menu, Leave button) and functions.
 
 **Solution:**
 - Updated `HtmlUnitFragment.kt` and `CourseUnitContainerAdapter.kt` to support `EDX_SGA` block type.
 - Implemented `WebChromeClient.onShowFileChooser` in `HtmlUnitFragment` using `ActivityResultLauncher` with `FLAG_GRANT_READ_URI_PERMISSION` to handle file uploads securely.
 - Enhanced WebView settings in `HtmlUnitFragment` for maximum compatibility:
     - Enabled `databaseEnabled`, `domStorageEnabled`, and `javaScriptEnabled`.
-    - Disabled `setSupportMultipleWindows` to prevent `IllegalArgumentException` crashes when content attempts to open popup windows (common in some XBlocks).
+    - Enabled `setSupportMultipleWindows(true)` to support popup windows and dialogs (essential for Zoom and some auth flows).
     - Added `CookieManager.getInstance().setAcceptThirdPartyCookies(true)` for embedded content.
     - Implemented Desktop User Agent override for `google-calendar` URLs.
-    - Set `mixedContentMode = WebSettings.MIXED_CONTENT_ALWAYS_ALLOW`.
+    - Set `mixedContentMode = WebSettings.MIXED_CONTENT_COMPATIBILITY_MODE`.
     - Enabled `isFocusable` and `isFocusableInTouchMode` for better interaction.
+    - Implemented `WebChromeClient.onPermissionRequest` to handle camera and microphone permissions for Zoom.
+    - Improved `WebChromeClient.onCreateWindow` to handle new window requests by creating and configuring a temporary WebView.
 
 ## 7. Dynamic Achievements and Badges
 
@@ -346,21 +349,34 @@ This document outlines the recent changes made to the project to address build i
 - Clicking this item allows the user to use their search query as a manual entry, solving the issue of being stuck when a specific university or college is not in the predefined list.
 - This implementation follows the project architecture by using central theme colors and string resources.
 
-## 30. WebView "Google Chrome" Compatibility Optimization
+## 30. Global WebView "Full Access" Optimization and Zoom Compatibility
 
 ### Global WebView "Full Access" Optimization
 - Centralized WebView configuration into a new extension helper: `applyFullAccessSettings(url)` in `ViewExt.kt`.
 - **Comprehensive Support across App**: Applied these optimized settings to `HtmlUnitFragment` (Course Units), `CatalogWebView` (Discovery), and `WebContentScreen` (General Web Content).
-- **Mobile Chrome Identity**: Standardized `userAgentString` to a modern `MOBILE_CHROME_USER_AGENT` for **all** URLs. This ensures websites recognize the app as a full Google Chrome browser and provide their complete mobile experience.
+- **Mobile Chrome Identity**: Standardized `userAgentString` to a modern `MOBILE_CHROME_USER_AGENT` for **all** URLs. For Zoom URLs, the User Agent is further refined to remove the `; wv` suffix, presenting a full Chrome browser identity to ensure all meeting features (dialogs, menus, functions) are visible and functional.
 - **Visual Stability**: Set `textZoom = 100` to prevent Android's system font size scaling from breaking responsive web layouts.
 - **Interactive Parity**:
     - Enabled `builtInZoomControls = true` with `displayZoomControls = false` to support pinch-to-zoom without the dated UI buttons.
     - Set `cacheMode = WebSettings.LOAD_DEFAULT` for optimal performance and cookie persistence.
+    - Enabled `allowFileAccess = true` and `allowContentAccess = true`.
 - **Advanced Capabilities**:
     - **Hardware Acceleration**: Enabled `android:hardwareAccelerated="true"` in the `AndroidManifest.xml` to ensure complex UIs render smoothly.
-    - **Multiple Windows (Popups)**: Enabled `setSupportMultipleWindows(true)` by default to support auth popups and secondary windows.
+    - **Multiple Windows (Popups)**: Enabled `setSupportMultipleWindows(true)` by default to support auth popups and Zoom's "More" menu dialogs.
     - **Third-Party Cookies**: Enabled support for cross-domain cookies across all versions from Lollipop onwards.
-- **Meeting Specific Logic**: Specifically disabled `setSupportMultipleWindows` for Zoom/Meeting links to ensure the "More" menu and "Leave" confirmation modals function correctly within the primary view.
+- **Meeting Specific Logic**:
+    - Set `mixedContentMode = WebSettings.MIXED_CONTENT_COMPATIBILITY_MODE` for broad content support.
+    - Enabled `setSupportMultipleWindows(true)` for Zoom URLs to fix missing dialogs and functions.
+    - Implemented a robust `WebChromeClient` with `onPermissionRequest` to automatically grant camera and microphone access within the WebView.
+    - Enhanced `onCreateWindow` to correctly handle popup windows by creating a new `WebView` instance with inherited settings, ensuring Zoom's internal dialogs and features load correctly.
+- **Rotation and State Persistence**:
+    - Added `android:configChanges="orientation|screenSize|screenLayout|smallestScreenSize"` to `AppActivity` in `AndroidManifest.xml` to prevent activity recreation and WebView reload upon screen rotation.
+    - Implemented `remember` for `WebView` instances in `HtmlUnitFragment` and `WebContentScreen` to preserve the WebView state and avoid re-loading content during Compose recompositions triggered by configuration changes.
+    - Optimized `AndroidView.update` blocks to prevent redundant `loadUrl` calls when the content URL hasn't changed.
+    - Implemented `onRelease` in `AndroidView` for both `HtmlUnitFragment` and `WebContentScreen` to stop loading, navigate to `about:blank`, and destroy the WebView instance when the composable is removed, ensuring meetings (and audio/video) stop immediately upon navigation.
+    - Updated `AppActivity` to use `mutableStateOf` for insets (`topInset`, `bottomInset`, `cutoutInset`), making the custom `navigationBarsInset()` and `statusBarsInset()` modifiers reactive to system bar visibility changes.
+    - Refined `hideSystemBars()` and `showSystemBars()` in `AppActivity` to correctly update inset states, ensuring the WebView fills the entire screen in landscape meeting mode and respects system bars in portrait mode.
+    - Updated `HtmlUnitFragment` and `WebContentScreen` to use `Modifier.fillMaxWidth()` and `RectangleShape` in landscape meeting mode, removing side margins and top rounded corners for a true full-screen experience.
 
 
 ## 31. Registration and Social Auth Stability Fixes

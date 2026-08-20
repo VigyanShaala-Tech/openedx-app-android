@@ -6,7 +6,6 @@ import android.content.res.Configuration
 import android.net.Uri
 import android.os.Build
 import android.os.Bundle
-import android.util.Rational
 import android.view.View
 import android.view.WindowManager
 import androidx.appcompat.app.AppCompatActivity
@@ -33,6 +32,8 @@ import androidx.compose.material.icons.filled.Info
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableIntStateOf
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -44,6 +45,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
 import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
+import androidx.core.view.ViewCompat
 import androidx.core.view.WindowCompat
 import androidx.core.view.WindowInsetsCompat
 import androidx.core.view.WindowInsetsControllerCompat
@@ -85,12 +87,12 @@ import org.openedx.whatsnew.presentation.whatsnew.WhatsNewFragment
 
 class AppActivity : AppCompatActivity(), InsetHolder, WindowSizeHolder {
 
-    override val topInset: Int
-        get() = _insetTop
-    override val bottomInset: Int
-        get() = _insetBottom
-    override val cutoutInset: Int
-        get() = _insetCutout
+    override var topInset: Int by mutableIntStateOf(0)
+        private set
+    override var bottomInset: Int by mutableIntStateOf(0)
+        private set
+    override var cutoutInset: Int by mutableIntStateOf(0)
+        private set
 
     override val windowSize: WindowSize
         get() = _windowSize
@@ -106,10 +108,6 @@ class AppActivity : AppCompatActivity(), InsetHolder, WindowSizeHolder {
     private val meetingNotifier by inject<MeetingNotifier>()
 
     private val branchLogger = Logger(BRANCH_TAG)
-
-    private var _insetTop = 0
-    private var _insetBottom = 0
-    private var _insetCutout = 0
 
     private var _windowSize = WindowSize(WindowType.Compact, WindowType.Compact)
     private var activationComposeView: androidx.compose.ui.platform.ComposeView? = null
@@ -244,24 +242,24 @@ class AppActivity : AppCompatActivity(), InsetHolder, WindowSizeHolder {
         computeWindowSizeClasses()
 
         savedInstanceState?.let {
-            _insetTop = it.getInt(TOP_INSET, 0)
-            _insetBottom = it.getInt(BOTTOM_INSET, 0)
-            _insetCutout = it.getInt(CUTOUT_INSET, 0)
+            topInset = it.getInt(TOP_INSET, 0)
+            bottomInset = it.getInt(BOTTOM_INSET, 0)
+            cutoutInset = it.getInt(CUTOUT_INSET, 0)
         }
 
         binding.root.setOnApplyWindowInsetsListener { _, insets ->
             val insetsCompat = WindowInsetsCompat.toWindowInsetsCompat(insets)
                 .getInsets(WindowInsetsCompat.Type.systemBars())
 
-            _insetTop = insetsCompat.top
-            _insetBottom = insetsCompat.bottom
+            topInset = insetsCompat.top
+            bottomInset = insetsCompat.bottom
 
             val displayCutout = WindowInsetsCompat.toWindowInsetsCompat(insets).displayCutout
             if (displayCutout != null) {
                 val top = displayCutout.safeInsetTop
                 val left = displayCutout.safeInsetLeft
                 val right = displayCutout.safeInsetRight
-                _insetCutout = maxOf(top, left, right)
+                cutoutInset = maxOf(top, left, right)
             }
 
             insets
@@ -554,6 +552,9 @@ class AppActivity : AppCompatActivity(), InsetHolder, WindowSizeHolder {
                     or View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN
                     or View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION)
         }
+        // Force insets to 0 for full screen
+        topInset = 0
+        bottomInset = 0
     }
 
     private fun showSystemBars() {
@@ -563,56 +564,17 @@ class AppActivity : AppCompatActivity(), InsetHolder, WindowSizeHolder {
             @Suppress("DEPRECATION")
             window.decorView.systemUiVisibility = View.SYSTEM_UI_FLAG_VISIBLE
         }
+        // Request insets to be reapplied and update state
+        binding.root.post {
+            binding.root.requestApplyInsets()
+            val insets = ViewCompat.getRootWindowInsets(binding.root)
+            val systemBars = insets?.getInsets(WindowInsetsCompat.Type.systemBars())
+            if (systemBars != null) {
+                topInset = systemBars.top
+                bottomInset = systemBars.bottom
+            }
+        }
     }
-
-//    override fun onUserLeaveHint() {
-//        super.onUserLeaveHint()
-//        if (isInMeeting && Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-//            val paramsBuilder = PictureInPictureParams.Builder()
-//                .setAspectRatio(Rational(16, 9))
-//            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
-//                paramsBuilder.setAutoEnterEnabled(true)
-//                paramsBuilder.setSeamlessResizeEnabled(true)
-//            }
-//            try {
-//                enterPictureInPictureMode(paramsBuilder.build())
-//            } catch (e: Exception) {
-//                // Ignore
-//            }
-//        }
-//    }
-
-//    override fun onPictureInPictureModeChanged(
-//        isInPictureInPictureMode: Boolean,
-//        newConfig: Configuration
-//    ) {
-//        super.onPictureInPictureModeChanged(isInPictureInPictureMode, newConfig)
-//        lifecycleScope.launch {
-//            meetingNotifier.setPipMode(isInPictureInPictureMode)
-//        }
-//        if (isInPictureInPictureMode) {
-//            // Hide navigation bar and status bar in PiP mode
-//            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
-//                window.insetsController?.hide(WindowInsetsCompat.Type.systemBars())
-//            } else {
-//                @Suppress("DEPRECATION")
-//                window.decorView.systemUiVisibility = View.SYSTEM_UI_FLAG_LOW_PROFILE or
-//                        View.SYSTEM_UI_FLAG_FULLSCREEN or
-//                        View.SYSTEM_UI_FLAG_LAYOUT_STABLE or
-//                        View.SYSTEM_UI_FLAG_IMMERSIVE_STICKY or
-//                        View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION or
-//                        View.SYSTEM_UI_FLAG_HIDE_NAVIGATION
-//            }
-//        } else {
-//            // Show navigation bar and status bar when exiting PiP mode
-//            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
-//                window.insetsController?.show(WindowInsetsCompat.Type.systemBars())
-//            } else {
-//                @Suppress("DEPRECATION")
-//                window.decorView.systemUiVisibility = View.SYSTEM_UI_FLAG_VISIBLE
-//            }
-//        }
-//    }
 
     private fun handlePushNotification(data: Bundle) {
         val deepLink = DeepLink(data.toStringMap())

@@ -103,7 +103,8 @@ fun CatalogWebViewScreen(
 
             webChromeClient = object : WebChromeClient() {
                 override fun onPermissionRequest(request: PermissionRequest?) {
-                    request?.grant(request.resources)
+                    val resources = request?.resources ?: arrayOf()
+                    request?.grant(resources)
                 }
 
                 override fun onGeolocationPermissionsShowPrompt(
@@ -119,13 +120,18 @@ fun CatalogWebViewScreen(
                     isUserGesture: Boolean,
                     resultMsg: android.os.Message?
                 ): Boolean {
-                    val transport = resultMsg?.obj as? WebView.WebViewTransport
-                    if (transport != null) {
-                        transport.webView = view
-                        resultMsg.sendToTarget()
-                        return true
+                    val chromeClient = this
+                    val newWebView = WebView(context).apply {
+                        settings.javaScriptEnabled = true
+                        settings.domStorageEnabled = true
+                        settings.javaScriptCanOpenWindowsAutomatically = true
+                        settings.setSupportMultipleWindows(true)
+                        webChromeClient = chromeClient
                     }
-                    return false
+                    val transport = resultMsg?.obj as? WebView.WebViewTransport
+                    transport?.webView = newWebView
+                    resultMsg?.sendToTarget()
+                    return true
                 }
             }
 

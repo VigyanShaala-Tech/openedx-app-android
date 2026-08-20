@@ -18,6 +18,7 @@ data class AppShapes(
     val courseImageShape: CornerBasedShape,
     val dialogShape: CornerBasedShape,
     val videoPreviewShape: CornerBasedShape,
+    val chipShape: CornerBasedShape,
 )
 
 val MaterialTheme.appShapes: AppShapes

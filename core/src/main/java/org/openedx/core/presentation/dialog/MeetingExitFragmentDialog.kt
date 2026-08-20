@@ -1,8 +1,10 @@
 package org.openedx.core.presentation.dialog
 
+import android.app.PictureInPictureParams
 import android.graphics.drawable.ColorDrawable
 import android.os.Build
 import android.os.Bundle
+import android.util.Rational
 import android.view.LayoutInflater
 import android.view.ViewGroup
 import androidx.compose.foundation.layout.Column
@@ -54,7 +56,19 @@ class MeetingExitFragmentDialog : DialogFragment() {
                     },
 //                    onMinimize = {
 //                        dismiss()
-//                        listener?.onMinimize()
+//                        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+//                            val paramsBuilder = PictureInPictureParams.Builder()
+//                                .setAspectRatio(Rational(16, 9))
+//                            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+//                                paramsBuilder.setAutoEnterEnabled(true)
+//                                paramsBuilder.setSeamlessResizeEnabled(true)
+//                            }
+//                            try {
+//                                activity?.enterPictureInPictureMode(paramsBuilder.build())
+//                            } catch (e: Exception) {
+//                                // Ignore
+//                            }
+//                        }
 //                    },
                     onCancel = {
                         dismiss()

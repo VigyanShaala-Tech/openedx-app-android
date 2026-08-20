@@ -107,6 +107,15 @@ class WebContentFragment : Fragment() {
     override fun onResume() {
         super.onResume()
         requireActivity().onBackPressedDispatcher.addCallback(viewLifecycleOwner, onBackPressedCallback)
+        val url = requireArguments().getString(ARG_URL, "")
+        val isMeeting = org.openedx.core.AppDataConstants.ZOOM_URL_PATTERNS.any {
+            url.contains(it)
+        }
+        if (isMeeting) {
+            lifecycleScope.launch {
+                meetingNotifier.send(true)
+            }
+        }
     }
 
     override fun onCreateView(

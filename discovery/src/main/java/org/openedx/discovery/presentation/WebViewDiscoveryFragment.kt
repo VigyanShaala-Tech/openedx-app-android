@@ -60,6 +60,7 @@ import org.openedx.core.ui.AuthButtonsPanel
 import org.openedx.core.ui.FullScreenErrorView
 import org.openedx.core.ui.Toolbar
 import org.openedx.core.ui.displayCutoutForLandscape
+import org.openedx.core.ui.navigationBarsInset
 import org.openedx.core.ui.statusBarsInset
 import org.openedx.core.ui.theme.OpenEdXTheme
 import org.openedx.core.ui.theme.appColors
@@ -254,6 +255,7 @@ private fun WebViewDiscoveryScreen(
                 .fillMaxSize()
                 .padding(it)
                 .statusBarsInset()
+                .navigationBarsInset()
                 .displayCutoutForLandscape(),
             horizontalAlignment = Alignment.CenterHorizontally,
         ) {

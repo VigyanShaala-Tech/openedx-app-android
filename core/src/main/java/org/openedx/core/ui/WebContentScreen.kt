@@ -34,7 +34,9 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
+import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
+import android.content.res.Configuration
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.semantics.testTagsAsResourceId
 import androidx.compose.ui.unit.Dp
@@ -42,6 +44,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.viewinterop.AndroidView
 import androidx.compose.ui.zIndex
 import org.openedx.core.ui.theme.appColors
+import org.openedx.core.AppDataConstants
 import org.openedx.core.utils.EmailUtil
 import org.openedx.core.extension.addMobileQueryParam
 import org.openedx.core.extension.applyFullAccessSettings
@@ -66,11 +69,15 @@ fun WebContentScreen(
     canShowBackBtn: Boolean = true,
 ) {
     val scaffoldState = rememberScaffoldState()
-    val isMeetingUrl = contentUrl?.let { it.contains("zoom.us") || it.contains("/meeting/") || it.contains("/join/") } ?: false
+    val isMeetingUrl = contentUrl?.let {
+        AppDataConstants.ZOOM_URL_PATTERNS.any { pattern ->
+            it.contains(pattern)
+        }
+    } ?: false
     Scaffold(
         modifier = Modifier
             .fillMaxSize()
-            .then(if (isMeetingUrl) Modifier else Modifier.padding(bottom = 24.dp))
+            .then(if (isMeetingUrl) Modifier.navigationBarsInset() else Modifier.padding(bottom = 24.dp))
             .semantics {
                 testTagsAsResourceId = true
             },
@@ -94,8 +101,10 @@ fun WebContentScreen(
                 .displayCutoutForLandscape(),
             contentAlignment = Alignment.TopCenter
         ) {
+            val configuration = LocalConfiguration.current
+            val isLandscape = configuration.orientation == Configuration.ORIENTATION_LANDSCAPE
             Column(screenWidth) {
-                if (title?.isNotEmpty() == true || canShowBackBtn) {
+                if (((title?.isNotEmpty() == true) || canShowBackBtn) && !(isMeetingUrl && isLandscape)) {
                     Box(
                         Modifier
                             .fillMaxWidth()

@@ -275,8 +275,7 @@ private fun NewDashboardScreenContent(
     Box(modifier = Modifier.fillMaxSize()) {
         Scaffold(
             modifier = Modifier
-                .fillMaxSize()
-                .navigationBarsPadding(),
+                .fillMaxSize(),
             backgroundColor = MaterialTheme.appColors.dashboardBackground
         ) { paddingValues ->
             LazyColumn(

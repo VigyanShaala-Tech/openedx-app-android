@@ -43,6 +43,7 @@ import coil.compose.AsyncImage
 import coil.request.ImageRequest
 import org.openedx.core.ui.theme.OpenEdXTheme
 import org.openedx.core.ui.theme.appColors
+import org.openedx.core.ui.theme.appDimens
 import org.openedx.core.ui.theme.appShapes
 import org.openedx.core.ui.theme.appTypography
 import org.openedx.discovery.R
@@ -102,13 +103,13 @@ fun DiscoveryCourseItem(
             .testTag("btn_course_card")
             .fillMaxWidth()
             .clickable { onClick(course.courseId.orEmpty()) }
-            .padding(vertical = 12.dp),
+            .padding(vertical = MaterialTheme.appDimens.defaultPadding),
         color = MaterialTheme.appColors.background
     ) {
         Row(
             modifier = Modifier
                 .fillMaxWidth(),
-            horizontalArrangement = Arrangement.spacedBy(16.dp),
+            horizontalArrangement = Arrangement.spacedBy(MaterialTheme.appDimens.doublePadding),
             verticalAlignment = Alignment.Top
         ) {
             AsyncImage(
@@ -142,13 +143,13 @@ fun DiscoveryCourseItem(
                     overflow = TextOverflow.Ellipsis
                 )
                 
-                Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                Row(horizontalArrangement = Arrangement.spacedBy(MaterialTheme.appDimens.defaultPadding)) {
                     // Placeholder chips to match design
                     Box(
                         modifier = Modifier
-                            .clip(androidx.compose.foundation.shape.RoundedCornerShape(12.dp))
-                            .background(MaterialTheme.appColors.primary.copy(alpha = 0.1f))
-                            .padding(horizontal = 8.dp, vertical = 4.dp)
+                            .clip(MaterialTheme.appShapes.chipShape)
+                            .background(MaterialTheme.appColors.primaryAlpha10)
+                            .padding(horizontal = MaterialTheme.appDimens.defaultPadding, vertical = MaterialTheme.appDimens.halfPadding)
                     ) {
                         Text(
                             text = course.level?:"",
@@ -158,9 +159,9 @@ fun DiscoveryCourseItem(
                     }
                     Box(
                         modifier = Modifier
-                            .clip(androidx.compose.foundation.shape.RoundedCornerShape(12.dp))
+                            .clip(MaterialTheme.appShapes.chipShape)
                             .background(MaterialTheme.appColors.textFieldBackground)
-                            .padding(horizontal = 8.dp, vertical = 4.dp)
+                            .padding(horizontal = MaterialTheme.appDimens.defaultPadding, vertical = MaterialTheme.appDimens.halfPadding)
                     ) {
                         Text(
                             text = course.category?:"",
@@ -212,8 +213,8 @@ fun WarningLabel(
             modifier = Modifier
                 .fillMaxWidth()
                 .padding(
-                    horizontal = 16.dp,
-                    vertical = 12.dp
+                    horizontal = MaterialTheme.appDimens.doublePadding,
+                    vertical = MaterialTheme.appDimens.defaultPadding
                 ),
             verticalAlignment = Alignment.CenterVertically
         ) {
@@ -222,7 +223,7 @@ fun WarningLabel(
                 contentDescription = null,
                 tint = MaterialTheme.appColors.warning
             )
-            Spacer(Modifier.width(12.dp))
+            Spacer(Modifier.width(MaterialTheme.appDimens.defaultPadding))
             Text(
                 modifier = Modifier.testTag("txt_enroll_internet_error"),
                 text = text,

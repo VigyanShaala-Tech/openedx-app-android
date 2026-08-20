@@ -12,6 +12,7 @@ import org.openedx.core.system.AppCookieManager
 import org.openedx.core.system.connection.NetworkConnection
 import org.openedx.core.system.notifier.CourseCompletionSet
 import org.openedx.core.system.notifier.CourseNotifier
+import org.openedx.core.system.notifier.MeetingNotifier
 import org.openedx.course.domain.interactor.CourseInteractor
 import org.openedx.course.worker.OfflineProgressSyncScheduler
 import org.openedx.foundation.extension.readAsText
@@ -24,6 +25,7 @@ class HtmlUnitViewModel(
     private val edxCookieManager: AppCookieManager,
     private val networkConnection: NetworkConnection,
     private val notifier: CourseNotifier,
+    private val meetingNotifier: MeetingNotifier,
     private val courseInteractor: CourseInteractor,
     private val offlineProgressSyncScheduler: OfflineProgressSyncScheduler
 ) : BaseViewModel() {
@@ -85,6 +87,12 @@ class HtmlUnitViewModel(
         viewModelScope.launch {
             courseInteractor.saveXBlockProgress(blockId, courseId, jsonProgress)
             offlineProgressSyncScheduler.scheduleSync()
+        }
+    }
+
+    fun sendMeetingActive(isActive: Boolean) {
+        viewModelScope.launch {
+            meetingNotifier.send(isActive)
         }
     }
 

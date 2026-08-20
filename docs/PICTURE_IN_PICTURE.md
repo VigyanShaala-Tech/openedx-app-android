@@ -11,7 +11,23 @@ To improve student engagement, the app supports PiP mode when a user is attendin
 ### 1. Identifying Zoom Meetings
 Zoom meetings are identified by checking the URL against common patterns defined in `AppDataConstants.ZOOM_URL_PATTERNS`. This centralizes the identification logic and makes it easy to update if Zoom changes their URL structure.
 
-### 2. Meeting State Tracking
+### 2. Meeting UI Overlap Fix
+To prevent the Zoom meeting UI from overlapping with the system navigation buttons (back, home, recent apps), `navigationBarsInset()` is applied to the web content container in `WebContentScreen.kt` when a meeting URL is detected.
+
+```kotlin
+    Scaffold(
+        modifier = Modifier
+            .fillMaxSize()
+            .then(if (isMeetingUrl) Modifier.navigationBarsInset() else Modifier.padding(bottom = 24.dp))
+```
+
+### 3. Screen Rotation and Fullscreen
+The app supports automatic screen rotation and fullscreen mode specifically for Zoom meetings:
+- **Automatic Rotation**: While the rest of the app is locked to portrait mode, Zoom meetings allow rotation to landscape via `ActivityInfo.SCREEN_ORIENTATION_FULL_SENSOR`.
+- **Landscape Fullscreen**: When rotated to landscape during a meeting, the app automatically hides the status and navigation bars to provide a true fullscreen experience.
+- **Auto-Restore**: Exiting a meeting immediately restores the app to portrait mode and shows the system bars.
+
+### 4. Meeting State Tracking
 A `MeetingNotifier` (located in `org.openedx.core.system.notifier`) is used to broadcast whether a meeting is currently active. 
 - `CourseUnitContainerFragment` updates this state in its `onResume` (sets to `true` if it's a meeting) and `onPause` (sets to `false`).
 

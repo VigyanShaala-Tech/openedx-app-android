@@ -1,7 +1,7 @@
 package org.openedx.app
 
-import android.app.PictureInPictureParams
 import android.content.Intent
+import android.content.pm.ActivityInfo
 import android.content.res.Configuration
 import android.net.Uri
 import android.os.Build
@@ -164,7 +164,7 @@ class AppActivity : AppCompatActivity(), InsetHolder, WindowSizeHolder {
         observeLogoutEvent()
         observeDownloadFailedDialog()
         observeAccountActivation()
-//        observeMeetingState()
+        observeMeetingState()
 
         calendarSyncScheduler.scheduleDailySync()
 
@@ -515,26 +515,55 @@ class AppActivity : AppCompatActivity(), InsetHolder, WindowSizeHolder {
         super.onResume()
     }
 
-//    private fun observeMeetingState() {
-//        lifecycleScope.launch {
-//            meetingNotifier.isMeetingActive.collectLatest { active ->
-//                isInMeeting = active
-//                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-//                    val paramsBuilder = PictureInPictureParams.Builder()
-//                        .setAspectRatio(Rational(16, 9))
-//                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
-//                        paramsBuilder.setAutoEnterEnabled(active)
-//                        paramsBuilder.setSeamlessResizeEnabled(true)
-//                    }
-//                    try {
-//                        setPictureInPictureParams(paramsBuilder.build())
-//                    } catch (e: Exception) {
-//                        // Ignore
-//                    }
-//                }
-//            }
-//        }
-//    }
+    private fun observeMeetingState() {
+        lifecycleScope.launch {
+            meetingNotifier.isMeetingActive.collectLatest { active ->
+                isInMeeting = active
+                if (active) {
+                    requestedOrientation = ActivityInfo.SCREEN_ORIENTATION_FULL_SENSOR
+                } else {
+                    requestedOrientation = ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED
+                    showSystemBars()
+                }
+            }
+        }
+    }
+
+    override fun onConfigurationChanged(newConfig: Configuration) {
+        super.onConfigurationChanged(newConfig)
+        if (isInMeeting) {
+            if (newConfig.orientation == Configuration.ORIENTATION_LANDSCAPE) {
+                hideSystemBars()
+            } else {
+                showSystemBars()
+            }
+        }
+    }
+
+    private fun hideSystemBars() {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
+            window.insetsController?.hide(WindowInsetsCompat.Type.systemBars())
+            window.insetsController?.systemBarsBehavior =
+                WindowInsetsControllerCompat.BEHAVIOR_SHOW_TRANSIENT_BARS_BY_SWIPE
+        } else {
+            @Suppress("DEPRECATION")
+            window.decorView.systemUiVisibility = (View.SYSTEM_UI_FLAG_FULLSCREEN
+                    or View.SYSTEM_UI_FLAG_HIDE_NAVIGATION
+                    or View.SYSTEM_UI_FLAG_IMMERSIVE_STICKY
+                    or View.SYSTEM_UI_FLAG_LAYOUT_STABLE
+                    or View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN
+                    or View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION)
+        }
+    }
+
+    private fun showSystemBars() {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
+            window.insetsController?.show(WindowInsetsCompat.Type.systemBars())
+        } else {
+            @Suppress("DEPRECATION")
+            window.decorView.systemUiVisibility = View.SYSTEM_UI_FLAG_VISIBLE
+        }
+    }
 
 //    override fun onUserLeaveHint() {
 //        super.onUserLeaveHint()

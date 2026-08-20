@@ -235,6 +235,7 @@ fun OpenEdXTheme(darkTheme: Boolean = isSystemInDarkTheme(), content: @Composabl
     ) {
         CompositionLocalProvider(
             LocalOverscrollFactory provides null,
+            LocalDimens provides AppDimens(),
             content = content
         )
     }

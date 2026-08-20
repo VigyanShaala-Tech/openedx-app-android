@@ -36,6 +36,7 @@ import androidx.compose.material.CircularProgressIndicator
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Surface
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -66,6 +67,7 @@ import org.openedx.core.extension.applyFullAccessSettings
 import org.openedx.core.extension.loadUrl
 import org.openedx.core.system.AppCookieManager
 import org.openedx.core.ui.FullScreenErrorView
+import org.openedx.core.ui.navigationBarsInset
 import org.openedx.core.ui.roundBorderWithoutBottom
 import org.openedx.core.ui.theme.OpenEdXTheme
 import org.openedx.core.ui.theme.appColors
@@ -114,6 +116,24 @@ class HtmlUnitFragment : Fragment() {
         lastModified = requireArguments().getString(ARG_LAST_MODIFIED, "")
         fromDownloadedContent = lastModified.isNotEmpty()
         checkAndRequestPermissions()
+    }
+
+    override fun onResume() {
+        super.onResume()
+        if (isMeetingUrl(blockUrl)) {
+            viewModel.sendMeetingActive(true)
+        }
+    }
+
+    override fun onPause() {
+        super.onPause()
+        if (isMeetingUrl(blockUrl)) {
+            viewModel.sendMeetingActive(false)
+        }
+    }
+
+    private fun isMeetingUrl(url: String): Boolean {
+        return AppDataConstants.ZOOM_URL_PATTERNS.any { url.contains(it) }
     }
 
     private fun checkAndRequestPermissions() {
@@ -240,7 +260,9 @@ fun HtmlUnitView(
 
         val configuration = LocalConfiguration.current
 
-        val isMeetingUrl = url.contains("zoom.us") || url.contains("/meeting/") || url.contains("/join/")
+        val isMeetingUrl = AppDataConstants.ZOOM_URL_PATTERNS.any {
+            url.contains(it)
+        }
         val bottomPadding =
             if (configuration.orientation == Configuration.ORIENTATION_PORTRAIT && !isMeetingUrl) {
                 72.dp
@@ -259,7 +281,8 @@ fun HtmlUnitView(
 
         Surface(
             modifier = Modifier
-                .clip(RoundedCornerShape(topStart = 24.dp, topEnd = 24.dp)),
+                .clip(RoundedCornerShape(topStart = 24.dp, topEnd = 24.dp))
+                .navigationBarsInset(),
             color = MaterialTheme.colors.background
         ) {
             Box(

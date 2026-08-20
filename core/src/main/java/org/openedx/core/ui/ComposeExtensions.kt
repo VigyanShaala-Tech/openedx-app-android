@@ -93,6 +93,12 @@ fun Modifier.statusBarsInset(): Modifier = composed {
         .padding(top = with(LocalDensity.current) { topInset.toDp() })
 }
 
+fun Modifier.navigationBarsInset(): Modifier = composed {
+    val bottomInset = (LocalContext.current as? InsetHolder)?.bottomInset ?: 0
+    return@composed this
+        .padding(bottom = with(LocalDensity.current) { bottomInset.toDp() })
+}
+
 fun Modifier.displayCutoutForLandscape(): Modifier = composed {
     val cutoutInset = (LocalContext.current as? InsetHolder)?.cutoutInset ?: 0
     val cutoutInsetDp = with(LocalDensity.current) { cutoutInset.toDp() }

@@ -96,6 +96,8 @@ data class AppColors(
     val cardDivider: Color,
 ) {
     val primary: Color get() = material.primary
+    val primaryAlpha10: Color get() = primary.copy(alpha = 0.1f)
+    val primaryAlpha20: Color get() = primary.copy(alpha = 0.2f)
     val primaryVariant: Color get() = material.primaryVariant
     val secondary: Color get() = material.secondary
     val secondaryVariant: Color get() = material.secondaryVariant

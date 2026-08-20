@@ -398,3 +398,37 @@ This document outlines the recent changes made to the project to address build i
     - Selecting **No**: Dismisses the dialog and keeps the user in the live session without interruption.
 - **Centralized Handling**: Integrated this logic into `handleBackNavigation()` which is called by both the Android back press callback and the custom toolbar back button.
 
+## 35. Orientation and Meeting State Management
+
+### Meeting-Specific Rotation and Full Screen
+**Requirement:** The application should only allow screen rotation and enter full-screen mode (hiding system bars) when a user is actively participating in a Zoom meeting or viewing a full-screen video. Other screens should remain locked in portrait mode.
+
+**Solution:**
+- **Centralized Management**: Utilized `MeetingNotifier` to broadcast the meeting status across the app.
+- **Activity Integration**: Updated `AppActivity.kt` to observe `MeetingNotifier`.
+    - When `isMeetingActive` is `true`, `requestedOrientation` is set to `ActivityInfo.SCREEN_ORIENTATION_FULL_SENSOR`.
+    - `onConfigurationChanged` specifically hides system bars in landscape mode and shows them in portrait mode only when a meeting is active.
+    - When `isMeetingActive` is `false`, `requestedOrientation` is reverted to `ActivityInfo.SCREEN_ORIENTATION_PORTRAIT`, and system bars are restored.
+- **Robust Fragment Lifecycle Handling**:
+    - Refined `HtmlUnitFragment.kt` to manage meeting state within `onResume` and `onPause` lifecycle methods.
+    - This ensures that rotation is correctly enabled ONLY when the meeting unit is actually visible to the user, and immediately disabled when they swipe to a different unit or navigate away, preventing rotation leaks to other parts of the application.
+- **Video Full Screen**: `VideoFullScreenFragment` continues to manage its own orientation lifecycle independently, ensuring it also supports rotation while active and resets to portrait upon exit.
+
+## 36. UI Layout Fixes
+
+### Dashboard Padding Adjustment
+**Issue:** Extra white space was appearing above the bottom navigation bar on the Dashboard screen.
+
+**Solution:**
+- Removed `navigationBarsPadding()` from the `Scaffold` in `NewDashboardFragment.kt`.
+- Since the dashboard is hosted within `MainFragment` which already positions its content above a custom `BottomNavigationView`, adding system navigation bar padding was causing redundant space.
+
+## 37. Refined Orientation Reset
+
+### Reliable Reversion to Manifest Defaults
+**Issue:** Reports of orientation settings "leaking" (app remains rotatable) after exiting a meeting or full-screen video.
+
+**Solution:**
+- Updated `AppActivity.kt` to use `ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED` instead of `SCREEN_ORIENTATION_PORTRAIT` when resetting the meeting state.
+- `SCREEN_ORIENTATION_UNSPECIFIED` tells the system to revert to the activity's default orientation defined in the `AndroidManifest.xml` (which is `portrait`). This is a more robust way to clear programmatic overrides and ensure the activity returns to its intended state across different Android versions and device types.
+

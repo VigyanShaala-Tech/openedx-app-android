@@ -21,6 +21,7 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxHeight
@@ -32,9 +33,13 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.widthIn
+import androidx.compose.foundation.lazy.grid.GridCells
+import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
+import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
@@ -239,6 +244,11 @@ class EditProfileFragment : Fragment() {
                     onSelectImageClick = {
                         registerForActivityResult.launch("image/*")
                     },
+                    onAvatarClick = { drawableRes ->
+                        val bitmap = android.graphics.BitmapFactory.decodeResource(resources, drawableRes)
+                        val uri = saveBitmapToUri(bitmap)
+                        viewModel.setImageUri(uri)
+                    },
                     onDeleteImageClick = {
                         viewModel.deleteImage()
                     },
@@ -254,6 +264,28 @@ class EditProfileFragment : Fragment() {
                 )
             }
         }
+    }
+
+    @Suppress("DEPRECATION")
+    private fun saveBitmapToUri(bitmap: Bitmap): Uri {
+        val newFile = File.createTempFile(
+            "Avatar_${System.currentTimeMillis()}",
+            ".jpg",
+            requireContext().getExternalFilesDir(Environment.DIRECTORY_PICTURES)
+        )
+        val bos = ByteArrayOutputStream()
+        bitmap.compress(Bitmap.CompressFormat.JPEG, IMAGE_QUALITY, bos)
+        val bitmapData = bos.toByteArray()
+
+        val fos = FileOutputStream(newFile)
+        fos.write(bitmapData)
+        fos.flush()
+        fos.close()
+        return FileProvider.getUriForFile(
+            requireContext(),
+            viewModel.config.getAppId() + ".fileprovider",
+            newFile
+        )!!
     }
 
     @Suppress("DEPRECATION")
@@ -327,6 +359,7 @@ private fun EditProfileScreen(
     onBackClick: (Boolean) -> Unit,
     onSaveClick: (Map<String, Any?>) -> Unit,
     onSelectImageClick: () -> Unit,
+    onAvatarClick: (Int) -> Unit,
     onDeleteImageClick: () -> Unit,
     onSendOtp: (String) -> Unit,
     onVerifyOtp: (String, String) -> Unit,
@@ -506,9 +539,14 @@ private fun EditProfileScreen(
 
             if (isOpenChangeImageDialogState && uiState.account.isOlderThanMinAge()) {
                 ChangeImageDialog(
+                    gender = mapFields[GENDER]?.toString(),
                     onSelectFromGalleryClick = {
                         isOpenChangeImageDialogState = false
                         onSelectImageClick()
+                    },
+                    onAvatarClick = {
+                        isOpenChangeImageDialogState = false
+                        onAvatarClick(it)
                     },
                     onRemoveImageClick = {
                         onDeleteImageClick()
@@ -844,86 +882,158 @@ private fun LimitedProfileDialog(
 
 @Composable
 private fun ChangeImageDialog(
+    gender: String?,
     onSelectFromGalleryClick: () -> Unit,
+    onAvatarClick: (Int) -> Unit,
     onRemoveImageClick: () -> Unit,
     onCancelClick: () -> Unit,
 ) {
+    val maleAvatars = listOf(
+        coreR.drawable.avatar_male_biology,
+        coreR.drawable.avatar_male_physics,
+        coreR.drawable.avatar_male_robotic,
+        coreR.drawable.avatar_male_zoology,
+        coreR.drawable.avatar_male_electric,
+        coreR.drawable.avatar_male_aerospace,
+        coreR.drawable.avatar_male_chemistry,
+        coreR.drawable.avatar_male_professor,
+        coreR.drawable.avatar_male_electronics,
+        coreR.drawable.avatar_male_biotechnology,
+        coreR.drawable.avatar_male_computer_science,
+    )
+    val femaleAvatars = listOf(
+        coreR.drawable.avatar_female_physics,
+        coreR.drawable.avatar_female_robotic,
+        coreR.drawable.avatar_female_zoology,
+        coreR.drawable.avatar_female_aerospace,
+        coreR.drawable.avatar_female_chemistry,
+        coreR.drawable.avatar_female_professor,
+        coreR.drawable.avatar_female_electronics,
+        coreR.drawable.avatar_female_mathematics,
+        coreR.drawable.avatar_female_environmental,
+        coreR.drawable.avatar_female_biotechnology,
+        coreR.drawable.avatar_female_computer_science
+    )
+
+    val avatars = when (gender?.lowercase()) {
+        "m", "male" -> maleAvatars
+        "f", "female" -> femaleAvatars
+        else -> maleAvatars + femaleAvatars
+    }
+
     Dialog(onDismissRequest = {
         onCancelClick()
-    }) {
-        val dialogWindowProvider = LocalView.current.parent as DialogWindowProvider
-        dialogWindowProvider.window.setGravity(Gravity.BOTTOM)
+    }, properties = DialogProperties(usePlatformDefaultWidth = false)) {
         Box(
             Modifier
-                .padding(bottom = 24.dp)
-                .semantics { testTagsAsResourceId = true }
+                .fillMaxSize()
+                .background(Color.Black.copy(alpha = 0.5f))
+                .clickable { onCancelClick() },
+            contentAlignment = Alignment.BottomCenter
         ) {
             Column(
                 Modifier
                     .fillMaxWidth()
+                    .fillMaxHeight(0.85f)
                     .background(
-                        MaterialTheme.appColors.cardViewBackground,
-                        MaterialTheme.appShapes.cardShape
+                        MaterialTheme.appColors.background,
+                        RoundedCornerShape(topStart = 24.dp, topEnd = 24.dp)
                     )
+                    .clickable(enabled = false) {}
                     .padding(horizontal = 20.dp),
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
-                Spacer(Modifier.height(4.dp))
+                Spacer(Modifier.height(12.dp))
                 Divider(
                     modifier = Modifier
                         .width(32.dp)
-                        .background(
-                            MaterialTheme.appColors.bottomSheetToggle,
-                            MaterialTheme.appShapes.material.small
-                        )
-                        .clip(MaterialTheme.appShapes.material.small),
-                    thickness = 4.dp
+                        .clip(CircleShape),
+                    thickness = 4.dp,
+                    color = MaterialTheme.appColors.divider
                 )
                 Spacer(Modifier.height(14.dp))
                 Text(
-                    modifier = Modifier.testTag("txt_edit_profile_change_image_title"),
                     text = stringResource(id = R.string.profile_change_image),
                     style = MaterialTheme.appTypography.titleLarge,
                     color = MaterialTheme.appColors.textPrimary
                 )
+                
                 Spacer(Modifier.height(20.dp))
-                OpenEdXButton(
-                    text = stringResource(id = R.string.profile_select_from_gallery),
-                    onClick = onSelectFromGalleryClick,
-                    content = {
-                        IconText(
-                            modifier = Modifier.testTag("it_select_from_gallery"),
-                            text = stringResource(id = R.string.profile_select_from_gallery),
-                            painter = painterResource(id = R.drawable.profile_ic_gallery),
-                            color = Color.White,
-                            textStyle = MaterialTheme.appTypography.labelLarge
+                
+                Text(
+                    text = "Choose an Avatar",
+                    style = MaterialTheme.appTypography.titleSmall,
+                    color = MaterialTheme.appColors.textPrimary,
+                    modifier = Modifier.fillMaxWidth()
+                )
+                
+                Spacer(Modifier.height(12.dp))
+                
+                LazyVerticalGrid(
+                    columns = GridCells.Adaptive(80.dp),
+                    modifier = Modifier.weight(1f),
+                    contentPadding = PaddingValues(bottom = 16.dp),
+                    verticalArrangement = Arrangement.spacedBy(8.dp),
+                    horizontalArrangement = Arrangement.spacedBy(8.dp)
+                ) {
+                    items(avatars) { avatar ->
+                        AsyncImage(
+                            model = ImageRequest.Builder(LocalContext.current)
+                                .data(avatar)
+                                .build(),
+                            contentDescription = null,
+                            modifier = Modifier
+                                .size(80.dp)
+                                .clip(CircleShape)
+                                .border(1.dp, MaterialTheme.appColors.divider, CircleShape)
+                                .clickable { onAvatarClick(avatar) },
+                            contentScale = ContentScale.Crop
                         )
                     }
-                )
+                }
+
+                Spacer(Modifier.height(16.dp))
+                
+                Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(12.dp)) {
+                    OpenEdXButton(
+                        modifier = Modifier.weight(1f),
+                        text = stringResource(id = R.string.profile_select_from_gallery),
+                        onClick = onSelectFromGalleryClick,
+                        content = {
+                            IconText(
+                                text = "Gallery",
+                                painter = painterResource(id = R.drawable.profile_ic_gallery),
+                                color = Color.White,
+                                textStyle = MaterialTheme.appTypography.labelLarge
+                            )
+                        }
+                    )
+                    OpenEdXOutlinedButton(
+                        modifier = Modifier.weight(1f),
+                        borderColor = MaterialTheme.appColors.error,
+                        textColor = MaterialTheme.appColors.error,
+                        text = stringResource(id = R.string.profile_remove_photo),
+                        onClick = onRemoveImageClick,
+                        content = {
+                            IconText(
+                                text = "Remove",
+                                painter = painterResource(id = R.drawable.profile_ic_remove_image),
+                                color = MaterialTheme.appColors.error,
+                                textStyle = MaterialTheme.appTypography.labelLarge
+                            )
+                        }
+                    )
+                }
+                
                 Spacer(Modifier.height(16.dp))
                 OpenEdXOutlinedButton(
-                    borderColor = MaterialTheme.appColors.error,
-                    textColor = MaterialTheme.appColors.textPrimary,
-                    text = stringResource(id = R.string.profile_remove_photo),
-                    onClick = onRemoveImageClick,
-                    content = {
-                        IconText(
-                            modifier = Modifier.testTag("it_remove_photo"),
-                            text = stringResource(id = R.string.profile_remove_photo),
-                            painter = painterResource(id = R.drawable.profile_ic_remove_image),
-                            color = MaterialTheme.appColors.error,
-                            textStyle = MaterialTheme.appTypography.labelLarge
-                        )
-                    }
-                )
-                Spacer(Modifier.height(40.dp))
-                OpenEdXOutlinedButton(
+                    modifier = Modifier.fillMaxWidth(),
                     borderColor = MaterialTheme.appColors.textPrimaryVariant,
                     textColor = MaterialTheme.appColors.textPrimary,
                     text = stringResource(id = coreR.string.core_cancel),
                     onClick = onCancelClick
                 )
-                Spacer(Modifier.height(20.dp))
+                Spacer(Modifier.height(24.dp))
             }
         }
     }
@@ -1265,6 +1375,7 @@ private fun EditProfileScreenPreview() {
             onDataChanged = {},
             onKeepEdit = {},
             onLimitedProfileChange = {},
+            onAvatarClick = {},
             isOtpLoading = false,
             isOtpSent = false,
             onSendOtp = {},
@@ -1292,6 +1403,7 @@ private fun EditProfileScreenTabletPreview() {
             onDataChanged = {},
             onKeepEdit = {},
             onLimitedProfileChange = {},
+            onAvatarClick = {},
             isOtpLoading = false,
             isOtpSent = false,
             onSendOtp = {},
@@ -1509,7 +1621,9 @@ fun LeaveProfileLandscapePreview() {
 @Composable
 fun ChangeProfileImagePreview() {
     ChangeImageDialog(
+        gender = "m",
         onSelectFromGalleryClick = {},
+        onAvatarClick = {},
         onRemoveImageClick = {},
         onCancelClick = {}
     )

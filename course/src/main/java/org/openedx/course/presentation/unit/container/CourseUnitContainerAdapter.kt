@@ -10,6 +10,7 @@ import org.openedx.course.presentation.unit.NotAvailableUnitType
 import org.openedx.course.presentation.unit.html.HtmlUnitFragment
 import org.openedx.course.presentation.unit.pdf.PdfUnitFragment
 import org.openedx.course.presentation.unit.video.VideoUnitFragment
+import org.openedx.course.presentation.unit.zoom.ZoomUnitFragment
 import org.openedx.course.presentation.unit.video.YoutubeVideoUnitFragment
 import org.openedx.discussion.presentation.threads.DiscussionThreadsFragment
 import org.openedx.discussion.presentation.topics.DiscussionTopicsViewModel
@@ -49,6 +50,10 @@ class CourseUnitContainerAdapter(
 
             block.isPdfBlock -> {
                 createPdfUnitFragment(block)
+            }
+
+            block.isZoomxBlock -> {
+                createZoomUnitFragment(block)
             }
 
             isSupportedHtmlBlock(block) -> {
@@ -93,7 +98,6 @@ class CourseUnitContainerAdapter(
                 block.isEdxSgaBlock||
                 block.isPollBlock||
                 block.isTasBlock||
-                block.isZoomxBlock||
                 block.isQuickQuizMakerBlock||
                 block.isGoogleDocumentBlock
 
@@ -167,6 +171,13 @@ class CourseUnitContainerAdapter(
             viewModel.courseId,
             block.pdfWebUrl ?: "",
             block.displayName
+        )
+    }
+
+    private fun createZoomUnitFragment(block: Block): Fragment {
+        return ZoomUnitFragment.newInstance(
+            block.id,
+            viewModel.courseId
         )
     }
 }

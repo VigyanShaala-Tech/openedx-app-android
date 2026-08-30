@@ -110,8 +110,10 @@ fun AssignmentsHomePagerCardContent(
 
         // First Incomplete Assignment section
         if (firstIncompleteAssignment != null) {
+            val index = uiState.courseAssignments.indexOf(firstIncompleteAssignment) + 1
             AssignmentCard(
                 assignment = firstIncompleteAssignment,
+                index = index,
                 sectionName = getBlockParent(firstIncompleteAssignment.id)?.displayName ?: "",
                 onAssignmentClick = onAssignmentClick,
                 background = MaterialTheme.appColors.background,
@@ -136,6 +138,7 @@ else {
 @Composable
 private fun AssignmentCard(
     assignment: Block,
+    index: Int,
     sectionName: String,
     onAssignmentClick: (Block) -> Unit,
     background: Color = MaterialTheme.appColors.surface
@@ -160,14 +163,14 @@ private fun AssignmentCard(
             ) {
                 // Assignment and section name
                 Text(
-                    text = assignment.displayName ?: "",
+                    text = "Assignment $index",
                     style = MaterialTheme.appTypography.titleSmall,
                     color = MaterialTheme.appColors.textDark,
                     fontWeight = FontWeight.Bold
                 )
                 Spacer(modifier = Modifier.height(4.dp))
                 Text(
-                    text = sectionName,
+                    text = assignment.displayName ?: "",
                     style = MaterialTheme.appTypography.labelSmall,
                     color = MaterialTheme.appColors.textSecondary,
                 )

@@ -419,8 +419,7 @@ private fun CourseItem(
                         text = enrolledCourse.course.name,
                         color = MaterialTheme.appColors.textPrimary,
                         style = MaterialTheme.appTypography.titleSmall,
-                        maxLines = 2,
-                        overflow = TextOverflow.Ellipsis
+                        overflow = TextOverflow.Clip
                     )
                     Row(
                         Modifier

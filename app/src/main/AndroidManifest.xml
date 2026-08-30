@@ -5,7 +5,11 @@
     <uses-permission android:name="android.permission.INTERNET" />
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE_CONNECTED_DEVICE" />
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE_DATA_SYNC" />
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE_MEDIA_PLAYBACK" />
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE_MEDIA_PROJECTION" />
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE_MICROPHONE" />
     <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
     <uses-permission android:name="android.permission.READ_CALENDAR" />
     <uses-permission android:name="android.permission.WRITE_CALENDAR" />
@@ -17,6 +21,8 @@
 <!--    <uses-permission android:name="android.permission.READ_MEDIA_IMAGES" />-->
 <!--    <uses-permission android:name="android.permission.READ_MEDIA_VIDEO" />-->
     <uses-permission android:name="android.permission.READ_MEDIA_AUDIO" />
+    <uses-permission android:name="android.permission.BLUETOOTH" />
+    <uses-permission android:name="android.permission.SYSTEM_ALERT_WINDOW" />
 
     <uses-feature android:name="android.hardware.camera" android:required="false" />
     <uses-feature android:name="android.hardware.camera.autofocus" android:required="false" />
@@ -38,6 +44,7 @@
         android:name=".OpenEdXApp"
         android:allowBackup="false"
         android:hardwareAccelerated="true"
+        android:extractNativeLibs="true"
         android:dataExtractionRules="@xml/data_extraction_rules"
         android:enableOnBackInvokedCallback="true"
         android:fullBackupContent="@xml/backup_rules"
@@ -49,6 +56,7 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.App.Starting"
         tools:targetApi="tiramisu"
+        tools:replace="android:usesCleartextTraffic"
         android:screenOrientation="portrait"
         android:launchMode="singleInstance">
         <activity
@@ -59,6 +67,7 @@
             android:windowSoftInputMode="adjustPan"
             android:screenOrientation="portrait"
             android:launchMode="singleInstance"
+            android:supportsPictureInPicture="true"
             android:configChanges="orientation|screenSize|screenLayout|smallestScreenSize">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
@@ -161,7 +170,7 @@
             android:name="io.branch.sdk.BranchKey.test"
             android:value="@string/branch_key" />
 
-        <!-- Bugsee init -->
+        <!-- Bugsee init
         <meta-data
             android:name="com.bugsee.app-token"
             android:value="@string/bugsee_app_token" />
@@ -174,6 +183,7 @@
         <meta-data
             android:name="com.bugsee.option.capture.breadcrumbs"
             android:value="true" />
+        -->
 
         <service
             android:name="androidx.work.impl.foreground.SystemForegroundService"

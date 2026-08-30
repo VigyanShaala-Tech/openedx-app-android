@@ -5,7 +5,7 @@ def firebaseConfig = config.get('FIREBASE')
 def firebaseEnabled = firebaseConfig?.getOrDefault('ENABLED', false)
 
 apply plugin: 'com.android.application'
-apply plugin: 'com.bugsee.android.gradle'
+// apply plugin: 'com.bugsee.android.gradle'
 apply plugin: 'org.jetbrains.kotlin.android'
 apply plugin: 'kotlin-parcelize'
 apply plugin: 'com.google.devtools.ksp'
@@ -36,8 +36,8 @@ android {
         applicationId appId
         minSdk min_sdk_version
         targetSdk target_sdk_version
-        versionCode 7
-        versionName "1.0.7"
+        versionCode 8
+        versionName "1.0.8"
 
         resourceConfigurations += ["en", "uk"]
 
@@ -91,8 +91,9 @@ android {
         }
         release {
             minifyEnabled true
+            shrinkResources true
             debuggable false
-            proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
+            proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro', 'proguard-zoom.cfg'
             signingConfig signingConfigs.release
 
             if (firebaseEnabled) {
@@ -131,6 +132,18 @@ android {
     testOptions {
         unitTests.returnDefaultValues = true
     }
+    splits {
+        abi {
+            enable !gradle.startParameter.taskNames.any { it.contains("bundle") }
+            reset()
+            include "armeabi-v7a", "arm64-v8a"
+            universalApk false
+        }
+    }
+    packagingOptions {
+        pickFirst '**/libc++_shared.so'
+        exclude '**/VERIFICATION.md'
+    }
 }
 
 dependencies {
@@ -143,9 +156,11 @@ dependencies {
     implementation project(path: ':discussion')
     implementation project(path: ':whatsnew')
     implementation project(path: ':downloads')
+    implementation project(':zoom_sdk_helper')
 
-    implementation("com.bugsee:bugsee-android:7.0.4")
-    implementation("com.shakebugs:shake:17.2.2")
+    // implementation("com.bugsee:bugsee-android:7.0.4")
+    developImplementation("com.shakebugs:shake:17.2.2")
+    stageImplementation("com.shakebugs:shake:17.2.2")
 
     ksp "androidx.room:room-compiler:$room_version"
 
@@ -204,12 +219,4 @@ private def setupFirebaseConfigFields(buildType) {
 
 ksp {
     arg("room.schemaLocation", "$projectDir/schemas")
-}
-
-bugsee {
-    instrumentation {
-        compose = false
-        composeSecure = false
-        composeInput = false
-    }
 }

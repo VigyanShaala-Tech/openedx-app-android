@@ -1,12 +1,9 @@
 package org.openedx.course.presentation.home
 
-import android.net.Uri
 import android.util.Log
 import androidx.fragment.app.FragmentManager
 import androidx.lifecycle.viewModelScope
-import androidx.core.net.toUri
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.async
 import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -16,7 +13,6 @@ import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.collectLatest
-import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 import org.openedx.core.BlockType
 import org.openedx.core.R
@@ -99,6 +95,9 @@ class CourseHomeViewModel(
     private var resumeVerticalBlock: Block? = null
 
     private val isCourseExpandableSectionsEnabled get() = config.getCourseUIConfig().isCourseDropdownNavigationEnabled
+
+    val userName get() = preferencesManager.user?.name ?: "Learner"
+    val userID get() = preferencesManager.user?.id?.toString() ?: ""
 
     private val courseSubSections = mutableMapOf<String, MutableList<Block>>()
     private val subSectionsDownloadsCount = mutableMapOf<String, Int>()

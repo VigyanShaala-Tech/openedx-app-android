@@ -5,7 +5,6 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.horizontalScroll
-import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.IntrinsicSize
@@ -36,8 +35,8 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.text.PlatformTextStyle
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
@@ -63,6 +62,7 @@ import org.openedx.course.presentation.videos.CourseContentVideoScreen
 import org.openedx.foundation.presentation.WindowSize
 import org.openedx.foundation.presentation.WindowType
 import org.openedx.foundation.presentation.windowSizeValue
+import us.zoom.sdkhelper.ZoomMeetingHelper
 
 @Composable
 fun ContentTabScreen(
@@ -75,6 +75,7 @@ fun ContentTabScreen(
     onTabSelected: (CourseContentTab) -> Unit = {},
     onNavigateToHome: () -> Unit = {},
 ) {
+    val context = LocalContext.current
     ContentTabUI(
         windowSize = windowSize,
         pagerState = pagerState,
@@ -129,10 +130,42 @@ fun ContentTabScreen(
                                     .padding(top = 16.dp),
                                 uiState = uiState,
                                 onJoinClick = { session ->
-                                    homeViewModel.joinMeeting(fragmentManager, session.joinUrl, session.topic)
+                                    val meetingId = session.meetingInfo?.meetingId
+                                    val passcode = session.meetingInfo?.passcode
+                                    if (!meetingId.isNullOrEmpty() && !passcode.isNullOrEmpty()) {
+                                        ZoomMeetingHelper.getInstance().joinMeeting(
+                                            context,
+                                            meetingId,
+                                            passcode,
+                                            homeViewModel.userName,
+                                            homeViewModel.userID
+                                        )
+                                    } else {
+                                        homeViewModel.joinMeeting(
+                                            fragmentManager,
+                                            session.joinUrl,
+                                            session.topic
+                                        )
+                                    }
                                 },
-                                onJoinOngoingClick = { joinUrl ->
-                                    homeViewModel.joinMeeting(fragmentManager, joinUrl, "")
+                                onJoinOngoingClick = { ongoingSession ->
+                                    val meetingId = ongoingSession.meetingId
+                                    val passcode = ongoingSession.passcode
+                                    if (!meetingId.isNullOrEmpty() && !passcode.isNullOrEmpty()) {
+                                        ZoomMeetingHelper.getInstance().joinMeeting(
+                                            context,
+                                            meetingId,
+                                            passcode,
+                                            homeViewModel.userName,
+                                            homeViewModel.userID
+                                        )
+                                    } else {
+                                        homeViewModel.joinMeeting(
+                                            fragmentManager,
+                                            ongoingSession.link ?: "",
+                                            ongoingSession.meetingName ?: ""
+                                        )
+                                    }
                                 },
                                 onViewAllLiveSessionsClick = {}
                             )

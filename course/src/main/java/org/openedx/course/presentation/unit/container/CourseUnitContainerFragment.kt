@@ -62,6 +62,7 @@ import org.openedx.course.presentation.DialogListener
 import org.openedx.core.presentation.dialog.MeetingExitDialogListener
 import org.openedx.core.presentation.dialog.MeetingExitFragmentDialog
 import org.openedx.course.presentation.ui.CourseUnitToolbar
+import us.zoom.sdkhelper.ZoomMeetingHelper
 import org.openedx.course.presentation.ui.CourseVideoItem
 import org.openedx.course.presentation.ui.HorizontalPageIndicator
 import org.openedx.course.presentation.ui.NavigationUnitsButtons
@@ -133,16 +134,14 @@ class CourseUnitContainerFragment : Fragment(R.layout.fragment_course_unit_conta
         }
     }
 
-    private fun handleBackNavigation() {
-        if (isCurrentBlockMeeting()) {
+    fun handleBackNavigation() {
+        if (ZoomMeetingHelper.getInstance().isMeetingOngoing()) {
             val dialog = MeetingExitFragmentDialog.newInstance()
             dialog.listener = object : MeetingExitDialogListener {
                 override fun onConfirm() {
+                    ZoomMeetingHelper.getInstance().leaveMeeting(false)
                     navigateToParentFragment()
                 }
-
-//                override fun onMinimize() {
-//                }
             }
             dialog.show(
                 requireActivity().supportFragmentManager,
@@ -236,13 +235,13 @@ class CourseUnitContainerFragment : Fragment(R.layout.fragment_course_unit_conta
 //        }
 //    }
 
-    private fun isCurrentBlockMeeting(): Boolean {
-        val currentBlock = viewModel.currentBlock.value
-        return currentBlock?.isZoomxBlock == true ||
-                currentBlock?.studentViewUrl?.contains("zoom.us") == true ||
-                currentBlock?.studentViewUrl?.contains("/meeting/") == true ||
-                currentBlock?.studentViewUrl?.contains("/join/") == true
-    }
+//    private fun isCurrentBlockMeeting(): Boolean {
+//        val currentBlock = viewModel.currentBlock.value
+//        return currentBlock?.isZoomxBlock == true ||
+//                currentBlock?.studentViewUrl?.contains("zoom.us") == true ||
+//                currentBlock?.studentViewUrl?.contains("/meeting/") == true ||
+//                currentBlock?.studentViewUrl?.contains("/join/") == true
+//    }
 
     private fun setupViewPagerInsets() {
         val insetHolder = requireActivity() as InsetHolder
@@ -443,9 +442,9 @@ class CourseUnitContainerFragment : Fragment(R.layout.fragment_course_unit_conta
     override fun onResume() {
         super.onResume()
         activity?.onBackPressedDispatcher?.addCallback(onBackPressedCallback)
-        lifecycleScope.launch {
-            meetingNotifier.send(isCurrentBlockMeeting())
-        }
+//        lifecycleScope.launch {
+//            meetingNotifier.send(isCurrentBlockMeeting())
+//        }
     }
 
     override fun onPause() {

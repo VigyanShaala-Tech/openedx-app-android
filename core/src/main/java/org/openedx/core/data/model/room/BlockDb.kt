@@ -13,6 +13,7 @@ import org.openedx.core.domain.model.AssignmentProgress as DomainAssignmentProgr
 import org.openedx.core.domain.model.Block as DomainBlock
 import org.openedx.core.domain.model.BlockCounts as DomainBlockCounts
 import org.openedx.core.domain.model.EncodedVideos as DomainEncodedVideos
+import org.openedx.core.domain.model.MeetingInfo as DomainMeetingInfo
 import org.openedx.core.domain.model.StudentViewData as DomainStudentViewData
 import org.openedx.core.domain.model.VideoInfo as DomainVideoInfo
 
@@ -54,7 +55,9 @@ data class BlockDb(
     @ColumnInfo("vimeo_url")
     val vimeoUrl: String?,
     @ColumnInfo("pdf_web_url")
-    val pdfWebUrl: String?
+    val pdfWebUrl: String?,
+    @Embedded
+    val meetingInfo: MeetingInfoDb?
 ) {
     fun mapToDomain(blocks: List<BlockDb>): DomainBlock {
         val blockType = BlockType.getBlockType(type)
@@ -88,7 +91,8 @@ data class BlockDb(
             due = TimeUtils.iso8601ToDate(due ?: ""),
             offlineDownload = offlineDownload?.mapToDomain(),
             vimeoUrl = vimeoUrl,
-            pdfWebUrl = pdfWebUrl
+            pdfWebUrl = pdfWebUrl,
+            meetingInfo = meetingInfo?.mapToDomain()
         )
     }
 
@@ -117,7 +121,8 @@ data class BlockDb(
                     due = due,
                     offlineDownload = offlineDownload?.mapToRoomEntity(),
                     vimeoUrl = vimeoUrl,
-                    pdfWebUrl = pdfWebUrl
+                    pdfWebUrl = pdfWebUrl,
+                    meetingInfo = MeetingInfoDb.createFrom(meetingInfo)
                 )
             }
         }
@@ -155,6 +160,48 @@ data class StudentViewDataDb(
                 transcripts = studentViewData?.transcripts,
                 encodedVideos = EncodedVideosDb.createFrom(studentViewData?.encodedVideos),
                 topicId = studentViewData?.topicId ?: ""
+            )
+        }
+    }
+}
+
+data class MeetingInfoDb(
+    @ColumnInfo("meetingId")
+    val meetingId: String,
+    @ColumnInfo("meetingTopic")
+    val topic: String,
+    @ColumnInfo("meetingPasscode")
+    val passcode: String,
+    @ColumnInfo("meetingStartTime")
+    val startTime: String,
+    @ColumnInfo("meetingDuration")
+    val duration: String,
+    @ColumnInfo("isMeetingEnded")
+    val isMeetingEnded: Boolean,
+    @ColumnInfo("isSessionOngoing")
+    val isSessionOngoing: Boolean
+) {
+    fun mapToDomain() = DomainMeetingInfo(
+        meetingId = meetingId,
+        topic = topic,
+        passcode = passcode,
+        startTime = startTime,
+        duration = duration,
+        isMeetingEnded = isMeetingEnded,
+        isSessionOngoing = isSessionOngoing
+    )
+
+    companion object {
+        fun createFrom(meetingInfo: org.openedx.core.data.model.MeetingInfo?): MeetingInfoDb? {
+            if (meetingInfo == null) return null
+            return MeetingInfoDb(
+                meetingId = meetingInfo.meetingId.orEmpty(),
+                topic = meetingInfo.topic.orEmpty(),
+                passcode = meetingInfo.passcode.orEmpty(),
+                startTime = meetingInfo.startTime.orEmpty(),
+                duration = meetingInfo.duration.orEmpty(),
+                isMeetingEnded = meetingInfo.isMeetingEnded ?: false,
+                isSessionOngoing = meetingInfo.isSessionOngoing ?: false
             )
         }
     }

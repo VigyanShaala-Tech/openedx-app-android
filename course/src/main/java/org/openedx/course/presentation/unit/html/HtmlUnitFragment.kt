@@ -14,6 +14,8 @@ import android.util.Log
 import android.view.LayoutInflater
 import android.view.ViewGroup
 import android.webkit.JavascriptInterface
+import android.webkit.JsPromptResult
+import android.webkit.JsResult
 import android.webkit.PermissionRequest
 import android.webkit.ValueCallback
 import android.webkit.WebChromeClient
@@ -71,9 +73,7 @@ import org.openedx.core.ui.navigationBarsInset
 import org.openedx.core.ui.roundBorderWithoutBottom
 import org.openedx.core.ui.theme.OpenEdXTheme
 import org.openedx.core.ui.theme.appColors
-import org.openedx.core.utils.EmailUtil
 import org.openedx.foundation.extension.applyDarkModeIfEnabled
-import org.openedx.foundation.extension.isEmailValid
 import org.openedx.foundation.presentation.WindowSize
 import org.openedx.foundation.presentation.rememberWindowSize
 import org.openedx.foundation.presentation.windowSizeValue
@@ -116,24 +116,6 @@ class HtmlUnitFragment : Fragment() {
         lastModified = requireArguments().getString(ARG_LAST_MODIFIED, "")
         fromDownloadedContent = lastModified.isNotEmpty()
         checkAndRequestPermissions()
-    }
-
-    override fun onResume() {
-        super.onResume()
-        if (isMeetingUrl(blockUrl)) {
-            viewModel.sendMeetingActive(true)
-        }
-    }
-
-    override fun onPause() {
-        super.onPause()
-        if (isMeetingUrl(blockUrl)) {
-            viewModel.sendMeetingActive(false)
-        }
-    }
-
-    private fun isMeetingUrl(url: String): Boolean {
-        return AppDataConstants.ZOOM_URL_PATTERNS.any { url.contains(it) }
     }
 
     private fun checkAndRequestPermissions() {
@@ -181,7 +163,6 @@ class HtmlUnitFragment : Fragment() {
                         if (intent.resolveActivity(requireContext().packageManager) != null) {
                             fileChooserLauncher.launch(intent)
                         } else {
-                            // Fallback for some devices/OS versions
                             val backupIntent = Intent(Intent.ACTION_GET_CONTENT).apply {
                                 addCategory(Intent.CATEGORY_OPENABLE)
                                 type = "*/*"
@@ -259,10 +240,7 @@ fun HtmlUnitView(
         val uiState by viewModel.uiState.collectAsState()
 
         val configuration = LocalConfiguration.current
-
-        val isMeetingUrl = AppDataConstants.ZOOM_URL_PATTERNS.any {
-            url.contains(it)
-        }
+        val isMeetingUrl = false
         val bottomPadding =
             if (configuration.orientation == Configuration.ORIENTATION_PORTRAIT && !isMeetingUrl) {
                 72.dp
@@ -341,7 +319,10 @@ fun HtmlUnitView(
                             saveXBlockProgress = { jsonProgress ->
                                 viewModel.saveXBlockProgress(jsonProgress)
                             },
-                            onShowFileChooser = onShowFileChooser
+                            onShowFileChooser = onShowFileChooser,
+                            onCloseClick = {
+                                (context as? androidx.activity.ComponentActivity)?.onBackPressedDispatcher?.onBackPressed()
+                            }
                         )
                     } else {
                         viewModel.onWebPageLoadError()
@@ -353,11 +334,13 @@ fun HtmlUnitView(
                         viewModel.onWebPageLoading()
                     }
                 }
+                
                 if (uiState is HtmlUnitUIState.Loading && hasInternetConnection) {
                     Box(
                         modifier = Modifier
                             .fillMaxSize()
-                            .zIndex(1f),
+                            .zIndex(1f)
+                            .background(android.graphics.Color.WHITE.toColor()),
                         contentAlignment = Alignment.Center
                     ) {
                         CircularProgressIndicator(color = MaterialTheme.appColors.primary)
@@ -367,6 +350,8 @@ fun HtmlUnitView(
         }
     }
 }
+
+private fun Int.toColor() = androidx.compose.ui.graphics.Color(this)
 
 @Composable
 @SuppressLint("SetJavaScriptEnabled")
@@ -384,14 +369,15 @@ private fun HTMLContentView(
     onWebPageLoadError: () -> Unit,
     saveXBlockProgress: (String) -> Unit,
     onShowFileChooser: (ValueCallback<Array<Uri>>, WebChromeClient.FileChooserParams) -> Unit,
+    onCloseClick: () -> Unit,
 ) {
     val coroutineScope = rememberCoroutineScope()
     val context = LocalContext.current
-
     val isDarkTheme = isSystemInDarkTheme()
 
     val webView = remember {
         WebView(context).apply {
+            setBackgroundColor(android.graphics.Color.WHITE)
             addJavascriptInterface(
                 object {
                     @Suppress("unused")
@@ -414,7 +400,6 @@ private fun HTMLContentView(
                 "AndroidBridge"
             )
             webViewClient = object : WebViewClient() {
-
                 override fun onPageStarted(view: WebView?, url: String?, favicon: Bitmap?) {
                     super.onPageStarted(view, url, favicon)
                     onWebPageLoading()
@@ -422,7 +407,6 @@ private fun HTMLContentView(
 
                 override fun onPageCommitVisible(view: WebView?, url: String?) {
                     super.onPageCommitVisible(view, url)
-                    Log.d("HTML", "onPageCommitVisible")
                     onWebPageLoaded()
                 }
 
@@ -431,6 +415,7 @@ private fun HTMLContentView(
                     request: WebResourceRequest?
                 ): Boolean {
                     val clickUrl = request?.url?.toString() ?: ""
+                    Log.d("WebViewURL", "Loading URL: $clickUrl")
                     if (clickUrl.startsWith("http://") || clickUrl.startsWith("https://")) {
                         return false
                     }
@@ -472,6 +457,15 @@ private fun HTMLContentView(
                     super.onReceivedError(view, request, error)
                 }
             }
+            setDownloadListener { downloadUrl, _, _, _, _ ->
+                try {
+                    val intent = Intent(Intent.ACTION_VIEW)
+                    intent.data = Uri.parse(downloadUrl)
+                    context.startActivity(intent)
+                } catch (e: Exception) {
+                    Log.e("WebView", "Error opening download URL: $downloadUrl", e)
+                }
+            }
             webChromeClient = object : WebChromeClient() {
                 override fun onShowFileChooser(
                     webView: WebView?,
@@ -489,42 +483,62 @@ private fun HTMLContentView(
                     request?.grant(resources)
                 }
 
-                override fun onGeolocationPermissionsShowPrompt(
-                    origin: String?,
-                    callback: android.webkit.GeolocationPermissions.Callback?
-                ) {
-                    callback?.invoke(origin, true, false)
-                }
-
                 override fun onCreateWindow(
                     view: WebView?,
                     isDialog: Boolean,
                     isUserGesture: Boolean,
                     resultMsg: android.os.Message?
                 ): Boolean {
-                    val chromeClient = this
-                    val newWebView = WebView(context).apply {
-                        settings.javaScriptEnabled = true
-                        settings.domStorageEnabled = true
-                        settings.javaScriptCanOpenWindowsAutomatically = true
-                        settings.setSupportMultipleWindows(true)
-                        webChromeClient = chromeClient
-                    }
                     val transport = resultMsg?.obj as? WebView.WebViewTransport
-                    transport?.webView = newWebView
+                    transport?.webView = view
                     resultMsg?.sendToTarget()
                     return true
                 }
 
-                override fun onHideCustomView() {
-                    // Handled by activity or automatically
+                override fun onJsAlert(view: WebView?, url: String?, message: String?, result: JsResult?): Boolean {
+                    androidx.appcompat.app.AlertDialog.Builder(context)
+                        .setMessage(message)
+                        .setPositiveButton(org.openedx.core.R.string.core_ok) { _, _ -> result?.confirm() }
+                        .setCancelable(false)
+                        .create()
+                        .show()
+                    return true
+                }
+
+                override fun onJsConfirm(view: WebView?, url: String?, message: String?, result: JsResult?): Boolean {
+                    androidx.appcompat.app.AlertDialog.Builder(context)
+                        .setMessage(message)
+                        .setPositiveButton(org.openedx.core.R.string.core_ok) { _, _ -> result?.confirm() }
+                        .setNegativeButton(org.openedx.core.R.string.core_cancel) { _, _ -> result?.cancel() }
+                        .setCancelable(false)
+                        .create()
+                        .show()
+                    return true
+                }
+
+                override fun onCloseWindow(window: WebView?) {
+                    super.onCloseWindow(window)
+                    onCloseClick()
+                }
+
+                override fun onConsoleMessage(consoleMessage: android.webkit.ConsoleMessage?): Boolean {
+                    Log.d("WebViewConsole", "${consoleMessage?.message()} -- From line " +
+                            "${consoleMessage?.lineNumber()} of ${consoleMessage?.sourceId()}")
+                    return true
+                }
+
+                override fun onGeolocationPermissionsShowPrompt(
+                    origin: String?,
+                    callback: android.webkit.GeolocationPermissions.Callback?
+                ) {
+                    callback?.invoke(origin, true, false)
                 }
             }
             @Suppress("DEPRECATION")
             applyFullAccessSettings(url)
             with(settings) {
                 mediaPlaybackRequiresUserGesture = false
-                cacheMode = WebSettings.LOAD_NO_CACHE
+                cacheMode = WebSettings.LOAD_DEFAULT
             }
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
                 android.webkit.CookieManager.getInstance().setAcceptThirdPartyCookies(this, true)

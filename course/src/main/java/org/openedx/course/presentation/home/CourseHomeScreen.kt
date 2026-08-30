@@ -57,32 +57,29 @@ import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.DialogProperties
 import androidx.fragment.app.FragmentManager
 import org.openedx.core.Mock
-import org.openedx.core.NoContentScreenType
 import org.openedx.core.data.model.LiveClassModel
+import org.openedx.core.data.model.OngoingSessionModel
 import org.openedx.core.domain.model.Block
 import org.openedx.core.domain.model.CourseDatesBannerInfo
 import androidx.compose.material.CircularProgressIndicator
 import org.openedx.core.ui.OpenEdXButton
-import org.openedx.core.ui.CircularProgress
 import org.openedx.core.ui.HandleUIMessage
-import org.openedx.core.ui.NoContentScreen
 import org.openedx.core.ui.displayCutoutForLandscape
 import org.openedx.core.ui.theme.OpenEdXTheme
 import org.openedx.core.ui.theme.appColors
-import org.openedx.core.ui.theme.appShapes
 import org.openedx.core.ui.theme.appTypography
 import org.openedx.course.R
 import org.openedx.course.presentation.container.CourseContentTab
 import org.openedx.course.presentation.ui.CourseDatesBanner
 import org.openedx.course.presentation.ui.CourseDatesBannerTablet
 import org.openedx.course.presentation.ui.CourseMessage
-import org.openedx.course.presentation.ui.ResumeCourseButton
 import org.openedx.course.presentation.unit.container.CourseViewMode
 import org.openedx.foundation.extension.takeIfNotEmpty
 import org.openedx.foundation.presentation.UIMessage
 import org.openedx.foundation.presentation.WindowSize
 import org.openedx.foundation.presentation.WindowType
 import org.openedx.foundation.presentation.windowSizeValue
+import us.zoom.sdkhelper.ZoomMeetingHelper
 import org.openedx.core.R as coreR
 
 @Composable
@@ -187,10 +184,42 @@ fun CourseHomeScreen(
             onNavigateToContent(CourseContentTab.HANDOUTS)
         },
         onJoinClick = { session ->
-            viewModel.joinMeeting(fragmentManager, session.joinUrl, session.topic)
+            val meetingId = session.meetingInfo?.meetingId
+            val passcode = session.meetingInfo?.passcode
+            if (!meetingId.isNullOrEmpty() && !passcode.isNullOrEmpty()) {
+                ZoomMeetingHelper.getInstance().joinMeeting(
+                    context,
+                    meetingId,
+                    passcode,
+                    viewModel.userName,
+                    viewModel.userID
+                )
+            } else {
+                viewModel.joinMeeting(
+                    fragmentManager,
+                    session.joinUrl,
+                    session.topic
+                )
+            }
         },
-        onJoinOngoingClick = { joinUrl ->
-            viewModel.joinMeeting(fragmentManager, joinUrl, "")
+        onJoinOngoingClick = { ongoingSession ->
+            val meetingId = ongoingSession.meetingId
+            val passcode = ongoingSession.passcode
+            if (!meetingId.isNullOrEmpty() && !passcode.isNullOrEmpty()) {
+                ZoomMeetingHelper.getInstance().joinMeeting(
+                    context,
+                    meetingId,
+                    passcode,
+                    viewModel.userName,
+                    viewModel.userID
+                )
+            } else {
+                viewModel.joinMeeting(
+                    fragmentManager,
+                    ongoingSession.link ?: "",
+                    ongoingSession.meetingName ?: ""
+                )
+            }
         },
         onViewAllLiveSessionsClick = {
             onNavigateToContent(CourseContentTab.LIVE_SESSIONS)
@@ -222,7 +251,7 @@ private fun CourseHomeUI(
     onViewProgressClick: () -> Unit,
     onViewAllAnnouncementsClick: () -> Unit,
     onJoinClick: (LiveClassModel) -> Unit,
-    onJoinOngoingClick: (String) -> Unit,
+    onJoinOngoingClick: (OngoingSessionModel) -> Unit,
     onViewAllLiveSessionsClick: () -> Unit,
     onRetry: () -> Unit,
 ) {
@@ -751,7 +780,7 @@ private fun CourseHomeScreenPreview() {
             onViewProgressClick = {},
             onViewAllAnnouncementsClick = {},
             onJoinClick = {},
-            onJoinOngoingClick = {},
+            onJoinOngoingClick = { _ -> },
             onViewAllLiveSessionsClick = {},
             onRetry = {}
         )

@@ -18,6 +18,10 @@ data class OngoingSessionModel(
     val linkLabel: String?,
     @SerializedName("meetingName")
     val meetingName: String?,
-    @SerializedName("Started")
-    val started: String?
+    @SerializedName("started")
+    val started: String?,
+    @SerializedName("meeting_id")
+    val meetingId: String?,
+    @SerializedName("passcode")
+    val passcode: String?
 )

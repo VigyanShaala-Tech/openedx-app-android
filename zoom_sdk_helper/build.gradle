@@ -1,0 +1,57 @@
+apply plugin: 'com.android.library'
+
+// Apply shared version definitions
+apply from: '../mobilertc/versions.gradle'
+
+android {
+    namespace 'us.zoom.sdkhelper'
+    compileSdk 36
+
+    defaultConfig {
+        minSdk 28
+        targetSdk 36
+
+        testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
+        consumerProguardFiles "consumer-rules.pro"
+    }
+
+    buildTypes {
+        release {
+            minifyEnabled false
+            proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
+        }
+    }
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_17
+        targetCompatibility JavaVersion.VERSION_17
+    }
+}
+
+dependencies {
+    api project(':mobilertc')
+    
+    // JWT generation
+    implementation libraries.nimbusds
+    
+    // Zoom SDK core dependencies (required by mobilertc.aar)
+    implementation libraries.securityCrypto
+    implementation libraries.cryptoTink
+    implementation libraries.exoplayerCore
+    implementation libraries.exoplayerUI
+    implementation libraries.swiperefreshlayout
+    implementation libraries.supportAppcompat
+    implementation libraries.constraintlayout
+    implementation libraries.supportDesign
+    implementation libraries.multidex
+    implementation libraries.gson
+    implementation libraries.glideAnnotations
+    implementation libraries.glideGlide
+    implementation libraries.recyclerview
+    implementation libraries.lottie
+    implementation libraries.supportWindow
+    implementation libraries.windowJava
+    implementation libraries.androidxCoreKtx
+    implementation libraries.androidxCore
+    implementation libraries.viewmodelKtx
+    implementation libraries.lifecycleKtx
+}

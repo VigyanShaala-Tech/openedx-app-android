@@ -38,6 +38,7 @@ import org.openedx.course.presentation.unit.video.BaseVideoViewModel
 import org.openedx.course.presentation.unit.video.EncodedVideoUnitViewModel
 import org.openedx.course.presentation.unit.video.VideoUnitViewModel
 import org.openedx.course.presentation.unit.video.VideoViewModel
+import org.openedx.course.presentation.unit.zoom.ZoomUnitViewModel
 import org.openedx.course.presentation.videos.CourseVideoViewModel
 import org.openedx.course.settings.download.DownloadQueueViewModel
 import org.openedx.courses.presentation.AllEnrolledCoursesViewModel
@@ -581,6 +582,14 @@ val screenModule = module {
             get(),
             get(),
             get(),
+        )
+    }
+    viewModel { (blockId: String, courseId: String) ->
+        ZoomUnitViewModel(
+            blockId,
+            courseId,
+            get(),
+            get()
         )
     }
 

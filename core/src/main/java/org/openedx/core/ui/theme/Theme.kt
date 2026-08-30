@@ -3,12 +3,16 @@ package org.openedx.core.ui.theme
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.LocalOverscrollFactory
 import androidx.compose.foundation.isSystemInDarkTheme
+import androidx.compose.material.LocalContentColor
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.darkColors
 import androidx.compose.material.lightColors
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.ReadOnlyComposable
+import androidx.compose.runtime.staticCompositionLocalOf
+
+internal val LocalAppColors = staticCompositionLocalOf { LightColorPalette }
 
 private val DarkColorPalette = AppColors(
     material = darkColors(
@@ -221,12 +225,12 @@ private val LightColorPalette = AppColors(
 val MaterialTheme.appColors: AppColors
     @Composable
     @ReadOnlyComposable
-    get() = if (colors.isLight) LightColorPalette else DarkColorPalette
+    get() = LocalAppColors.current
 
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
 fun OpenEdXTheme(darkTheme: Boolean = isSystemInDarkTheme(), content: @Composable () -> Unit) {
-    val colors = LightColorPalette
+    val colors = if (darkTheme) DarkColorPalette else LightColorPalette
 
     MaterialTheme(
         colors = colors.material,
@@ -236,6 +240,8 @@ fun OpenEdXTheme(darkTheme: Boolean = isSystemInDarkTheme(), content: @Composabl
         CompositionLocalProvider(
             LocalOverscrollFactory provides null,
             LocalDimens provides AppDimens(),
+            LocalAppColors provides colors,
+            LocalContentColor provides colors.textPrimary,
             content = content
         )
     }

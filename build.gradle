@@ -85,7 +85,7 @@ ext {
     // Android SDK versions
     compile_sdk_version = 36
     target_sdk_version = 36
-    min_sdk_version = 24
+    min_sdk_version = 28
     java_version = JavaVersion.VERSION_17
     jvm_target_version = JvmTarget.JVM_17
 

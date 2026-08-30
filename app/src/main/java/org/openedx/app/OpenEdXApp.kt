@@ -18,6 +18,8 @@ import org.openedx.app.di.networkingModule
 import org.openedx.app.di.screenModule
 import org.openedx.core.config.Config
 import org.openedx.firebase.OEXFirebaseAnalytics
+import us.zoom.sdk.ZoomSDKInitializeListener
+import us.zoom.sdkhelper.ZoomMeetingHelper
 
 class OpenEdXApp : Application() {
 
@@ -48,6 +50,8 @@ class OpenEdXApp : Application() {
             }
         }
 
+        /*
+        /*
         if (config.getBugseeConfig().enabled) {
             try {
                 Class.forName("com.bugsee.library.Bugsee")
@@ -56,6 +60,8 @@ class OpenEdXApp : Application() {
                 e.printStackTrace()
             }
         }
+        */
+        */
 
         if (config.getFirebaseConfig().enabled) {
             FirebaseApp.initializeApp(this)
@@ -102,6 +108,20 @@ class OpenEdXApp : Application() {
         }
 
         initPlugins()
+        initZoomSDK()
+    }
+
+    private fun initZoomSDK() {
+        val clientId = "arSLyWXwTK21Nr84F7Idw"
+        val clientSecret = "y8ewZoeDA2gQeDdjt1CG3a3KzVUfsWTg"
+        ZoomMeetingHelper.getInstance().initSDK(this, clientId, clientSecret, object : ZoomSDKInitializeListener {
+            override fun onZoomSDKInitializeResult(errorCode: Int, internalErrorCode: Int) {
+                // SDK Initialized
+            }
+
+            override fun onZoomAuthIdentityExpired() {
+            }
+        })
     }
 
     private fun initPlugins() {

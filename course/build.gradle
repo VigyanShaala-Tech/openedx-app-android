@@ -61,6 +61,7 @@ android {
 dependencies {
     implementation project(path: ':core')
     implementation project(path: ':discussion')
+    implementation project(':zoom_sdk_helper')
     implementation "com.pierfrancescosoffritti.androidyoutubeplayer:core:$youtubeplayer_version"
     implementation "com.pierfrancescosoffritti.androidyoutubeplayer:custom-ui:$youtubeplayer_version"
 

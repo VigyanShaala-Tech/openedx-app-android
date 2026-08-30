@@ -55,7 +55,7 @@ fun LiveSessionsCardContent(
     showTitle: Boolean = true,
     uiState: CourseHomeUIState.CourseData,
     onJoinClick: (LiveClassModel) -> Unit,
-    onJoinOngoingClick: (String) -> Unit,
+    onJoinOngoingClick: (OngoingSessionModel) -> Unit,
     onViewAllLiveSessionsClick: () -> Unit
 ) {
     val ongoingSession = uiState.ongoingSession
@@ -82,9 +82,8 @@ fun LiveSessionsCardContent(
 
             OngoingSessionItem(
                 session = ongoingSession,
-                onJoinClick = { ongoingSession.link?.let {
-                        onJoinOngoingClick(it)
-                    }
+                onJoinClick = {
+                    onJoinOngoingClick(ongoingSession)
                 }
             )
         }
@@ -161,7 +160,7 @@ fun OngoingSessionItem(
 fun TabbedLiveSessions(
     uiState: CourseHomeUIState.CourseData,
     onJoinClick: (LiveClassModel) -> Unit,
-    onJoinOngoingClick: (String) -> Unit,
+    onJoinOngoingClick: (OngoingSessionModel) -> Unit,
     onViewAllLiveSessionsClick: () -> Unit
 ) {
     var selectedTab by remember { mutableStateOf("today") }
@@ -215,7 +214,7 @@ fun TabbedLiveSessions(
         if (selectedTab == "today" && uiState.ongoingSession?.isSessionOngoing == true) {
             OngoingSessionItem(
                 session = uiState.ongoingSession,
-                onJoinClick = { uiState.ongoingSession.link?.let { onJoinOngoingClick(it) } }
+                onJoinClick = { onJoinOngoingClick(uiState.ongoingSession) }
             )
             Spacer(modifier = Modifier.height(12.dp))
         }

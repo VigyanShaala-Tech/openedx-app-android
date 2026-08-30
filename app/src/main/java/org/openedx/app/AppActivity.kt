@@ -272,7 +272,8 @@ class AppActivity : AppCompatActivity(), InsetHolder, WindowSizeHolder {
             addFlags(WindowManager.LayoutParams.FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS)
             WindowCompat.setDecorFitsSystemWindows(this, false)
             val insetsController = WindowInsetsControllerCompat(this, binding.root)
-            insetsController.isAppearanceLightStatusBars = true
+            val isDarkMode = (resources.configuration.uiMode and Configuration.UI_MODE_NIGHT_MASK) == Configuration.UI_MODE_NIGHT_YES
+            insetsController.isAppearanceLightStatusBars = !isDarkMode
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.VANILLA_ICE_CREAM) {
                 insetsController.systemBarsBehavior =
                     WindowInsetsControllerCompat.BEHAVIOR_SHOW_TRANSIENT_BARS_BY_SWIPE

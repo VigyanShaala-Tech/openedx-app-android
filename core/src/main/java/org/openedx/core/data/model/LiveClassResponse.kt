@@ -16,6 +16,8 @@ data class LiveClassModel(
     val topic: String,
     @SerializedName("is_owner")
     val isOwner: Boolean,
+    @SerializedName("is_host")
+    val isHost: Boolean?,
     @SerializedName("is_recurring_meeting")
     val isRecurringMeeting: Boolean,
     @SerializedName("startTime")
@@ -28,8 +30,14 @@ data class LiveClassModel(
     val timezone: String,
     @SerializedName("status")
     val status: String,
+    @SerializedName("isOngoing")
+    val isOngoing: Boolean?,
     @SerializedName("occurrence_internal_id")
     val occurrenceInternalId: String,
     @SerializedName("join_url")
-    val joinUrl: String
+    val joinUrl: String,
+    @SerializedName("unit_url")
+    val unitUrl: String?,
+    @SerializedName("meeting_info")
+    val meetingInfo: MeetingInfo?
 )

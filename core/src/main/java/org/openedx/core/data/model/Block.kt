@@ -6,6 +6,7 @@ import org.openedx.core.utils.TimeUtils
 import org.openedx.core.domain.model.Block as DomainBlock
 import org.openedx.core.domain.model.BlockCounts as DomainBlockCounts
 import org.openedx.core.domain.model.EncodedVideos as DomainEncodedVideos
+import org.openedx.core.domain.model.MeetingInfo as DomainMeetingInfo
 import org.openedx.core.domain.model.StudentViewData as DomainStudentViewData
 import org.openedx.core.domain.model.VideoInfo as DomainVideoInfo
 
@@ -47,7 +48,9 @@ data class Block(
     @SerializedName("vimeo_url")
     val vimeoUrl: String?,
     @SerializedName("pdf_web_url")
-    val pdfWebUrl: String?
+    val pdfWebUrl: String?,
+    @SerializedName("meeting_info")
+    val meetingInfo: MeetingInfo?
 ) {
     fun mapToDomain(blockData: Map<String, Block>): DomainBlock {
         val blockType = BlockType.getBlockType(type.orEmpty())
@@ -73,7 +76,8 @@ data class Block(
             due = TimeUtils.iso8601ToDate(due.orEmpty()),
             offlineDownload = offlineDownload?.mapToDomain(),
             vimeoUrl = vimeoUrl,
-            pdfWebUrl = pdfWebUrl
+            pdfWebUrl = pdfWebUrl,
+            meetingInfo = meetingInfo?.mapToDomain()
         )
     }
 
@@ -108,6 +112,33 @@ data class StudentViewData(
         transcripts = transcripts,
         encodedVideos = encodedVideos?.mapToDomain(),
         topicId = topicId.orEmpty()
+    )
+}
+
+data class MeetingInfo(
+    @SerializedName("meeting_id")
+    val meetingId: String?,
+    @SerializedName("topic")
+    val topic: String?,
+    @SerializedName("passcode")
+    val passcode: String?,
+    @SerializedName("start_time")
+    val startTime: String?,
+    @SerializedName("duration")
+    val duration: String?,
+    @SerializedName("isMeetingEnded")
+    val isMeetingEnded: Boolean?,
+    @SerializedName("isSessionOngoing")
+    val isSessionOngoing: Boolean?
+) {
+    fun mapToDomain() = DomainMeetingInfo(
+        meetingId = meetingId.orEmpty(),
+        topic = topic.orEmpty(),
+        passcode = passcode.orEmpty(),
+        startTime = startTime.orEmpty(),
+        duration = duration.orEmpty(),
+        isMeetingEnded = isMeetingEnded ?: false,
+        isSessionOngoing = isSessionOngoing ?: false
     )
 }
 

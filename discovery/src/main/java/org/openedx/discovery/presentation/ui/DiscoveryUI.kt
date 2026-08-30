@@ -139,8 +139,7 @@ fun DiscoveryCourseItem(
                     text = course.name.orEmpty(),
                     color = MaterialTheme.appColors.textDark,
                     style = MaterialTheme.appTypography.titleSmall.copy(fontWeight = FontWeight.Bold),
-                    maxLines = 2,
-                    overflow = TextOverflow.Ellipsis
+                    overflow = TextOverflow.Clip
                 )
                 
                 Row(horizontalArrangement = Arrangement.spacedBy(MaterialTheme.appDimens.defaultPadding)) {

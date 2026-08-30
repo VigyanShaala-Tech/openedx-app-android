@@ -1,10 +1,11 @@
 package org.openedx.core.ui
 
 import android.annotation.SuppressLint
-import android.app.Activity
 import android.content.Intent
 import android.net.Uri
 import android.view.ViewGroup
+import android.webkit.JsPromptResult
+import android.webkit.JsResult
 import android.webkit.PermissionRequest
 import android.webkit.WebChromeClient
 import android.webkit.WebResourceRequest
@@ -45,7 +46,6 @@ import androidx.compose.ui.viewinterop.AndroidView
 import androidx.compose.ui.zIndex
 import org.openedx.core.ui.theme.appColors
 import org.openedx.core.AppDataConstants
-import org.openedx.core.utils.EmailUtil
 import org.openedx.core.extension.addMobileQueryParam
 import org.openedx.core.extension.applyFullAccessSettings
 import org.openedx.core.extension.loadUrl
@@ -164,6 +164,7 @@ private fun WebViewContent(
     val isDarkTheme = isSystemInDarkTheme()
     val webView = remember {
         WebView(context).apply {
+            setBackgroundColor(android.graphics.Color.WHITE)
             webViewClient = object : WebViewClient() {
                 override fun onPageCommitVisible(view: WebView?, url: String?) {
                     super.onPageCommitVisible(view, url)
@@ -177,15 +178,21 @@ private fun WebViewContent(
                     val clickUrl = request?.url?.toString() ?: ""
                     if (clickUrl.isEmpty()) return false
 
-                    // Don't override Zoom URLs, let them load in the WebView
+                    // Don't override Zoom URLs or internal app URLs, let them load in the WebView
                     val isZoomUrl = AppDataConstants.ZOOM_URL_PATTERNS.any { clickUrl.contains(it) }
-                    if (isZoomUrl) {
+                    val isInternalUrl = apiHostUrl?.let { clickUrl.startsWith(it) } ?: false
+                    
+                    if (isZoomUrl || isInternalUrl || clickUrl.contains("vigyanshaala.com")) {
                         return false
                     }
 
                     return if (clickUrl.startsWith("http")) {
-                        context.startActivity(Intent(Intent.ACTION_VIEW, Uri.parse(clickUrl)))
-                        true
+                        try {
+                            context.startActivity(Intent(Intent.ACTION_VIEW, Uri.parse(clickUrl)))
+                            true
+                        } catch (e: Exception) {
+                            false
+                        }
                     } else if (clickUrl.startsWith("mailto:")) {
                         val email = clickUrl.replace("mailto:", "")
                         if (email.isEmailValid()) {
@@ -218,17 +225,42 @@ private fun WebViewContent(
                     isUserGesture: Boolean,
                     resultMsg: android.os.Message?
                 ): Boolean {
-                    val chromeClient = this
-                    val newWebView = WebView(context).apply {
-                        settings.javaScriptEnabled = true
-                        settings.domStorageEnabled = true
-                        settings.javaScriptCanOpenWindowsAutomatically = true
-                        settings.setSupportMultipleWindows(true)
-                        webChromeClient = chromeClient
-                    }
+                    // Force popups to open in the same window for React consistency
                     val transport = resultMsg?.obj as? WebView.WebViewTransport
-                    transport?.webView = newWebView
+                    transport?.webView = view
                     resultMsg?.sendToTarget()
+                    return true
+                }
+
+                override fun onJsAlert(view: WebView?, url: String?, message: String?, result: JsResult?): Boolean {
+                    androidx.appcompat.app.AlertDialog.Builder(context)
+                        .setMessage(message)
+                        .setPositiveButton(org.openedx.core.R.string.core_ok) { _, _ -> result?.confirm() }
+                        .setCancelable(false)
+                        .create()
+                        .show()
+                    return true
+                }
+
+                override fun onJsConfirm(view: WebView?, url: String?, message: String?, result: JsResult?): Boolean {
+                    androidx.appcompat.app.AlertDialog.Builder(context)
+                        .setMessage(message)
+                        .setPositiveButton(org.openedx.core.R.string.core_ok) { _, _ -> result?.confirm() }
+                        .setNegativeButton(org.openedx.core.R.string.core_cancel) { _, _ -> result?.cancel() }
+                        .setCancelable(false)
+                        .create()
+                        .show()
+                    return true
+                }
+
+                override fun onCloseWindow(window: WebView?) {
+                    super.onCloseWindow(window)
+                    (context as? androidx.activity.ComponentActivity)?.onBackPressedDispatcher?.onBackPressed()
+                }
+
+                override fun onConsoleMessage(consoleMessage: android.webkit.ConsoleMessage?): Boolean {
+                    android.util.Log.d("WebViewConsole", "${consoleMessage?.message()} -- From line " +
+                            "${consoleMessage?.lineNumber()} of ${consoleMessage?.sourceId()}")
                     return true
                 }
             }

@@ -36,7 +36,8 @@ data class Block(
     val due: Date?,
     val offlineDownload: OfflineDownload?,
     val vimeoUrl: String? = null,
-    val pdfWebUrl: String? = null
+    val pdfWebUrl: String? = null,
+    val meetingInfo: MeetingInfo? = null
 ) : Parcelable {
     val isDownloadable: Boolean
         get() {
@@ -127,7 +128,18 @@ data class StudentViewData(
     val duration: @RawValue Any,
     val transcripts: HashMap<String, String>?,
     val encodedVideos: EncodedVideos?,
-    val topicId: String,
+    val topicId: String
+) : Parcelable
+
+@Parcelize
+data class MeetingInfo(
+    val meetingId: String,
+    val topic: String,
+    val passcode: String,
+    val startTime: String,
+    val duration: String,
+    val isMeetingEnded: Boolean,
+    val isSessionOngoing: Boolean
 ) : Parcelable
 
 @Parcelize

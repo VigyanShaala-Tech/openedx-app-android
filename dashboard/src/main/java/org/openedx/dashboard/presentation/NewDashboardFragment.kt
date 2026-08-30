@@ -725,8 +725,8 @@ private fun CourseCard(c: CourseCardData, apiHostUrl: String, onClick: () -> Uni
                     text = c.title,
                     style = MaterialTheme.appTypography.titleSmall,
                     color = MaterialTheme.appColors.textDark,
-                    maxLines = 2,
-                    overflow = TextOverflow.Ellipsis
+                    minLines = 2,
+                    overflow = TextOverflow.Clip
                 )
                 Spacer(Modifier.height(8.dp))
                 Column(
@@ -902,8 +902,7 @@ private fun RecommendationItem(r: RecommendationData, apiHostUrl: String, onClic
                     text = r.title,
                     style = MaterialTheme.appTypography.titleSmall,
                     color = MaterialTheme.appColors.textDark,
-                    maxLines = 1,
-                    overflow = TextOverflow.Ellipsis
+                    overflow = TextOverflow.Clip
                 )
                 Spacer(Modifier.height(4.dp))
                 Text(
@@ -919,9 +918,9 @@ private fun RecommendationItem(r: RecommendationData, apiHostUrl: String, onClic
 }
 
 private const val SAMPLE_IMAGE_1 =
-    "https://images.unsplash.com/photo-1509395176047-4a66953fd231?q=80&w=1080&auto=format&fit=crop"
-private const val SAMPLE_IMAGE_2 =
     "https://images.unsplash.com/photo-1517142089942-ba376ce32a2e?q=80&w=1080&auto=format&fit=crop"
+private const val SAMPLE_IMAGE_2 =
+    "https://images.unsplash.com/photo-1509395176047-4a66953fd231?q=80&w=1080&auto=format&fit=crop"
 private const val SAMPLE_IMAGE_3 =
     "https://images.unsplash.com/photo-1527694224012-bea5e2b3e979?q=80&w=1080&auto=format&fit=crop"
 private const val SAMPLE_IMAGE_4 =

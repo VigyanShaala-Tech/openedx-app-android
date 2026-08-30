@@ -198,7 +198,8 @@ object Mock {
         due = null,
         offlineDownload = null,
         vimeoUrl = null,
-        pdfWebUrl = null
+        pdfWebUrl = null,
+        meetingInfo = null
     )
 
     val mockSequentialBlockForDownload = Block(

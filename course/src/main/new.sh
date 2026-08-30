@@ -1,0 +1,1 @@
+adb shell pm get-app-links org.app.vigyanshaala

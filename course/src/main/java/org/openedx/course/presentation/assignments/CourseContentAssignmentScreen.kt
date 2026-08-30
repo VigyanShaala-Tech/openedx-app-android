@@ -21,6 +21,7 @@ import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.Card
@@ -46,6 +47,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Devices
 import androidx.compose.ui.tooling.preview.Preview
@@ -272,9 +274,10 @@ private fun AssignmentGroupSection(
                     modifier = Modifier.padding(vertical = 8.dp),
                     contentPadding = PaddingValues(horizontal = 24.dp)
                 ) {
-                    items(assignments) { assignment ->
+                    itemsIndexed(assignments) { index, assignment ->
                         AssignmentButton(
                             assignment = assignment,
+                            index = index + 1,
                             isSelected = assignment.id == selectedId,
                             onClick = {
                                 selectedId = assignment.id
@@ -285,11 +288,13 @@ private fun AssignmentGroupSection(
             }
             if (assignments.size > 1) {
                 // Show details for selected assignment in this group
-                assignments.find { it.id == selectedId }?.let { assignment ->
+                val selectedIndex = assignments.indexOfFirst { it.id == selectedId }
+                assignments.getOrNull(selectedIndex)?.let { assignment ->
                     AssignmentDetails(
                         modifier = Modifier
                             .padding(horizontal = 24.dp),
                         assignment = assignment,
+                        index = selectedIndex + 1,
                         sectionName = sectionNames[assignment.id] ?: "",
                         onAssignmentClick = onAssignmentClick
                     )
@@ -301,6 +306,7 @@ private fun AssignmentGroupSection(
                         .padding(horizontal = 24.dp)
                         .padding(top = 12.dp),
                     assignment = assignment,
+                    index = 1,
                     sectionName = sectionNames[assignment.id] ?: "",
                     onAssignmentClick = onAssignmentClick
                 )
@@ -314,7 +320,7 @@ private fun AssignmentGroupSection(
 }
 
 @Composable
-private fun AssignmentButton(assignment: Block, isSelected: Boolean, onClick: () -> Unit) {
+private fun AssignmentButton(assignment: Block, index: Int, isSelected: Boolean, onClick: () -> Unit) {
     val isDuePast = assignment.due != null && assignment.due!! < Date()
     val cardBorderColor = when {
         isSelected -> MaterialTheme.appColors.primary
@@ -372,7 +378,7 @@ private fun AssignmentButton(assignment: Block, isSelected: Boolean, onClick: ()
                 ) {
                     Text(
                         modifier = Modifier.align(Alignment.Center),
-                        text = assignment.assignmentProgress?.label ?: "",
+                        text = "A$index",
                         color = MaterialTheme.appColors.textDark,
                         style = MaterialTheme.appTypography.bodyMedium,
                         maxLines = 1,
@@ -413,6 +419,7 @@ private fun AssignmentButton(assignment: Block, isSelected: Boolean, onClick: ()
 private fun AssignmentDetails(
     modifier: Modifier = Modifier,
     assignment: Block,
+    index: Int,
     sectionName: String,
     onAssignmentClick: (Block) -> Unit,
 ) {
@@ -486,14 +493,15 @@ private fun AssignmentDetails(
             ) {
                 Column {
                     Text(
-                        text = sectionName,
-                        style = MaterialTheme.appTypography.bodySmall,
-                        color = MaterialTheme.appColors.textDark
+                        text = "Assignment $index",
+                        style = MaterialTheme.appTypography.bodyLarge,
+                        color = MaterialTheme.appColors.textDark,
+                        fontWeight = FontWeight.Bold
                     )
                     Text(
                         modifier = Modifier.padding(top = 4.dp),
                         text = assignment.displayName ?: "",
-                        style = MaterialTheme.appTypography.bodyLarge,
+                        style = MaterialTheme.appTypography.bodySmall,
                         color = MaterialTheme.appColors.textDark
                     )
                     if (description.isNotEmpty()) {

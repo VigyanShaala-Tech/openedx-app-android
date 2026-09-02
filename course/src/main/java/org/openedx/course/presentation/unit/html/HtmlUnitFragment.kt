@@ -14,7 +14,6 @@ import android.util.Log
 import android.view.LayoutInflater
 import android.view.ViewGroup
 import android.webkit.JavascriptInterface
-import android.webkit.JsPromptResult
 import android.webkit.JsResult
 import android.webkit.PermissionRequest
 import android.webkit.ValueCallback
@@ -33,12 +32,10 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.widthIn
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.CircularProgressIndicator
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Surface
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -48,7 +45,6 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
 import androidx.compose.ui.platform.ComposeView
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
@@ -63,18 +59,15 @@ import androidx.fragment.app.Fragment
 import kotlinx.coroutines.launch
 import org.koin.androidx.viewmodel.ext.android.viewModel
 import org.koin.core.parameter.parametersOf
-import org.openedx.core.AppDataConstants
 import org.openedx.core.extension.addMobileQueryParam
 import org.openedx.core.extension.applyFullAccessSettings
 import org.openedx.core.extension.loadUrl
 import org.openedx.core.system.AppCookieManager
 import org.openedx.core.ui.FullScreenErrorView
 import org.openedx.core.ui.navigationBarsInset
-import org.openedx.core.ui.roundBorderWithoutBottom
 import org.openedx.core.ui.theme.OpenEdXTheme
 import org.openedx.core.ui.theme.appColors
 import org.openedx.foundation.extension.applyDarkModeIfEnabled
-import org.openedx.foundation.presentation.WindowSize
 import org.openedx.foundation.presentation.rememberWindowSize
 import org.openedx.foundation.presentation.windowSizeValue
 
@@ -116,6 +109,7 @@ class HtmlUnitFragment : Fragment() {
         lastModified = requireArguments().getString(ARG_LAST_MODIFIED, "")
         fromDownloadedContent = lastModified.isNotEmpty()
         checkAndRequestPermissions()
+        viewModel.markTopicCompleted()
     }
 
     private fun checkAndRequestPermissions() {
@@ -243,20 +237,12 @@ fun HtmlUnitView(
         val isMeetingUrl = false
         val bottomPadding =
             if (configuration.orientation == Configuration.ORIENTATION_PORTRAIT && !isMeetingUrl) {
-                72.dp
+                50.dp
             } else {
                 0.dp
             }
 
-        val border = if (!isSystemInDarkTheme() && !viewModel.isCourseUnitProgressEnabled) {
-            Modifier.roundBorderWithoutBottom(
-                borderWidth = 2.dp,
-                cornerRadius = 30.dp
-            )
-        } else {
-            Modifier
-        }
-
+        val isLandscapeMeeting = isMeetingUrl && configuration.orientation == Configuration.ORIENTATION_LANDSCAPE
         val screenWidth by remember(key1 = windowSize, key2 = isMeetingUrl, key3 = configuration.orientation) {
             mutableStateOf(
                 if (isMeetingUrl && configuration.orientation == Configuration.ORIENTATION_LANDSCAPE) {
@@ -270,24 +256,16 @@ fun HtmlUnitView(
             )
         }
 
-        val isLandscapeMeeting = isMeetingUrl && configuration.orientation == Configuration.ORIENTATION_LANDSCAPE
-        val shape = if (isLandscapeMeeting) {
-            androidx.compose.ui.graphics.RectangleShape
-        } else {
-            RoundedCornerShape(topStart = 24.dp, topEnd = 24.dp)
-        }
-
         Surface(
             modifier = Modifier
-                .clip(shape)
+                .fillMaxSize()
                 .then(if (isLandscapeMeeting) Modifier else Modifier.navigationBarsInset()),
-            color = MaterialTheme.colors.background
+            color = MaterialTheme.appColors.background
         ) {
             Box(
                 modifier = Modifier
                     .fillMaxSize()
-                    .padding(bottom = bottomPadding)
-                    .then(border),
+                    .padding(bottom = bottomPadding),
                 contentAlignment = Alignment.TopCenter
             ) {
                 if (uiState is HtmlUnitUIState.Initialization) return@Box
@@ -340,7 +318,7 @@ fun HtmlUnitView(
                         modifier = Modifier
                             .fillMaxSize()
                             .zIndex(1f)
-                            .background(android.graphics.Color.WHITE.toColor()),
+                            .background(MaterialTheme.appColors.background),
                         contentAlignment = Alignment.Center
                     ) {
                         CircularProgressIndicator(color = MaterialTheme.appColors.primary)
@@ -351,7 +329,6 @@ fun HtmlUnitView(
     }
 }
 
-private fun Int.toColor() = androidx.compose.ui.graphics.Color(this)
 
 @Composable
 @SuppressLint("SetJavaScriptEnabled")
@@ -375,9 +352,12 @@ private fun HTMLContentView(
     val context = LocalContext.current
     val isDarkTheme = isSystemInDarkTheme()
 
+    val textColor = MaterialTheme.appColors.textPrimary
+    val bgColor = MaterialTheme.appColors.background
+
     val webView = remember {
         WebView(context).apply {
-            setBackgroundColor(android.graphics.Color.WHITE)
+            setBackgroundColor(android.graphics.Color.TRANSPARENT)
             addJavascriptInterface(
                 object {
                     @Suppress("unused")
@@ -408,6 +388,12 @@ private fun HTMLContentView(
                 override fun onPageCommitVisible(view: WebView?, url: String?) {
                     super.onPageCommitVisible(view, url)
                     onWebPageLoaded()
+//                    if (isDarkTheme) {
+//                        val textColorHex = java.lang.Long.toHexString(textColor.value.toLong()).substring(2, 8)
+//                        val bgColorHex = java.lang.Long.toHexString(bgColor.value.toLong()).substring(2, 8)
+//                        val js = "var style = document.createElement('style'); style.innerHTML = 'body { background-color: #$bgColorHex !important; color: #$textColorHex !important; margin: 0 !important; padding: 0 !important; } * { color: #$textColorHex !important; }'; document.head.appendChild(style);"
+//                        evaluateJavascript(js, null)
+//                    }
                 }
 
                 override fun shouldOverrideUrlLoading(

@@ -83,6 +83,16 @@ class HtmlUnitViewModel(
         }
     }
 
+    fun markTopicCompleted() {
+        viewModelScope.launch {
+            try {
+                courseInteractor.markTopicCompleted(courseId, blockId)
+            } catch (e: Exception) {
+                e.printStackTrace()
+            }
+        }
+    }
+
     fun saveXBlockProgress(jsonProgress: String) {
         viewModelScope.launch {
             courseInteractor.saveXBlockProgress(blockId, courseId, jsonProgress)

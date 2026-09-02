@@ -18,8 +18,8 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.lazy.rememberLazyListState
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.DropdownMenu
 import androidx.compose.material.DropdownMenuItem
 import androidx.compose.material.Icon
@@ -38,7 +38,6 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -156,8 +155,8 @@ private fun FilterPill(
             modifier = Modifier
                 .height(38.dp)
                 .clip(RoundedCornerShape(16.dp)) // Refined rounded corners
-                .border(1.dp, Color(0xFFECEFF1), RoundedCornerShape(16.dp))
-                .background(Color.White)
+                .border(1.dp, MaterialTheme.appColors.textFieldBorder, RoundedCornerShape(16.dp))
+                .background(MaterialTheme.appColors.cardViewBackground)
                 .clickable { expanded = true }
                 .padding(horizontal = 14.dp),
             verticalAlignment = Alignment.CenterVertically,
@@ -169,12 +168,12 @@ private fun FilterPill(
                     fontSize = 13.sp,
                     fontWeight = FontWeight.Medium
                 ),
-                color = Color(0xFF546E7A)
+                color = MaterialTheme.appColors.textDark
             )
             Icon(
                 imageVector = Icons.Filled.ExpandMore,
                 contentDescription = null,
-                tint = Color(0xFF78909C),
+                tint = MaterialTheme.appColors.textSecondary,
                 modifier = Modifier.size(16.dp)
             )
         }
@@ -183,7 +182,7 @@ private fun FilterPill(
             expanded = expanded,
             onDismissRequest = { expanded = false },
             modifier = Modifier
-                .background(Color.White)
+                .background(MaterialTheme.appColors.cardViewBackground)
                 .clip(RoundedCornerShape(8.dp)) // Rounded corners for dropdown menu
         ) {
             options.forEach { opt ->
@@ -194,7 +193,7 @@ private fun FilterPill(
                     Text(
                         text = opt, 
                         style = MaterialTheme.appTypography.bodyMedium,
-                        color = Color(0xFF263238)
+                        color = MaterialTheme.appColors.textDark
                     )
                 }
             }

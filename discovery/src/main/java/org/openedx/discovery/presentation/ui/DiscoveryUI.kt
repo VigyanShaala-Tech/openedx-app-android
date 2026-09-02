@@ -14,7 +14,6 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.material.Icon
 import androidx.compose.material.MaterialTheme
@@ -30,17 +29,16 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.painter.Painter
 import androidx.compose.ui.layout.ContentScale
-import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import coil.compose.AsyncImage
 import coil.request.ImageRequest
+import org.openedx.core.ui.AutoSizeText
 import org.openedx.core.ui.theme.OpenEdXTheme
 import org.openedx.core.ui.theme.appColors
 import org.openedx.core.ui.theme.appDimens
@@ -50,7 +48,6 @@ import org.openedx.discovery.R
 import org.openedx.discovery.domain.model.Course
 import org.openedx.foundation.extension.toImageLink
 import org.openedx.foundation.presentation.WindowSize
-import org.openedx.foundation.presentation.rememberWindowSize
 import org.openedx.foundation.presentation.windowSizeValue
 import org.openedx.core.R as сoreR
 
@@ -129,17 +126,17 @@ fun DiscoveryCourseItem(
             Column(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .height(105.dp),
-                verticalArrangement = Arrangement.SpaceBetween
+                    .padding(vertical = 4.dp),
+                verticalArrangement = Arrangement.spacedBy(8.dp)
             ) {
-                Text(
+                AutoSizeText(
                     modifier = Modifier
                         .testTag("txt_course_title")
                         .fillMaxWidth(),
                     text = course.name.orEmpty(),
                     color = MaterialTheme.appColors.textDark,
-                    style = MaterialTheme.appTypography.titleSmall.copy(fontWeight = FontWeight.Bold),
-                    overflow = TextOverflow.Clip
+                    style = MaterialTheme.appTypography.titleMedium.copy(fontWeight = FontWeight.Bold),
+                    minSize = 12f
                 )
                 
                 Row(horizontalArrangement = Arrangement.spacedBy(MaterialTheme.appDimens.defaultPadding)) {

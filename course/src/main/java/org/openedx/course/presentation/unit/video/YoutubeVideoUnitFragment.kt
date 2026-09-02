@@ -71,6 +71,7 @@ class YoutubeVideoUnitFragment : Fragment(R.layout.fragment_youtube_video_unit) 
             blockId = getString(ARG_BLOCK_ID, "")
         }
         viewModel.downloadSubtitles()
+//        viewModel.markTopicCompleted()
     }
 
     override fun onCreateView(

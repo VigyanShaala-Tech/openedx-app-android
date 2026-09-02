@@ -56,6 +56,7 @@ class PdfUnitFragment : Fragment() {
         courseId = requireArguments().getString(ARG_COURSE_ID, "")
         pdfUrl = requireArguments().getString(ARG_PDF_URL, "")
         title = requireArguments().getString(ARG_TITLE, "")
+//        viewModel.markBlockCompleted()
     }
 
     override fun onCreateView(

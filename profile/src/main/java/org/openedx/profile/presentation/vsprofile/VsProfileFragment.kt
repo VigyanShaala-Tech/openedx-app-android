@@ -22,6 +22,8 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.text.KeyboardActions
+import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.Card
 import androidx.compose.material.CircularProgressIndicator
@@ -31,7 +33,6 @@ import androidx.compose.material.MaterialTheme
 import androidx.compose.material.OutlinedTextField
 import androidx.compose.material.Scaffold
 import androidx.compose.material.Text
-import androidx.compose.material.TextButton
 import androidx.compose.material.TextFieldDefaults
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.Help
@@ -39,7 +40,6 @@ import androidx.compose.material.icons.automirrored.filled.HelpOutline
 import androidx.compose.material.icons.automirrored.filled.KeyboardArrowRight
 import androidx.compose.material.icons.automirrored.filled.Logout
 import androidx.compose.material.icons.filled.ChatBubbleOutline
-import androidx.compose.material.icons.filled.CheckCircle
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.icons.filled.HeadsetMic
@@ -47,9 +47,6 @@ import androidx.compose.material.icons.filled.Info
 import androidx.compose.material.icons.filled.Person
 import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material.icons.filled.Share
-import androidx.compose.material.icons.outlined.Smartphone
-import androidx.compose.foundation.text.KeyboardActions
-import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.rememberScaffoldState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -57,7 +54,6 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
@@ -65,9 +61,10 @@ import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.focus.FocusDirection
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.ComposeView
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.platform.ViewCompositionStrategy
 import androidx.compose.ui.platform.testTag
@@ -84,8 +81,11 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Dialog
 import androidx.fragment.app.Fragment
+import coil.compose.AsyncImage
+import coil.request.ImageRequest
 import org.koin.android.ext.android.inject
 import org.koin.androidx.viewmodel.ext.android.viewModel
+import org.openedx.core.config.Config
 import org.openedx.core.data.storage.CorePreferences
 import org.openedx.core.presentation.global.AppData
 import org.openedx.core.ui.HandleUIMessage
@@ -96,9 +96,9 @@ import org.openedx.core.ui.theme.OpenEdXTheme
 import org.openedx.core.ui.theme.appColors
 import org.openedx.core.ui.theme.appShapes
 import org.openedx.core.ui.theme.appTypography
+import org.openedx.foundation.extension.toImageLink
 import org.openedx.foundation.presentation.UIMessage
 import org.openedx.profile.R
-import org.openedx.core.config.Config
 import org.openedx.profile.presentation.ProfileRouter
 import org.openedx.profile.presentation.profile.ProfileViewModel
 
@@ -130,6 +130,7 @@ class VsProfileFragment : Fragment() {
                 val uiMessage by profileViewModel.uiMessage.observeAsState()
 
                 VsProfileScreen(
+                    apiHostUrl = config.getApiHostURL(),
                     userName = corePreferences.user?.name ?: corePreferences.user?.username ?: stringResource(id = R.string.profile_student_user),
                     userEmail = corePreferences.user?.email ?: stringResource(id = R.string.profile_student_email),
                     account = accountData?.account,
@@ -180,6 +181,7 @@ class VsProfileFragment : Fragment() {
 
 @Composable
 private fun VsProfileScreen(
+    apiHostUrl: String,
     userName: String,
     userEmail: String,
     account: org.openedx.profile.domain.model.Account?,
@@ -273,19 +275,34 @@ private fun VsProfileScreen(
                         .padding(20.dp),
                     verticalAlignment = Alignment.CenterVertically
                 ) {
-                    Box(
-                        modifier = Modifier
-                            .size(64.dp)
-                            .clip(CircleShape)
-                            .background(MaterialTheme.appColors.surface),
-                        contentAlignment = Alignment.Center
-                    ) {
-                        Icon(
-                            imageVector = Icons.Filled.Person,
+                    if (account?.profileImage?.hasImage == true) {
+                        AsyncImage(
+                            model = ImageRequest.Builder(LocalContext.current)
+                                .data(account.profileImage.imageUrlMedium.toImageLink(apiHostUrl))
+                                .error(org.openedx.core.R.drawable.core_ic_default_profile_picture)
+                                .placeholder(org.openedx.core.R.drawable.core_ic_default_profile_picture)
+                                .build(),
                             contentDescription = null,
-                            tint = MaterialTheme.appColors.textPrimary,
-                            modifier = Modifier.size(32.dp)
+                            modifier = Modifier
+                                .size(64.dp)
+                                .clip(CircleShape),
+                            contentScale = ContentScale.Crop
                         )
+                    } else {
+                        Box(
+                            modifier = Modifier
+                                .size(64.dp)
+                                .clip(CircleShape)
+                                .background(MaterialTheme.appColors.surface),
+                            contentAlignment = Alignment.Center
+                        ) {
+                            Icon(
+                                imageVector = Icons.Filled.Person,
+                                contentDescription = null,
+                                tint = MaterialTheme.appColors.textPrimary,
+                                modifier = Modifier.size(32.dp)
+                            )
+                        }
                     }
                     Spacer(Modifier.size(16.dp))
                     Column(modifier = Modifier.weight(1f)) {
@@ -308,14 +325,14 @@ private fun VsProfileScreen(
                         modifier = Modifier
                             .size(36.dp)
                             .clip(CircleShape)
-                            .background(Color(0xFFE8F5E9))
+                            .background(MaterialTheme.appColors.primaryAlpha10)
                             .clickable { onEditClick() },
                         contentAlignment = Alignment.Center
                     ) {
                         Icon(
                             imageVector = Icons.Filled.Edit,
                             contentDescription = null,
-                            tint = Color(0xFF4CAF50),
+                            tint = MaterialTheme.appColors.primary,
                             modifier = Modifier.size(18.dp)
                         )
                     }
@@ -526,7 +543,7 @@ private fun LogoutDialog(
                                     .testTag("txt_logout")
                                     .fillMaxWidth(),
                                 text = stringResource(id = R.string.profile_logout),
-                                color = MaterialTheme.appColors.textWarning,
+                                color = MaterialTheme.appColors.primaryButtonText,
                                 style = MaterialTheme.appTypography.labelLarge,
                                 textAlign = TextAlign.Center
                             )
@@ -535,7 +552,7 @@ private fun LogoutDialog(
                                     .testTag("ic_logout"),
                                 painter = painterResource(id = R.drawable.profile_ic_logout),
                                 contentDescription = null,
-                                tint = Color.Black
+                                tint = MaterialTheme.appColors.primaryButtonText
                             )
                         }
                     }
@@ -663,11 +680,11 @@ private fun WhatsappDialog(
                     enabled = !isOtpLoading && (if (isOtpSent) otpCode.length >= 4 else (phoneNumber.length >= 10 && phoneNumber != initialPhoneNumber))
                 ) {
                     if (isOtpLoading) {
-                        CircularProgressIndicator(modifier = Modifier.size(24.dp), color = Color.White)
+                        CircularProgressIndicator(modifier = Modifier.size(24.dp), color = MaterialTheme.appColors.primaryButtonText)
                     } else {
                         Text(
                             text = if (isOtpSent) stringResource(id = R.string.profile_verify_otp) else stringResource(id = R.string.profile_send_otp),
-                            color = Color.White,
+                            color = MaterialTheme.appColors.primaryButtonText,
                             style = MaterialTheme.appTypography.labelLarge
                         )
                     }
@@ -683,6 +700,7 @@ private fun WhatsappDialog(
 private fun VsProfileScreenPreview() {
     OpenEdXTheme {
         VsProfileScreen(
+            apiHostUrl = "",
             userName = "Student User",
             userEmail = "student@example.com",
             account = null,

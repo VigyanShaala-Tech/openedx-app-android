@@ -63,7 +63,6 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.semantics.testTagsAsResourceId
 import androidx.compose.ui.text.style.TextAlign
-import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Devices
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.Dp
@@ -398,7 +397,7 @@ private fun CourseItem(
             Column(
                 Modifier
                     .fillMaxWidth()
-                    .height(105.dp)
+                    .padding(vertical = 4.dp)
                     .background(MaterialTheme.appColors.background)
             ) {
                 Text(
@@ -410,7 +409,7 @@ private fun CourseItem(
                 Spacer(modifier = Modifier.height(4.dp))
                 Column(
                     Modifier
-                        .fillMaxSize()
+                        .fillMaxWidth()
                         .background(MaterialTheme.appColors.background),
                     verticalArrangement = Arrangement.SpaceBetween
                 ) {
@@ -418,8 +417,7 @@ private fun CourseItem(
                         modifier = Modifier.testTag("txt_course_name"),
                         text = enrolledCourse.course.name,
                         color = MaterialTheme.appColors.textPrimary,
-                        style = MaterialTheme.appTypography.titleSmall,
-                        overflow = TextOverflow.Clip
+                        style = MaterialTheme.appTypography.titleSmall
                     )
                     Row(
                         Modifier

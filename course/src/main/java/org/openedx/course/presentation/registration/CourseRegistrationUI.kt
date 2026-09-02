@@ -3,11 +3,28 @@ package org.openedx.course.presentation.registration
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.heightIn
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
-import androidx.compose.material.*
+import androidx.compose.material.Divider
+import androidx.compose.material.Icon
+import androidx.compose.material.MaterialTheme
+import androidx.compose.material.OutlinedTextField
+import androidx.compose.material.RadioButton
+import androidx.compose.material.RadioButtonDefaults
+import androidx.compose.material.Text
+import androidx.compose.material.TextFieldDefaults
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowDropDown
 import androidx.compose.material.icons.filled.UploadFile
@@ -47,7 +64,7 @@ fun RegistrationStepper(
             if (i < totalSteps) {
                 Divider(
                     modifier = Modifier.width(60.dp),
-                    color = if (i < currentStep) Color(0xFF4CAF50) else Color(0xFFE0E0E0),
+                    color = if (i < currentStep) Color(0xFF4CAF50) else MaterialTheme.appColors.divider,
                     thickness = 1.dp
                 )
             }
@@ -63,18 +80,18 @@ private fun RegistrationStepCircle(
 ) {
     val backgroundColor = when {
         isCompleted -> Color(0xFF4CAF50)
-        isSelected -> Color.White
-        else -> Color.White
+        isSelected -> MaterialTheme.appColors.background
+        else -> MaterialTheme.appColors.background
     }
     val borderColor = when {
         isCompleted -> Color(0xFF4CAF50)
         isSelected -> Color(0xFF4CAF50)
-        else -> Color(0xFFE0E0E0)
+        else -> MaterialTheme.appColors.divider
     }
     val textColor = when {
         isCompleted -> Color.White
         isSelected -> Color(0xFF4CAF50)
-        else -> Color(0xFF9E9E9E)
+        else -> MaterialTheme.appColors.textSecondary
     }
 
     Box(
@@ -126,14 +143,14 @@ fun VsRegistrationTextField(
                 }
             },
             style = MaterialTheme.appTypography.bodyMedium.copy(fontWeight = FontWeight.Medium),
-            color = Color(0xFF424242)
+            color = MaterialTheme.appColors.textDark
         )
         if (!helperText.isNullOrEmpty()) {
             Spacer(modifier = Modifier.height(4.dp))
             Text(
                 text = helperText,
                 style = MaterialTheme.appTypography.labelSmall,
-                color = Color(0xFF757575)
+                color = MaterialTheme.appColors.textSecondary
             )
         }
         Spacer(modifier = Modifier.height(8.dp))
@@ -145,19 +162,19 @@ fun VsRegistrationTextField(
                 Text(
                     text = placeholder,
                     style = MaterialTheme.appTypography.bodyMedium,
-                    color = Color(0xFF9E9E9E)
+                    color = MaterialTheme.appColors.textFieldHint
                 )
             },
             enabled = enabled,
             shape = RoundedCornerShape(8.dp),
             colors = TextFieldDefaults.outlinedTextFieldColors(
-                unfocusedBorderColor = Color(0xFFE0E0E0),
-                focusedBorderColor = Color(0xFFE0E0E0),
-                backgroundColor = if (enabled) Color.White else Color(0xFFF5F5F5),
-                textColor = Color.Black,
-                cursorColor = Color.Black,
-                disabledTextColor = Color(0xFF757575),
-                disabledBorderColor = Color(0xFFE0E0E0)
+                unfocusedBorderColor = MaterialTheme.appColors.textFieldBorder,
+                focusedBorderColor = MaterialTheme.appColors.primary,
+                backgroundColor = if (enabled) MaterialTheme.appColors.textFieldBackground else MaterialTheme.appColors.surface,
+                textColor = MaterialTheme.appColors.textFieldText,
+                cursorColor = MaterialTheme.appColors.textFieldText,
+                disabledTextColor = MaterialTheme.appColors.textSecondary,
+                disabledBorderColor = MaterialTheme.appColors.divider
             ),
             isError = errorText != null,
             minLines = if (isTextArea) 3 else 1,
@@ -196,14 +213,14 @@ fun VsRegistrationSelectField(
                 }
             },
             style = MaterialTheme.appTypography.bodyMedium.copy(fontWeight = FontWeight.Medium),
-            color = Color(0xFF424242)
+            color = MaterialTheme.appColors.textDark
         )
         if (!helperText.isNullOrEmpty()) {
             Spacer(modifier = Modifier.height(4.dp))
             Text(
                 text = helperText,
                 style = MaterialTheme.appTypography.bodySmall,
-                color = Color(0xFF757575),
+                color = MaterialTheme.appColors.textSecondary,
                 lineHeight = 16.sp
             )
         }
@@ -212,8 +229,8 @@ fun VsRegistrationSelectField(
             modifier = Modifier
                 .fillMaxWidth()
                 .heightIn(min = 56.dp)
-                .background(if (enabled) Color.White else Color(0xFFF5F5F5), RoundedCornerShape(8.dp))
-                .border(1.dp, Color(0xFFE0E0E0), RoundedCornerShape(8.dp))
+                .background(if (enabled) MaterialTheme.appColors.textFieldBackground else MaterialTheme.appColors.surface, RoundedCornerShape(8.dp))
+                .border(1.dp, MaterialTheme.appColors.textFieldBorder, RoundedCornerShape(8.dp))
                 .clickable(enabled = enabled) { onClick() }
                 .padding(horizontal = 16.dp, vertical = 12.dp),
             contentAlignment = Alignment.CenterStart
@@ -221,7 +238,7 @@ fun VsRegistrationSelectField(
             Text(
                 text = value.ifEmpty { placeholder },
                 style = MaterialTheme.appTypography.bodyMedium,
-                color = if (value.isEmpty()) Color(0xFF9E9E9E) else if (enabled) Color.Black else Color(0xFF757575),
+                color = if (value.isEmpty()) MaterialTheme.appColors.textFieldHint else MaterialTheme.appColors.textDark,
                 modifier = Modifier.padding(end = 24.dp)
             )
             if (enabled) {
@@ -229,7 +246,7 @@ fun VsRegistrationSelectField(
                     imageVector = Icons.Default.ArrowDropDown,
                     contentDescription = null,
                     modifier = Modifier.align(Alignment.CenterEnd).size(32.dp),
-                    tint = Color.Black
+                    tint = MaterialTheme.appColors.textDark
                 )
             }
         }
@@ -256,14 +273,14 @@ fun VsRegistrationRadioField(
                 }
             },
             style = MaterialTheme.appTypography.bodyMedium.copy(fontWeight = FontWeight.Medium),
-            color = Color(0xFF424242)
+            color = MaterialTheme.appColors.textDark
         )
         Spacer(modifier = Modifier.height(8.dp))
         Row(
             modifier = Modifier
                 .fillMaxWidth()
                 .background(
-                    color = if (enabled) Color.Transparent else Color(0xFFF5F5F5),
+                    color = if (enabled) Color.Transparent else MaterialTheme.appColors.surface,
                     shape = RoundedCornerShape(8.dp)
                 ),
             horizontalArrangement = Arrangement.Start,
@@ -281,15 +298,15 @@ fun VsRegistrationRadioField(
                         onClick = if (enabled) { { onValueChange(option.value) } } else null,
                         enabled = enabled,
                         colors = RadioButtonDefaults.colors(
-                            selectedColor = Color(0xFF2196F3),
-                            unselectedColor = Color(0xFF757575),
-                            disabledColor = if (selectedValue == option.value) Color(0xFF2196F3) else Color(0xFFBDBDBD)
+                            selectedColor = MaterialTheme.appColors.primary,
+                            unselectedColor = MaterialTheme.appColors.textSecondary,
+                            disabledColor = if (selectedValue == option.value) MaterialTheme.appColors.primary else MaterialTheme.appColors.divider
                         )
                     )
                     Text(
                         text = option.label,
                         style = MaterialTheme.appTypography.bodyMedium,
-                        color = if (enabled) Color.Black else Color(0xFF757575),
+                        color = MaterialTheme.appColors.textDark,
                         modifier = Modifier.padding(start = 4.dp)
                     )
                 }
@@ -319,14 +336,14 @@ fun VsRegistrationFileField(
                 }
             },
             style = MaterialTheme.appTypography.bodyMedium.copy(fontWeight = FontWeight.Medium),
-            color = Color(0xFF424242)
+            color = MaterialTheme.appColors.textDark
         )
         if (!helperText.isNullOrEmpty()) {
             Spacer(modifier = Modifier.height(4.dp))
             Text(
                 text = helperText,
                 style = MaterialTheme.appTypography.bodySmall,
-                color = Color(0xFF757575),
+                color = MaterialTheme.appColors.textSecondary,
                 lineHeight = 16.sp
             )
         }
@@ -335,8 +352,8 @@ fun VsRegistrationFileField(
             modifier = Modifier
                 .fillMaxWidth()
                 .heightIn(min = 56.dp)
-                .background(if (enabled) Color.White else Color(0xFFF5F5F5), RoundedCornerShape(8.dp))
-                .border(1.dp, Color(0xFFE0E0E0), RoundedCornerShape(8.dp))
+                .background(if (enabled) MaterialTheme.appColors.textFieldBackground else MaterialTheme.appColors.surface, RoundedCornerShape(8.dp))
+                .border(1.dp, MaterialTheme.appColors.textFieldBorder, RoundedCornerShape(8.dp))
                 .clickable(enabled = enabled) { onClick() }
                 .padding(horizontal = 16.dp, vertical = 12.dp),
             contentAlignment = Alignment.CenterStart
@@ -344,7 +361,7 @@ fun VsRegistrationFileField(
             Text(
                 text = value.ifEmpty { placeholder },
                 style = MaterialTheme.appTypography.bodyMedium,
-                color = if (value.isEmpty()) Color(0xFF9E9E9E) else if (enabled) Color.Black else Color(0xFF757575),
+                color = if (value.isEmpty()) MaterialTheme.appColors.textFieldHint else MaterialTheme.appColors.textDark,
                 modifier = Modifier.padding(end = 24.dp)
             )
             if (enabled) {
@@ -352,7 +369,7 @@ fun VsRegistrationFileField(
                     imageVector = Icons.Default.UploadFile,
                     contentDescription = null,
                     modifier = Modifier.align(Alignment.CenterEnd).size(24.dp),
-                    tint = Color.Gray
+                    tint = MaterialTheme.appColors.textDark
                 )
             }
         }

@@ -81,7 +81,6 @@ import org.openedx.core.ApiConstants
 import org.openedx.core.domain.model.Media
 import org.openedx.core.ui.HandleUIMessage
 import org.openedx.core.ui.OfflineModeDialog
-import org.openedx.core.ui.OpenEdXButton
 import org.openedx.core.ui.OpenEdXOutlinedButton
 import org.openedx.core.ui.SearchBar
 import org.openedx.core.ui.Toolbar
@@ -90,7 +89,6 @@ import org.openedx.core.ui.shouldLoadMore
 import org.openedx.core.ui.statusBarsInset
 import org.openedx.core.ui.theme.OpenEdXTheme
 import org.openedx.core.ui.theme.appColors
-import org.openedx.core.ui.theme.appShapes
 import org.openedx.core.ui.theme.appTypography
 import org.openedx.core.ui.theme.compose.LogistrationLogoView
 import org.openedx.discovery.domain.model.Course
@@ -275,7 +273,7 @@ private fun LogistrationScreen(
             if (!origin.equals("RECOMMENDED", true)) {
                 Surface(
                     elevation = 8.dp,
-                    color = Color.White,
+                    color = MaterialTheme.appColors.background,
                     modifier = Modifier.fillMaxWidth()
                 ) {
                     Row(
@@ -292,7 +290,7 @@ private fun LogistrationScreen(
                             onClick = onSignInClick,
                             borderColor = MaterialTheme.appColors.primary,
                             textColor = MaterialTheme.appColors.primary,
-                            backgroundColor = Color.White
+                            backgroundColor = MaterialTheme.appColors.background
                         )
                         if (isRegistrationEnabled) {
                             Spacer(Modifier.width(16.dp))
@@ -304,7 +302,7 @@ private fun LogistrationScreen(
                                 onClick = onRegisterClick,
                                 borderColor = MaterialTheme.appColors.primary,
                                 textColor = MaterialTheme.appColors.primary,
-                                backgroundColor = Color.White
+                                backgroundColor = MaterialTheme.appColors.background
                             )
                         }
                     }
@@ -407,7 +405,7 @@ private fun LogistrationScreen(
                                             color = if (isSearchFocused) MaterialTheme.appColors.primary else Color.Transparent,
                                             shape = RoundedCornerShape(8.dp)
                                         )
-                                        .background(Color(0xFFF1F4F6)),
+                                        .background(MaterialTheme.appColors.textFieldBackground),
                                     label = "Search courses...",
                                     requestFocus = false,
                                     searchValue = textFieldValue,
@@ -533,7 +531,7 @@ private fun LogistrationCourseItem(
     onClick: (Course) -> Unit
 ) {
     Card(
-        backgroundColor = Color.White,
+        backgroundColor = MaterialTheme.appColors.cardViewBackground,
         elevation = 1.dp,
         shape = RoundedCornerShape(12.dp),
         modifier = Modifier
@@ -566,8 +564,7 @@ private fun LogistrationCourseItem(
                         fontSize = 14.sp,
                         lineHeight = 18.sp
                     ),
-                    color = Color(0xFF263238),
-                    maxLines = 2,
+                    color = MaterialTheme.appColors.textDark,
                     overflow = TextOverflow.Ellipsis
                 )
                 Spacer(Modifier.height(6.dp))
@@ -583,7 +580,7 @@ private fun LogistrationCourseItem(
                 Text(
                     text = course.instructorName.orEmpty(),
                     style = MaterialTheme.appTypography.labelSmall.copy(fontSize = 11.sp),
-                    color = Color(0xFF78909C) 
+                    color = MaterialTheme.appColors.textSecondary 
                 )
             }
         }

@@ -38,7 +38,6 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalUriHandler
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.painterResource
@@ -460,7 +459,7 @@ private fun LogoutDialog(
                                     .testTag("ic_logout"),
                                 painter = painterResource(id = profileR.drawable.profile_ic_logout),
                                 contentDescription = null,
-                                tint = Color.Black
+                                tint = MaterialTheme.appColors.textWarning
                             )
                         }
                     }

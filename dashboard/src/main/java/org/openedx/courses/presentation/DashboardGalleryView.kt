@@ -62,7 +62,6 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
-import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Devices
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.Dp
@@ -482,16 +481,14 @@ private fun CourseListItem(
                         .fillMaxWidth()
                         .height(90.dp)
                 )
-                Text(
+                org.openedx.core.ui.AutoSizeText(
                     modifier = Modifier
                         .fillMaxHeight()
                         .padding(horizontal = 4.dp, vertical = 8.dp),
                     text = course.course.name,
-                    style = MaterialTheme.appTypography.titleSmall,
+                    style = MaterialTheme.appTypography.titleMedium,
                     color = MaterialTheme.appColors.textDark,
-                    overflow = TextOverflow.Ellipsis,
-                    maxLines = 2,
-                    minLines = 2
+                    minSize = 11f
                 )
             }
             if (!course.course.coursewareAccess?.errorCode.isNullOrEmpty()) {
@@ -821,15 +818,14 @@ private fun PrimaryCourseTitle(
             style = MaterialTheme.appTypography.labelMedium,
             color = MaterialTheme.appColors.textFieldHint
         )
-        Text(
+        org.openedx.core.ui.AutoSizeText(
             modifier = Modifier
                 .fillMaxWidth()
                 .padding(top = 4.dp),
             text = primaryCourse.course.name,
             style = MaterialTheme.appTypography.titleLarge,
             color = MaterialTheme.appColors.textDark,
-            overflow = TextOverflow.Ellipsis,
-            maxLines = 3
+            minSize = 14f
         )
         Text(
             modifier = Modifier

@@ -10,17 +10,16 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyRow
-import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
@@ -358,7 +357,6 @@ private fun AssignmentButton(assignment: Block, index: Int, isSelected: Boolean,
         ) {
             Card(
                 modifier = Modifier
-                    .width(60.dp)
                     .height(42.dp)
                     .clickable {
                         onClick()
@@ -373,16 +371,16 @@ private fun AssignmentButton(assignment: Block, index: Int, isSelected: Boolean,
             ) {
                 Box(
                     modifier = Modifier
-                        .fillMaxSize()
-                        .padding(2.dp)
+                        .fillMaxHeight()
+                        .padding(horizontal = 12.dp)
                 ) {
                     Text(
                         modifier = Modifier.align(Alignment.Center),
-                        text = "A$index",
+                        text = "Assignment $index",
                         color = MaterialTheme.appColors.textDark,
-                        style = MaterialTheme.appTypography.bodyMedium,
+                        style = MaterialTheme.appTypography.labelMedium,
                         maxLines = 1,
-                        overflow = TextOverflow.Ellipsis
+                        overflow = TextOverflow.Visible
                     )
                 }
             }

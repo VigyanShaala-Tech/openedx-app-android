@@ -17,7 +17,6 @@ import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
@@ -223,7 +222,7 @@ private fun NewDashboardScreenContent(
             val (icon, color) = when (it.icon) {
                 "faBookOpen" -> Icons.Filled.ImportContacts to Color(0xFF69AB4A)
                 "faCheckCircle" -> Icons.Filled.CheckCircle to Color(0xFF4CAF50)
-                "faChartLine" -> Icons.Filled.Alarm to Color(0xFF3F51B5)
+                "faChartLine" -> Icons.Filled.Alarm to Color(0xFF879FF5)
                 "faAward" -> Icons.Filled.EmojiEvents to Color(0xFFFFA000)
                 else -> Icons.Filled.Book to primaryColor
             }
@@ -721,12 +720,11 @@ private fun CourseCard(c: CourseCardData, apiHostUrl: String, onClick: () -> Uni
                 }
             }
             Column(modifier = Modifier.padding(12.dp)) {
-                Text(
+                AutoSizeText(
                     text = c.title,
                     style = MaterialTheme.appTypography.titleSmall,
                     color = MaterialTheme.appColors.textDark,
-                    minLines = 2,
-                    overflow = TextOverflow.Clip
+                    minSize = 11f
                 )
                 Spacer(Modifier.height(8.dp))
                 Column(
@@ -785,9 +783,7 @@ private fun WishlistItem(w: WishlistItemData, apiHostUrl: String, onRemove: (Str
                     Text(
                         text = w.title,
                         style = MaterialTheme.appTypography.titleSmall,
-                        color = MaterialTheme.appColors.textDark,
-                        maxLines = 2,
-                        overflow = TextOverflow.Ellipsis
+                        color = MaterialTheme.appColors.textDark
                     )
                     Spacer(Modifier.height(4.dp))
                     Text(
@@ -851,6 +847,7 @@ private fun RecommendationItem(r: RecommendationData, apiHostUrl: String, onClic
         ) {
             AsyncImage(
                 modifier = Modifier
+                    .padding(8.dp)
                     .size(80.dp)
                     .clip(MaterialTheme.appShapes.cardShape),
                 contentScale = ContentScale.FillBounds,
@@ -901,8 +898,7 @@ private fun RecommendationItem(r: RecommendationData, apiHostUrl: String, onClic
                 Text(
                     text = r.title,
                     style = MaterialTheme.appTypography.titleSmall,
-                    color = MaterialTheme.appColors.textDark,
-                    overflow = TextOverflow.Clip
+                    color = MaterialTheme.appColors.textDark
                 )
                 Spacer(Modifier.height(4.dp))
                 Text(

@@ -23,7 +23,6 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.SpanStyle
@@ -34,10 +33,9 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import org.openedx.core.ui.theme.appColors
-import org.openedx.core.ui.theme.appShapes
-import org.openedx.core.ui.theme.appTypography
 import kotlinx.coroutines.delay
+import org.openedx.core.ui.theme.appColors
+import org.openedx.core.ui.theme.appTypography
 
 data class LogistrationCarouselItem(
     val imageResId: Int,
@@ -93,7 +91,7 @@ fun LogistrationCarousel(
                 Spacer(Modifier.height(24.dp))
                 Text(
                     text = buildAnnotatedString {
-                        withStyle(style = SpanStyle(color = Color(0xFF263238))) {
+                        withStyle(style = SpanStyle(color = MaterialTheme.appColors.textDark)) {
                             append(item.title)
                         }
                         if (item.titleColored.isNotEmpty()) {
@@ -121,7 +119,7 @@ fun LogistrationCarousel(
                         textAlign = TextAlign.Center,
                         fontFamily = MaterialTheme.appTypography.defaultFontFamily
                     ),
-                    color = Color(0xFF78909C),
+                    color = MaterialTheme.appColors.textSecondary,
                     modifier = Modifier.padding(horizontal = 32.dp),
                     maxLines = 5,
                     overflow = TextOverflow.Ellipsis
@@ -142,8 +140,8 @@ fun LogistrationCarousel(
                         .size(10.dp)
                         .clip(CircleShape)
                         .background(
-                            if (selected) Color(0xFF37474F) 
-                            else Color(0xFFCFD8DC)
+                            if (selected) MaterialTheme.appColors.primary 
+                            else MaterialTheme.appColors.textFieldBorder
                         )
                 )
             }

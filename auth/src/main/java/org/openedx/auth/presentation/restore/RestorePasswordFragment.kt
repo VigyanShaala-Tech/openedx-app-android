@@ -25,6 +25,8 @@ import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Scaffold
 import androidx.compose.material.Surface
 import androidx.compose.material.Text
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Email
 import androidx.compose.material.rememberScaffoldState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -54,8 +56,6 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Email
 import androidx.fragment.app.Fragment
 import org.koin.androidx.viewmodel.ext.android.viewModel
 import org.openedx.auth.presentation.ui.LoginTextField
@@ -256,7 +256,7 @@ private fun RestorePasswordScreen(
                                     text = "Forgot password",
                                     style = MaterialTheme.appTypography.headlineSmall.copy(
                                         fontWeight = FontWeight.Bold,
-                                        color = Color(0xFF263238),
+                                        color = MaterialTheme.appColors.textDark,
                                         fontSize = 32.sp
                                     )
                                 )
@@ -267,7 +267,7 @@ private fun RestorePasswordScreen(
                                         .fillMaxWidth(),
                                     text = "Enter your email address and we will send you a link to reset your password.",
                                     style = MaterialTheme.appTypography.bodyMedium.copy(
-                                        color = Color(0xFF78909C),
+                                        color = MaterialTheme.appColors.textSecondary,
                                         fontSize = 16.sp
                                     )
                                 )
@@ -335,7 +335,7 @@ private fun RestorePasswordScreen(
                                     modifier = Modifier.size(120.dp),
                                     painter = painterResource(id = authR.drawable.auth_ic_email),
                                     contentDescription = null,
-                                    tint = Color(0xFF263238)
+                                    tint = MaterialTheme.appColors.textDark
                                 )
                                 Spacer(Modifier.height(40.dp))
                                 Text(
@@ -345,7 +345,7 @@ private fun RestorePasswordScreen(
                                     text = "Check your email",
                                     style = MaterialTheme.appTypography.headlineSmall.copy(
                                         fontWeight = FontWeight.Bold,
-                                        color = Color(0xFF263238),
+                                        color = MaterialTheme.appColors.textDark,
                                         fontSize = 28.sp
                                     )
                                 )
@@ -357,7 +357,7 @@ private fun RestorePasswordScreen(
                                     textAlign = TextAlign.Center,
                                     text = "We have sent a password recover instructions to your email ${uiState.email}",
                                     style = MaterialTheme.appTypography.bodyMedium.copy(
-                                        color = Color(0xFF78909C),
+                                        color = MaterialTheme.appColors.textSecondary,
                                         fontSize = 16.sp
                                     )
                                 )

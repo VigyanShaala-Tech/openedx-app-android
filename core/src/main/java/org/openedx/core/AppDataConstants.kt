@@ -3,7 +3,7 @@ package org.openedx.core
 import java.util.Locale
 
 object AppDataConstants {
-    const val USER_MIN_YEAR = 13
+    const val USER_MIN_YEAR = 0
     const val USER_MAX_YEAR = 77
     const val DEFAULT_MIME_TYPE = "image/jpeg"
     val defaultLocale: Locale = Locale.Builder().setLanguage("en").build()

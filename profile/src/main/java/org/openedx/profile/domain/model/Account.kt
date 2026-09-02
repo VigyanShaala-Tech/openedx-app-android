@@ -2,10 +2,8 @@ package org.openedx.profile.domain.model
 
 import android.os.Parcelable
 import kotlinx.parcelize.Parcelize
-import org.openedx.core.AppDataConstants.USER_MIN_YEAR
 import org.openedx.core.domain.model.LanguageProficiency
 import org.openedx.core.domain.model.ProfileImage
-import java.util.Calendar
 import java.util.Date
 
 @Parcelize
@@ -38,7 +36,6 @@ data class Account(
     fun isLimited() = accountPrivacy == Privacy.PRIVATE
 
     fun isOlderThanMinAge(): Boolean {
-        val currentYear = Calendar.getInstance().get(Calendar.YEAR)
-        return yearOfBirth != null && currentYear - yearOfBirth > USER_MIN_YEAR
+        return true
     }
 }

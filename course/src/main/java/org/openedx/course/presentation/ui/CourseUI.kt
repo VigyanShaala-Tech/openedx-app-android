@@ -1119,9 +1119,7 @@ fun CourseSubSectionItem(
                 modifier = Modifier.weight(1f),
                 text = block.displayName ?: "",
                 style = MaterialTheme.appTypography.titleSmall,
-                color = MaterialTheme.appColors.textPrimary,
-                overflow = TextOverflow.Ellipsis,
-                maxLines = 1
+                color = MaterialTheme.appColors.textPrimary
             )
             Spacer(modifier = Modifier.width(16.dp))
             if (due != null || showDueDate) {
@@ -1223,8 +1221,6 @@ fun SubSectionUnitsTitle(
             text = unitName,
             color = MaterialTheme.appColors.textPrimary,
             style = textStyle,
-            maxLines = 2,
-            overflow = TextOverflow.Ellipsis,
             textAlign = TextAlign.Start
         )
 
@@ -1284,8 +1280,6 @@ fun SubSectionUnitsList(
                             text = unit.displayName ?: "",
                             color = MaterialTheme.appColors.textPrimary,
                             style = MaterialTheme.appTypography.labelMedium,
-                            maxLines = 2,
-                            overflow = TextOverflow.Ellipsis,
                             textAlign = TextAlign.Start,
                         )
                         Icon(

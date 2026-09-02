@@ -164,10 +164,14 @@ class CourseDetailsViewModel(
     }
 
     fun getCourseAboutBody(bgColor: ULong, textColor: ULong): String {
+        val textColorHex = getColorFromULong(textColor)
         val darkThemeStyle = "<style>\n" +
                 "      body {\n" +
                 "        background-color: #${getColorFromULong(bgColor)};\n" +
-                "        color: #${getColorFromULong(textColor)};\n" +
+                "        color: #$textColorHex;\n" +
+                "      }\n" +
+                "      * {\n" +
+                "        color: #$textColorHex !important;\n" +
                 "      }\n" +
                 "    </style>"
         val buff = StringBuffer().apply {

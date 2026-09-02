@@ -1,6 +1,7 @@
 package org.openedx.course.presentation.progress
 
 import androidx.compose.foundation.BorderStroke
+import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
@@ -20,26 +21,23 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.Card
 import androidx.compose.material.CircularProgressIndicator
-import androidx.compose.material.Divider
 import androidx.compose.material.Icon
 import androidx.compose.material.LinearProgressIndicator
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Scaffold
 import androidx.compose.material.Surface
 import androidx.compose.material.Text
-import androidx.compose.foundation.Canvas
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.outlined.InsertDriveFile
+import androidx.compose.material.icons.automirrored.outlined.TrendingUp
 import androidx.compose.material.icons.filled.AccessTime
 import androidx.compose.material.icons.filled.AssignmentTurnedIn
 import androidx.compose.material.icons.filled.Description
 import androidx.compose.material.icons.filled.Videocam
-import androidx.compose.material.icons.automirrored.outlined.TrendingUp
 import androidx.compose.material.rememberScaffoldState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
@@ -680,10 +678,21 @@ private fun SummaryCardView(modifier: Modifier = Modifier, card: DashboardProgre
             modifier = Modifier.padding(16.dp),
             verticalArrangement = Arrangement.SpaceBetween
         ) {
+            val isDark = androidx.compose.foundation.isSystemInDarkTheme()
+            val iconColor = try { 
+                val c = Color(card.color.toColorInt())
+                if (isDark) {
+                    // Brighten the color for dark mode to ensure it's visible
+                    c.copy(alpha = 1f) 
+                } else {
+                    c
+                }
+            } catch (_: Exception) { Color.Gray }
+
             Surface(
                 modifier = Modifier.size(40.dp),
                 shape = RoundedCornerShape(8.dp),
-                color = try { Color(card.color.toColorInt()).copy(alpha = 0.1f) } catch (_: Exception) { Color.Gray.copy(alpha = 0.1f) }
+                color = iconColor.copy(alpha = if (isDark) 0.2f else 0.1f)
             ) {
                 Box(contentAlignment = Alignment.Center) {
                     Icon(
@@ -695,7 +704,7 @@ private fun SummaryCardView(modifier: Modifier = Modifier, card: DashboardProgre
                             else -> Icons.Default.Description
                         },
                         contentDescription = null,
-                        tint = try { Color(card.color.toColorInt()) } catch (_: Exception) { Color.Gray },
+                        tint = iconColor,
                         modifier = Modifier.size(24.dp)
                     )
                 }
@@ -755,6 +764,11 @@ private fun QuizScoreChart(quizScores: List<DashboardProgress.QuizScoreData>) {
                     .height(200.dp)
                     .padding(bottom = 24.dp)
             ) {
+                val barColor = if (androidx.compose.foundation.isSystemInDarkTheme()) {
+                    MaterialTheme.appColors.primary
+                } else {
+                    Color(0xFF2C4869)
+                }
                 Canvas(modifier = Modifier.fillMaxSize()) {
                     val width = size.width
                     val height = size.height
@@ -776,7 +790,7 @@ private fun QuizScoreChart(quizScores: List<DashboardProgress.QuizScoreData>) {
                         val barHeight = if (quiz.max > 0) (height * (quiz.score / quiz.max)).toFloat() else 0f
                         
                         drawRect(
-                            color = Color(0xFF2C4869),
+                            color = barColor,
                             topLeft = androidx.compose.ui.geometry.Offset(x, height - barHeight),
                             size = androidx.compose.ui.geometry.Size(barWidth, barHeight)
                         )
@@ -828,6 +842,8 @@ private fun OverallPerformanceView(performance: DashboardProgress.OverallPerform
             }
             Spacer(modifier = Modifier.height(24.dp))
             
+            val primaryColor = MaterialTheme.appColors.primary
+            val isDark = androidx.compose.foundation.isSystemInDarkTheme()
             Box(
                 modifier = Modifier
                     .fillMaxWidth()
@@ -849,7 +865,7 @@ private fun OverallPerformanceView(performance: DashboardProgress.OverallPerform
                         drawArc(
                             color = when (index) {
                                 0 -> Color(0xFF69AB4A)
-                                1 -> Color(0xFF2C4869)
+                                1 -> if (isDark) primaryColor.copy(alpha = 0.7f) else Color(0xFF2C4869)
                                 2 -> Color(0xFFFFCC29)
                                 else -> Color.Gray
                             },
@@ -892,7 +908,7 @@ private fun OverallPerformanceView(performance: DashboardProgress.OverallPerform
                             .clip(CircleShape),
                         color = when (index) {
                             0 -> Color(0xFF69AB4A)
-                            1 -> Color(0xFF2C4869)
+                            1 -> if (androidx.compose.foundation.isSystemInDarkTheme()) MaterialTheme.appColors.primary.copy(alpha = 0.7f) else Color(0xFF2C4869)
                             2 -> Color(0xFFFFCC29)
                             else -> MaterialTheme.appColors.primary
                         },
@@ -904,7 +920,7 @@ private fun OverallPerformanceView(performance: DashboardProgress.OverallPerform
             if (performance.encouragementMessage.isNotEmpty()) {
                 Spacer(modifier = Modifier.height(16.dp))
                 Surface(
-                    color = Color(0xFFF1F8E9),
+                    color = MaterialTheme.appColors.primaryAlpha10,
                     shape = RoundedCornerShape(8.dp)
                 ) {
                     Row(
@@ -914,14 +930,14 @@ private fun OverallPerformanceView(performance: DashboardProgress.OverallPerform
                         Icon(
                             painter = painterResource(id = R.drawable.ic_course_marker),
                             contentDescription = null,
-                            tint = Color(0xFF69AB4A),
+                            tint = MaterialTheme.appColors.primary,
                             modifier = Modifier.size(16.dp)
                         )
                         Spacer(modifier = Modifier.width(8.dp))
                         Text(
                             text = performance.encouragementMessage,
                             style = MaterialTheme.appTypography.bodySmall.copy(fontWeight = FontWeight.Medium),
-                            color = Color(0xFF69AB4A)
+                            color = MaterialTheme.appColors.primary
                         )
                     }
                 }

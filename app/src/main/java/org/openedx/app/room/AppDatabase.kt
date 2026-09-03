@@ -12,6 +12,7 @@ import org.openedx.core.data.model.room.CourseStructureEntity
 import org.openedx.core.data.model.room.DownloadCoursePreview
 import org.openedx.core.data.model.room.OfflineXBlockProgress
 import org.openedx.core.data.model.room.VideoProgressEntity
+import org.openedx.core.data.model.room.WishlistEntity
 import org.openedx.core.data.model.room.discovery.EnrolledCourseEntity
 import org.openedx.core.data.storage.CourseDao
 import org.openedx.core.module.db.CalendarDao
@@ -22,9 +23,8 @@ import org.openedx.dashboard.data.DashboardDao
 import org.openedx.discovery.data.converter.DiscoveryConverter
 import org.openedx.discovery.data.model.room.CourseEntity
 import org.openedx.discovery.data.storage.DiscoveryDao
-import org.openedx.core.data.model.room.WishlistEntity
 
-const val DATABASE_VERSION = 6
+const val DATABASE_VERSION = 7
 const val DATABASE_NAME = "OpenEdX_db"
 
 @Suppress("MagicNumber")
@@ -47,7 +47,8 @@ const val DATABASE_NAME = "OpenEdX_db"
         AutoMigration(1, 2),
         AutoMigration(2, 3),
         AutoMigration(3, 4),
-        AutoMigration(4, DATABASE_VERSION),
+        AutoMigration(4, 6),
+        AutoMigration(6, 7),
     ],
     version = DATABASE_VERSION
 )

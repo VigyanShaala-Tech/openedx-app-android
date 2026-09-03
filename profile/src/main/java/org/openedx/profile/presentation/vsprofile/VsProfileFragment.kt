@@ -278,7 +278,7 @@ private fun VsProfileScreen(
                     if (account?.profileImage?.hasImage == true) {
                         AsyncImage(
                             model = ImageRequest.Builder(LocalContext.current)
-                                .data(account.profileImage.imageUrlMedium.toImageLink(apiHostUrl))
+                                .data(account.profileImage.imageUrlFull.toImageLink(apiHostUrl))
                                 .error(org.openedx.core.R.drawable.core_ic_default_profile_picture)
                                 .placeholder(org.openedx.core.R.drawable.core_ic_default_profile_picture)
                                 .build(),

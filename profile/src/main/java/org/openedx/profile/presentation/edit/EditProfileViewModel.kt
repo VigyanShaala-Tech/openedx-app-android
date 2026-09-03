@@ -67,23 +67,10 @@ class EditProfileViewModel(
 
     private val _verificationKey = MutableStateFlow<String?>(null)
 
-    var isLimitedProfile: Boolean = account.isLimited()
+    var isLimitedProfile: Boolean = false
         set(value) {
-            field = value
-            _uiState.value = EditProfileUIState(account, isLimited = value)
-            logProfileEvent(
-                ProfileAnalyticsEvent.SWITCH_PROFILE,
-                buildMap {
-                    put(
-                        ProfileAnalyticsKey.ACTION.key,
-                        if (isLimitedProfile) {
-                            ProfileAnalyticsKey.LIMITED_PROFILE.key
-                        } else {
-                            ProfileAnalyticsKey.FULL_PROFILE.key
-                        }
-                    )
-                }
-            )
+            field = false
+            _uiState.value = EditProfileUIState(account, isLimited = false)
         }
 
     private val _showLeaveDialog = MutableLiveData<Boolean>()
@@ -103,9 +90,9 @@ class EditProfileViewModel(
                 }
                 val updatedAccount = interactor.updateAccount(fields)
                 account = updatedAccount
-                isLimitedProfile = updatedAccount.isLimited()
+                isLimitedProfile = false
                 _uiState.value =
-                    EditProfileUIState(updatedAccount, isUpdating = false, isLimitedProfile)
+                    EditProfileUIState(updatedAccount, isUpdating = false, false)
                 sendAccountUpdated()
                 _deleteImage.value = false
                 _selectedImageUri.value = null
@@ -130,9 +117,9 @@ class EditProfileViewModel(
                 interactor.setProfileImage(file, mimeType)
                 val updatedAccount = interactor.updateAccount(fields)
                 account = updatedAccount
-                isLimitedProfile = updatedAccount.isLimited()
+                isLimitedProfile = false
                 _uiState.value =
-                    EditProfileUIState(updatedAccount, isUpdating = false, isLimitedProfile)
+                    EditProfileUIState(updatedAccount, isUpdating = false, false)
                 _selectedImageUri.value = null
                 sendAccountUpdated()
                 _saveSuccess.emit(true)

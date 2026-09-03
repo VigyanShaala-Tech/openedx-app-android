@@ -415,7 +415,8 @@ private fun LogistrationScreen(
                                         onSearchSubmit(textFieldValue.text)
                                     },
                                     onValueChanged = { text ->
-                                        val isClearing = textFieldValue.text.isNotEmpty() && text.text.isEmpty()
+                                        val isClearing =
+                                            textFieldValue.text.isNotEmpty() && text.text.isEmpty()
                                         textFieldValue = text
                                         if (isClearing) {
                                             onSearchSubmit("")
@@ -548,7 +549,10 @@ private fun LogistrationCourseItem(
                     .clip(RoundedCornerShape(10.dp)),
                 contentScale = ContentScale.Crop,
                 model = ImageRequest.Builder(LocalContext.current)
-                    .data(course.media?.courseImage?.uri?.toImageLink(apiHostUrl) ?: "")
+                    .data(
+                        course.media?.courseImage?.uri?.toImageLink(apiHostUrl)
+                            ?: course.courseImage?.toImageLink(apiHostUrl) ?: ""
+                    )
                     .error(CoreR.drawable.core_no_image_course)
                     .placeholder(CoreR.drawable.core_no_image_course)
                     .crossfade(true)
@@ -580,7 +584,7 @@ private fun LogistrationCourseItem(
                 Text(
                     text = course.instructorName.orEmpty(),
                     style = MaterialTheme.appTypography.labelSmall.copy(fontSize = 11.sp),
-                    color = MaterialTheme.appColors.textSecondary 
+                    color = MaterialTheme.appColors.textSecondary
                 )
             }
         }
@@ -717,5 +721,6 @@ private val mockCourse = Course(
     level = "Beginner",
     category = "STEM",
     instructorName = "Dr. Priya Sharma",
+    courseImage = "",
     cohortFormId = "6c2d8d459edb4b37"
 )

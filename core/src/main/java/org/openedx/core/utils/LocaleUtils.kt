@@ -18,12 +18,7 @@ object LocaleUtils {
     }
 
     fun isProfileLimited(inputYear: String?): Boolean {
-        val currentYear = Calendar.getInstance().get(Calendar.YEAR)
-        return if (!inputYear.isNullOrEmpty()) {
-            currentYear - inputYear.toInt() < MIN_USER_AGE
-        } else {
-            true
-        }
+        return false
     }
 
     fun getCountries() = getAvailableCountries()

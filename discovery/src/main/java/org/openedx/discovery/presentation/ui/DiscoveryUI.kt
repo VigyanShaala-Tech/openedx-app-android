@@ -109,9 +109,22 @@ fun DiscoveryCourseItem(
             horizontalArrangement = Arrangement.spacedBy(MaterialTheme.appDimens.doublePadding),
             verticalAlignment = Alignment.Top
         ) {
+            val imageUrl = (course.media?.image?.small.takeIf { !it.isNullOrEmpty() }
+                ?: course.media?.bannerImage?.uriAbsolute.takeIf { !it.isNullOrEmpty() }
+                ?: course.courseImage.takeIf { !it.isNullOrEmpty() }
+                ?: course.media?.courseImage?.uri.takeIf { !it.isNullOrEmpty() }
+                ?: course.media?.image?.large.takeIf { !it.isNullOrEmpty() }
+                ?: "").trim()
+
+            val finalImageUrl = if (imageUrl.startsWith("http")) {
+                imageUrl
+            } else {
+                imageUrl.toImageLink(apiHostUrl)
+            }
+
             AsyncImage(
                 model = ImageRequest.Builder(LocalContext.current)
-                    .data((course.media?.image?.small ?: course.media?.image?.large ?: course.media?.courseImage?.uri)?.toImageLink(apiHostUrl) ?: "")
+                    .data(finalImageUrl)
                     .error(сoreR.drawable.core_no_image_course)
                     .placeholder(сoreR.drawable.core_no_image_course)
                     .build(),

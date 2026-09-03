@@ -33,7 +33,7 @@ data class Account(
         ALL_USERS
     }
 
-    fun isLimited() = accountPrivacy == Privacy.PRIVATE
+    fun isLimited() = false
 
     fun isOlderThanMinAge(): Boolean {
         return true

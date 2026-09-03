@@ -247,6 +247,7 @@ class LogistrationViewModel(
                         level = c.level,
                         category = c.category,
                         instructorName = c.instructor_name,
+                        courseImage = c.media?.course_image?.values?.firstOrNull() ?: "",
                         cohortFormId = null
                     )
                 }

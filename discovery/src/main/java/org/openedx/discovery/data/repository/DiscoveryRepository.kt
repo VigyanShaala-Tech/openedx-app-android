@@ -108,8 +108,12 @@ class DiscoveryRepository(
     private suspend fun enrichMissingFields(results: List<CourseDetails>): List<CourseDetails> = coroutineScope {
         val tasks = results.map { item ->
             async {
-                val needsEnrichment =
-                    item.level.isNullOrEmpty() || item.category.isNullOrEmpty() || item.instructorName.isNullOrEmpty()
+                val needsEnrichment = item.level.isNullOrEmpty() ||
+                        item.category.isNullOrEmpty() ||
+                        item.instructorName.isNullOrEmpty() ||
+                        (item.media?.image?.small.isNullOrEmpty() &&
+                                item.media?.image?.large.isNullOrEmpty() &&
+                                item.media?.courseImage?.uri.isNullOrEmpty())
                 if (!needsEnrichment) {
                     item
                 } else {
@@ -128,7 +132,14 @@ class DiscoveryRepository(
                                 noOfReviews = detail.noOfReviews ?: item.noOfReviews,
                                 enrollments = detail.enrollments ?: item.enrollments,
                                 isWishlisted = detail.isWishlisted ?: item.isWishlisted,
-                                overview = detail.overview ?: item.overview
+                                overview = detail.overview ?: item.overview,
+                                media = if (detail.media?.image?.small.isNullOrEmpty() &&
+                                    detail.media?.courseImage?.uri.isNullOrEmpty()
+                                ) {
+                                    item.media ?: detail.media
+                                } else {
+                                    detail.media
+                                }
                             )
                         } ?: item
                     }

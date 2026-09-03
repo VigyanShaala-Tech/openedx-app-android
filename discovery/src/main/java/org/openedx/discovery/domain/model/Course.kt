@@ -32,5 +32,6 @@ data class Course(
     val instructorName: String?,
     val category: String?,
     val level: String?,
+    val courseImage: String?,
     val cohortFormId: String?
 )

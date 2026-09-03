@@ -558,5 +558,6 @@ private val mockCourse = Course(
     instructorName = "instructorName",
     category = "category",
     level = "level",
+    courseImage = "",
     cohortFormId = "6c2d8d459edb4b37"
 )

@@ -96,6 +96,7 @@ data class CourseDetails(
             instructorName = instructorName,
             category = category,
             level = level,
+            courseImage = media?.courseImage?.uri ?: media?.image?.small,
             cohortFormId = cohortFormId
         )
     }

@@ -248,9 +248,6 @@ class EditProfileFragment : Fragment() {
                     onDeleteImageClick = {
                         viewModel.deleteImage()
                     },
-                    onLimitedProfileChange = {
-                        viewModel.isLimitedProfile = it
-                    },
                     onSendOtp = {
                         viewModel.sendOtp(it)
                     },
@@ -351,7 +348,6 @@ private fun EditProfileScreen(
     isOtpSent: Boolean,
     onKeepEdit: () -> Unit,
     onDataChanged: (Boolean) -> Unit,
-    onLimitedProfileChange: (Boolean) -> Unit,
     onBackClick: (Boolean) -> Unit,
     onSaveClick: (Map<String, Any?>) -> Unit,
     onSelectImageClick: () -> Unit,
@@ -372,9 +368,6 @@ private fun EditProfileScreen(
 
     var expandedList by rememberSaveable {
         mutableStateOf(emptyList<RegistrationField.Option>())
-    }
-    var openWarningMessageDialog by rememberSaveable {
-        mutableStateOf(false)
     }
 
     var bottomDialogTitle by rememberSaveable {
@@ -485,20 +478,6 @@ private fun EditProfileScreen(
             )
         }
 
-        val popUpModifier by remember(key1 = windowSize) {
-            mutableStateOf(
-                windowSize.windowSizeValue(
-                    expanded = Modifier
-                        .widthIn(Dp.Unspecified, 560.dp)
-                        .padding(bottom = 86.dp),
-                    compact = Modifier
-                        .fillMaxWidth()
-                        .padding(bottom = 60.dp)
-                        .padding(horizontal = 24.dp)
-                )
-            )
-        }
-
         ModalBottomSheetLayout(
             modifier = Modifier
                 .testTag("btn_bottom_sheet_edit_profile")
@@ -533,7 +512,7 @@ private fun EditProfileScreen(
         ) {
             HandleUIMessage(uiMessage = uiMessage, scaffoldState = scaffoldState)
 
-            if (isOpenChangeImageDialogState && uiState.account.isOlderThanMinAge()) {
+            if (isOpenChangeImageDialogState) {
                 ChangeImageDialog(
                     gender = mapFields[GENDER]?.toString(),
                     onSelectFromGalleryClick = {
@@ -552,8 +531,6 @@ private fun EditProfileScreen(
                         isOpenChangeImageDialogState = false
                     }
                 )
-            } else {
-                isOpenChangeImageDialogState = false
             }
 
             if (leaveDialog) {
@@ -652,18 +629,6 @@ private fun EditProfileScreen(
                                 .verticalScroll(rememberScrollState()),
                             horizontalAlignment = Alignment.CenterHorizontally
                         ) {
-                            Text(
-                                modifier = Modifier.testTag("txt_edit_profile_type_label"),
-                                text = stringResource(
-                                    if (uiState.isLimited) {
-                                        R.string.profile_limited_profile
-                                    } else {
-                                        R.string.profile_full_profile
-                                    }
-                                ),
-                                color = MaterialTheme.appColors.textSecondary,
-                                style = MaterialTheme.appTypography.titleSmall
-                            )
                             Spacer(modifier = Modifier.height(32.dp))
                             Box(contentAlignment = Alignment.BottomEnd) {
                                 AsyncImage(
@@ -689,9 +654,6 @@ private fun EditProfileScreen(
                                         .clip(CircleShape)
                                         .noRippleClickable {
                                             isOpenChangeImageDialogState = true
-                                            if (!uiState.account.isOlderThanMinAge()) {
-                                                openWarningMessageDialog = true
-                                            }
                                         }
                                 )
                                 Icon(
@@ -702,9 +664,6 @@ private fun EditProfileScreen(
                                         .padding(5.dp)
                                         .clickable {
                                             isOpenChangeImageDialogState = true
-                                            if (!uiState.account.isOlderThanMinAge()) {
-                                                openWarningMessageDialog = true
-                                            }
                                         },
                                     painter = painterResource(id = R.drawable.profile_ic_edit_image),
                                     contentDescription = null,
@@ -719,35 +678,9 @@ private fun EditProfileScreen(
                                 color = MaterialTheme.appColors.textPrimary
                             )
                             Spacer(modifier = Modifier.height(24.dp))
-                            Text(
-                                modifier = Modifier
-                                    .testTag("txt_edit_profile_limited_profile_label")
-                                    .clickable {
-                                        if (!LocaleUtils.isProfileLimited(mapFields[YEAR_OF_BIRTH].toString())) {
-                                            val privacy = if (uiState.isLimited) {
-                                                Account.Privacy.ALL_USERS
-                                            } else {
-                                                Account.Privacy.PRIVATE
-                                            }
-                                            mapFields[ACCOUNT_PRIVACY] = privacy
-                                            onLimitedProfileChange(!uiState.isLimited)
-                                        } else {
-                                            openWarningMessageDialog = true
-                                        }
-                                    },
-                                text = stringResource(
-                                    if (uiState.isLimited) {
-                                        R.string.profile_switch_to_full
-                                    } else {
-                                        R.string.profile_switch_to_limited
-                                    }
-                                ),
-                                color = MaterialTheme.appColors.textAccent,
-                                style = MaterialTheme.appTypography.labelLarge
-                            )
                             Spacer(modifier = Modifier.height(20.dp))
                             ProfileFields(
-                                disabled = uiState.isLimited,
+                                disabled = false,
                                 onFieldClick = { field, title ->
                                     bottomDialogTitle = title
                                     keyboardController?.hide()
@@ -812,13 +745,6 @@ private fun EditProfileScreen(
                                 onOtpChange = { otpCode = it }
                             )
                             Spacer(Modifier.height(52.dp))
-                        }
-                        if (openWarningMessageDialog) {
-                            LimitedProfileDialog(
-                                modifier = popUpModifier
-                            ) {
-                                openWarningMessageDialog = false
-                            }
                         }
                     }
                 }
@@ -1371,7 +1297,6 @@ private fun EditProfileScreenPreview() {
             onDeleteImageClick = {},
             onDataChanged = {},
             onKeepEdit = {},
-            onLimitedProfileChange = {},
             onAvatarClick = {},
             isOtpLoading = false,
             isOtpSent = false,
@@ -1399,7 +1324,6 @@ private fun EditProfileScreenTabletPreview() {
             onDeleteImageClick = {},
             onDataChanged = {},
             onKeepEdit = {},
-            onLimitedProfileChange = {},
             onAvatarClick = {},
             isOtpLoading = false,
             isOtpSent = false,

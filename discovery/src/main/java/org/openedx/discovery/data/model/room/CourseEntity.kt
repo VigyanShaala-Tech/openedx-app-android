@@ -68,6 +68,8 @@ data class CourseEntity(
     val category: String,
     @ColumnInfo(name = "level", defaultValue = "")
     val level: String,
+    @ColumnInfo(name = "courseImageUrl", defaultValue = "")
+    val courseImage: String,
 ) {
 
     fun mapToDomain(): Course {
@@ -100,6 +102,7 @@ data class CourseEntity(
             instructorName = instructorName,
             category = category,
             level = level,
+            courseImage = courseImage,
             cohortFormId = "6c2d8d459edb4b37"
         )
     }
@@ -134,7 +137,8 @@ data class CourseEntity(
                 isWishlisted = model.isWishlisted ?: false,
                 instructorName = model.instructorName.orEmpty(),
                 category = model.category.orEmpty(),
-                level = model.level.orEmpty()
+                level = model.level.orEmpty(),
+                courseImage = (model.media?.courseImage?.uri ?: model.media?.image?.small).orEmpty()
             )
         }
     }

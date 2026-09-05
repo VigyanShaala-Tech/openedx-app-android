@@ -235,6 +235,7 @@ private fun LogistrationScreen(
     isRegistrationEnabled: Boolean,
     onBackClick: () -> Unit,
 ) {
+    val filtersViewModel: LogistrationFiltersViewModel = org.koin.androidx.compose.koinViewModel()
     var textFieldValue by rememberSaveable(stateSaver = TextFieldValue.Saver) {
         mutableStateOf(TextFieldValue(searchQuery))
     }
@@ -429,6 +430,7 @@ private fun LogistrationScreen(
                                 )
                                 Spacer(Modifier.height(16.dp))
                                 LogistrationFilters(
+                                    viewModel = filtersViewModel,
                                     onFiltersChanged = onFiltersChanged
                                 )
                             }
@@ -466,24 +468,37 @@ private fun LogistrationScreen(
                         }
 
                         is DiscoveryUIState.Courses -> {
-                            items(state.courses) { course ->
-                                LogistrationCourseItem(
-                                    apiHostUrl = apiHostUrl,
-                                    course = course,
-                                    onClick = {
-                                        onItemClick(course)
-                                    }
-                                )
-                            }
-                            item {
-                                if (canLoadMore) {
-                                    Box(
-                                        modifier = Modifier
-                                            .fillMaxWidth()
-                                            .padding(vertical = 16.dp),
-                                        contentAlignment = Alignment.Center
-                                    ) {
-                                        CircularProgressIndicator(color = MaterialTheme.appColors.primary)
+                            if (state.courses.isEmpty()) {
+                                item {
+                                    org.openedx.discovery.presentation.ui.NoResultsView(
+                                        onClearFiltersClick = {
+                                            textFieldValue = TextFieldValue("")
+                                            onSearchSubmit("")
+                                            filtersViewModel.reset()
+                                            onFiltersChanged(filtersViewModel.state.value.selected)
+                                        }
+                                    )
+                                }
+                            } else {
+                                items(state.courses) { course ->
+                                    LogistrationCourseItem(
+                                        apiHostUrl = apiHostUrl,
+                                        course = course,
+                                        onClick = {
+                                            onItemClick(course)
+                                        }
+                                    )
+                                }
+                                item {
+                                    if (canLoadMore) {
+                                        Box(
+                                            modifier = Modifier
+                                                .fillMaxWidth()
+                                                .padding(vertical = 16.dp),
+                                            contentAlignment = Alignment.Center
+                                        ) {
+                                            CircularProgressIndicator(color = MaterialTheme.appColors.primary)
+                                        }
                                     }
                                 }
                             }

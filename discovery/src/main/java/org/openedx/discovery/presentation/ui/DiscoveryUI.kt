@@ -15,6 +15,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.widthIn
 import androidx.compose.material.Icon
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Surface
@@ -34,6 +35,7 @@ import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import coil.compose.AsyncImage
@@ -188,6 +190,33 @@ fun DiscoveryCourseItem(
                 )
             }
         }
+    }
+}
+
+@Composable
+fun NoResultsView(
+    modifier: Modifier = Modifier,
+    onClearFiltersClick: () -> Unit
+) {
+    Column(
+        modifier = modifier
+            .fillMaxWidth()
+            .padding(vertical = 40.dp),
+        horizontalAlignment = Alignment.CenterHorizontally,
+        verticalArrangement = Arrangement.Center
+    ) {
+        Text(
+            text = stringResource(id = R.string.discovery_no_results_to_show),
+            style = MaterialTheme.appTypography.bodyLarge,
+            color = MaterialTheme.appColors.textPrimary,
+            textAlign = TextAlign.Center
+        )
+        Spacer(Modifier.height(20.dp))
+        org.openedx.core.ui.OpenEdXButton(
+            modifier = Modifier.widthIn(min = 160.dp),
+            text = stringResource(id = R.string.discovery_clear_filters),
+            onClick = onClearFiltersClick
+        )
     }
 }
 

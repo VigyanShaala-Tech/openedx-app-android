@@ -51,6 +51,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.semantics.testTagsAsResourceId
 import androidx.compose.ui.text.TextRange
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
@@ -58,6 +59,7 @@ import androidx.compose.ui.tooling.preview.Devices
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.compose.ui.zIndex
 import androidx.core.os.bundleOf
 import androidx.fragment.app.Fragment
@@ -374,6 +376,20 @@ private fun CourseSearchScreen(
                                         style = MaterialTheme.appTypography.titleSmall
                                     )
                                     Spacer(modifier = Modifier.height(14.dp))
+                                    val coursesState = state as? CourseSearchUIState.Courses
+                                    if (coursesState != null) {
+                                        Text(
+                                            text = "Showing ${coursesState.courses.size} of ${coursesState.numCourses} courses",
+                                            style = MaterialTheme.appTypography.bodySmall.copy(
+                                                fontWeight = FontWeight.SemiBold,
+                                                fontSize = 12.sp
+                                            ),
+                                            color = MaterialTheme.appColors.primary,
+                                            modifier = Modifier.fillMaxWidth(),
+                                            textAlign = TextAlign.Start
+                                        )
+                                        Spacer(modifier = Modifier.height(8.dp))
+                                    }
                                 }
                             }
                             when (state) {
@@ -391,31 +407,46 @@ private fun CourseSearchScreen(
                                 }
 
                                 is CourseSearchUIState.Courses -> {
-                                    items(state.courses) { course ->
-                                        DiscoveryCourseItem(
-                                            apiHostUrl = apiHostUrl,
-                                            course,
-                                            windowSize = windowSize,
-                                            onClick = { courseId ->
-                                                onItemClick(courseId)
-                                            }
-                                        )
-                                        Divider()
-                                    }
-                                    item {
-                                        if (canLoadMore) {
-                                            Box(
-                                                modifier = Modifier
-                                                    .fillMaxWidth()
-                                                    .padding(vertical = 16.dp),
-                                                contentAlignment = Alignment.Center
-                                            ) {
-                                                CircularProgressIndicator(color = MaterialTheme.appColors.primary)
+                                    if (state.courses.isEmpty()) {
+                                        item {
+                                            org.openedx.discovery.presentation.ui.NoResultsView(
+                                                onClearFiltersClick = {
+                                                    textFieldValue = TextFieldValue("")
+                                                    onSearchTextChanged("")
+                                                }
+                                            )
+                                        }
+                                    } else {
+                                        items(state.courses) { course ->
+                                            DiscoveryCourseItem(
+                                                apiHostUrl = apiHostUrl,
+                                                course,
+                                                windowSize = windowSize,
+                                                onClick = { courseId ->
+                                                    onItemClick(courseId)
+                                                }
+                                            )
+                                            Divider()
+                                        }
+                                        item {
+                                            if (canLoadMore) {
+                                                Box(
+                                                    modifier = Modifier
+                                                        .fillMaxWidth()
+                                                        .padding(vertical = 16.dp),
+                                                    contentAlignment = Alignment.Center
+                                                ) {
+                                                    CircularProgressIndicator(color = MaterialTheme.appColors.primary)
+                                                }
                                             }
                                         }
-                                    }
-                                    if (scrollState.shouldLoadMore(firstVisibleIndex, LOAD_MORE_THRESHOLD)) {
-                                        paginationCallback()
+                                        if (scrollState.shouldLoadMore(
+                                                firstVisibleIndex,
+                                                LOAD_MORE_THRESHOLD
+                                            )
+                                        ) {
+                                            paginationCallback()
+                                        }
                                     }
                                 }
                             }

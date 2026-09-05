@@ -44,7 +44,7 @@ class OpenEdXApp : Application() {
         if (config.getShakeConfig().enabled) {
             try {
                 Class.forName("com.shakebugs.shake.Shake")
-                com.shakebugs.shake.Shake.start(this, config.getShakeConfig().token)
+//                com.shakebugs.shake.Shake.start(this, config.getShakeConfig().token)
             } catch (e: Exception) {
                 e.printStackTrace()
             }

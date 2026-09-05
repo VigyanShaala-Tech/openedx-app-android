@@ -49,10 +49,13 @@ import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.semantics.testTagsAsResourceId
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Devices
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.core.os.bundleOf
 import androidx.fragment.app.Fragment
 import org.koin.android.ext.android.inject
@@ -366,18 +369,39 @@ internal fun DiscoveryScreen(
                                                 style = MaterialTheme.appTypography.titleSmall
                                             )
                                             Spacer(modifier = Modifier.height(14.dp))
+                                            Text(
+                                                text = "Showing ${state.courses.size} of ${state.totalCount} courses",
+                                                style = MaterialTheme.appTypography.bodySmall.copy(
+                                                    fontWeight = FontWeight.SemiBold,
+                                                    fontSize = 12.sp
+                                                ),
+                                                color = MaterialTheme.appColors.primary,
+                                                modifier = Modifier.fillMaxWidth(),
+                                                textAlign = TextAlign.Start
+                                            )
+                                            Spacer(modifier = Modifier.height(8.dp))
                                         }
                                     }
-                                    items(state.courses) { course ->
-                                        DiscoveryCourseItem(
-                                            apiHostUrl = apiHostUrl,
-                                            course = course,
-                                            windowSize = windowSize,
-                                            onClick = {
-                                                onItemClick(course)
-                                            }
-                                        )
-                                        Divider()
+                                    if (state.courses.isEmpty()) {
+                                        item {
+                                            org.openedx.discovery.presentation.ui.NoResultsView(
+                                                onClearFiltersClick = {
+                                                    onSwipeRefresh()
+                                                }
+                                            )
+                                        }
+                                    } else {
+                                        items(state.courses) { course ->
+                                            DiscoveryCourseItem(
+                                                apiHostUrl = apiHostUrl,
+                                                course = course,
+                                                windowSize = windowSize,
+                                                onClick = {
+                                                    onItemClick(course)
+                                                }
+                                            )
+                                            Divider()
+                                        }
                                     }
                                     item {
                                         if (canLoadMore) {

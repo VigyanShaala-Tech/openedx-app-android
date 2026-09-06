@@ -1,5 +1,6 @@
 package org.openedx.course.presentation.unit.video
 
+import android.content.res.Configuration
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
@@ -8,6 +9,7 @@ import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.livedata.observeAsState
+import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.core.os.bundleOf
 import androidx.core.view.isVisible
 import androidx.fragment.app.Fragment
@@ -32,9 +34,11 @@ import org.openedx.course.presentation.CourseRouter
 import org.openedx.course.presentation.ui.VideoSubtitles
 import org.openedx.course.presentation.ui.VideoTitle
 import org.openedx.foundation.extension.computeWindowSizeClasses
+import org.openedx.foundation.extension.dpToPixel
 import org.openedx.foundation.extension.objectToString
 import org.openedx.foundation.extension.stringToObject
 import org.openedx.foundation.presentation.WindowSize
+import kotlin.math.roundToInt
 
 class YoutubeVideoUnitFragment : Fragment(R.layout.fragment_youtube_video_unit) {
 
@@ -141,6 +145,8 @@ class YoutubeVideoUnitFragment : Fragment(R.layout.fragment_youtube_video_unit) 
 
         binding.connectionError.isVisible = !viewModel.hasInternetConnection
 
+        setupPlayerHeight()
+
         lifecycle.addObserver(binding.youtubePlayerView)
 
         val options = IFramePlayerOptions.Builder(requireContext())
@@ -154,13 +160,18 @@ class YoutubeVideoUnitFragment : Fragment(R.layout.fragment_youtube_video_unit) 
             override fun onCurrentSecond(youTubePlayer: YouTubePlayer, second: Float) {
                 super.onCurrentSecond(youTubePlayer, second)
                 viewModel.setCurrentVideoTime((second * 1000f).toLong())
-                val completePercentage = second / youtubeTrackerListener.videoDuration
-                if (completePercentage >= VIDEO_COMPLETION_THRESHOLD && !isMarkBlockCompletedCalled) {
-                    viewModel.markBlockCompleted(blockId, CourseAnalyticsKey.YOUTUBE.key)
-                    isMarkBlockCompletedCalled = true
+                if (youtubeTrackerListener.videoDuration > 0) {
+                    val completePercentage = second / youtubeTrackerListener.videoDuration
+                    if (completePercentage >= VIDEO_COMPLETION_THRESHOLD && !isMarkBlockCompletedCalled) {
+                        viewModel.markBlockCompleted(blockId, CourseAnalyticsKey.YOUTUBE.key)
+                        isMarkBlockCompletedCalled = true
+                    }
                 }
-                if (completePercentage >= RATE_DIALOG_THRESHOLD && !appReviewManager.isDialogShowed) {
-                    appReviewManager.tryToOpenRateDialog()
+                if (youtubeTrackerListener.videoDuration > 0) {
+                    val completePercentage = second / youtubeTrackerListener.videoDuration
+                    if (completePercentage >= RATE_DIALOG_THRESHOLD && !appReviewManager.isDialogShowed) {
+                        appReviewManager.tryToOpenRateDialog()
+                    }
                 }
             }
 
@@ -249,7 +260,26 @@ class YoutubeVideoUnitFragment : Fragment(R.layout.fragment_youtube_video_unit) 
         _binding = null
     }
 
+    override fun onConfigurationChanged(newConfig: Configuration) {
+        super.onConfigurationChanged(newConfig)
+        setupPlayerHeight()
+        binding.root.requestLayout()
+    }
+
+    private fun setupPlayerHeight() {
+        val layoutParams = binding.cardView.layoutParams as ConstraintLayout.LayoutParams
+        if (windowSize?.isTablet == true) {
+            layoutParams.height = requireContext().dpToPixel(TABLET_PLAYER_HEIGHT_DP).roundToInt()
+            layoutParams.width = ConstraintLayout.LayoutParams.WRAP_CONTENT
+        } else {
+            layoutParams.height = 0
+            layoutParams.width = 0
+        }
+        binding.cardView.layoutParams = layoutParams
+    }
+
     companion object {
+        private const val TABLET_PLAYER_HEIGHT_DP = 320
 
         private const val ARG_VIDEO_URL = "videoUrl"
         private const val ARG_TRANSCRIPT_URL = "transcriptUrl"

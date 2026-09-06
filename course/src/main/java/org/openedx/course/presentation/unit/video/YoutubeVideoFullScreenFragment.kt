@@ -49,7 +49,6 @@ class YoutubeVideoFullScreenFragment : Fragment(R.layout.fragment_youtube_video_
         if (viewModel.isPlaying == null) {
             viewModel.isPlaying = requireArguments().getBoolean(ARG_IS_PLAYING)
         }
-        viewModel.markTopicCompleted(blockId)
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
@@ -114,6 +113,7 @@ class YoutubeVideoFullScreenFragment : Fragment(R.layout.fragment_youtube_video_
                     val defPlayerUiController =
                         DefaultPlayerUiController(binding.youtubePlayerView, youTubePlayer)
                     defPlayerUiController.setFullscreenButtonClickListener {
+                        requireActivity().requestedOrientation = ActivityInfo.SCREEN_ORIENTATION_PORTRAIT
                         parentFragmentManager.popBackStack()
                     }
 

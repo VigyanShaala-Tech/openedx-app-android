@@ -75,7 +75,6 @@ class VideoFullScreenFragment : Fragment(R.layout.fragment_video_full_screen) {
         if (viewModel.isPlaying == null) {
             viewModel.isPlaying = requireArguments().getBoolean(ARG_IS_PLAYING)
         }
-        viewModel.markTopicCompleted(blockId)
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
@@ -135,6 +134,7 @@ class VideoFullScreenFragment : Fragment(R.layout.fragment_video_full_screen) {
             setShowNextButton(false)
             setShowPreviousButton(false)
             setFullscreenButtonClickListener {
+                requireActivity().requestedOrientation = ActivityInfo.SCREEN_ORIENTATION_PORTRAIT
                 requireActivity().supportFragmentManager.popBackStackImmediate()
             }
         }

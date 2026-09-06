@@ -61,16 +61,16 @@ import org.koin.android.ext.android.inject
 import org.koin.androidx.viewmodel.ext.android.viewModel
 import org.openedx.app.databinding.ActivityAppBinding
 import org.openedx.app.deeplink.DeepLink
-import org.openedx.auth.presentation.AuthRouter
 import org.openedx.auth.data.model.AccountActivationResponse
+import org.openedx.auth.presentation.AuthRouter
 import org.openedx.auth.presentation.logistration.LogistrationFragment
 import org.openedx.auth.presentation.signin.SignInFragment
 import org.openedx.core.ApiConstants
 import org.openedx.core.data.storage.CorePreferences
 import org.openedx.core.presentation.dialog.downloaddialog.DownloadDialogManager
-import org.openedx.core.system.notifier.MeetingNotifier
 import org.openedx.core.presentation.global.InsetHolder
 import org.openedx.core.presentation.global.WindowSizeHolder
+import org.openedx.core.system.notifier.MeetingNotifier
 import org.openedx.core.ui.OpenEdXButton
 import org.openedx.core.ui.theme.OpenEdXTheme
 import org.openedx.core.ui.theme.appColors
@@ -521,7 +521,6 @@ class AppActivity : AppCompatActivity(), InsetHolder, WindowSizeHolder {
                 if (active) {
                     requestedOrientation = ActivityInfo.SCREEN_ORIENTATION_FULL_SENSOR
                 } else {
-                    requestedOrientation = ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED
                     showSystemBars()
                 }
             }
@@ -536,35 +535,25 @@ class AppActivity : AppCompatActivity(), InsetHolder, WindowSizeHolder {
             } else {
                 showSystemBars()
             }
+        } else {
+            showSystemBars()
         }
     }
 
     private fun hideSystemBars() {
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
-            window.insetsController?.hide(WindowInsetsCompat.Type.systemBars())
-            window.insetsController?.systemBarsBehavior =
-                WindowInsetsControllerCompat.BEHAVIOR_SHOW_TRANSIENT_BARS_BY_SWIPE
-        } else {
-            @Suppress("DEPRECATION")
-            window.decorView.systemUiVisibility = (View.SYSTEM_UI_FLAG_FULLSCREEN
-                    or View.SYSTEM_UI_FLAG_HIDE_NAVIGATION
-                    or View.SYSTEM_UI_FLAG_IMMERSIVE_STICKY
-                    or View.SYSTEM_UI_FLAG_LAYOUT_STABLE
-                    or View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN
-                    or View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION)
-        }
+        val insetsController = WindowCompat.getInsetsController(window, window.decorView)
+        insetsController.hide(WindowInsetsCompat.Type.systemBars())
+        insetsController.systemBarsBehavior =
+            WindowInsetsControllerCompat.BEHAVIOR_SHOW_TRANSIENT_BARS_BY_SWIPE
         // Force insets to 0 for full screen
         topInset = 0
         bottomInset = 0
     }
 
     private fun showSystemBars() {
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
-            window.insetsController?.show(WindowInsetsCompat.Type.systemBars())
-        } else {
-            @Suppress("DEPRECATION")
-            window.decorView.systemUiVisibility = View.SYSTEM_UI_FLAG_VISIBLE
-        }
+        val insetsController = WindowCompat.getInsetsController(window, window.decorView)
+        insetsController.show(WindowInsetsCompat.Type.systemBars())
+        
         // Request insets to be reapplied and update state
         binding.root.post {
             binding.root.requestApplyInsets()
@@ -574,6 +563,7 @@ class AppActivity : AppCompatActivity(), InsetHolder, WindowSizeHolder {
                 topInset = systemBars.top
                 bottomInset = systemBars.bottom
             }
+            binding.root.requestLayout()
         }
     }
 

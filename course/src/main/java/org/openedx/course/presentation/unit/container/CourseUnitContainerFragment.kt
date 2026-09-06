@@ -1,10 +1,8 @@
 package org.openedx.course.presentation.unit.container
 
-import android.app.PictureInPictureParams
-import android.os.Build
+import android.content.res.Configuration
 import android.os.Bundle
 import android.os.SystemClock
-import android.util.Rational
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -34,7 +32,6 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
-import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.core.os.bundleOf
 import androidx.core.view.isGone
 import androidx.core.view.isVisible
@@ -49,7 +46,8 @@ import org.koin.androidx.viewmodel.ext.android.viewModel
 import org.koin.core.parameter.parametersOf
 import org.openedx.core.BlockType
 import org.openedx.core.domain.model.Block
-import org.openedx.core.presentation.global.InsetHolder
+import org.openedx.core.presentation.dialog.MeetingExitDialogListener
+import org.openedx.core.presentation.dialog.MeetingExitFragmentDialog
 import org.openedx.core.system.notifier.MeetingNotifier
 import org.openedx.core.ui.theme.OpenEdXTheme
 import org.openedx.core.ui.theme.appColors
@@ -59,10 +57,7 @@ import org.openedx.course.databinding.FragmentCourseUnitContainerBinding
 import org.openedx.course.presentation.ChapterEndFragmentDialog
 import org.openedx.course.presentation.CourseRouter
 import org.openedx.course.presentation.DialogListener
-import org.openedx.core.presentation.dialog.MeetingExitDialogListener
-import org.openedx.core.presentation.dialog.MeetingExitFragmentDialog
 import org.openedx.course.presentation.ui.CourseUnitToolbar
-import us.zoom.sdkhelper.ZoomMeetingHelper
 import org.openedx.course.presentation.ui.CourseVideoItem
 import org.openedx.course.presentation.ui.HorizontalPageIndicator
 import org.openedx.course.presentation.ui.NavigationUnitsButtons
@@ -70,6 +65,7 @@ import org.openedx.course.presentation.ui.SubSectionUnitsList
 import org.openedx.course.presentation.ui.SubSectionUnitsTitle
 import org.openedx.course.presentation.ui.VerticalPageIndicator
 import org.openedx.foundation.extension.serializable
+import us.zoom.sdkhelper.ZoomMeetingHelper
 
 class CourseUnitContainerFragment : Fragment(R.layout.fragment_course_unit_container) {
 
@@ -163,7 +159,6 @@ class CourseUnitContainerFragment : Fragment(R.layout.fragment_course_unit_conta
             }
         }
     }
-    // End workaround
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -198,24 +193,6 @@ class CourseUnitContainerFragment : Fragment(R.layout.fragment_course_unit_conta
         setupChapterEndDialogListener()
     }
 
-//    private fun observePipMode() {
-//        lifecycleScope.launch {
-//            meetingNotifier.isInPipMode.collect { isInPip ->
-//                binding.btnBack.isVisible = !isInPip
-//                binding.cvNavigationBar.isVisible = !isInPip
-//                if (viewModel.isCourseUnitProgressEnabled) {
-//                    binding.horizontalProgress.isVisible = !isInPip
-//                } else {
-//                    binding.cvCount.isVisible = !isInPip
-//                }
-//                if (viewModel.isCourseExpandableSectionsEnabled) {
-//                    binding.subSectionUnitsTitle.isVisible = !isInPip
-//                }
-//                binding.mediaRouteButton.isVisible = !isInPip && isMediaRouteButtonVisible()
-//            }
-//        }
-//    }
-
     private fun isMediaRouteButtonVisible(): Boolean {
         val position = binding.viewPager.currentItem
         val blocks = viewModel.getUnitBlocks()
@@ -226,28 +203,8 @@ class CourseUnitContainerFragment : Fragment(R.layout.fragment_course_unit_conta
                 !encodedVideo.videoUrl.endsWith(".m3u8")
     }
 
-//    private fun observeCurrentBlock() {
-//        lifecycleScope.launch {
-//            viewModel.currentBlock.collect { block ->
-//                val isMeeting = isCurrentBlockMeeting()
-//                meetingNotifier.send(isMeeting)
-//            }
-//        }
-//    }
-
-//    private fun isCurrentBlockMeeting(): Boolean {
-//        val currentBlock = viewModel.currentBlock.value
-//        return currentBlock?.isZoomxBlock == true ||
-//                currentBlock?.studentViewUrl?.contains("zoom.us") == true ||
-//                currentBlock?.studentViewUrl?.contains("/meeting/") == true ||
-//                currentBlock?.studentViewUrl?.contains("/join/") == true
-//    }
-
     private fun setupViewPagerInsets() {
-        val insetHolder = requireActivity() as InsetHolder
-        val containerParams = binding.viewPager.layoutParams as ConstraintLayout.LayoutParams
-        containerParams.bottomMargin = insetHolder.bottomInset
-        binding.viewPager.layoutParams = containerParams
+        // No-op: handled by constraints in XML
     }
 
     private fun setupMediaRouteButton() {
@@ -442,9 +399,6 @@ class CourseUnitContainerFragment : Fragment(R.layout.fragment_course_unit_conta
     override fun onResume() {
         super.onResume()
         activity?.onBackPressedDispatcher?.addCallback(onBackPressedCallback)
-//        lifecycleScope.launch {
-//            meetingNotifier.send(isCurrentBlockMeeting())
-//        }
     }
 
     override fun onPause() {
@@ -463,6 +417,11 @@ class CourseUnitContainerFragment : Fragment(R.layout.fragment_course_unit_conta
         binding.viewPager.unregisterOnPageChangeCallback(onPageChangeCallback)
         super.onDestroyView()
         _binding = null
+    }
+
+    override fun onConfigurationChanged(newConfig: Configuration) {
+        super.onConfigurationChanged(newConfig)
+        binding.root.requestLayout()
     }
 
     private fun updateNavigationButtons(updatedData: (String, Boolean, Boolean) -> Unit) {

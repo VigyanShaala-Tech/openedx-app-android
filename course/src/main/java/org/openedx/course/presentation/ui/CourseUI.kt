@@ -360,7 +360,6 @@ fun NavigationUnitsButtons(
                 .fillMaxWidth()
         } else {
             Modifier
-                .statusBarsPadding()
                 .padding(end = 32.dp)
                 .padding(top = 2.dp)
         }

@@ -5,11 +5,11 @@ import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
 import android.view.View
-import android.widget.FrameLayout
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.livedata.observeAsState
+import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.core.os.bundleOf
 import androidx.core.view.isVisible
 import androidx.fragment.app.Fragment
@@ -19,7 +19,6 @@ import androidx.media3.common.MediaMetadata
 import androidx.media3.common.util.UnstableApi
 import androidx.media3.datasource.DefaultDataSource
 import androidx.media3.exoplayer.hls.HlsMediaSource
-import androidx.window.layout.WindowMetricsCalculator
 import org.koin.android.ext.android.inject
 import org.koin.androidx.viewmodel.ext.android.viewModel
 import org.koin.core.parameter.parametersOf
@@ -65,9 +64,11 @@ class VideoUnitFragment : Fragment(R.layout.fragment_video_unit) {
                 if (it.isPlaying) {
                     viewModel.setCurrentVideoTime(it.currentPosition)
                 }
-                val completePercentage = it.currentPosition.toDouble() / it.duration.toDouble()
-                if (completePercentage >= 0.8f) {
-                    viewModel.markBlockCompleted(viewModel.blockId, CourseAnalyticsKey.NATIVE.key)
+                if (it.duration > 0) {
+                    val completePercentage = it.currentPosition.toDouble() / it.duration.toDouble()
+                    if (completePercentage >= 0.95f) {
+                        viewModel.markBlockCompleted(viewModel.blockId, CourseAnalyticsKey.NATIVE.key)
+                    }
                 }
             }
             handler.postDelayed(this, 200)
@@ -156,36 +157,22 @@ class VideoUnitFragment : Fragment(R.layout.fragment_video_unit) {
         }
     }
 
+    override fun onConfigurationChanged(newConfig: Configuration) {
+        super.onConfigurationChanged(newConfig)
+        setupPlayerHeight()
+        binding.root.requestLayout()
+    }
+
     private fun setupPlayerHeight() {
-        val orientation = resources.configuration.orientation
-        val windowMetrics = WindowMetricsCalculator.getOrCreate()
-            .computeCurrentWindowMetrics(requireActivity())
-        val currentBounds = windowMetrics.bounds
-        val layoutParams = binding.playerView.layoutParams as FrameLayout.LayoutParams
-
-        if (orientation == Configuration.ORIENTATION_PORTRAIT || windowSize?.isTablet == true) {
-            val padding = requireContext().dpToPixel(PLAYER_VIEW_PADDING_DP)
-            val width = currentBounds.width() - padding
-            val minHeight = requireContext().dpToPixel(MIN_PLAYER_HEIGHT_DP).roundToInt()
-            val aspectRatio = VIDEO_ASPECT_RATIO_WIDTH / VIDEO_ASPECT_RATIO_HEIGHT
-            val calculatedHeight = (width / aspectRatio).roundToInt()
-
-            layoutParams.height = when {
-                windowSize?.isTablet == true -> {
-                    requireContext().dpToPixel(TABLET_PLAYER_HEIGHT_DP).roundToInt()
-                }
-
-                calculatedHeight < minHeight -> {
-                    minHeight
-                }
-
-                else -> {
-                    calculatedHeight
-                }
-            }
+        val layoutParams = binding.cardView.layoutParams as ConstraintLayout.LayoutParams
+        if (windowSize?.isTablet == true) {
+            layoutParams.height = requireContext().dpToPixel(TABLET_PLAYER_HEIGHT_DP).roundToInt()
+            layoutParams.width = ConstraintLayout.LayoutParams.WRAP_CONTENT
+        } else {
+            layoutParams.height = 0
+            layoutParams.width = 0
         }
-
-        binding.playerView.layoutParams = layoutParams
+        binding.cardView.layoutParams = layoutParams
     }
 
     @androidx.annotation.OptIn(UnstableApi::class)
@@ -301,11 +288,7 @@ class VideoUnitFragment : Fragment(R.layout.fragment_video_unit) {
         private const val ARG_TITLE = "title"
         private const val ARG_DOWNLOADED = "isDownloaded"
 
-        private const val PLAYER_VIEW_PADDING_DP = 32
-        private const val MIN_PLAYER_HEIGHT_DP = 194
         private const val TABLET_PLAYER_HEIGHT_DP = 320
-        private const val VIDEO_ASPECT_RATIO_WIDTH = 16f
-        private const val VIDEO_ASPECT_RATIO_HEIGHT = 9f
         private const val CONTROLLER_SHOW_TIMEOUT = 2000
 
         fun newInstance(

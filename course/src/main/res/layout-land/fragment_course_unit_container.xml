@@ -7,9 +7,8 @@
 
     <androidx.compose.ui.platform.ComposeView
         android:id="@+id/btnBack"
-        android:layout_width="0dp"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        app:layout_constraintEnd_toStartOf="@+id/mediaRouteButton"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
 
@@ -21,8 +20,7 @@
         android:layout_marginBottom="12dp"
         android:mediaRouteTypes="user"
         app:layout_constraintBottom_toBottomOf="@+id/btnBack"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintEnd_toStartOf="@+id/cv_navigationBar" />
+        app:layout_constraintEnd_toEndOf="parent" />
 
     <androidx.compose.ui.platform.ComposeView
         android:id="@+id/subSectionUnitsTitle"
@@ -32,54 +30,50 @@
         app:layout_constraintTop_toBottomOf="@+id/btnBack" />
 
     <androidx.compose.ui.platform.ComposeView
-        android:id="@+id/horizontalProgress"
+        android:id="@+id/videoList"
         android:layout_width="match_parent"
-        android:layout_height="4dp"
-        android:layout_marginTop="4dp"
-        android:visibility="gone"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="8dp"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/subSectionUnitsTitle" />
 
     <androidx.compose.ui.platform.ComposeView
+        android:id="@+id/horizontalProgress"
+        android:layout_width="match_parent"
+        android:layout_height="6dp"
+        android:layout_marginTop="4dp"
+        android:visibility="gone"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/videoList" />
+
+    <androidx.compose.ui.platform.ComposeView
         android:id="@+id/cv_navigationBar"
-        android:layout_width="wrap_content"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:elevation="4dp"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintTop_toTopOf="parent" />
-
-    <androidx.constraintlayout.widget.ConstraintLayout
-        android:id="@+id/constraintLayout"
-        android:layout_width="match_parent"
-        android:layout_height="0dp"
-        android:orientation="vertical"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent" />
+
+    <androidx.compose.ui.platform.ComposeView
+        android:id="@+id/cv_count"
+        android:layout_width="24dp"
+        android:layout_height="0dp"
+        android:elevation="4dp"
+        android:visibility="gone"
+        app:layout_constraintBottom_toTopOf="@id/cv_navigationBar"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/horizontalProgress" />
+
+    <androidx.viewpager2.widget.ViewPager2
+        android:id="@+id/viewPager"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:layout_marginTop="4dp"
+        app:layout_constraintBottom_toTopOf="@id/cv_navigationBar"
+        app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/horizontalProgress">
-
-        <androidx.compose.ui.platform.ComposeView
-            android:id="@+id/cv_count"
-            android:layout_width="24dp"
-            android:layout_height="match_parent"
-            android:elevation="4dp"
-            app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintTop_toTopOf="parent" />
-
-        <androidx.viewpager2.widget.ViewPager2
-            android:id="@+id/viewPager"
-            android:layout_width="0dp"
-            android:layout_height="0dp"
-            android:layout_marginStart="48dp"
-            android:layout_marginTop="8dp"
-            android:layout_marginEnd="48dp"
-            app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toTopOf="parent" />
-
-    </androidx.constraintlayout.widget.ConstraintLayout>
+        app:layout_constraintTop_toBottomOf="@id/horizontalProgress" />
 
     <View
         android:id="@+id/subSectionUnitsBg"
@@ -93,7 +87,7 @@
         android:layout_height="0dp"
         android:layout_marginStart="16dp"
         android:layout_marginEnd="16dp"
-        android:layout_marginBottom="16dp"
+        android:layout_marginBottom="84dp"
         android:visibility="gone"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintStart_toStartOf="parent"

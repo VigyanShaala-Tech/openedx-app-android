@@ -59,6 +59,7 @@ import androidx.fragment.app.Fragment
 import kotlinx.coroutines.launch
 import org.koin.androidx.viewmodel.ext.android.viewModel
 import org.koin.core.parameter.parametersOf
+import org.openedx.core.BlockType
 import org.openedx.core.extension.addMobileQueryParam
 import org.openedx.core.extension.applyFullAccessSettings
 import org.openedx.core.extension.loadUrl
@@ -107,9 +108,13 @@ class HtmlUnitFragment : Fragment() {
         blockUrl = requireArguments().getString(ARG_BLOCK_URL, "")
         offlineUrl = requireArguments().getString(ARG_OFFLINE_URL, "")
         lastModified = requireArguments().getString(ARG_LAST_MODIFIED, "")
+        val blockTypeStr = requireArguments().getString(ARG_BLOCK_TYPE, "")
+        val blockType = BlockType.getBlockType(blockTypeStr)
         fromDownloadedContent = lastModified.isNotEmpty()
         checkAndRequestPermissions()
-        viewModel.markTopicCompleted()
+        if (!BlockType.isQuizType(blockType)) {
+            viewModel.markTopicCompleted()
+        }
     }
 
     private fun checkAndRequestPermissions() {
@@ -183,12 +188,15 @@ class HtmlUnitFragment : Fragment() {
         private const val ARG_BLOCK_URL = "blockUrl"
         private const val ARG_OFFLINE_URL = "offlineUrl"
         private const val ARG_LAST_MODIFIED = "lastModified"
+        private const val ARG_BLOCK_TYPE = "blockType"
+
         fun newInstance(
             blockId: String,
             blockUrl: String,
             courseId: String,
             offlineUrl: String = "",
-            lastModified: String = ""
+            lastModified: String = "",
+            blockType: String = ""
         ): HtmlUnitFragment {
             val fragment = HtmlUnitFragment()
             fragment.arguments = bundleOf(
@@ -196,7 +204,8 @@ class HtmlUnitFragment : Fragment() {
                 ARG_BLOCK_URL to blockUrl,
                 ARG_OFFLINE_URL to offlineUrl,
                 ARG_LAST_MODIFIED to lastModified,
-                ARG_COURSE_ID to courseId
+                ARG_COURSE_ID to courseId,
+                ARG_BLOCK_TYPE to blockType
             )
             return fragment
         }

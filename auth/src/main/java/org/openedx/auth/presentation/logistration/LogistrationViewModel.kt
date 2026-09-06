@@ -185,7 +185,9 @@ class LogistrationViewModel(
             try {
                 _uiState.value = DiscoveryUIState.Loading
                 val category = selected["categories"]?.takeIf { it.isNotBlank() && !it.startsWith("All") }
-                val level = selected["levels"]?.takeIf { it.isNotBlank() && !it.startsWith("All") }
+                val level = (selected["levels"] ?: selected["tags"])?.takeIf {
+                    it.isNotBlank() && !it.startsWith("All") && !it.equals("Tags", ignoreCase = true)
+                }
                 val subject = selected["subjects"]?.takeIf { it.isNotBlank() && !it.startsWith("All") }
 
                 val resp = catalogApi.getCourses(

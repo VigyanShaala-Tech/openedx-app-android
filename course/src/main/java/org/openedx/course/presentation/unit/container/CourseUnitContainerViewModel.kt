@@ -261,11 +261,7 @@ class CourseUnitContainerViewModel(
     }
 
     fun isSkipMarkCompleted(block: Block): Boolean {
-        return block.type == BlockType.QUICKQUIZMAKER ||
-                block.type == BlockType.OPENASSESSMENT ||
-                block.type == BlockType.PROBLEM ||
-                block.type == BlockType.VIDEO ||
-                block.type == BlockType.TAS
+        return block.isVideoBlock || block.isQuizBlock
     }
 
     fun moveToNextBlock(): Block? {

@@ -116,6 +116,19 @@ enum class BlockType {
             }
         }
 
+        fun isQuizType(type: BlockType): Boolean {
+            return type == PROBLEM ||
+                    type == TAS ||
+                    type == EDX_SGA ||
+                    type == FILL_BLANK ||
+                    type == MATCH_COLUMN ||
+                    type == WORD_CLOUD ||
+                    type == POLL ||
+                    type == SURVEY ||
+                    type == QUICKQUIZMAKER ||
+                    type == OPENASSESSMENT
+        }
+
         fun sortByPriority(blockTypes: List<BlockType>): List<BlockType> {
             val priorityMap = mapOf(
                 PROBLEM to PROBLEM_PRIORITY,

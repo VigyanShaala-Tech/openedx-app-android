@@ -101,6 +101,7 @@ data class Block(
     val isTasBlock get() = type == BlockType.TAS
     val isQuickQuizMakerBlock get() = type == BlockType.QUICKQUIZMAKER
     val isSgaBlock get() = type == BlockType.EDX_SGA
+    val isQuizBlock get() = BlockType.isQuizType(type)
 }
 
 fun Block.getFileSize(): Long {

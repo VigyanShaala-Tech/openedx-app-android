@@ -10,8 +10,8 @@ import org.openedx.course.presentation.unit.NotAvailableUnitType
 import org.openedx.course.presentation.unit.html.HtmlUnitFragment
 import org.openedx.course.presentation.unit.pdf.PdfUnitFragment
 import org.openedx.course.presentation.unit.video.VideoUnitFragment
-import org.openedx.course.presentation.unit.zoom.ZoomUnitFragment
 import org.openedx.course.presentation.unit.video.YoutubeVideoUnitFragment
+import org.openedx.course.presentation.unit.zoom.ZoomUnitFragment
 import org.openedx.discussion.presentation.threads.DiscussionThreadsFragment
 import org.openedx.discussion.presentation.topics.DiscussionTopicsViewModel
 import java.io.File
@@ -92,15 +92,17 @@ class CourseUnitContainerAdapter(
                 block.isDragAndDropBlock ||
                 block.isWordCloudBlock ||
                 block.isLTIConsumerBlock ||
-                block.isSurveyBlock||
-                block.isGoogleCalendarBlock||
-                block.isScormBlock||
-                block.isEdxSgaBlock||
-                block.isPollBlock||
-                block.isTasBlock||
-                block.isQuickQuizMakerBlock||
-                block.isGoogleDocumentBlock
-
+                block.isSurveyBlock ||
+                block.isGoogleCalendarBlock ||
+                block.isScormBlock ||
+                block.isEdxSgaBlock ||
+                block.isPollBlock ||
+                block.isTasBlock ||
+                block.isQuickQuizMakerBlock ||
+                block.isGoogleDocumentBlock ||
+                block.isH5PBlock ||
+                block.isFillBlankBlock ||
+                block.isMatchColumnBlock
     }
 
     private fun createHtmlUnitFragment(
@@ -119,7 +121,8 @@ class CourseUnitContainerAdapter(
             block.studentViewUrl,
             viewModel.courseId,
             offlineUrl,
-            lastModified
+            lastModified,
+            block.type.name
         )
     }
 

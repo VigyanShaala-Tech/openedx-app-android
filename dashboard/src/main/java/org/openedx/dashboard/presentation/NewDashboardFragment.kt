@@ -226,29 +226,29 @@ private fun NewDashboardScreenContent(
                 "faAward" -> Icons.Filled.EmojiEvents to Color(0xFFFFA000)
                 else -> Icons.Filled.Book to primaryColor
             }
-            StatCardData(icon, it.number.toString(), it.label, color)
+            StatCardData(icon, it.number?.toString() ?: "0", it.label ?: "", color)
         }
     }
 
     val continueCourses = remember(uiState.continueLearning) {
         uiState.continueLearning.map { course ->
             CourseCardData(
-                course.id,
-                course.title,
+                course.id ?: "",
+                course.title ?: "",
                 course.category ?: "",
                 sanitizeUrl(course.course_image),
-                course.progress
+                course.progress ?: 0
             )
         }
     }
     val completedCourses = remember(uiState.completed) {
         uiState.completed?.results?.map { course ->
             CourseCardData(
-                course.id,
-                course.title,
+                course.id ?: "",
+                course.title ?: "",
                 course.category ?: "",
                 sanitizeUrl(course.course_image),
-                course.progress
+                course.progress ?: 0
             )
         } ?: emptyList()
     }
@@ -261,10 +261,10 @@ private fun NewDashboardScreenContent(
     val recommendations = remember(uiState.recommended) {
         uiState.recommended.map { rec ->
             RecommendationData(
-                rec.id,
-                rec.title,
+                rec.id ?: "",
+                rec.title ?: "",
                 rec.category ?: "",
-                (rec.rating ?: 0).toString(),
+                (rec.rating ?: 0.0).toString(),
                 rec.description ?: "",
                 sanitizeUrl(rec.image)
             )
@@ -328,7 +328,7 @@ private fun NewDashboardScreenContent(
                                         }
                                         Spacer(Modifier.height(12.dp))
                                         Text(
-                                            text = item.value,
+                                            text = item.value ?: "0",
                                             style = MaterialTheme.appTypography.titleLarge.copy(
                                                 fontWeight = FontWeight.Bold,
                                                 fontSize = 22.sp
@@ -337,7 +337,7 @@ private fun NewDashboardScreenContent(
                                         )
                                         Spacer(Modifier.height(4.dp))
                                         Text(
-                                            text = item.label,
+                                            text = item.label ?: "",
                                             style = MaterialTheme.appTypography.labelSmall.copy(
                                                 fontSize = 10.sp
                                             ),
@@ -401,7 +401,7 @@ private fun NewDashboardScreenContent(
                         ) {
                             items(
                                 items = achievements,
-                                key = { it.id }
+                                key = { it.id ?: it.hashCode() }
                             ) { a ->
                                 Card(
                                     backgroundColor = MaterialTheme.appColors.surface,
@@ -433,7 +433,7 @@ private fun NewDashboardScreenContent(
                                         )
                                         Spacer(Modifier.height(8.dp))
                                         Text(
-                                            text = a.title,
+                                            text = a.title ?: "",
                                             style = MaterialTheme.appTypography.labelSmall,
                                             color = MaterialTheme.appColors.textDark,
                                             maxLines = 2,
@@ -457,9 +457,9 @@ private fun NewDashboardScreenContent(
                     }
                     items(
                         items = recommendations,
-                        key = { it.id }
+                        key = { it.id ?: it.hashCode().toString() }
                     ) { r ->
-                        RecommendationItem(r, apiHostUrl) { onRecommendationClick(r.id) }
+                        RecommendationItem(r, apiHostUrl) { onRecommendationClick(r.id ?: "") }
                     }
                 }
             }
@@ -576,7 +576,7 @@ private fun CoursesTabs(
                         Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
                             rowItems.forEach { c ->
                                 Box(modifier = Modifier.weight(1f)) {
-                                    CourseCard(c, apiHostUrl) { onCourseClick(c.id, c.title) }
+                                    CourseCard(c, apiHostUrl) { onCourseClick(c.id ?: "", c.title ?: "") }
                                 }
                             }
                             if (rowItems.size == 1) {
@@ -611,7 +611,7 @@ private fun CoursesTabs(
                         Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
                             rowItems.forEach { c ->
                                 Box(modifier = Modifier.weight(1f)) {
-                                    CourseCard(c, apiHostUrl) { onCourseClick(c.id, c.title) }
+                                    CourseCard(c, apiHostUrl) { onCourseClick(c.id ?: "", c.title ?: "") }
                                 }
                             }
                             if (rowItems.size == 1) {
@@ -695,7 +695,7 @@ private fun CourseCard(c: CourseCardData, apiHostUrl: String, onClick: () -> Uni
                         .clip(RoundedCornerShape(topStart = 12.dp, topEnd = 12.dp)),
                     contentScale = ContentScale.FillBounds,
                     model = ImageRequest.Builder(LocalContext.current)
-                        .data(c.imageUrl.toImageLink(apiHostUrl))
+                        .data((c.imageUrl ?: "").toImageLink(apiHostUrl))
                         .error(CoreR.drawable.core_no_image_course)
                         .placeholder(CoreR.drawable.core_no_image_course)
                         .crossfade(true)
@@ -713,7 +713,7 @@ private fun CourseCard(c: CourseCardData, apiHostUrl: String, onClick: () -> Uni
                         .padding(horizontal = 10.dp, vertical = 4.dp)
                 ) {
                     Text(
-                        text = c.tag,
+                        text = c.tag ?: "",
                         style = MaterialTheme.appTypography.labelSmall,
                         color = MaterialTheme.appColors.primaryButtonText
                     )
@@ -721,7 +721,7 @@ private fun CourseCard(c: CourseCardData, apiHostUrl: String, onClick: () -> Uni
             }
             Column(modifier = Modifier.padding(12.dp)) {
                 AutoSizeText(
-                    text = c.title,
+                    text = c.title ?: "",
                     style = MaterialTheme.appTypography.titleSmall,
                     color = MaterialTheme.appColors.textDark,
                     minSize = 11f
@@ -732,14 +732,14 @@ private fun CourseCard(c: CourseCardData, apiHostUrl: String, onClick: () -> Uni
                 ) {
                     // Percentage text
                     Text(
-                        text = "${c.progress}%",
+                        text = "${c.progress ?: 0}%",
                         style = MaterialTheme.appTypography.bodySmall,
                         color = Color(0xFF7A7A7A), // subtle grey
                         modifier = Modifier.padding(bottom = 6.dp)
                     )
 
                     LinearProgressIndicator(
-                        progress = c.progress / 100f,
+                        progress = (c.progress ?: 0) / 100f,
                         modifier = Modifier
                             .fillMaxWidth()
                             .height(8.dp)
@@ -771,7 +771,7 @@ private fun WishlistItem(w: WishlistItemData, apiHostUrl: String, onRemove: (Str
                         .clip(MaterialTheme.appShapes.cardShape),
                     contentScale = ContentScale.Crop,
                     model = ImageRequest.Builder(LocalContext.current)
-                        .data(w.image.toImageLink(apiHostUrl))
+                        .data((w.image ?: "").toImageLink(apiHostUrl))
                         .error(CoreR.drawable.core_no_image_course)
                         .placeholder(CoreR.drawable.core_no_image_course)
                         .crossfade(true)
@@ -781,13 +781,13 @@ private fun WishlistItem(w: WishlistItemData, apiHostUrl: String, onRemove: (Str
                 Spacer(Modifier.width(12.dp))
                 Column(modifier = Modifier.weight(1f)) {
                     Text(
-                        text = w.title,
+                        text = w.title ?: "",
                         style = MaterialTheme.appTypography.titleSmall,
                         color = MaterialTheme.appColors.textDark
                     )
                     Spacer(Modifier.height(4.dp))
                     Text(
-                        text = "${w.duration}-${w.category}",
+                        text = "${w.duration ?: ""}-${w.category ?: ""}",
                         style = MaterialTheme.appTypography.labelSmall,
                         color = MaterialTheme.appColors.textPrimary
                     )
@@ -800,7 +800,7 @@ private fun WishlistItem(w: WishlistItemData, apiHostUrl: String, onRemove: (Str
                         )
                         Spacer(Modifier.width(4.dp))
                         Text(
-                            text = w.rating?.toString() ?: "",
+                            text = w.rating?.toString() ?: "0.0",
                             style = MaterialTheme.appTypography.bodySmall,
                             color = MaterialTheme.appColors.textDark
                         )
@@ -813,7 +813,7 @@ private fun WishlistItem(w: WishlistItemData, apiHostUrl: String, onRemove: (Str
                     }
                     Spacer(Modifier.height(4.dp))
                     Text(
-                        text = w.instructor,
+                        text = w.instructor ?: "",
                         style = MaterialTheme.appTypography.labelSmall,
                         color = MaterialTheme.appColors.textPrimary
                     )
@@ -826,7 +826,7 @@ private fun WishlistItem(w: WishlistItemData, apiHostUrl: String, onRemove: (Str
                 modifier = Modifier
                     .padding(8.dp)
                     .align(Alignment.TopEnd)
-                    .clickable { onRemove(w.id) }
+                    .clickable { onRemove(w.id ?: "") }
             )
         }
     }
@@ -852,7 +852,7 @@ private fun RecommendationItem(r: RecommendationData, apiHostUrl: String, onClic
                     .clip(MaterialTheme.appShapes.cardShape),
                 contentScale = ContentScale.FillBounds,
                 model = ImageRequest.Builder(LocalContext.current)
-                    .data(r.imageUrl.toImageLink(apiHostUrl))
+                    .data((r.imageUrl ?: "").toImageLink(apiHostUrl))
                     .error(CoreR.drawable.core_no_image_course)
                     .placeholder(CoreR.drawable.core_no_image_course)
                     .crossfade(true)
@@ -876,7 +876,7 @@ private fun RecommendationItem(r: RecommendationData, apiHostUrl: String, onClic
                             .padding(horizontal = 8.dp, vertical = 2.dp)
                     ) {
                         Text(
-                            text = r.category,
+                            text = r.category ?: "",
                             style = MaterialTheme.appTypography.labelSmall,
                             color = MaterialTheme.appColors.primary
                         )
@@ -889,20 +889,20 @@ private fun RecommendationItem(r: RecommendationData, apiHostUrl: String, onClic
                     )
                     Spacer(Modifier.width(4.dp))
                     Text(
-                        text = r.rating,
+                        text = r.rating ?: "0.0",
                         style = MaterialTheme.appTypography.labelSmall,
                         color = MaterialTheme.appColors.textDark
                     )
                 }
                 Spacer(Modifier.height(6.dp))
                 Text(
-                    text = r.title,
+                    text = r.title ?: "",
                     style = MaterialTheme.appTypography.titleSmall,
                     color = MaterialTheme.appColors.textDark
                 )
                 Spacer(Modifier.height(4.dp))
                 Text(
-                    text = r.description,
+                    text = r.description ?: "",
                     style = MaterialTheme.appTypography.labelSmall,
                     color = MaterialTheme.appColors.textPrimary,
                     maxLines = 2,

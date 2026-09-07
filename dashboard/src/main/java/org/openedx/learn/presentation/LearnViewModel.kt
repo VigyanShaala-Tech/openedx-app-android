@@ -9,14 +9,13 @@ import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import org.openedx.DashboardNavigator
 import org.openedx.core.config.Config
+import org.openedx.core.data.storage.CorePreferences
+import org.openedx.core.domain.model.NotificationModel
+import org.openedx.dashboard.domain.interactor.DashboardInteractor
 import org.openedx.dashboard.presentation.DashboardAnalytics
 import org.openedx.dashboard.presentation.DashboardAnalyticsEvent
 import org.openedx.dashboard.presentation.DashboardAnalyticsKey
 import org.openedx.dashboard.presentation.DashboardRouter
-import org.openedx.core.data.storage.CorePreferences
-import org.openedx.core.domain.model.NotificationModel
-import org.openedx.dashboard.data.model.NotificationDto
-import org.openedx.dashboard.domain.interactor.DashboardInteractor
 import org.openedx.foundation.presentation.BaseViewModel
 import org.openedx.learn.LearnType
 
@@ -90,12 +89,12 @@ class LearnViewModel(
                 val response = dashboardInteractor.getNotifications(false)
                 _notifications.value = response.notifications.map {
                     NotificationModel(
-                        id = it.id,
-                        title = it.title,
-                        description = it.description,
-                        type = it.type,
-                        isRead = it.is_read,
-                        createdAt = it.created_at
+                        id = it.id ?: 0,
+                        title = it.title ?: "",
+                        description = it.description ?: "",
+                        type = it.type ?: "",
+                        isRead = it.is_read ?: false,
+                        createdAt = it.created_at ?: ""
                     )
                 }
                 _haveNewNotification.value = response.haveNewNotification

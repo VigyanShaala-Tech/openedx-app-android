@@ -15,11 +15,10 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.grid.GridCells
-import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
-import androidx.compose.foundation.lazy.grid.items
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.Card
 import androidx.compose.material.CircularProgressIndicator
+import androidx.compose.material.ExperimentalMaterialApi
 import androidx.compose.material.Icon
 import androidx.compose.material.LinearProgressIndicator
 import androidx.compose.material.MaterialTheme
@@ -27,15 +26,13 @@ import androidx.compose.material.Scaffold
 import androidx.compose.material.Text
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Alarm
+import androidx.compose.material.icons.filled.Book
 import androidx.compose.material.icons.filled.CheckCircle
 import androidx.compose.material.icons.filled.EmojiEvents
-import androidx.compose.material.icons.filled.Book
-import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.pullrefresh.PullRefreshIndicator
 import androidx.compose.material.pullrefresh.pullRefresh
 import androidx.compose.material.pullrefresh.rememberPullRefreshState
 import androidx.compose.material.rememberScaffoldState
-import androidx.compose.material.ExperimentalMaterialApi
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -44,9 +41,9 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
@@ -61,13 +58,11 @@ import org.openedx.core.ui.statusBarsInset
 import org.openedx.core.ui.theme.appColors
 import org.openedx.core.ui.theme.appShapes
 import org.openedx.core.ui.theme.appTypography
-import org.openedx.dashboard.data.model.AchievementStatDto
+import org.openedx.dashboard.R
 import org.openedx.dashboard.data.model.BadgeProgressDto
 import org.openedx.dashboard.data.model.EarnedBadgeDto
 import org.openedx.foundation.presentation.rememberWindowSize
 import org.openedx.foundation.presentation.windowSizeValue
-import androidx.compose.ui.res.stringResource
-import org.openedx.dashboard.R
 import org.openedx.core.R as CoreR
 
 @Composable
@@ -178,7 +173,7 @@ private fun AchievementsView(
                                                 else -> Icons.Filled.Alarm
                                             }
                                             Box(modifier = Modifier.weight(1f)) {
-                                                StatCard(icon, s.number.toString(), s.label)
+                                                StatCard(icon, s.number?.toString() ?: "0", s.label ?: "")
                                             }
                                         }
                                     }
@@ -329,7 +324,7 @@ private fun EarnedBadgeCard(badge: EarnedBadgeDto) {
             )
             Spacer(Modifier.height(8.dp))
             Text(
-                text = badge.title,
+                text = badge.title ?: "",
                 style = MaterialTheme.appTypography.titleSmall,
                 color = MaterialTheme.appColors.textDark,
                 maxLines = 1,
@@ -337,7 +332,7 @@ private fun EarnedBadgeCard(badge: EarnedBadgeDto) {
             )
             Spacer(Modifier.height(4.dp))
             Text(
-                text = badge.description,
+                text = badge.description ?: "",
                 style = MaterialTheme.appTypography.labelSmall,
                 color = MaterialTheme.appColors.textPrimary,
                 maxLines = 2,
@@ -384,11 +379,12 @@ private fun BadgeProgressItem(item: BadgeProgressDto) {
                             contentDescription = null,
                         )
                     } else {
+                        val title = item.title ?: ""
                         val icon = when {
-                            item.title.contains("Hour", true) -> Icons.Filled.Alarm
-                            item.title.contains("Research", true) -> Icons.Filled.Book
-                            item.title.contains("Community", true) -> Icons.Filled.EmojiEvents
-                            item.title.contains("Course", true) -> Icons.Filled.CheckCircle
+                            title.contains("Hour", true) -> Icons.Filled.Alarm
+                            title.contains("Research", true) -> Icons.Filled.Book
+                            title.contains("Community", true) -> Icons.Filled.EmojiEvents
+                            title.contains("Course", true) -> Icons.Filled.CheckCircle
                             else -> Icons.Filled.EmojiEvents
                         }
                         Icon(
@@ -402,7 +398,7 @@ private fun BadgeProgressItem(item: BadgeProgressDto) {
                 Spacer(Modifier.width(12.dp))
                 Column(modifier = Modifier.weight(1f)) {
                     Text(
-                        text = item.title,
+                        text = item.title ?: "",
                         style = MaterialTheme.appTypography.titleSmall,
                         color = MaterialTheme.appColors.textDark,
                         maxLines = 1,
@@ -410,7 +406,7 @@ private fun BadgeProgressItem(item: BadgeProgressDto) {
                     )
                     Spacer(Modifier.height(4.dp))
                     Text(
-                        text = item.description,
+                        text = item.description ?: "",
                         style = MaterialTheme.appTypography.labelSmall,
                         color = MaterialTheme.appColors.textPrimary,
                         maxLines = 2,

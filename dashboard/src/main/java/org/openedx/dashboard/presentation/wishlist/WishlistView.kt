@@ -1,7 +1,5 @@
 package org.openedx.dashboard.presentation.wishlist
 
-import androidx.compose.foundation.background
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -13,32 +11,29 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.material.Card
 import androidx.compose.material.CircularProgressIndicator
+import androidx.compose.material.ExperimentalMaterialApi
 import androidx.compose.material.Icon
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Scaffold
 import androidx.compose.material.Text
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Star
 import androidx.compose.material.icons.filled.Close
+import androidx.compose.material.icons.filled.Star
 import androidx.compose.material.pullrefresh.PullRefreshIndicator
 import androidx.compose.material.pullrefresh.pullRefresh
 import androidx.compose.material.pullrefresh.rememberPullRefreshState
 import androidx.compose.material.rememberScaffoldState
-import androidx.compose.material.ExperimentalMaterialApi
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.saveable.rememberSaveable
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -220,7 +215,7 @@ private fun WishlistGridItem(item: WishlistItemData, onRemove: (String) -> Unit)
                     contentDescription = null,
                 )
                 androidx.compose.material.IconButton(
-                    onClick = { onRemove(item.id) },
+                    onClick = { onRemove(item.id ?: "") },
                     modifier = Modifier
                         .align(Alignment.TopEnd)
                         .padding(6.dp)
@@ -234,7 +229,7 @@ private fun WishlistGridItem(item: WishlistItemData, onRemove: (String) -> Unit)
             }
             Spacer(Modifier.height(8.dp))
             Text(
-                text = item.title,
+                text = item.title ?: "",
                 style = MaterialTheme.appTypography.titleSmall,
                 color = MaterialTheme.appColors.textDark,
                 maxLines = 2
@@ -248,13 +243,13 @@ private fun WishlistGridItem(item: WishlistItemData, onRemove: (String) -> Unit)
                 )
                 Spacer(Modifier.width(4.dp))
                     Text(
-                        text = item.rating?.toString() ?: "",
+                        text = item.rating?.toString() ?: "0.0",
                         style = MaterialTheme.appTypography.labelSmall,
                         color = MaterialTheme.appColors.textDark
                     )
                 Spacer(Modifier.width(8.dp))
                 Text(
-                    text = item.level.trim(),
+                    text = (item.level ?: "").trim(),
                     style = MaterialTheme.appTypography.labelSmall,
                     color = MaterialTheme.appColors.textPrimary
                 )

@@ -3,30 +3,30 @@ package org.openedx.dashboard.data.model
 import com.google.gson.annotations.SerializedName
 
 data class SummaryCardDto(
-    val id: Int,
-    val icon: String,
-    val number: Int,
-    val label: String
+    val id: Int?,
+    val icon: String?,
+    val number: Int?,
+    val label: String?
 )
 
 data class CourseItemDto(
-    val id: String,
-    val title: String,
+    val id: String?,
+    val title: String?,
     val course_image: String?,
-    val progress: Int,
+    val progress: Int?,
     val category: String?,
     val level: String?
 )
 
 data class AchievementDto(
-    val id: Int,
-    val title: String,
+    val id: Int?,
+    val title: String?,
     val img: String?
 )
 
 data class RecommendationDto(
-    val id: String,
-    val title: String,
+    val id: String?,
+    val title: String?,
     val description: String?,
     val category: String?,
     val duration: String?,
@@ -40,8 +40,8 @@ data class RecommendationDto(
 data class PaginationDto(
     val next: String?,
     val previous: String?,
-    val count: Int,
-    val num_pages: Int
+    val count: Int?,
+    val num_pages: Int?
 )
 
 data class PaginatedDto<T>(
@@ -51,42 +51,42 @@ data class PaginatedDto<T>(
 
 data class StatCardData(
     val icon: androidx.compose.ui.graphics.vector.ImageVector,
-    val value: String,
-    val label: String,
+    val value: String?,
+    val label: String?,
     val color: androidx.compose.ui.graphics.Color = androidx.compose.ui.graphics.Color.Black
 )
 
 data class CourseCardData(
-    val id: String,
-    val title: String,
-    val tag: String,
-    val imageUrl: String,
-    val progress: Int
+    val id: String?,
+    val title: String?,
+    val tag: String?,
+    val imageUrl: String?,
+    val progress: Int?
 )
 
 data class WishlistItemData(
     @SerializedName("id")
-    val id: String,
+    val id: String?,
     @SerializedName("title")
-    val title: String,
+    val title: String?,
     @SerializedName("description")
-    val description: String,
+    val description: String?,
     @SerializedName("image")
-    val image: String,
+    val image: String?,
     @SerializedName("duration")
-    val duration: String,
+    val duration: String?,
     @SerializedName("progress")
     val progress: String?,
     @SerializedName("category")
-    val category: String,
+    val category: String?,
     @SerializedName("level")
-    val level: String,
+    val level: String?,
     @SerializedName("rating")
     val rating: Float?,
     @SerializedName("reviews")
     val reviews: Int?,
     @SerializedName("instructor")
-    val instructor: String,
+    val instructor: String?,
 )
 
 data class AchievementData(
@@ -95,12 +95,12 @@ data class AchievementData(
 )
 
 data class RecommendationData(
-    val id: String,
-    val title: String,
-    val category: String,
-    val rating: String,
-    val description: String,
-    val imageUrl: String
+    val id: String?,
+    val title: String?,
+    val category: String?,
+    val rating: String?,
+    val description: String?,
+    val imageUrl: String?
 )
 
 data class AchievementsAllDto(
@@ -110,22 +110,22 @@ data class AchievementsAllDto(
 )
 
 data class AchievementStatDto(
-    val id: Int,
-    val icon: String,
-    val number: Int,
-    val label: String
+    val id: Int?,
+    val icon: String?,
+    val number: Int?,
+    val label: String?
 )
 
 data class EarnedBadgeDto(
     val icon_url: String?,
-    val title: String,
-    val description: String
+    val title: String?,
+    val description: String?
 )
 
 data class BadgeProgressDto(
     val icon_url: String?,
-    val title: String,
-    val description: String,
+    val title: String?,
+    val description: String?,
     val progress: Int?
 )
 
@@ -135,17 +135,17 @@ data class WishlistResponse(val success: Boolean, val message: String?)
 
 data class NotificationDto(
     @SerializedName("id")
-    val id: Int,
+    val id: Int?,
     @SerializedName("title")
-    val title: String,
+    val title: String?,
     @SerializedName("description")
-    val description: String,
+    val description: String?,
     @SerializedName("type")
-    val type: String,
+    val type: String?,
     @SerializedName("is_read")
-    val is_read: Boolean,
+    val is_read: Boolean?,
     @SerializedName("created_at")
-    val created_at: String
+    val created_at: String?
 )
 
 data class NotificationResponse(

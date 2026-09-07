@@ -29,12 +29,12 @@ class NotificationsViewModel(
                 val response = dashboardInteractor.getNotifications(true)
                 _notifications.value = response.notifications.map {
                     NotificationModel(
-                        id = it.id,
-                        title = it.title,
-                        description = it.description,
-                        type = it.type,
-                        isRead = it.is_read,
-                        createdAt = it.created_at
+                        id = it.id ?: 0,
+                        title = it.title ?: "",
+                        description = it.description ?: "",
+                        type = it.type ?: "",
+                        isRead = it.is_read ?: false,
+                        createdAt = it.created_at ?: ""
                     )
                 }
             } catch (e: Exception) {

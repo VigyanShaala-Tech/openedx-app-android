@@ -15,14 +15,12 @@ import org.openedx.core.R
 import org.openedx.core.config.Config
 import org.openedx.core.domain.model.EnrolledCourse
 import org.openedx.core.domain.model.EnrolledCourseData
-import org.openedx.core.domain.model.CourseSharingUtmParameters
-import org.openedx.core.domain.model.Progress
 import org.openedx.core.system.connection.NetworkConnection
 import org.openedx.core.system.notifier.CourseDashboardUpdate
 import org.openedx.core.system.notifier.DiscoveryNotifier
+import org.openedx.dashboard.data.model.CourseItemDto
 import org.openedx.dashboard.domain.CourseStatusFilter
 import org.openedx.dashboard.domain.interactor.DashboardInteractor
-import org.openedx.dashboard.data.model.CourseItemDto
 import org.openedx.dashboard.presentation.DashboardAnalytics
 import org.openedx.dashboard.presentation.DashboardRouter
 import org.openedx.foundation.extension.isInternetError
@@ -251,10 +249,10 @@ class AllEnrolledCoursesViewModel(
     }
 
     private fun CourseItemDto.mapToEnrolled(): EnrolledCourse {
-        val progressValue = org.openedx.core.domain.model.Progress(progress, 100)
+        val progressValue = org.openedx.core.domain.model.Progress(progress ?: 0, 100)
         val courseData = EnrolledCourseData(
-            id = id,
-            name = title,
+            id = id ?: "",
+            name = title ?: "",
             number = "",
             org = "",
             start = null,

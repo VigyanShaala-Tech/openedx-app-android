@@ -74,6 +74,8 @@ class LogistrationViewModel(
     private val coursesList = mutableListOf<Course>()
     private var isLoading = false
 
+    private var currentSelectedFilters: Map<String, String> = emptyMap()
+
     init {
         logLogistrationScreenEvent()
         if (courseId.isEmpty() && !discoveryTypeWebView) {
@@ -173,37 +175,46 @@ class LogistrationViewModel(
 
     fun searchCatalogCourses(
         searchTerm: String? = null,
-        selected: Map<String, String> = emptyMap()
+        selected: Map<String, String>? = null
     ) {
-        _searchQuery.value = searchTerm ?: ""
-        if (searchTerm.isNullOrBlank() && selected.isEmpty()) {
+        val queryText = searchTerm ?: _searchQuery.value.orEmpty()
+        _searchQuery.value = queryText
+
+        if (selected != null) {
+            currentSelectedFilters = selected
+        }
+        val activeFilters = currentSelectedFilters ?: emptyMap()
+
+        val category = activeFilters["categories"]?.takeIf { it.isNotBlank() && !it.startsWith("All") }
+        val level = (activeFilters["levels"] ?: activeFilters["tags"])?.takeIf {
+            it.isNotBlank() && !it.startsWith("All") && !it.equals("Tags", ignoreCase = true)
+        }
+        val subject = activeFilters["subjects"]?.takeIf { it.isNotBlank() && !it.startsWith("All") }
+        val query = queryText.takeIf { it.isNotBlank() }
+
+        if (query == null && category == null && level == null && subject == null) {
             page = 1
             getCoursesList()
             return
         }
+
         viewModelScope.launch {
             try {
                 _uiState.value = DiscoveryUIState.Loading
-                val category = selected["categories"]?.takeIf { it.isNotBlank() && !it.startsWith("All") }
-                val level = (selected["levels"] ?: selected["tags"])?.takeIf {
-                    it.isNotBlank() && !it.startsWith("All") && !it.equals("Tags", ignoreCase = true)
-                }
-                val subject = selected["subjects"]?.takeIf { it.isNotBlank() && !it.startsWith("All") }
-
                 val resp = catalogApi.getCourses(
-                    searchTerm = searchTerm?.takeIf { it.isNotBlank() },
+                    searchTerm = query,
                     category = category,
                     level = level,
                     subject = subject
                 )
 
                 // Client-side ranking: Prioritize exact/substring matches in name or description
-                val sortedResults = if (!searchTerm.isNullOrBlank()) {
+                val sortedResults = if (!query.isNullOrBlank()) {
                     resp.results.sortedByDescending { c ->
                         var score = 0
-                        if (c.name.contains(searchTerm, ignoreCase = true)) score += 10
-                        if (c.short_description?.contains(searchTerm, ignoreCase = true) == true) score += 5
-                        if (c.name.startsWith(searchTerm, ignoreCase = true)) score += 10
+                        if (c.name.contains(query, ignoreCase = true)) score += 10
+                        if (c.short_description?.contains(query, ignoreCase = true) == true) score += 5
+                        if (c.name.startsWith(query, ignoreCase = true)) score += 10
                         score
                     }
                 } else {

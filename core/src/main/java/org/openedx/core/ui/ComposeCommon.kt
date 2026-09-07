@@ -324,6 +324,11 @@ fun SearchBar(
     var textFieldValue by rememberSaveable(stateSaver = TextFieldValue.Saver) {
         mutableStateOf(searchValue)
     }
+    LaunchedEffect(searchValue) {
+        if (textFieldValue.text != searchValue.text) {
+            textFieldValue = searchValue
+        }
+    }
     OutlinedTextField(
         modifier = Modifier
             .testTag("tf_search")

@@ -139,6 +139,9 @@ class LogistrationFragment : Fragment() {
                     onFiltersChanged = { selected ->
                         viewModel.searchCatalogCourses(selected = selected)
                     },
+                    onClearFilters = {
+                        viewModel.searchCatalogCourses(searchTerm = "", selected = emptyMap())
+                    },
                     onSignInClick = {
                         if (viewModel.isBrowserLoginEnabled) {
                             viewModel.signInBrowser(requireActivity())
@@ -225,6 +228,7 @@ private fun LogistrationScreen(
     hasInternetConnection: Boolean,
     onSearchSubmit: (String) -> Unit,
     onFiltersChanged: (Map<String, String>) -> Unit,
+    onClearFilters: () -> Unit = {},
     onSearchClick: (String) -> Unit,
     onRegisterClick: () -> Unit,
     onSignInClick: () -> Unit,
@@ -473,9 +477,8 @@ private fun LogistrationScreen(
                                     org.openedx.discovery.presentation.ui.NoResultsView(
                                         onClearFiltersClick = {
                                             textFieldValue = TextFieldValue("")
-                                            onSearchSubmit("")
                                             filtersViewModel.reset()
-                                            onFiltersChanged(filtersViewModel.state.value.selected)
+                                            onClearFilters()
                                         }
                                     )
                                 }

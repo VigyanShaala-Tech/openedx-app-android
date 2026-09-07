@@ -18,6 +18,7 @@ import org.openedx.core.system.notifier.CourseVideoPositionChanged
 import org.openedx.course.data.repository.CourseRepository
 import org.openedx.course.presentation.CourseAnalytics
 import subtitleFile.TimedTextObject
+import java.util.Locale
 
 open class VideoUnitViewModel(
     val courseId: String,
@@ -90,13 +91,32 @@ open class VideoUnitViewModel(
     }
 
     private fun saveVideoProgress() {
+        val currentMs = _currentVideoTime.value ?: 0L
+        saveUserState(currentMs)
         viewModelScope.launch {
             courseRepository.saveVideoProgress(
                 blockId,
                 videoUrl,
-                _currentVideoTime.value ?: 0L,
+                currentMs,
                 duration
             )
+        }
+    }
+
+    fun saveUserState(positionMs: Long) {
+        if (courseId.isNotEmpty() && blockId.isNotEmpty()) {
+            val seconds = positionMs / 1000
+            val hours = seconds / 3600
+            val minutes = (seconds % 3600) / 60
+            val secs = seconds % 60
+            val formattedTime = String.format(Locale.US, "%02d:%02d:%02d", hours, minutes, secs)
+            viewModelScope.launch {
+                try {
+                    courseRepository.saveUserState(courseId, blockId, formattedTime)
+                } catch (e: Exception) {
+                    e.printStackTrace()
+                }
+            }
         }
     }
 
@@ -126,6 +146,7 @@ open class VideoUnitViewModel(
     open fun markBlockCompleted(blockId: String, medium: String) {
         if (!isBlockAlreadyCompleted) {
             logLoadedCompletedEvent(videoUrl, false, getCurrentVideoTime(), medium)
+            saveUserState(getCurrentVideoTime())
             viewModelScope.launch {
                 try {
                     isBlockAlreadyCompleted = true

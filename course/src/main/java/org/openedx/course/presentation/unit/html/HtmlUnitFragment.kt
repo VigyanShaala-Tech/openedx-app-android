@@ -90,8 +90,17 @@ class HtmlUnitFragment : Fragment() {
     private val fileChooserLauncher = registerForActivityResult(
         ActivityResultContracts.StartActivityForResult()
     ) { result ->
-        if (result.resultCode == Activity.RESULT_OK) {
-            val results = WebChromeClient.FileChooserParams.parseResult(result.resultCode, result.data)
+        if (result.resultCode == Activity.RESULT_OK && result.data != null) {
+            var results = WebChromeClient.FileChooserParams.parseResult(result.resultCode, result.data)
+            if (results == null) {
+                val dataUri = result.data?.data
+                val clipData = result.data?.clipData
+                if (clipData != null) {
+                    results = Array(clipData.itemCount) { i -> clipData.getItemAt(i).uri }
+                } else if (dataUri != null) {
+                    results = arrayOf(dataUri)
+                }
+            }
             filePathCallback?.onReceiveValue(results)
         } else {
             filePathCallback?.onReceiveValue(null)
@@ -155,16 +164,24 @@ class HtmlUnitFragment : Fragment() {
                 fromDownloadedContent = fromDownloadedContent,
                 isFragmentAdded = isAdded,
                 onShowFileChooser = { callback, params ->
+                    filePathCallback?.onReceiveValue(null)
                     filePathCallback = callback
                     try {
-                        val intent = params.createIntent()
-                        intent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
-                        if (intent.resolveActivity(requireContext().packageManager) != null) {
-                            fileChooserLauncher.launch(intent)
-                        } else {
+                        val intent = params.createIntent().apply {
+                            addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
+                        }
+                        fileChooserLauncher.launch(intent)
+                    } catch (e: Exception) {
+                        try {
                             val backupIntent = Intent(Intent.ACTION_GET_CONTENT).apply {
                                 addCategory(Intent.CATEGORY_OPENABLE)
                                 type = "*/*"
+                                if (params.mode == WebChromeClient.FileChooserParams.MODE_OPEN_MULTIPLE) {
+                                    putExtra(Intent.EXTRA_ALLOW_MULTIPLE, true)
+                                }
+                                if (!params.acceptTypes.isNullOrEmpty() && params.acceptTypes[0].isNotEmpty()) {
+                                    putExtra(Intent.EXTRA_MIME_TYPES, params.acceptTypes)
+                                }
                             }
                             fileChooserLauncher.launch(
                                 Intent.createChooser(
@@ -172,10 +189,10 @@ class HtmlUnitFragment : Fragment() {
                                     getString(org.openedx.core.R.string.core_file_chooser_title)
                                 )
                             )
+                        } catch (e2: Exception) {
+                            filePathCallback?.onReceiveValue(null)
+                            filePathCallback = null
                         }
-                    } catch (_: Exception) {
-                        filePathCallback?.onReceiveValue(null)
-                        filePathCallback = null
                     }
                 }
             )

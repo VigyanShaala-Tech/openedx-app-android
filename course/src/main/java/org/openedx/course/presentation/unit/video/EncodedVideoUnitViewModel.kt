@@ -179,7 +179,9 @@ class EncodedVideoUnitViewModel(
             DefaultLoadControl(),
             DefaultBandwidthMeter.getSingletonInstance(context),
             DefaultAnalyticsCollector(Clock.DEFAULT)
-        ).build()
+        ).setSeekForwardIncrementMs(10000L)
+        .setSeekBackIncrementMs(10000L)
+        .build()
         logLoadedCompletedEvent(videoUrl, true, getCurrentVideoTime(), getPlayingMedium())
     }
 

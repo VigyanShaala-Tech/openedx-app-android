@@ -64,10 +64,13 @@ class VideoUnitFragment : Fragment(R.layout.fragment_video_unit) {
                 if (it.isPlaying) {
                     viewModel.setCurrentVideoTime(it.currentPosition)
                 }
-                if (it.duration > 0) {
-                    val completePercentage = it.currentPosition.toDouble() / it.duration.toDouble()
-                    if (completePercentage >= 0.95f) {
-                        viewModel.markBlockCompleted(viewModel.blockId, CourseAnalyticsKey.NATIVE.key)
+                if (it.duration > 1000L) {
+                    viewModel.duration = it.duration
+                    if (it.currentPosition > 0L) {
+                        val completePercentage = it.currentPosition.toDouble() / it.duration.toDouble()
+                        if (completePercentage >= 0.95f) {
+                            viewModel.markBlockCompleted(viewModel.blockId, CourseAnalyticsKey.NATIVE.key)
+                        }
                     }
                 }
             }
@@ -175,12 +178,19 @@ class VideoUnitFragment : Fragment(R.layout.fragment_video_unit) {
         binding.cardView.layoutParams = layoutParams
     }
 
+    override fun onResume() {
+        super.onResume()
+        viewModel.getActivePlayer()?.seekTo(viewModel.getCurrentVideoTime())
+    }
+
     @androidx.annotation.OptIn(UnstableApi::class)
     private fun initPlayer() {
         with(binding) {
             playerView.player = viewModel.getActivePlayer()
             playerView.setShowNextButton(false)
             playerView.setShowPreviousButton(false)
+            playerView.setShowFastForwardButton(true)
+            playerView.setShowRewindButton(true)
             showVideoControllerIndefinitely(false)
 
             val movieMetadata = MediaMetadata.Builder()

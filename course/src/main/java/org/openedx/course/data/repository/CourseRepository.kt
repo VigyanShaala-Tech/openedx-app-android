@@ -10,6 +10,7 @@ import okhttp3.RequestBody.Companion.toRequestBody
 import org.openedx.core.ApiConstants
 import org.openedx.core.data.api.CourseApi
 import org.openedx.core.data.model.BlocksCompletionBody
+import org.openedx.core.data.model.RegistrationSubmitResponse
 import org.openedx.core.data.model.room.CourseProgressEntity
 import org.openedx.core.data.model.room.OfflineXBlockProgress
 import org.openedx.core.data.model.room.VideoProgressEntity
@@ -21,10 +22,8 @@ import org.openedx.core.domain.model.CourseDatesBannerInfo
 import org.openedx.core.domain.model.CourseDatesResult
 import org.openedx.core.domain.model.CourseEnrollmentDetails
 import org.openedx.core.domain.model.CourseProgress
-import org.openedx.core.domain.model.DashboardProgress
-import org.openedx.core.data.model.OngoingSessionResponse
-import org.openedx.core.data.model.RegistrationSubmitResponse
 import org.openedx.core.domain.model.CourseStructure
+import org.openedx.core.domain.model.DashboardProgress
 import org.openedx.core.domain.model.EligibilityResult
 import org.openedx.core.domain.model.EnrollmentForm
 import org.openedx.core.domain.model.LeaderboardList
@@ -528,6 +527,14 @@ class CourseRepository(
     suspend fun markTopicCompleted(courseId: String, blockId: String) {
         try {
             api.markTopicCompleted(courseId, blockId)
+        } catch (e: Exception) {
+            e.printStackTrace()
+        }
+    }
+
+    suspend fun saveUserState(courseId: String, blockId: String, savedVideoPosition: String) {
+        try {
+            api.saveUserState(courseId, blockId, mapOf("saved_video_position" to savedVideoPosition))
         } catch (e: Exception) {
             e.printStackTrace()
         }

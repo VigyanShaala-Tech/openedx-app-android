@@ -172,7 +172,7 @@ class CourseHomeViewModelTest {
             pagination = Pagination(0, "", 0, "")
         )
         coEvery { interactor.getOngoingSession(any()) } returns OngoingSessionResponse(
-            result = OngoingSessionModel(false, "", "", "", "", "")
+            result = OngoingSessionModel(false, "", "", "", "", "", "", "")
         )
         coEvery { interactor.getVideoProgress("video1") } returns videoProgress
 

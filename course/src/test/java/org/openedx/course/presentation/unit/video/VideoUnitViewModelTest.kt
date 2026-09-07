@@ -47,6 +47,10 @@ class VideoUnitViewModelTest {
     @Before
     fun setUp() {
         Dispatchers.setMain(dispatcher)
+        coEvery { courseRepository.saveUserState(any(), any(), any()) } returns Unit
+        coEvery { courseRepository.markTopicCompleted(any(), any()) } returns Unit
+        coEvery { courseRepository.getVideoProgress(any()) } returns mockk(relaxed = true)
+        coEvery { notifier.send(any<org.openedx.core.system.notifier.CourseCompletionSet>()) } returns Unit
     }
 
     @After

@@ -32,11 +32,9 @@ import retrofit2.http.GET
 import retrofit2.http.Header
 import retrofit2.http.Multipart
 import retrofit2.http.POST
-import retrofit2.http.PUT
 import retrofit2.http.Part
 import retrofit2.http.Path
 import retrofit2.http.Query
-import retrofit2.http.Url
 
 interface CourseApi {
 
@@ -211,5 +209,12 @@ interface CourseApi {
     suspend fun markTopicCompleted(
         @Path("course_id") courseId: String,
         @Path("block_id") blockId: String
+    ): ResponseBody
+
+    @POST("/courses/{course_id}/xblock/{block_id}/handler/xmodule_handler/save_user_state")
+    suspend fun saveUserState(
+        @Path("course_id") courseId: String,
+        @Path("block_id") blockId: String,
+        @Body body: Map<String, String>
     ): ResponseBody
 }

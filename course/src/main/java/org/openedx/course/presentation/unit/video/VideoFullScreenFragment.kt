@@ -124,7 +124,9 @@ class VideoFullScreenFragment : Fragment(R.layout.fragment_video_full_screen) {
             DefaultLoadControl(),
             DefaultBandwidthMeter.getSingletonInstance(requireContext()),
             DefaultAnalyticsCollector(Clock.DEFAULT)
-        ).build()
+        ).setSeekForwardIncrementMs(10000L)
+        .setSeekBackIncrementMs(10000L)
+        .build()
     }
 
     @OptIn(UnstableApi::class)
@@ -133,6 +135,8 @@ class VideoFullScreenFragment : Fragment(R.layout.fragment_video_full_screen) {
             player = exoPlayer
             setShowNextButton(false)
             setShowPreviousButton(false)
+            setShowFastForwardButton(true)
+            setShowRewindButton(true)
             setFullscreenButtonClickListener {
                 requireActivity().requestedOrientation = ActivityInfo.SCREEN_ORIENTATION_PORTRAIT
                 requireActivity().supportFragmentManager.popBackStackImmediate()
@@ -157,6 +161,9 @@ class VideoFullScreenFragment : Fragment(R.layout.fragment_video_full_screen) {
                     viewModel.currentVideoTime,
                     CourseAnalyticsKey.NATIVE.key
                 )
+                if (!isPlaying) {
+                    viewModel.saveUserState(blockId, exoPlayer?.currentPosition ?: viewModel.currentVideoTime)
+                }
             }
 
             override fun onPlaybackStateChanged(playbackState: Int) {

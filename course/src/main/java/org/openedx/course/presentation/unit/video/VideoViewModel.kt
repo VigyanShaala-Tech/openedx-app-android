@@ -46,9 +46,27 @@ class VideoViewModel(
         }
     }
 
+    fun saveUserState(blockId: String, positionMs: Long) {
+        if (courseId.isNotEmpty() && blockId.isNotEmpty() && positionMs >= 0) {
+            val seconds = positionMs / 1000
+            val hours = seconds / 3600
+            val minutes = (seconds % 3600) / 60
+            val secs = seconds % 60
+            val formattedTime = String.format(java.util.Locale.US, "%02d:%02d:%02d", hours, minutes, secs)
+            viewModelScope.launch {
+                try {
+                    courseRepository.saveUserState(courseId, blockId, formattedTime)
+                } catch (e: Exception) {
+                    e.printStackTrace()
+                }
+            }
+        }
+    }
+
     fun markBlockCompleted(blockId: String, medium: String) {
         if (!isBlockAlreadyCompleted) {
             logLoadedCompletedEvent(videoUrl, false, currentVideoTime, medium)
+            saveUserState(blockId, currentVideoTime)
             viewModelScope.launch {
                 try {
                     isBlockAlreadyCompleted = true

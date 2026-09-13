@@ -28,6 +28,8 @@ import org.openedx.core.data.model.RegistrationSubmitResponse
 import org.openedx.core.data.model.ResetCourseDates
 import org.openedx.core.data.model.UserRankingResponse
 import retrofit2.http.Body
+import retrofit2.http.FieldMap
+import retrofit2.http.FormUrlEncoded
 import retrofit2.http.GET
 import retrofit2.http.Header
 import retrofit2.http.Multipart
@@ -211,10 +213,11 @@ interface CourseApi {
         @Path("block_id") blockId: String
     ): ResponseBody
 
+    @FormUrlEncoded
     @POST("/courses/{course_id}/xblock/{block_id}/handler/xmodule_handler/save_user_state")
     suspend fun saveUserState(
         @Path("course_id") courseId: String,
         @Path("block_id") blockId: String,
-        @Body body: Map<String, String>
+        @FieldMap body: Map<String, String>
     ): ResponseBody
 }

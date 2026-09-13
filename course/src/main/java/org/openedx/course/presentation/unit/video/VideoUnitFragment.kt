@@ -19,6 +19,7 @@ import androidx.media3.common.MediaMetadata
 import androidx.media3.common.util.UnstableApi
 import androidx.media3.datasource.DefaultDataSource
 import androidx.media3.exoplayer.hls.HlsMediaSource
+import androidx.window.layout.WindowMetricsCalculator
 import org.koin.android.ext.android.inject
 import org.koin.androidx.viewmodel.ext.android.viewModel
 import org.koin.core.parameter.parametersOf
@@ -167,13 +168,35 @@ class VideoUnitFragment : Fragment(R.layout.fragment_video_unit) {
     }
 
     private fun setupPlayerHeight() {
+        val orientation = resources.configuration.orientation
+        val windowMetrics = WindowMetricsCalculator.getOrCreate()
+            .computeCurrentWindowMetrics(requireActivity())
+        val currentBounds = windowMetrics.bounds
         val layoutParams = binding.cardView.layoutParams as ConstraintLayout.LayoutParams
-        if (windowSize?.isTablet == true) {
-            layoutParams.height = requireContext().dpToPixel(TABLET_PLAYER_HEIGHT_DP).roundToInt()
-            layoutParams.width = ConstraintLayout.LayoutParams.WRAP_CONTENT
+
+        if (orientation == Configuration.ORIENTATION_PORTRAIT || windowSize?.isTablet == true) {
+            val padding = requireContext().dpToPixel(PLAYER_VIEW_PADDING_DP)
+            val width = currentBounds.width() - padding
+            val minHeight = requireContext().dpToPixel(MIN_PLAYER_HEIGHT_DP).roundToInt()
+            val aspectRatio = VIDEO_ASPECT_RATIO_WIDTH / VIDEO_ASPECT_RATIO_HEIGHT
+            val calculatedHeight = (width / aspectRatio).roundToInt()
+
+            val targetHeight = when {
+                windowSize?.isTablet == true -> {
+                    requireContext().dpToPixel(TABLET_PLAYER_HEIGHT_DP).roundToInt()
+                }
+
+                calculatedHeight < minHeight -> {
+                    minHeight
+                }
+
+                else -> {
+                    calculatedHeight
+                }
+            }
+            layoutParams.height = targetHeight
         } else {
             layoutParams.height = 0
-            layoutParams.width = 0
         }
         binding.cardView.layoutParams = layoutParams
     }
@@ -187,6 +210,7 @@ class VideoUnitFragment : Fragment(R.layout.fragment_video_unit) {
     private fun initPlayer() {
         with(binding) {
             playerView.player = viewModel.getActivePlayer()
+            playerView.useController = true
             playerView.setShowNextButton(false)
             playerView.setShowPreviousButton(false)
             playerView.setShowFastForwardButton(true)
@@ -266,12 +290,16 @@ class VideoUnitFragment : Fragment(R.layout.fragment_video_unit) {
     @UnstableApi
     private fun showVideoControllerIndefinitely(show: Boolean) {
         if (show) {
+            binding.playerView.useController = true
             binding.playerView.controllerAutoShow = false
             binding.playerView.controllerShowTimeoutMs = 0
             binding.playerView.showController()
         } else {
+            binding.playerView.useController = true
             binding.playerView.controllerAutoShow = true
+            binding.playerView.controllerHideOnTouch = true
             binding.playerView.controllerShowTimeoutMs = CONTROLLER_SHOW_TIMEOUT
+            binding.playerView.showController()
         }
     }
 
@@ -298,7 +326,11 @@ class VideoUnitFragment : Fragment(R.layout.fragment_video_unit) {
         private const val ARG_TITLE = "title"
         private const val ARG_DOWNLOADED = "isDownloaded"
 
+        private const val PLAYER_VIEW_PADDING_DP = 48
+        private const val MIN_PLAYER_HEIGHT_DP = 210
         private const val TABLET_PLAYER_HEIGHT_DP = 320
+        private const val VIDEO_ASPECT_RATIO_WIDTH = 16f
+        private const val VIDEO_ASPECT_RATIO_HEIGHT = 9f
         private const val CONTROLLER_SHOW_TIMEOUT = 2000
 
         fun newInstance(

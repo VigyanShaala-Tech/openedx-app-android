@@ -1,6 +1,5 @@
 package org.openedx.dashboard.presentation.wishlist
 
-import androidx.fragment.app.FragmentManager
 import androidx.lifecycle.viewModelScope
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -12,14 +11,14 @@ import kotlinx.coroutines.launch
 import org.openedx.core.R
 import org.openedx.core.config.Config
 import org.openedx.core.system.connection.NetworkConnection
+import org.openedx.core.system.notifier.CourseDashboardUpdate
+import org.openedx.core.system.notifier.DiscoveryNotifier
 import org.openedx.dashboard.data.model.WishlistItemData
 import org.openedx.dashboard.domain.interactor.DashboardInteractor
 import org.openedx.foundation.extension.isInternetError
 import org.openedx.foundation.presentation.BaseViewModel
 import org.openedx.foundation.presentation.UIMessage
 import org.openedx.foundation.system.ResourceManager
-import org.openedx.core.system.notifier.CourseDashboardUpdate
-import org.openedx.core.system.notifier.DiscoveryNotifier
 
 data class WishlistUIState(
     val loading: Boolean = true,
@@ -57,10 +56,11 @@ class WishlistViewModel(
             _uiState.value = _uiState.value.copy(loading = !isRefreshing, refreshing = isRefreshing)
             try {
                 val response = interactor.getWishlist()
+                val items = (response.results as? List<*>)?.mapNotNull { WishlistItemData.from(it) } ?: emptyList()
                 _uiState.value = _uiState.value.copy(
                     loading = false,
                     refreshing = false,
-                    items = response.results
+                    items = items
                 )
             } catch (e: Exception) {
                 _uiState.value = _uiState.value.copy(loading = false, refreshing = false)

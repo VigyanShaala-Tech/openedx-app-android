@@ -11,6 +11,7 @@
 -keepattributes *Annotation*
 
 # Application classes that will be serialized/deserialized over Gson
+-keep class org.openedx.**.data.model.** { *; }
 -keepclassmembers class org.openedx.**.data.model.** { *; }
 
 # Prevent proguard from stripping interface information from TypeAdapter, TypeAdapterFactory,
@@ -194,3 +195,17 @@
     public static *** w(...);
     public static *** e(...);
 }
+
+##---------------Begin: Proguard configuration for Media3 / ExoPlayer  ----------
+-keep class androidx.media3.ui.** { *; }
+-keepclassmembers class androidx.media3.ui.** { *; }
+-keep class androidx.media3.exoplayer.** { *; }
+-keepclassmembers class androidx.media3.exoplayer.** { *; }
+-keep class androidx.media3.common.** { *; }
+-keepclassmembers class androidx.media3.common.** { *; }
+##---------------End: Proguard configuration for Media3 / ExoPlayer  ----------
+
+##---------------Begin: Proguard configuration for Android YouTube Player  ----------
+-keep class com.pierfrancescosoffritti.androidyoutubeplayer.** { *; }
+-keepclassmembers class com.pierfrancescosoffritti.androidyoutubeplayer.** { *; }
+##---------------End: Proguard configuration for Android YouTube Player  ----------

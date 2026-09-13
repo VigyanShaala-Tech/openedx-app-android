@@ -92,7 +92,7 @@ class AllEnrolledCoursesViewModel(
                 when (currentFilter.value) {
                     CourseStatusFilter.IN_PROGRESS -> {
                         val response = interactor.getInProgress()
-                        val mapped = response.results.map { it.mapToEnrolled() }
+                        val mapped = (response.results as? List<*>)?.mapNotNull { CourseItemDto.from(it)?.mapToEnrolled() } ?: emptyList()
                         _uiState.update { it.copy(canLoadMore = false) }
                         page = -1
                         coursesList.clear()
@@ -100,7 +100,7 @@ class AllEnrolledCoursesViewModel(
                     }
                     CourseStatusFilter.COMPLETE -> {
                         val response = interactor.getCompleted()
-                        val mapped = response.results.map { it.mapToEnrolled() }
+                        val mapped = (response.results as? List<*>)?.mapNotNull { CourseItemDto.from(it)?.mapToEnrolled() } ?: emptyList()
                         _uiState.update { it.copy(canLoadMore = false) }
                         page = -1
                         coursesList.clear()
@@ -152,14 +152,14 @@ class AllEnrolledCoursesViewModel(
                 when (currentFilter.value) {
                     CourseStatusFilter.IN_PROGRESS -> {
                         val response = interactor.getInProgress()
-                        val mapped = response.results.map { it.mapToEnrolled() }
+                        val mapped = (response.results as? List<*>)?.mapNotNull { CourseItemDto.from(it)?.mapToEnrolled() } ?: emptyList()
                         _uiState.update { it.copy(canLoadMore = false) }
                         page = -1
                         coursesList.addAll(mapped)
                     }
                     CourseStatusFilter.COMPLETE -> {
                         val response = interactor.getCompleted()
-                        val mapped = response.results.map { it.mapToEnrolled() }
+                        val mapped = (response.results as? List<*>)?.mapNotNull { CourseItemDto.from(it)?.mapToEnrolled() } ?: emptyList()
                         _uiState.update { it.copy(canLoadMore = false) }
                         page = -1
                         coursesList.addAll(mapped)

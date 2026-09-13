@@ -218,31 +218,22 @@ private fun NewDashboardScreenContent(
 
     val primaryColor = MaterialTheme.appColors.primary
     val statCards = remember(uiState.summary, primaryColor) {
-        uiState.summary.map {
-            val (icon, color) = when (it.icon) {
+        (uiState.summary as? List<*>)?.mapNotNull { item ->
+            val summaryDto = SummaryCardDto.from(item) ?: return@mapNotNull null
+            val (icon, color) = when (summaryDto.icon) {
                 "faBookOpen" -> Icons.Filled.ImportContacts to Color(0xFF69AB4A)
                 "faCheckCircle" -> Icons.Filled.CheckCircle to Color(0xFF4CAF50)
                 "faChartLine" -> Icons.Filled.Alarm to Color(0xFF879FF5)
                 "faAward" -> Icons.Filled.EmojiEvents to Color(0xFFFFA000)
                 else -> Icons.Filled.Book to primaryColor
             }
-            StatCardData(icon, it.number?.toString() ?: "0", it.label ?: "", color)
-        }
+            StatCardData(icon, summaryDto.number?.toString() ?: "0", summaryDto.label ?: "", color)
+        } ?: emptyList()
     }
 
     val continueCourses = remember(uiState.continueLearning) {
-        uiState.continueLearning.map { course ->
-            CourseCardData(
-                course.id ?: "",
-                course.title ?: "",
-                course.category ?: "",
-                sanitizeUrl(course.course_image),
-                course.progress ?: 0
-            )
-        }
-    }
-    val completedCourses = remember(uiState.completed) {
-        uiState.completed?.results?.map { course ->
+        (uiState.continueLearning as? List<*>)?.mapNotNull { item ->
+            val course = CourseItemDto.from(item) ?: return@mapNotNull null
             CourseCardData(
                 course.id ?: "",
                 course.title ?: "",
@@ -252,14 +243,38 @@ private fun NewDashboardScreenContent(
             )
         } ?: emptyList()
     }
-    val wishlistItems = remember(uiState.wishlist) {
-        uiState.wishlist?.results?.map { it.copy(image = sanitizeUrl(it.image)) } ?: emptyList()
+
+    val completedCourses = remember(uiState.completed) {
+        val rawResults = (uiState.completed?.results as? List<*>)
+        rawResults?.mapNotNull { item ->
+            val course = CourseItemDto.from(item) ?: return@mapNotNull null
+            CourseCardData(
+                course.id ?: "",
+                course.title ?: "",
+                course.category ?: "",
+                sanitizeUrl(course.course_image),
+                course.progress ?: 0
+            )
+        } ?: emptyList()
     }
 
-    val achievements = uiState.achievements
+    val wishlistItems = remember(uiState.wishlist) {
+        val rawResults = (uiState.wishlist?.results as? List<*>)
+        rawResults?.mapNotNull { item ->
+            val wish = WishlistItemData.from(item) ?: return@mapNotNull null
+            wish.copy(image = sanitizeUrl(wish.image))
+        } ?: emptyList()
+    }
+
+    val achievements = remember(uiState.achievements) {
+        (uiState.achievements as? List<*>)?.mapNotNull { item ->
+            AchievementDto.from(item)
+        } ?: emptyList()
+    }
 
     val recommendations = remember(uiState.recommended) {
-        uiState.recommended.map { rec ->
+        (uiState.recommended as? List<*>)?.mapNotNull { item ->
+            val rec = RecommendationDto.from(item) ?: return@mapNotNull null
             RecommendationData(
                 rec.id ?: "",
                 rec.title ?: "",
@@ -268,7 +283,7 @@ private fun NewDashboardScreenContent(
                 rec.description ?: "",
                 sanitizeUrl(rec.image)
             )
-        }
+        } ?: emptyList()
     }
 
     Box(modifier = Modifier.fillMaxSize()) {

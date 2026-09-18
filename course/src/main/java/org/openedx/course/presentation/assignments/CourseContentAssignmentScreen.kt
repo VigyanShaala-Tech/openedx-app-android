@@ -525,7 +525,7 @@ private fun AssignmentDetails(
                         modifier = Modifier.padding(top = 4.dp),
                         text = annotatedDisplayName,
                         style = MaterialTheme.appTypography.bodySmall,
-                        fontWeight = FontWeight.Bold,
+//                        fontWeight = FontWeight.Bold,
                         color = MaterialTheme.appColors.textDark
                     )
                     if (description.isNotEmpty()) {

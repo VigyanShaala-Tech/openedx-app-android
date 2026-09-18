@@ -197,7 +197,7 @@ private fun AssignmentCard(
                 Spacer(modifier = Modifier.height(4.dp))
                 Text(
                     text = annotatedDisplayName,
-                    fontWeight = FontWeight.Bold,
+//                    fontWeight = FontWeight.Bold,
                     style = MaterialTheme.appTypography.labelSmall,
                     color = MaterialTheme.appColors.textSecondary,
                 )

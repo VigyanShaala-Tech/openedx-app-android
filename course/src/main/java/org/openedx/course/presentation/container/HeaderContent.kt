@@ -1,16 +1,9 @@
 package org.openedx.course.presentation.container
 
-import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
-import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
@@ -23,20 +16,17 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Devices
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import org.openedx.course.R
 import org.openedx.core.ui.theme.OpenEdXTheme
 import org.openedx.core.ui.theme.appColors
 import org.openedx.core.ui.theme.appTypography
+import org.openedx.course.R
 import org.openedx.foundation.presentation.rememberWindowSize
-import org.openedx.core.R as coreR
 
 @Composable
 internal fun ExpandedHeaderContent(
@@ -62,8 +52,6 @@ internal fun ExpandedHeaderContent(
             text = courseTitle ?: "",
             color = MaterialTheme.appColors.textDark,
             style = MaterialTheme.appTypography.titleLarge,
-            overflow = TextOverflow.Ellipsis,
-            maxLines = 3,
             fontWeight = FontWeight.Bold,
             lineHeight = 32.sp,
             modifier = Modifier
@@ -112,9 +100,7 @@ internal fun CollapsedHeaderContent(
             .padding(bottom = 3.dp),
         text = courseTitle ?: "",
         color = MaterialTheme.appColors.textDark,
-        overflow = TextOverflow.Ellipsis,
-        style = MaterialTheme.appTypography.titleSmall,
-        maxLines = 1
+        style = MaterialTheme.appTypography.titleSmall
     )
 }
 

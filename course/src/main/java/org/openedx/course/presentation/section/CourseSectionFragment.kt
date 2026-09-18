@@ -43,7 +43,6 @@ import androidx.compose.ui.platform.ViewCompositionStrategy
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
-import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Devices
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.Dp
@@ -236,8 +235,6 @@ private fun CourseSectionScreen(
                         text = title,
                         color = MaterialTheme.appColors.textPrimary,
                         style = MaterialTheme.appTypography.titleMedium,
-                        maxLines = 1,
-                        overflow = TextOverflow.Ellipsis,
                         textAlign = TextAlign.Center
                     )
                 }
@@ -323,9 +320,7 @@ private fun CourseSubsectionItem(
                 modifier = Modifier.weight(1f),
                 text = block.displayName ?: "",
                 style = MaterialTheme.appTypography.titleSmall,
-                color = MaterialTheme.appColors.textPrimary,
-                overflow = TextOverflow.Ellipsis,
-                maxLines = 1
+                color = MaterialTheme.appColors.textPrimary
             )
             Spacer(modifier = Modifier.width(16.dp))
             Row(

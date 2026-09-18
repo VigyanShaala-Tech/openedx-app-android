@@ -30,7 +30,6 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.core.os.bundleOf
 import androidx.core.view.isGone
@@ -684,14 +683,12 @@ class CourseUnitContainerFragment : Fragment(R.layout.fragment_course_unit_conta
 
         if (hierarchyPath.isNotEmpty()) {
             Text(
-                overflow = TextOverflow.Ellipsis,
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(horizontal = 24.dp),
                 text = hierarchyPath ?: "",
                 style = MaterialTheme.appTypography.bodySmall,
-                color = MaterialTheme.appColors.textDark,
-                maxLines = 2,
+                color = MaterialTheme.appColors.textDark
             )
         }
     }

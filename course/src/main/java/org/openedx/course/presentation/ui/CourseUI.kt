@@ -331,9 +331,7 @@ fun VideoTitle(
         text = text,
         modifier = modifier,
         color = MaterialTheme.appColors.textPrimary,
-        style = MaterialTheme.appTypography.titleLarge,
-        maxLines = 1,
-        overflow = TextOverflow.Ellipsis
+        style = MaterialTheme.appTypography.titleLarge
     )
 }
 
@@ -790,9 +788,7 @@ fun CourseVideoItem(
                 Text(
                     text = videoBlock.displayName ?: "",
                     color = Color.White,
-                    style = titleStyle,
-                    maxLines = 1,
-                    overflow = TextOverflow.Ellipsis
+                    style = titleStyle
                 )
             }
 
@@ -853,9 +849,7 @@ fun CourseVideoSectionHeader(
             Text(
                 text = block.displayName ?: "",
                 style = MaterialTheme.appTypography.titleSmall,
-                color = MaterialTheme.appColors.textPrimary,
-                maxLines = 1,
-                overflow = TextOverflow.Ellipsis
+                color = MaterialTheme.appColors.textPrimary
             )
             Text(
                 text = stringResource(
@@ -1038,7 +1032,7 @@ fun CourseExpandableChapterCard(
     Row(
         modifier
             .fillMaxWidth()
-            .height(48.dp)
+            .defaultMinSize(minHeight = 48.dp)
             .padding(vertical = 8.dp)
             .padding(start = 16.dp, end = 16.dp),
         verticalAlignment = Alignment.CenterVertically,
@@ -1063,9 +1057,7 @@ fun CourseExpandableChapterCard(
             modifier = Modifier.weight(1f),
             text = block.displayName ?: "",
             style = MaterialTheme.appTypography.titleMedium,
-            color = MaterialTheme.appColors.textPrimary,
-            maxLines = 1,
-            overflow = TextOverflow.Ellipsis
+            color = MaterialTheme.appColors.textPrimary
         )
         DownloadIcon(
             downloadedState = downloadedState,
@@ -1181,8 +1173,6 @@ fun CourseUnitToolbar(
                 text = title ?: "",
                 color = MaterialTheme.appColors.textPrimary,
                 style = MaterialTheme.appTypography.titleSmall,
-                maxLines = 2,
-                overflow = TextOverflow.Ellipsis,
                 textAlign = TextAlign.Center
             )
         }

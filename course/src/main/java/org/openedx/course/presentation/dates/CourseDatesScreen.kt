@@ -54,7 +54,6 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Devices
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.Dp
@@ -590,8 +589,6 @@ private fun CourseDateItem(
                 },
                 style = MaterialTheme.appTypography.titleMedium,
                 color = MaterialTheme.appColors.textDark,
-                maxLines = 1,
-                overflow = TextOverflow.Ellipsis,
             )
             Spacer(modifier = Modifier.width(7.dp))
 

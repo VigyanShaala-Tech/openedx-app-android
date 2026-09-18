@@ -1,6 +1,5 @@
 package org.openedx.course.presentation.home
 
-import android.net.Uri
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -129,8 +128,7 @@ fun OngoingSessionItem(
                     text = session.meetingName ?: "",
                     style = MaterialTheme.appTypography.bodyMedium,
                     color = MaterialTheme.appColors.textDark,
-                    fontWeight = FontWeight.Bold,
-                    maxLines = 1
+                    fontWeight = FontWeight.Bold
                 )
                 Text(
                     text = session.started ?: "",

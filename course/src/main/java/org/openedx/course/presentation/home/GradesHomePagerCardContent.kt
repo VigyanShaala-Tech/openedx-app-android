@@ -24,7 +24,6 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import org.openedx.core.domain.model.CourseProgress
 import org.openedx.core.domain.model.CourseStructure
@@ -134,9 +133,7 @@ private fun GradeCard(
                 text = policy.type ?: "",
                 style = MaterialTheme.appTypography.labelLarge,
                 color = MaterialTheme.appColors.textPrimary,
-                fontWeight = FontWeight.Medium,
-                maxLines = 1,
-                overflow = TextOverflow.Ellipsis
+                fontWeight = FontWeight.Medium
             )
 
             Spacer(modifier = Modifier.height(8.dp))

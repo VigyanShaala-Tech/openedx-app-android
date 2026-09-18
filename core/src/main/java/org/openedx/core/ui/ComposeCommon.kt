@@ -255,10 +255,8 @@ fun MainToolbar(
                 .padding(start = 16.dp)
                 .padding(end = 64.dp),
             text = label ?: "",
-            color = MaterialTheme.appColors.textDark,
-            style = MaterialTheme.appTypography.titleLarge,
-            maxLines = 2,
-            overflow = TextOverflow.Ellipsis
+            color = MaterialTheme.appColors.primary,
+            style = MaterialTheme.appTypography.titleLarge
         )
         Row(
             modifier = Modifier

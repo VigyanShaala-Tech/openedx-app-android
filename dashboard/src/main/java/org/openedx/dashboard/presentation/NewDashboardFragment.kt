@@ -231,8 +231,8 @@ private fun NewDashboardScreenContent(
         } ?: emptyList()
     }
 
-    val continueCourses = remember(uiState.continueLearning) {
-        (uiState.continueLearning as? List<*>)?.mapNotNull { item ->
+    val continueCourses = remember(uiState.continueLearning, uiState.inProgress) {
+        val list1 = (uiState.continueLearning as? List<*>)?.mapNotNull { item ->
             val course = CourseItemDto.from(item) ?: return@mapNotNull null
             CourseCardData(
                 course.id ?: "",
@@ -242,6 +242,19 @@ private fun NewDashboardScreenContent(
                 course.progress ?: 0
             )
         } ?: emptyList()
+
+        val list2 = (uiState.inProgress?.results as? List<*>)?.mapNotNull { item ->
+            val course = CourseItemDto.from(item) ?: return@mapNotNull null
+            CourseCardData(
+                course.id ?: "",
+                course.title ?: "",
+                course.category ?: "",
+                sanitizeUrl(course.course_image),
+                course.progress ?: 0
+            )
+        } ?: emptyList()
+
+        (list1 + list2).distinctBy { it.id }
     }
 
     val completedCourses = remember(uiState.completed) {
@@ -717,21 +730,23 @@ private fun CourseCard(c: CourseCardData, apiHostUrl: String, onClick: () -> Uni
                         .build(),
                     contentDescription = null,
                 )
-                Box(
-                    modifier = Modifier
-                        .padding(10.dp)
-                        .background(
-                            MaterialTheme.appColors.primary,
-                            MaterialTheme.appShapes.textFieldShape
+                if (!c.tag.isNullOrBlank()) {
+                    Box(
+                        modifier = Modifier
+                            .padding(10.dp)
+                            .background(
+                                MaterialTheme.appColors.primary,
+                                MaterialTheme.appShapes.textFieldShape
+                            )
+                            .clip(MaterialTheme.appShapes.textFieldShape)
+                            .padding(horizontal = 10.dp, vertical = 4.dp)
+                    ) {
+                        Text(
+                            text = c.tag,
+                            style = MaterialTheme.appTypography.labelSmall,
+                            color = MaterialTheme.appColors.primaryButtonText
                         )
-                        .clip(MaterialTheme.appShapes.textFieldShape)
-                        .padding(horizontal = 10.dp, vertical = 4.dp)
-                ) {
-                    Text(
-                        text = c.tag ?: "",
-                        style = MaterialTheme.appTypography.labelSmall,
-                        color = MaterialTheme.appColors.primaryButtonText
-                    )
+                    }
                 }
             }
             Column(modifier = Modifier.padding(12.dp)) {
@@ -881,6 +896,7 @@ private fun RecommendationItem(r: RecommendationData, apiHostUrl: String, onClic
                     .padding(12.dp)
             ) {
                 Row(verticalAlignment = Alignment.CenterVertically) {
+                if (!r.category.isNullOrBlank()) {
                     Box(
                         modifier = Modifier
                             .background(
@@ -891,12 +907,13 @@ private fun RecommendationItem(r: RecommendationData, apiHostUrl: String, onClic
                             .padding(horizontal = 8.dp, vertical = 2.dp)
                     ) {
                         Text(
-                            text = r.category ?: "",
+                            text = r.category,
                             style = MaterialTheme.appTypography.labelSmall,
                             color = MaterialTheme.appColors.primary
                         )
                     }
                     Spacer(Modifier.width(8.dp))
+                }
                     Icon(
                         imageVector = Icons.Filled.Star,
                         contentDescription = null,

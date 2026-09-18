@@ -15,7 +15,7 @@
     <string name="course_share_desc">Share with friends and colleagues</string>
     <string name="course_good_job">Good job!</string>
     <string name="course_section_finished">You\'ve completed \"%s\".</string>
-    <string name="course_back_to_outline">Back to outline</string>
+    <string name="course_back_to_outline">Back to Course</string>
     <string name="course_next_section">Next section</string>
     <string name="course_not_started">This course hasn’t started yet.</string>
     <string name="course_can_download_only_with_wifi">You can download content only from Wi-fi</string>

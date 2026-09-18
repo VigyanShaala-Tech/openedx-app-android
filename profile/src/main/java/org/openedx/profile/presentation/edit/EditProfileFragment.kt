@@ -1004,7 +1004,13 @@ private fun ProfileFields(
                 value = phoneNumber,
                 onValueChange = { onPhoneChange(it) },
                 modifier = Modifier.fillMaxWidth(),
-                placeholder = { Text(stringResource(id = R.string.profile_whatsapp_number_placeholder)) },
+                placeholder = {
+                    Text(
+                        text = stringResource(id = R.string.profile_whatsapp_number_placeholder),
+                        color = MaterialTheme.appColors.textDark,
+                        style = MaterialTheme.appTypography.bodyMedium
+                    )
+                },
                 enabled = !isOtpSent && !isOtpLoading,
                 keyboardOptions = KeyboardOptions(
                     keyboardType = KeyboardType.Phone,
@@ -1015,12 +1021,16 @@ private fun ProfileFields(
                     onDone = { focusManager.clearFocus() }
                 ),
                 colors = TextFieldDefaults.outlinedTextFieldColors(
-                    textColor = MaterialTheme.appColors.textFieldText,
+                    textColor = MaterialTheme.appColors.textDark,
+                    disabledTextColor = MaterialTheme.appColors.textDark,
                     backgroundColor = MaterialTheme.appColors.textFieldBackground,
                     unfocusedBorderColor = MaterialTheme.appColors.textFieldBorder,
-                    focusedBorderColor = MaterialTheme.appColors.primary
+                    focusedBorderColor = MaterialTheme.appColors.primary,
+                    placeholderColor = MaterialTheme.appColors.textDark,
+                    disabledPlaceholderColor = MaterialTheme.appColors.textDark,
                 ),
                 shape = MaterialTheme.appShapes.textFieldShape,
+                textStyle = MaterialTheme.appTypography.bodyMedium.copy(color = MaterialTheme.appColors.textDark),
                 trailingIcon = {
                     if (account.isWhatsappVerified && phoneNumber == account.whatsappNumber) {
                         Icon(
@@ -1039,7 +1049,7 @@ private fun ProfileFields(
                         value = otpCode,
                         onValueChange = { onOtpChange(it) },
                         modifier = Modifier.fillMaxWidth(),
-                        label = { Text(stringResource(id = R.string.profile_enter_otp)) },
+                        label = { Text(stringResource(id = R.string.profile_enter_otp), color = MaterialTheme.appColors.textDark) },
                         enabled = !isOtpLoading,
                         keyboardOptions = KeyboardOptions(
                             keyboardType = KeyboardType.Number,
@@ -1047,12 +1057,14 @@ private fun ProfileFields(
                         ),
                         keyboardActions = KeyboardActions(onDone = { focusManager.clearFocus() }),
                         colors = TextFieldDefaults.outlinedTextFieldColors(
-                            textColor = MaterialTheme.appColors.textFieldText,
+                            textColor = MaterialTheme.appColors.textDark,
+                            disabledTextColor = MaterialTheme.appColors.textDark,
                             backgroundColor = MaterialTheme.appColors.textFieldBackground,
                             unfocusedBorderColor = MaterialTheme.appColors.textFieldBorder,
                             focusedBorderColor = MaterialTheme.appColors.primary
                         ),
-                        shape = MaterialTheme.appShapes.textFieldShape
+                        shape = MaterialTheme.appShapes.textFieldShape,
+                        textStyle = MaterialTheme.appTypography.bodyMedium.copy(color = MaterialTheme.appColors.textDark)
                     )
                 }
 
@@ -1184,7 +1196,7 @@ private fun SelectableField(
                 placeholder = {
                     Text(
                         text = name,
-                        color = MaterialTheme.appColors.textFieldHint,
+                        color = MaterialTheme.appColors.textDark,
                         style = MaterialTheme.appTypography.bodyMedium
                     )
                 },
@@ -1192,18 +1204,21 @@ private fun SelectableField(
                     Icon(
                         imageVector = Icons.Filled.ExpandMore,
                         contentDescription = null,
-                        tint = MaterialTheme.appColors.textPrimaryVariant
+                        tint = MaterialTheme.appColors.textDark
                     )
                 },
                 modifier = Modifier.fillMaxWidth(),
                 colors = TextFieldDefaults.outlinedTextFieldColors(
-                    textColor = MaterialTheme.appColors.textFieldText,
+                    textColor = MaterialTheme.appColors.textDark,
+                    disabledTextColor = MaterialTheme.appColors.textDark,
+                    disabledBorderColor = MaterialTheme.appColors.textFieldBorder,
+                    disabledPlaceholderColor = MaterialTheme.appColors.textDark,
+                    disabledTrailingIconColor = MaterialTheme.appColors.textDark,
                     backgroundColor = MaterialTheme.appColors.textFieldBackground,
                     unfocusedBorderColor = MaterialTheme.appColors.textFieldBorder,
-                    disabledBorderColor = MaterialTheme.appColors.textFieldBorder,
                 ),
                 shape = MaterialTheme.appShapes.textFieldShape,
-                textStyle = MaterialTheme.appTypography.bodyMedium
+                textStyle = MaterialTheme.appTypography.bodyMedium.copy(color = MaterialTheme.appColors.textDark)
             )
             Box(
                 modifier = Modifier
@@ -1248,17 +1263,20 @@ private fun InputEditField(
                 onValueChanged(it)
             },
             colors = TextFieldDefaults.outlinedTextFieldColors(
-                textColor = MaterialTheme.appColors.textFieldText,
+                textColor = MaterialTheme.appColors.textDark,
+                disabledTextColor = MaterialTheme.appColors.textDark,
                 backgroundColor = MaterialTheme.appColors.textFieldBackground,
                 unfocusedBorderColor = MaterialTheme.appColors.textFieldBorder,
-                cursorColor = MaterialTheme.appColors.textFieldText,
+                cursorColor = MaterialTheme.appColors.textDark,
+                placeholderColor = MaterialTheme.appColors.textDark,
+                disabledPlaceholderColor = MaterialTheme.appColors.textDark,
             ),
             shape = MaterialTheme.appShapes.textFieldShape,
             placeholder = {
                 Text(
                     modifier = Modifier.testTag("txt_placeholder_${name.tagId()}"),
                     text = name,
-                    color = MaterialTheme.appColors.textFieldHint,
+                    color = MaterialTheme.appColors.textDark,
                     style = MaterialTheme.appTypography.bodyMedium
                 )
             },
@@ -1271,7 +1289,7 @@ private fun InputEditField(
                 focusManager.clearFocus()
                 onDoneClick()
             },
-            textStyle = MaterialTheme.appTypography.bodyMedium,
+            textStyle = MaterialTheme.appTypography.bodyMedium.copy(color = MaterialTheme.appColors.textDark),
             modifier = modifier.testTag("tf_input_${name.tagId()}")
         )
     }

@@ -459,7 +459,7 @@ fun SearchBarStateless(
             Text(
                 modifier = Modifier.fillMaxWidth(),
                 text = label,
-                color = MaterialTheme.appColors.textSecondary,
+                color = MaterialTheme.appColors.textDark,
                 style = MaterialTheme.appTypography.bodyMedium
             )
         },
@@ -614,7 +614,7 @@ fun SheetContent(
             textAlign = TextAlign.Center,
             style = MaterialTheme.appTypography.titleMedium,
             text = title,
-            color = MaterialTheme.appColors.onBackground
+            color = MaterialTheme.appColors.textDark
         )
         SearchBarStateless(
             modifier = Modifier
@@ -650,7 +650,7 @@ fun SheetContent(
                             onItemClick(item)
                         }
                         .padding(vertical = 12.dp),
-                    color = MaterialTheme.appColors.onBackground,
+                    color = MaterialTheme.appColors.textDark,
                     text = item.name,
                     style = MaterialTheme.appTypography.bodyLarge,
                     textAlign = TextAlign.Center
@@ -709,7 +709,8 @@ fun SheetContent(
                 .padding(10.dp),
             textAlign = TextAlign.Center,
             style = MaterialTheme.appTypography.titleMedium,
-            text = title
+            text = title,
+            color = MaterialTheme.appColors.textDark
         )
         SearchBarStateless(
             modifier = Modifier
@@ -744,6 +745,7 @@ fun SheetContent(
                         }
                         .padding(vertical = 12.dp),
                     text = item.first,
+                    color = MaterialTheme.appColors.textDark,
                     style = MaterialTheme.appTypography.bodyLarge,
                     textAlign = TextAlign.Center
                 )

@@ -74,12 +74,26 @@ class CourseOfflineViewModel(
                 _uiState.update { it.copy(isDownloading = isDownloading) }
             }
         }
+        viewModelScope.launch {
+            try {
+                initDownloadFragment()
+                getOfflineData()
+            } catch (_: Exception) {
+            }
+        }
         collectCourseNotifier()
     }
 
     fun downloadAllBlocks(fragmentManager: FragmentManager) {
         viewModelScope.launch {
-            val courseStructure = courseInteractor.getCourseStructureFromCache(courseId)
+            val courseStructure = runCatching { courseInteractor.getCourseStructureFromCache(courseId) }.getOrNull()
+                ?: runCatching { courseInteractor.getCourseStructure(courseId) }.getOrNull()
+            if (courseStructure == null) return@launch
+
+            if (allBlocks.isEmpty()) {
+                initDownloadFragment()
+            }
+
             val downloadModels = courseInteractor.getAllDownloadModels()
             val subSectionsBlocks = allBlocks.values.filter { it.type == BlockType.SEQUENTIAL }
             val notDownloadedSubSectionBlocks = subSectionsBlocks.mapNotNull { subSection ->
@@ -152,7 +166,9 @@ class CourseOfflineViewModel(
     }
 
     private suspend fun initDownloadFragment() {
-        val courseStructure = courseInteractor.getCourseStructureFromCache(courseId)
+        val courseStructure = runCatching { courseInteractor.getCourseStructureFromCache(courseId) }.getOrNull()
+            ?: runCatching { courseInteractor.getCourseStructure(courseId) }.getOrNull()
+            ?: return
         setBlocks(courseStructure.blockData)
         allBlocks.values
             .filter { it.type == BlockType.SEQUENTIAL }
@@ -161,10 +177,14 @@ class CourseOfflineViewModel(
 
     private fun getOfflineData() {
         viewModelScope.launch {
-            val courseStructure = courseInteractor.getCourseStructureFromCache(courseId)
+            val courseStructure = runCatching { courseInteractor.getCourseStructureFromCache(courseId) }.getOrNull()
+                ?: return@launch
             val totalDownloadableSize = getFilesSize(courseStructure.blockData)
+            val hasDownloadableBlocks = courseStructure.blockData.any { it.isDownloadable }
 
-            if (totalDownloadableSize == 0L) return@launch
+            _uiState.update {
+                it.copy(isHaveDownloadableBlocks = hasDownloadableBlocks)
+            }
 
             courseInteractor.getDownloadModels().collect { downloadModels ->
                 val completedDownloads =
@@ -176,7 +196,8 @@ class CourseOfflineViewModel(
                 updateUIState(
                     totalDownloadableSize,
                     completedDownloads,
-                    downloadedBlocks
+                    downloadedBlocks,
+                    hasDownloadableBlocks
                 )
             }
         }
@@ -185,22 +206,29 @@ class CourseOfflineViewModel(
     private fun updateUIState(
         totalDownloadableSize: Long,
         completedDownloads: List<DownloadModel>,
-        downloadedBlocks: List<Block>
+        downloadedBlocks: List<Block>,
+        hasDownloadableBlocks: Boolean = true
     ) {
         val downloadedSize = getFilesSize(downloadedBlocks).toFloat()
         val realDownloadedSize = completedDownloads.sumOf { it.size }
         val largestDownloads = completedDownloads
             .sortedByDescending { it.size }
             .take(n = 5)
-        val progressBarValue = downloadedSize.safeDivBy(totalDownloadableSize.toFloat())
-        val readyToDownloadSize = if (progressBarValue >= 1) {
-            0
+        val progressBarValue = if (totalDownloadableSize > 0L) {
+            downloadedSize.safeDivBy(totalDownloadableSize.toFloat())
+        } else if (completedDownloads.isNotEmpty()) {
+            1f
         } else {
-            totalDownloadableSize - realDownloadedSize
+            0f
+        }
+        val readyToDownloadSize = if (progressBarValue >= 1) {
+            0L
+        } else {
+            (totalDownloadableSize - realDownloadedSize).coerceAtLeast(0L)
         }
         _uiState.update {
             it.copy(
-                isHaveDownloadableBlocks = true,
+                isHaveDownloadableBlocks = hasDownloadableBlocks || completedDownloads.isNotEmpty(),
                 largestDownloads = largestDownloads,
                 readyToDownloadSize = readyToDownloadSize.toFileSize(1, false),
                 downloadedSize = realDownloadedSize.toFileSize(1, false),

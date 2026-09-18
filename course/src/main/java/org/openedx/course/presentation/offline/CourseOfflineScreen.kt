@@ -159,19 +159,14 @@ private fun CourseOfflineUI(
                             Spacer(modifier = Modifier.height(20.dp))
                             OpenEdXButton(
                                 text = stringResource(R.string.core_download_all),
-                                backgroundColor = MaterialTheme.appColors.secondaryButtonBackground,
+                                backgroundColor = MaterialTheme.appColors.primary,
                                 onClick = onDownloadAllClick,
                                 enabled = uiState.isHaveDownloadableBlocks,
                                 content = {
-                                    val textColor = if (uiState.isHaveDownloadableBlocks) {
-                                        MaterialTheme.appColors.primaryButtonText
-                                    } else {
-                                        MaterialTheme.appColors.textPrimaryVariant
-                                    }
                                     IconText(
                                         text = stringResource(R.string.core_download_all),
                                         icon = Icons.Outlined.CloudDownload,
-                                        color = textColor,
+                                        color = Color.White,
                                         textStyle = MaterialTheme.appTypography.labelLarge
                                     )
                                 }

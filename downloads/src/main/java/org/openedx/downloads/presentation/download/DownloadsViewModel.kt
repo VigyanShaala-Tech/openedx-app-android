@@ -162,9 +162,10 @@ class DownloadsViewModel(
         isSizeMatch: Boolean
     ): DownloadedState {
         return when {
-            blockStates.all { it == DownloadedState.DOWNLOADED } && isSizeMatch -> DownloadedState.DOWNLOADED
-            blockStates.all { it == DownloadedState.WAITING } -> DownloadedState.WAITING
+            blockStates.all { it == DownloadedState.DOWNLOADED } || isSizeMatch -> DownloadedState.DOWNLOADED
             blockStates.any { it == DownloadedState.DOWNLOADING } -> DownloadedState.DOWNLOADING
+            blockStates.all { it == DownloadedState.WAITING } -> DownloadedState.WAITING
+            blockStates.any { it == DownloadedState.DOWNLOADED } -> DownloadedState.DOWNLOADED
             else -> DownloadedState.NOT_DOWNLOADED
         }
     }

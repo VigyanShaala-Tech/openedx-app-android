@@ -6,10 +6,10 @@ import android.content.res.Configuration
 import android.content.res.Configuration.UI_MODE_NIGHT_YES
 import android.graphics.Bitmap
 import android.graphics.ImageDecoder
+import android.graphics.Matrix
 import android.net.Uri
 import android.os.Build
 import android.os.Bundle
-import android.os.Environment
 import android.provider.MediaStore
 import android.view.LayoutInflater
 import android.view.ViewGroup
@@ -104,7 +104,6 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.DialogProperties
-import androidx.core.content.FileProvider
 import androidx.core.os.bundleOf
 import androidx.fragment.app.Fragment
 import coil.compose.AsyncImage
@@ -112,7 +111,6 @@ import coil.request.ImageRequest
 import kotlinx.coroutines.launch
 import org.koin.androidx.viewmodel.ext.android.viewModel
 import org.koin.core.parameter.parametersOf
-import org.openedx.core.AppDataConstants.DEFAULT_MIME_TYPE
 import org.openedx.core.domain.model.LanguageProficiency
 import org.openedx.core.domain.model.ProfileImage
 import org.openedx.core.domain.model.RegistrationField
@@ -133,7 +131,6 @@ import org.openedx.core.ui.theme.appColors
 import org.openedx.core.ui.theme.appShapes
 import org.openedx.core.ui.theme.appTypography
 import org.openedx.core.utils.LocaleUtils
-import org.openedx.foundation.extension.getFileName
 import org.openedx.foundation.extension.parcelable
 import org.openedx.foundation.extension.tagId
 import org.openedx.foundation.presentation.UIMessage
@@ -144,7 +141,6 @@ import org.openedx.foundation.presentation.windowSizeValue
 import org.openedx.profile.R
 import org.openedx.profile.domain.model.Account
 import org.openedx.profile.presentation.edit.EditProfileFragment.Companion.LEAVE_PROFILE_WIDTH_FACTOR
-import java.io.ByteArrayOutputStream
 import java.io.File
 import java.io.FileOutputStream
 import org.openedx.core.R as coreR
@@ -160,7 +156,10 @@ class EditProfileFragment : Fragment() {
     private val registerForActivityResult =
         registerForActivityResult(ActivityResultContracts.GetContent()) { uri ->
             uri?.let {
-                viewModel.setImageUri(cropImage(it))
+                val croppedUri = cropImage(it)
+                if (croppedUri != null) {
+                    viewModel.setImageUri(croppedUri)
+                }
             }
         }
 
@@ -216,18 +215,28 @@ class EditProfileFragment : Fragment() {
                         if (selectedImageUri == null) {
                             viewModel.updateAccount(fields)
                         } else {
-                            selectedImageUri?.let {
-                                requireContext().contentResolver.openInputStream(it)
-                                    .use { stream ->
-                                        val file = File(
-                                            requireContext().cacheDir,
-                                            requireContext().contentResolver.getFileName(it)
-                                        )
-                                        val mimeType = requireContext().contentResolver.getType(it)
-                                            ?: DEFAULT_MIME_TYPE
-                                        stream?.copyTo(FileOutputStream(file))
-                                        viewModel.updateAccountAndImage(fields, file, mimeType)
+                            selectedImageUri?.let { uri ->
+                                try {
+                                    val file = if (uri.scheme == "file" && !uri.path.isNullOrEmpty()) {
+                                        File(uri.path!!)
+                                    } else {
+                                        val tempFile = File(requireContext().cacheDir, "upload_${System.currentTimeMillis()}.jpg")
+                                        requireContext().contentResolver.openInputStream(uri)?.use { input ->
+                                            FileOutputStream(tempFile).use { output ->
+                                                input.copyTo(output)
+                                            }
+                                        }
+                                        tempFile
                                     }
+                                    if (file.exists() && file.length() > 0) {
+                                        viewModel.updateAccountAndImage(fields, file, "image/jpeg")
+                                    } else {
+                                        viewModel.updateAccount(fields)
+                                    }
+                                } catch (e: Exception) {
+                                    e.printStackTrace()
+                                    viewModel.updateAccount(fields)
+                                }
                             }
                         }
                     },
@@ -259,66 +268,100 @@ class EditProfileFragment : Fragment() {
         }
     }
 
-    @Suppress("DEPRECATION")
     private fun saveBitmapToUri(bitmap: Bitmap): Uri {
         val newFile = File.createTempFile(
             "Avatar_${System.currentTimeMillis()}",
             ".jpg",
-            requireContext().getExternalFilesDir(Environment.DIRECTORY_PICTURES)
+            requireContext().cacheDir
         )
-        val bos = ByteArrayOutputStream()
-        bitmap.compress(Bitmap.CompressFormat.JPEG, IMAGE_QUALITY, bos)
-        val bitmapData = bos.toByteArray()
-
-        val fos = FileOutputStream(newFile)
-        fos.write(bitmapData)
-        fos.flush()
-        fos.close()
-        return FileProvider.getUriForFile(
-            requireContext(),
-            viewModel.config.getAppId() + ".fileprovider",
-            newFile
-        )!!
+        FileOutputStream(newFile).use { fos ->
+            bitmap.compress(Bitmap.CompressFormat.JPEG, IMAGE_QUALITY, fos)
+            fos.flush()
+        }
+        return Uri.fromFile(newFile)
     }
 
     @Suppress("DEPRECATION")
-    private fun cropImage(uri: Uri): Uri {
-        val originalBitmap = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
-            ImageDecoder.decodeBitmap(
-                ImageDecoder.createSource(
-                    requireContext().contentResolver,
-                    uri
+    private fun cropImage(uri: Uri): Uri? {
+        return try {
+            val contentResolver = requireContext().contentResolver
+
+            val orientation = try {
+                contentResolver.openInputStream(uri)?.use { stream ->
+                    val exif = android.media.ExifInterface(stream)
+                    exif.getAttributeInt(
+                        android.media.ExifInterface.TAG_ORIENTATION,
+                        android.media.ExifInterface.ORIENTATION_NORMAL
+                    )
+                } ?: android.media.ExifInterface.ORIENTATION_NORMAL
+            } catch (e: Exception) {
+                android.media.ExifInterface.ORIENTATION_NORMAL
+            }
+
+            val originalBitmap = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
+                ImageDecoder.decodeBitmap(
+                    ImageDecoder.createSource(contentResolver, uri)
+                ) { decoder, info, _ ->
+                    decoder.allocator = ImageDecoder.ALLOCATOR_SOFTWARE
+                    decoder.isMutableRequired = true
+                    val srcWidth = info.size.width
+                    if (srcWidth > TARGET_IMAGE_WIDTH * 2) {
+                        val sampleSize = srcWidth / TARGET_IMAGE_WIDTH
+                        decoder.setTargetSampleSize(sampleSize)
+                    }
+                }
+            } else {
+                MediaStore.Images.Media.getBitmap(contentResolver, uri)
+            }
+
+            val rotatedBitmap = when (orientation) {
+                android.media.ExifInterface.ORIENTATION_ROTATE_90 -> rotateBitmap(originalBitmap, 90f)
+                android.media.ExifInterface.ORIENTATION_ROTATE_180 -> rotateBitmap(originalBitmap, 180f)
+                android.media.ExifInterface.ORIENTATION_ROTATE_270 -> rotateBitmap(originalBitmap, 270f)
+                else -> originalBitmap
+            }
+
+            val finalBitmap = if (rotatedBitmap.width > TARGET_IMAGE_WIDTH) {
+                val ratio: Float = rotatedBitmap.width.toFloat() / TARGET_IMAGE_WIDTH
+                Bitmap.createScaledBitmap(
+                    rotatedBitmap,
+                    TARGET_IMAGE_WIDTH,
+                    (rotatedBitmap.height.toFloat() / ratio).toInt().coerceAtLeast(1),
+                    true
                 )
+            } else {
+                rotatedBitmap
+            }
+
+            val newFile = File.createTempFile(
+                "Image_${System.currentTimeMillis()}",
+                ".jpg",
+                requireContext().cacheDir
             )
-        } else {
-            MediaStore.Images.Media.getBitmap(requireContext().contentResolver, uri)
+
+            FileOutputStream(newFile).use { fos ->
+                finalBitmap.compress(Bitmap.CompressFormat.JPEG, IMAGE_QUALITY, fos)
+                fos.flush()
+            }
+
+            if (originalBitmap != rotatedBitmap && !originalBitmap.isRecycled) {
+                originalBitmap.recycle()
+            }
+            if (rotatedBitmap != finalBitmap && !rotatedBitmap.isRecycled) {
+                rotatedBitmap.recycle()
+            }
+
+            Uri.fromFile(newFile)
+        } catch (e: Exception) {
+            e.printStackTrace()
+            null
         }
-        val newFile = File.createTempFile(
-            "Image_${System.currentTimeMillis()}",
-            ".jpg",
-            requireContext().getExternalFilesDir(Environment.DIRECTORY_PICTURES)
-        )
+    }
 
-        val ratio: Float = originalBitmap.width.toFloat() / TARGET_IMAGE_WIDTH
-        val newBitmap = Bitmap.createScaledBitmap(
-            originalBitmap,
-            TARGET_IMAGE_WIDTH,
-            (originalBitmap.height.toFloat() / ratio).toInt(),
-            false
-        )
-        val bos = ByteArrayOutputStream()
-        newBitmap.compress(Bitmap.CompressFormat.JPEG, IMAGE_QUALITY, bos)
-        val bitmapData = bos.toByteArray()
-
-        val fos = FileOutputStream(newFile)
-        fos.write(bitmapData)
-        fos.flush()
-        fos.close()
-        return FileProvider.getUriForFile(
-            requireContext(),
-            viewModel.config.getAppId() + ".fileprovider",
-            newFile
-        )!!
+    private fun rotateBitmap(source: Bitmap, angle: Float): Bitmap {
+        val matrix = Matrix()
+        matrix.postRotate(angle)
+        return Bitmap.createBitmap(source, 0, 0, source.width, source.height, matrix, true)
     }
 
     companion object {

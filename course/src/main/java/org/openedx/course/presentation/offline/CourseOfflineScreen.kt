@@ -1,5 +1,6 @@
 package org.openedx.course.presentation.offline
 
+import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -15,6 +16,7 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.material.CircularProgressIndicator
 import androidx.compose.material.Divider
 import androidx.compose.material.Icon
 import androidx.compose.material.LinearProgressIndicator
@@ -45,6 +47,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
@@ -92,6 +95,12 @@ fun CourseOfflineScreen(
         onDeleteAllClick = {
             viewModel.deleteAll(fragmentManager)
         },
+        onDownloadItemClick = { itemId ->
+            viewModel.downloadSingleItem(itemId)
+        },
+        onCancelItemClick = { itemId ->
+            viewModel.cancelSingleItemDownload(itemId)
+        }
     )
 }
 
@@ -103,7 +112,9 @@ private fun CourseOfflineUI(
     onDownloadAllClick: () -> Unit,
     onCancelDownloadClick: () -> Unit,
     onDeleteClick: (downloadModel: DownloadModel) -> Unit,
-    onDeleteAllClick: () -> Unit
+    onDeleteAllClick: () -> Unit,
+    onDownloadItemClick: (itemId: String) -> Unit,
+    onCancelItemClick: (itemId: String) -> Unit,
 ) {
     val scaffoldState = rememberScaffoldState()
 
@@ -190,6 +201,14 @@ private fun CourseOfflineUI(
                                 }
                             )
                         }
+                        if (uiState.downloadableItems.isNotEmpty()) {
+                            Spacer(modifier = Modifier.height(24.dp))
+                            AvailableDownloadsSection(
+                                downloadableItems = uiState.downloadableItems,
+                                onDownloadItemClick = onDownloadItemClick,
+                                onCancelItemClick = onCancelItemClick
+                            )
+                        }
                         if (uiState.largestDownloads.isNotEmpty()) {
                             Spacer(modifier = Modifier.height(20.dp))
                             LargestDownloads(
@@ -203,6 +222,129 @@ private fun CourseOfflineUI(
                 }
             }
         }
+    }
+}
+
+@Composable
+private fun AvailableDownloadsSection(
+    downloadableItems: List<DownloadableItemModel>,
+    onDownloadItemClick: (String) -> Unit,
+    onCancelItemClick: (String) -> Unit,
+) {
+    Column {
+        Text(
+            text = stringResource(R.string.core_available_to_download),
+            style = MaterialTheme.appTypography.titleMedium,
+            color = MaterialTheme.appColors.textDark
+        )
+        Spacer(modifier = Modifier.height(12.dp))
+        downloadableItems.forEach { item ->
+            AvailableDownloadItem(
+                item = item,
+                onDownloadClick = { onDownloadItemClick(item.id) },
+                onCancelClick = { onCancelItemClick(item.id) }
+            )
+        }
+    }
+}
+
+@Composable
+private fun AvailableDownloadItem(
+    item: DownloadableItemModel,
+    onDownloadClick: () -> Unit,
+    onCancelClick: () -> Unit
+) {
+    val fileIcon = if (item.type == FileType.VIDEO) {
+        Icons.Outlined.SmartDisplay
+    } else {
+        Icons.AutoMirrored.Outlined.InsertDriveFile
+    }
+
+    Column {
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(vertical = 8.dp, horizontal = 4.dp),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Icon(
+                imageVector = fileIcon,
+                contentDescription = null,
+                tint = MaterialTheme.appColors.textDark,
+                modifier = Modifier.size(22.dp)
+            )
+            Spacer(modifier = Modifier.width(12.dp))
+            Column(
+                modifier = Modifier.weight(1f)
+            ) {
+                Text(
+                    text = item.title,
+                    style = MaterialTheme.appTypography.labelLarge,
+                    color = MaterialTheme.appColors.textDark,
+                    maxLines = 2,
+                    overflow = TextOverflow.Ellipsis
+                )
+                if (item.size > 0) {
+                    Spacer(modifier = Modifier.height(2.dp))
+                    Text(
+                        text = item.size.toFileSize(1, false),
+                        style = MaterialTheme.appTypography.labelSmall,
+                        color = MaterialTheme.appColors.textPrimary
+                    )
+                }
+            }
+            Spacer(modifier = Modifier.width(12.dp))
+
+            when (item.downloadedState) {
+                DownloadedState.DOWNLOADED -> {
+                    Icon(
+                        imageVector = Icons.Default.CloudDone,
+                        tint = MaterialTheme.appColors.successGreen,
+                        contentDescription = "Downloaded",
+                        modifier = Modifier.size(24.dp)
+                    )
+                }
+                DownloadedState.DOWNLOADING, DownloadedState.WAITING -> {
+                    Box(
+                        contentAlignment = Alignment.Center,
+                        modifier = Modifier
+                            .size(28.dp)
+                            .clickable { onCancelClick() }
+                    ) {
+                        CircularProgressIndicator(
+                            modifier = Modifier.size(22.dp),
+                            strokeWidth = 2.dp,
+                            color = MaterialTheme.appColors.primary
+                        )
+                        Icon(
+                            imageVector = Icons.Rounded.Close,
+                            tint = MaterialTheme.appColors.textPrimary,
+                            contentDescription = "Cancel Download",
+                            modifier = Modifier.size(14.dp)
+                        )
+                    }
+                }
+                else -> {
+                    Box(
+                        contentAlignment = Alignment.Center,
+                        modifier = Modifier
+                            .size(32.dp)
+                            .clip(CircleShape)
+                            .background(MaterialTheme.appColors.primary.copy(alpha = 0.1f))
+                            .clickable { onDownloadClick() }
+                    ) {
+                        Icon(
+                            imageVector = Icons.Outlined.CloudDownload,
+                            tint = MaterialTheme.appColors.primary,
+                            contentDescription = "Download Content",
+                            modifier = Modifier.size(20.dp)
+                        )
+                    }
+                }
+            }
+        }
+        Spacer(modifier = Modifier.height(4.dp))
+        Divider(color = MaterialTheme.appColors.divider.copy(alpha = 0.5f))
     }
 }
 
@@ -478,7 +620,9 @@ private fun CourseOfflineUIPreview() {
             onDownloadAllClick = {},
             onCancelDownloadClick = {},
             onDeleteClick = {},
-            onDeleteAllClick = {}
+            onDeleteAllClick = {},
+            onDownloadItemClick = {},
+            onCancelItemClick = {}
         )
     }
 }

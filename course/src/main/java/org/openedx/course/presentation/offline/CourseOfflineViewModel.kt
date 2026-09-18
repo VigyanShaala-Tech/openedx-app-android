@@ -165,6 +165,14 @@ class CourseOfflineViewModel(
         }
     }
 
+    fun downloadSingleItem(itemId: String) {
+        saveDownloadModels(fileUtil.getExternalAppDir().path, courseId, itemId)
+    }
+
+    fun cancelSingleItemDownload(itemId: String) {
+        removeBlockDownloadModel(itemId)
+    }
+
     private suspend fun initDownloadFragment() {
         val courseStructure = runCatching { courseInteractor.getCourseStructureFromCache(courseId) }.getOrNull()
             ?: runCatching { courseInteractor.getCourseStructure(courseId) }.getOrNull()
@@ -187,17 +195,70 @@ class CourseOfflineViewModel(
             }
 
             courseInteractor.getDownloadModels().collect { downloadModels ->
+                val downloadModelsMap = downloadModels.associateBy { it.id }
                 val completedDownloads =
                     downloadModels.filter { it.downloadedState.isDownloaded && it.courseId == courseId }
                 val completedDownloadIds = completedDownloads.map { it.id }
                 val downloadedBlocks =
                     courseStructure.blockData.filter { it.id in completedDownloadIds }
 
+                val downloadableItems = buildDownloadableItems(courseStructure, downloadModelsMap)
+
                 updateUIState(
                     totalDownloadableSize,
                     completedDownloads,
                     downloadedBlocks,
-                    hasDownloadableBlocks
+                    hasDownloadableBlocks,
+                    downloadableItems
+                )
+            }
+        }
+    }
+
+    private fun buildDownloadableItems(
+        courseStructure: org.openedx.core.domain.model.CourseStructure,
+        downloadModelsMap: Map<String, DownloadModel>
+    ): List<DownloadableItemModel> {
+        val subSectionsBlocks = allBlocks.values.filter { it.type == BlockType.SEQUENTIAL }
+        if (subSectionsBlocks.isNotEmpty()) {
+            return subSectionsBlocks.mapNotNull { subSection ->
+                val verticalBlocks = allBlocks.values.filter { it.id in subSection.descendants }
+                val downloadableBlocks = courseStructure.blockData.filter { block ->
+                    block.id in verticalBlocks.flatMap { it.descendants } && block.isDownloadable
+                }
+                if (downloadableBlocks.isEmpty()) return@mapNotNull null
+
+                val totalSize = getFilesSize(downloadableBlocks)
+                val blockStatuses = downloadableBlocks.map { block ->
+                    downloadModelsMap[block.id]?.downloadedState ?: org.openedx.core.module.db.DownloadedState.NOT_DOWNLOADED
+                }
+                val itemState = when {
+                    blockStatuses.all { it == org.openedx.core.module.db.DownloadedState.DOWNLOADED } -> org.openedx.core.module.db.DownloadedState.DOWNLOADED
+                    blockStatuses.any { it.isWaitingOrDownloading } -> org.openedx.core.module.db.DownloadedState.DOWNLOADING
+                    else -> org.openedx.core.module.db.DownloadedState.NOT_DOWNLOADED
+                }
+                val firstType = downloadableBlocks.firstOrNull()?.downloadableType ?: FileType.VIDEO
+
+                DownloadableItemModel(
+                    id = subSection.id,
+                    title = subSection.displayName,
+                    size = totalSize,
+                    downloadedState = itemState,
+                    type = firstType
+                )
+            }
+        } else {
+            return courseStructure.blockData.filter { it.isDownloadable }.map { block ->
+                val downloadModel = downloadModelsMap[block.id]
+                val itemState = downloadModel?.downloadedState ?: org.openedx.core.module.db.DownloadedState.NOT_DOWNLOADED
+                val size = getFilesSize(listOf(block))
+
+                DownloadableItemModel(
+                    id = block.id,
+                    title = block.displayName,
+                    size = if (size > 0) size else (downloadModel?.size ?: 0L),
+                    downloadedState = itemState,
+                    type = block.downloadableType ?: FileType.VIDEO
                 )
             }
         }
@@ -207,7 +268,8 @@ class CourseOfflineViewModel(
         totalDownloadableSize: Long,
         completedDownloads: List<DownloadModel>,
         downloadedBlocks: List<Block>,
-        hasDownloadableBlocks: Boolean = true
+        hasDownloadableBlocks: Boolean = true,
+        downloadableItems: List<DownloadableItemModel> = emptyList()
     ) {
         val downloadedSize = getFilesSize(downloadedBlocks).toFloat()
         val realDownloadedSize = completedDownloads.sumOf { it.size }
@@ -232,7 +294,8 @@ class CourseOfflineViewModel(
                 largestDownloads = largestDownloads,
                 readyToDownloadSize = readyToDownloadSize.toFileSize(1, false),
                 downloadedSize = realDownloadedSize.toFileSize(1, false),
-                progressBarValue = progressBarValue
+                progressBarValue = progressBarValue,
+                downloadableItems = downloadableItems
             )
         }
     }

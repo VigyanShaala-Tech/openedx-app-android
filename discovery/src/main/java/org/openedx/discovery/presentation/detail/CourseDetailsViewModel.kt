@@ -68,17 +68,24 @@ class CourseDetailsViewModel(
     fun toggleWishlist() {
         val current = _uiState.value
         if (current is CourseDetailsUIState.CourseData) {
+            val targetState = !current.isWishlisted
+            val updatedCourse = current.course.copy(isWishlisted = targetState)
+            course = updatedCourse
+            _uiState.value = current.copy(course = updatedCourse, isWishlisted = targetState)
             viewModelScope.launch {
                 try {
-                    if (current.isWishlisted) {
-                        interactor.removeFromWishlist(courseId)
-                        _uiState.value = current.copy(isWishlisted = false)
-                    } else {
+                    if (targetState) {
                         interactor.addToWishlist(courseId)
-                        _uiState.value = current.copy(isWishlisted = true)
+                    } else {
+                        interactor.removeFromWishlist(courseId)
                     }
-                    notifier.send(org.openedx.core.system.notifier.CourseDashboardUpdate())
                 } catch (e: Exception) {
+                    val latest = _uiState.value
+                    if (latest is CourseDetailsUIState.CourseData) {
+                        val revertedCourse = current.course.copy(isWishlisted = current.isWishlisted)
+                        course = revertedCourse
+                        _uiState.value = latest.copy(course = revertedCourse, isWishlisted = current.isWishlisted)
+                    }
                     if (e.isInternetError()) {
                         _uiMessage.value =
                             UIMessage.SnackBarMessage(resourceManager.getString(org.openedx.core.R.string.core_error_no_connection))

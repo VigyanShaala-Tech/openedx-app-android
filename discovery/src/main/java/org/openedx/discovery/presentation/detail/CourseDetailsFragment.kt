@@ -437,7 +437,7 @@ private fun CourseDetailNativeContent(
                     imageVector = if (isWishlisted) Icons.Filled.Favorite else Icons.Outlined.FavoriteBorder,
                     contentDescription = null,
                     tint = MaterialTheme.appColors.primary,
-                    modifier = Modifier.size(24.dp)
+                    modifier = Modifier.size(28.dp)
                 )
             }
             if (!course.media?.courseVideo?.uri.isNullOrEmpty()) {

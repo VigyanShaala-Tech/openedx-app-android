@@ -24,6 +24,7 @@ import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.Card
+import androidx.compose.material.CircularProgressIndicator
 import androidx.compose.material.Icon
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Scaffold
@@ -61,15 +62,15 @@ import org.openedx.core.data.model.LiveClassModel
 import org.openedx.core.data.model.OngoingSessionModel
 import org.openedx.core.domain.model.Block
 import org.openedx.core.domain.model.CourseDatesBannerInfo
-import androidx.compose.material.CircularProgressIndicator
-import org.openedx.core.ui.OpenEdXButton
 import org.openedx.core.ui.HandleUIMessage
+import org.openedx.core.ui.OpenEdXButton
 import org.openedx.core.ui.displayCutoutForLandscape
 import org.openedx.core.ui.theme.OpenEdXTheme
 import org.openedx.core.ui.theme.appColors
 import org.openedx.core.ui.theme.appTypography
 import org.openedx.course.R
 import org.openedx.course.presentation.container.CourseContentTab
+import org.openedx.course.presentation.handouts.HandoutsType
 import org.openedx.course.presentation.ui.CourseDatesBanner
 import org.openedx.course.presentation.ui.CourseDatesBannerTablet
 import org.openedx.course.presentation.ui.CourseMessage
@@ -181,7 +182,11 @@ fun CourseHomeScreen(
         onViewProgressClick = viewModel::logViewProgressClick,
         onViewAllAnnouncementsClick = {
             viewModel.logViewAllAnnouncementsClick()
-            onNavigateToContent(CourseContentTab.HANDOUTS)
+            viewModel.courseRouter.navigateToHandoutsWebView(
+                fragmentManager,
+                viewModel.courseId,
+                HandoutsType.Announcements
+            )
         },
         onJoinClick = { session ->
             val meetingId = session.meetingInfo?.meetingId

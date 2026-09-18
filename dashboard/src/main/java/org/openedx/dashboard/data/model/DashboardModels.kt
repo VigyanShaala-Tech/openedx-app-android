@@ -165,7 +165,8 @@ data class StatCardData(
     val icon: androidx.compose.ui.graphics.vector.ImageVector,
     val value: String?,
     val label: String?,
-    val color: androidx.compose.ui.graphics.Color = androidx.compose.ui.graphics.Color.Black
+    val color: androidx.compose.ui.graphics.Color = androidx.compose.ui.graphics.Color.Black,
+    val iconName: String? = null
 )
 
 data class CourseCardData(

@@ -23,6 +23,7 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.Card
@@ -45,8 +46,10 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
@@ -69,6 +72,7 @@ import androidx.fragment.app.Fragment
 import androidx.lifecycle.Lifecycle
 import coil.compose.AsyncImage
 import coil.request.ImageRequest
+import kotlinx.coroutines.launch
 import org.koin.android.ext.android.inject
 import org.koin.androidx.compose.koinViewModel
 import org.koin.core.parameter.parametersOf
@@ -227,7 +231,7 @@ private fun NewDashboardScreenContent(
                 "faAward" -> Icons.Filled.EmojiEvents to Color(0xFFFFA000)
                 else -> Icons.Filled.Book to primaryColor
             }
-            StatCardData(icon, summaryDto.number?.toString() ?: "0", summaryDto.label ?: "", color)
+            StatCardData(icon, summaryDto.number?.toString() ?: "0", summaryDto.label ?: "", color, summaryDto.icon)
         } ?: emptyList()
     }
 
@@ -299,6 +303,19 @@ private fun NewDashboardScreenContent(
         } ?: emptyList()
     }
 
+    val listState = rememberLazyListState()
+    val coroutineScope = rememberCoroutineScope()
+    var selectedTab by rememberSaveable { mutableIntStateOf(0) }
+
+    LaunchedEffect(statCards.isNotEmpty()) {
+        listState.scrollToItem(0)
+    }
+
+    val myCoursesHeaderIndex = if (statCards.isNotEmpty()) 1 else 0
+    val achievementsIndex = if (achievements.isNotEmpty()) {
+        (if (statCards.isNotEmpty()) 1 else 0) + 2
+    } else -1
+
     Box(modifier = Modifier.fillMaxSize()) {
         Scaffold(
             modifier = Modifier
@@ -306,6 +323,7 @@ private fun NewDashboardScreenContent(
             backgroundColor = MaterialTheme.appColors.dashboardBackground
         ) { paddingValues ->
             LazyColumn(
+                state = listState,
                 modifier = Modifier
                     .fillMaxSize()
                     .padding(paddingValues),
@@ -322,7 +340,7 @@ private fun NewDashboardScreenContent(
                                 .height(IntrinsicSize.Max),
                             horizontalArrangement = Arrangement.spacedBy(12.dp)
                         ) {
-                            cards.forEach { item ->
+                            cards.forEachIndexed { index, item ->
                                 Card(
                                     backgroundColor = MaterialTheme.appColors.background,
                                     elevation = 4.dp,
@@ -330,6 +348,48 @@ private fun NewDashboardScreenContent(
                                     modifier = Modifier
                                         .weight(1f)
                                         .fillMaxHeight()
+                                        .clip(MaterialTheme.appShapes.cardShape)
+                                        .clickable {
+                                            val iconName = item.iconName
+                                            val labelLower = item.label?.lowercase() ?: ""
+                                            when {
+                                                iconName == "faBookOpen" || labelLower.contains("enrolled") || (iconName == null && index == 0) -> {
+                                                    selectedTab = 0
+                                                    coroutineScope.launch {
+                                                        listState.animateScrollToItem(myCoursesHeaderIndex)
+                                                    }
+                                                }
+                                                iconName == "faCheckCircle" || labelLower.contains("completed") || (iconName == null && index == 1) -> {
+                                                    selectedTab = 2
+                                                    coroutineScope.launch {
+                                                        listState.animateScrollToItem(myCoursesHeaderIndex)
+                                                    }
+                                                }
+                                                iconName == "faChartLine" || labelLower.contains("progress") || labelLower.contains("streak") || (iconName == null && index == 2) -> {
+                                                    selectedTab = 0
+                                                    coroutineScope.launch {
+                                                        listState.animateScrollToItem(myCoursesHeaderIndex)
+                                                    }
+                                                }
+                                                iconName == "faAward" || labelLower.contains("badge") || labelLower.contains("achievement") || (iconName == null && index == 3) -> {
+                                                    if (achievementsIndex != -1) {
+                                                        coroutineScope.launch {
+                                                            listState.animateScrollToItem(achievementsIndex)
+                                                        }
+                                                    } else {
+                                                        coroutineScope.launch {
+                                                            listState.animateScrollToItem(myCoursesHeaderIndex)
+                                                        }
+                                                    }
+                                                }
+                                                else -> {
+                                                    selectedTab = 0
+                                                    coroutineScope.launch {
+                                                        listState.animateScrollToItem(myCoursesHeaderIndex)
+                                                    }
+                                                }
+                                            }
+                                        }
                                 ) {
                                     Column(
                                         modifier = Modifier
@@ -403,6 +463,8 @@ private fun NewDashboardScreenContent(
 
                 item(key = "course_tabs") {
                     CoursesTabs(
+                        selectedTab = selectedTab,
+                        onTabSelected = { selectedTab = it },
                         continueCourses = continueCourses,
                         wishlistItems = wishlistItems,
                         completedCourses = completedCourses,
@@ -545,6 +607,8 @@ private fun SectionHeader(
 
 @Composable
 private fun CoursesTabs(
+    selectedTab: Int,
+    onTabSelected: (Int) -> Unit,
     continueCourses: List<CourseCardData>,
     wishlistItems: List<WishlistItemData>,
     completedCourses: List<CourseCardData>,
@@ -555,7 +619,6 @@ private fun CoursesTabs(
     onCompletedViewAllClick: () -> Unit,
     onRemoveWishlist: (String) -> Unit
 ) {
-    var selectedTab by rememberSaveable { mutableStateOf(0) }
     val tabs = listOf(
         stringResource(R.string.dashboard_continue_learning),
         stringResource(R.string.dashboard_wishlist),
@@ -578,7 +641,7 @@ private fun CoursesTabs(
                     .background(
                         if (selected) MaterialTheme.appColors.primary else Color.Transparent
                     )
-                    .clickable { selectedTab = index }
+                    .clickable { onTabSelected(index) }
                     .padding(vertical = 10.dp, horizontal = 4.dp),
                 contentAlignment = Alignment.Center
             ) {

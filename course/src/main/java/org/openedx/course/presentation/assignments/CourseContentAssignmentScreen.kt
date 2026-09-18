@@ -46,8 +46,12 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.AnnotatedString
+import androidx.compose.ui.text.SpanStyle
+import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.tooling.preview.Devices
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.Dp
@@ -459,6 +463,27 @@ private fun AssignmentDetails(
             "$label $dueDate"
         }
     }
+    val displayNameText = assignment.displayName ?: ""
+    val annotatedDisplayName = remember(displayNameText) {
+        val deadlineKeywords = listOf("Deadline", "Due in", "Due ")
+        var matchIndex = -1
+        for (keyword in deadlineKeywords) {
+            val idx = displayNameText.indexOf(keyword, ignoreCase = true)
+            if (idx != -1 && (matchIndex == -1 || idx < matchIndex)) {
+                matchIndex = idx
+            }
+        }
+        if (matchIndex != -1) {
+            buildAnnotatedString {
+                append(displayNameText.substring(0, matchIndex))
+                withStyle(style = SpanStyle(fontWeight = FontWeight.Bold)) {
+                    append(displayNameText.substring(matchIndex))
+                }
+            }
+        } else {
+            AnnotatedString(displayNameText)
+        }
+    }
     Card(
         modifier = modifier
             .fillMaxWidth()
@@ -498,8 +523,9 @@ private fun AssignmentDetails(
                     )
                     Text(
                         modifier = Modifier.padding(top = 4.dp),
-                        text = assignment.displayName ?: "",
+                        text = annotatedDisplayName,
                         style = MaterialTheme.appTypography.bodySmall,
+                        fontWeight = FontWeight.Bold,
                         color = MaterialTheme.appColors.textDark
                     )
                     if (description.isNotEmpty()) {
@@ -507,7 +533,8 @@ private fun AssignmentDetails(
                             modifier = Modifier.padding(top = 6.dp),
                             text = description,
                             style = MaterialTheme.appTypography.bodySmall,
-                            color = MaterialTheme.appColors.textDark
+                            color = MaterialTheme.appColors.textDark,
+                            fontWeight = FontWeight.Bold
                         )
                     }
                 }

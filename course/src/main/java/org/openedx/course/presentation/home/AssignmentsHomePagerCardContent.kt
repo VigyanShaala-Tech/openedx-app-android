@@ -20,12 +20,17 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.Assignment
 import androidx.compose.material.icons.automirrored.filled.KeyboardArrowRight
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.text.AnnotatedString
+import androidx.compose.ui.text.SpanStyle
+import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.dp
 import org.openedx.core.domain.model.Block
 import org.openedx.core.ui.theme.appColors
@@ -161,6 +166,27 @@ private fun AssignmentCard(
             Column(
                 modifier = Modifier.weight(1f)
             ) {
+                val displayNameText = assignment.displayName ?: ""
+                val annotatedDisplayName = remember(displayNameText) {
+                    val deadlineKeywords = listOf("Deadline", "Due in", "Due ")
+                    var matchIndex = -1
+                    for (keyword in deadlineKeywords) {
+                        val idx = displayNameText.indexOf(keyword, ignoreCase = true)
+                        if (idx != -1 && (matchIndex == -1 || idx < matchIndex)) {
+                            matchIndex = idx
+                        }
+                    }
+                    if (matchIndex != -1) {
+                        buildAnnotatedString {
+                            append(displayNameText.substring(0, matchIndex))
+                            withStyle(style = SpanStyle(fontWeight = FontWeight.Bold)) {
+                                append(displayNameText.substring(matchIndex))
+                            }
+                        }
+                    } else {
+                        AnnotatedString(displayNameText)
+                    }
+                }
                 // Assignment and section name
                 Text(
                     text = "Assignment $index",
@@ -170,7 +196,8 @@ private fun AssignmentCard(
                 )
                 Spacer(modifier = Modifier.height(4.dp))
                 Text(
-                    text = assignment.displayName ?: "",
+                    text = annotatedDisplayName,
+                    fontWeight = FontWeight.Bold,
                     style = MaterialTheme.appTypography.labelSmall,
                     color = MaterialTheme.appColors.textSecondary,
                 )

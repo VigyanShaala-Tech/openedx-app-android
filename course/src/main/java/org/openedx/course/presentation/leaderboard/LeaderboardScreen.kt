@@ -259,7 +259,7 @@ private fun LeaderboardHeader() {
             .padding(horizontal = 16.dp, vertical = 12.dp)
     ) {
         Text(text = "Rank", modifier = Modifier.width(60.dp), style = MaterialTheme.appTypography.labelLarge, color = MaterialTheme.appColors.textSecondary)
-        Text(text = "User", modifier = Modifier.weight(1f), style = MaterialTheme.appTypography.labelLarge, color = MaterialTheme.appColors.textSecondary)
+        Text(text = "Student", modifier = Modifier.weight(1f), style = MaterialTheme.appTypography.labelLarge, color = MaterialTheme.appColors.textSecondary)
         Text(text = "College", modifier = Modifier.weight(1f), style = MaterialTheme.appTypography.labelLarge, color = MaterialTheme.appColors.textSecondary)
         Text(text = "Points", modifier = Modifier.width(60.dp), textAlign = TextAlign.End, style = MaterialTheme.appTypography.labelLarge, color = MaterialTheme.appColors.textSecondary)
     }

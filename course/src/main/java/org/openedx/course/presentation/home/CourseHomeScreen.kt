@@ -5,7 +5,6 @@ import android.content.res.Configuration.UI_MODE_NIGHT_YES
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -32,7 +31,6 @@ import androidx.compose.material.Surface
 import androidx.compose.material.Text
 import androidx.compose.material.TextButton
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.KeyboardArrowRight
 import androidx.compose.material.icons.automirrored.filled.List
 import androidx.compose.material.rememberScaffoldState
 import androidx.compose.runtime.Composable
@@ -74,6 +72,7 @@ import org.openedx.course.presentation.handouts.HandoutsType
 import org.openedx.course.presentation.ui.CourseDatesBanner
 import org.openedx.course.presentation.ui.CourseDatesBannerTablet
 import org.openedx.course.presentation.ui.CourseMessage
+import org.openedx.course.presentation.ui.ResumeCourseButton
 import org.openedx.course.presentation.unit.container.CourseViewMode
 import org.openedx.foundation.extension.takeIfNotEmpty
 import org.openedx.foundation.presentation.UIMessage
@@ -494,42 +493,10 @@ fun ResumeButton(
     displayName: String?,
     onClick: () -> Unit
 ) {
-    Card(
-        modifier = Modifier
-            .fillMaxWidth()
-            .height(64.dp)
-            .clickable { onClick() },
-        backgroundColor = Color(0xFF7CB342), // Green color from screenshot
-        shape = RoundedCornerShape(12.dp),
-        elevation = 0.dp
-    ) {
-        Row(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(horizontal = 16.dp),
-            verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.SpaceBetween
-        ) {
-            Text(
-                text = displayName ?: "",
-                style = MaterialTheme.appTypography.titleSmall,
-                color = Color.White,
-                fontWeight = FontWeight.Bold
-            )
-            Row(verticalAlignment = Alignment.CenterVertically) {
-                Text(
-                    text = "Continue",
-                    style = MaterialTheme.appTypography.labelLarge,
-                    color = Color.White
-                )
-                Icon(
-                    imageVector = Icons.AutoMirrored.Filled.KeyboardArrowRight,
-                    contentDescription = null,
-                    tint = Color.White
-                )
-            }
-        }
-    }
+    ResumeCourseButton(
+        displayName = displayName,
+        onResumeClick = { onClick() }
+    )
 }
 
 @Composable

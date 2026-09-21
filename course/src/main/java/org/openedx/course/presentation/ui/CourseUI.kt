@@ -110,7 +110,6 @@ import org.openedx.core.ui.BackBtn
 import org.openedx.core.ui.IconText
 import org.openedx.core.ui.OpenEdXButton
 import org.openedx.core.ui.OpenEdXOutlinedButton
-import org.openedx.core.ui.TextIcon
 import org.openedx.core.ui.displayCutoutForLandscape
 import org.openedx.core.ui.noRippleClickable
 import org.openedx.core.ui.theme.OpenEdXTheme
@@ -1584,39 +1583,55 @@ fun CourseProgress(
 @Composable
 fun ResumeCourseButton(
     modifier: Modifier = Modifier,
-    block: Block,
+    block: Block? = null,
     displayName: String?,
     onResumeClick: (String) -> Unit,
 ) {
-    OpenEdXButton(
+    Card(
         modifier = modifier
             .fillMaxWidth()
-            .defaultMinSize(minHeight = 54.dp),
-        onClick = {
-            onResumeClick(block.id)
-        },
-        content = {
+            .defaultMinSize(minHeight = 56.dp)
+            .clickable {
+                block?.id?.let { onResumeClick(it) } ?: onResumeClick("")
+            },
+        backgroundColor = MaterialTheme.appColors.primary,
+        shape = RoundedCornerShape(12.dp),
+        elevation = 0.dp
+    ) {
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(horizontal = 16.dp, vertical = 12.dp),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.SpaceBetween
+        ) {
+            Text(
+                modifier = Modifier
+                    .weight(1f)
+                    .padding(end = 12.dp),
+                text = displayName ?: "",
+                color = MaterialTheme.appColors.primaryButtonText,
+                style = MaterialTheme.appTypography.titleSmall,
+                fontWeight = FontWeight.Bold
+            )
             Row(
-                modifier = Modifier.fillMaxWidth(),
-                verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.SpaceBetween
+                verticalAlignment = Alignment.CenterVertically
             ) {
                 Text(
-                    modifier = Modifier.weight(1f),
-                    text = displayName ?: "",
-                    color = MaterialTheme.appColors.primaryButtonText,
-                    style = MaterialTheme.appTypography.titleMedium,
-                    fontWeight = FontWeight.W600
-                )
-                TextIcon(
                     text = stringResource(id = R.string.course_continue),
-                    icon = Icons.AutoMirrored.Filled.ArrowForward,
                     color = MaterialTheme.appColors.primaryButtonText,
-                    textStyle = MaterialTheme.appTypography.labelLarge
+                    style = MaterialTheme.appTypography.labelLarge,
+                    maxLines = 1
+                )
+                Spacer(modifier = Modifier.width(4.dp))
+                Icon(
+                    imageVector = Icons.AutoMirrored.Filled.KeyboardArrowRight,
+                    contentDescription = null,
+                    tint = MaterialTheme.appColors.primaryButtonText
                 )
             }
         }
-    )
+    }
 }
 
 @Composable

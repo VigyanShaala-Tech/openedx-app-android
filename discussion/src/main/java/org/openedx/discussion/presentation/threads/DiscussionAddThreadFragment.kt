@@ -76,6 +76,7 @@ import org.openedx.core.ui.HandleUIMessage
 import org.openedx.core.ui.OpenEdXButton
 import org.openedx.core.ui.OpenEdXOutlinedTextField
 import org.openedx.core.ui.SheetContent
+import org.openedx.core.ui.clearFocusOnTap
 import org.openedx.core.ui.displayCutoutForLandscape
 import org.openedx.core.ui.isImeVisibleState
 import org.openedx.core.ui.noRippleClickable
@@ -326,6 +327,7 @@ private fun DiscussionAddThreadScreen(
                                 .fillMaxSize()
                                 .background(MaterialTheme.appColors.background)
                                 .verticalScroll(rememberScrollState())
+                                .clearFocusOnTap()
                         ) {
                             Column(
                                 Modifier.padding(horizontal = contentPadding, vertical = 32.dp),

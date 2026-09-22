@@ -84,6 +84,7 @@ import org.openedx.core.ui.OfflineModeDialog
 import org.openedx.core.ui.OpenEdXOutlinedButton
 import org.openedx.core.ui.SearchBar
 import org.openedx.core.ui.Toolbar
+import org.openedx.core.ui.clearFocusOnTap
 import org.openedx.core.ui.displayCutoutForLandscape
 import org.openedx.core.ui.shouldLoadMore
 import org.openedx.core.ui.statusBarsInset
@@ -342,6 +343,7 @@ private fun LogistrationScreen(
                 .statusBarsInset()
                 .displayCutoutForLandscape()
                 .pullRefresh(pullRefreshState)
+                .clearFocusOnTap()
         ) {
             LazyColumn(
                 modifier = Modifier

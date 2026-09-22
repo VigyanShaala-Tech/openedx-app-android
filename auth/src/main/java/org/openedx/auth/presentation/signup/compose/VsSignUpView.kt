@@ -74,6 +74,7 @@ import org.openedx.auth.presentation.signup.VsSignUpUIState
 import org.openedx.auth.presentation.ui.SocialAuthView
 import org.openedx.core.ui.HandleUIMessage
 import org.openedx.core.ui.OpenEdXButton
+import org.openedx.core.ui.clearFocusOnTap
 import org.openedx.core.ui.theme.appColors
 import org.openedx.core.ui.theme.appTypography
 import org.openedx.core.utils.Validators
@@ -168,6 +169,7 @@ fun VsSignUpView(
                 .padding(paddingValues)
                 .fillMaxSize()
                 .verticalScroll(rememberScrollState())
+                .clearFocusOnTap()
                 .padding(horizontal = 24.dp)
         ) {
             Spacer(modifier = Modifier.height(24.dp))

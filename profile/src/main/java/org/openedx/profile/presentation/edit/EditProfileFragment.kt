@@ -121,6 +121,7 @@ import org.openedx.core.ui.IconText
 import org.openedx.core.ui.OpenEdXButton
 import org.openedx.core.ui.OpenEdXOutlinedButton
 import org.openedx.core.ui.SheetContent
+import org.openedx.core.ui.clearFocusOnTap
 import org.openedx.core.ui.displayCutoutForLandscape
 import org.openedx.core.ui.isImeVisibleState
 import org.openedx.core.ui.noRippleClickable
@@ -494,6 +495,7 @@ private fun EditProfileScreen(
         modifier = Modifier
             .fillMaxSize()
             .navigationBarsPadding()
+            .clearFocusOnTap()
             .semantics {
                 testTagsAsResourceId = true
             },

@@ -90,6 +90,7 @@ data class Block(
     val isSurveyBlock get() = type == BlockType.SURVEY
     val isPdfBlock get() = type == BlockType.PDF
     val isGoogleDocumentBlock get() = type == BlockType.GOOGLE_DOCUMENT
+    val isFeedbackBlock get() = type == BlockType.FEEDBACK
     val isGoogleCalendarBlock get() = type == BlockType.GOOGLE_CALENDAR
     val isScormBlock get() = type == BlockType.SCORM
     val isEdxSgaBlock get() = type == BlockType.EDX_SGA

@@ -101,6 +101,7 @@ class CourseUnitContainerAdapter(
                 block.isQuickQuizMakerBlock ||
                 block.isGoogleDocumentBlock ||
                 block.isH5PBlock ||
+                block.isFeedbackBlock ||
                 block.isFillBlankBlock ||
                 block.isMatchColumnBlock
     }

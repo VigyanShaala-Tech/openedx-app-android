@@ -89,6 +89,9 @@ enum class BlockType {
     QUICKQUIZMAKER {
         override fun isContainer() = false
     },
+    FEEDBACK {
+        override fun isContainer() = false
+    },
 
     GOOGLE_CALENDAR {
         override fun isContainer() = false

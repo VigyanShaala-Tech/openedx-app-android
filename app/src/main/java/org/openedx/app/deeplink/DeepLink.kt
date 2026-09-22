@@ -3,18 +3,56 @@ package org.openedx.app.deeplink
 class DeepLink(params: Map<String, String>) {
 
     private val screenName = params[Keys.SCREEN_NAME.value]
+        ?: params["screen_name"]
+        ?: params["screenName"]
+        ?: params["screen"]
     private val notificationType = params[Keys.NOTIFICATION_TYPE.value]
-    val courseId = params[Keys.COURSE_ID.value] ?: params[Keys.COURSE_ID_ALT.value]
-    val pathId = params[Keys.PATH_ID.value]
-    val componentId = params[Keys.COMPONENT_ID.value]
-    val topicId = params[Keys.TOPIC_ID.value]
-    val threadId = params[Keys.THREAD_ID.value]
-    val commentId = params[Keys.COMMENT_ID.value]
-    val parentId = params[Keys.PARENT_ID.value]
-    val token = params[Keys.TOKEN.value]
-    val activationId = params[Keys.ACTIVATION_ID.value]
-    val meetingId = params[Keys.MEETING_ID.value]
-    val type = DeepLinkType.typeOf(screenName ?: notificationType ?: "")
+        ?: params["notification_type"]
+        ?: params["notificationType"]
+        ?: params["type"]
+        ?: params["action"]
+    val courseId = params[Keys.COURSE_ID.value]
+        ?: params[Keys.COURSE_ID_ALT.value]
+        ?: params["course_id"]
+        ?: params["courseId"]
+        ?: params["course"]
+        ?: params["c_id"]
+        ?: params["CId"]
+    val pathId = params[Keys.PATH_ID.value] ?: params["path_id"] ?: params["pathId"]
+    val componentId = params[Keys.COMPONENT_ID.value] ?: params["component_id"] ?: params["componentId"]
+    val topicId = params[Keys.TOPIC_ID.value] ?: params["topic_id"] ?: params["topicId"]
+    val threadId = params[Keys.THREAD_ID.value] ?: params["thread_id"] ?: params["threadId"]
+    val commentId = params[Keys.COMMENT_ID.value] ?: params["comment_id"] ?: params["commentId"]
+    val parentId = params[Keys.PARENT_ID.value] ?: params["parent_id"] ?: params["parentId"]
+    val token = params[Keys.TOKEN.value] ?: params["token"]
+    val activationId = params[Keys.ACTIVATION_ID.value] ?: params["activationId"] ?: params["activation_id"]
+    val meetingId = params[Keys.MEETING_ID.value] ?: params["meetingId"] ?: params["meeting_id"]
+
+    val type: DeepLinkType = determineType(screenName, notificationType, params)
+
+    private fun determineType(
+        screenName: String?,
+        notificationType: String?,
+        params: Map<String, String>
+    ): DeepLinkType {
+        if (!screenName.isNullOrBlank()) {
+            val resolved = DeepLinkType.typeOf(screenName)
+            if (resolved != DeepLinkType.NONE) return resolved
+        }
+        if (!notificationType.isNullOrBlank()) {
+            val resolved = DeepLinkType.typeOf(notificationType)
+            if (resolved != DeepLinkType.NONE) return resolved
+        }
+        val typeParam = params["type"] ?: params["screen"] ?: params["action"] ?: params["notification_type"]
+        if (!typeParam.isNullOrBlank()) {
+            val resolved = DeepLinkType.typeOf(typeParam)
+            if (resolved != DeepLinkType.NONE) return resolved
+        }
+        if (!courseId.isNullOrBlank()) {
+            return DeepLinkType.COURSE_DASHBOARD
+        }
+        return DeepLinkType.NONE
+    }
 
     enum class Keys(val value: String) {
         SCREEN_NAME("screen_name"),
@@ -67,7 +105,7 @@ enum class DeepLinkType(val type: String) {
 
     companion object {
         fun typeOf(type: String): DeepLinkType {
-            return entries.firstOrNull { it.type == type } ?: NONE
+            return entries.firstOrNull { it.type.equals(type, ignoreCase = true) } ?: NONE
         }
     }
 }

@@ -52,7 +52,6 @@ import androidx.core.view.WindowInsetsControllerCompat
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.lifecycleScope
 import androidx.window.layout.WindowMetricsCalculator
-import com.braze.support.toStringMap
 import io.branch.referral.Branch
 import io.branch.referral.Branch.BranchUniversalReferralInitListener
 import kotlinx.coroutines.flow.collectLatest
@@ -299,7 +298,7 @@ class AppActivity : AppCompatActivity(), InsetHolder, WindowSizeHolder {
                 else -> addFragment(MainFragment.newInstance())
             }
 
-            intent.extras?.takeIf { it.containsKey(DeepLink.Keys.NOTIFICATION_TYPE.value) }?.let {
+            intent.extras?.takeIf { isPushNotification(it) }?.let {
                 handlePushNotification(it)
             }
         }
@@ -344,8 +343,8 @@ class AppActivity : AppCompatActivity(), InsetHolder, WindowSizeHolder {
         }
 
         val extras = intent.extras
-        if (extras?.containsKey(DeepLink.Keys.NOTIFICATION_TYPE.value) == true) {
-            handlePushNotification(extras)
+        if (isPushNotification(extras)) {
+            handlePushNotification(extras!!)
         }
 
         if (viewModel.isBranchEnabled) {
@@ -567,8 +566,34 @@ class AppActivity : AppCompatActivity(), InsetHolder, WindowSizeHolder {
         }
     }
 
+    private fun isPushNotification(extras: Bundle?): Boolean {
+        if (extras == null || extras.isEmpty) return false
+        return extras.containsKey(DeepLink.Keys.NOTIFICATION_TYPE.value) ||
+                extras.containsKey(DeepLink.Keys.SCREEN_NAME.value) ||
+                extras.containsKey(DeepLink.Keys.COURSE_ID.value) ||
+                extras.containsKey(DeepLink.Keys.COURSE_ID_ALT.value) ||
+                extras.containsKey("notification_type") ||
+                extras.containsKey("screen_name") ||
+                extras.containsKey("screen") ||
+                extras.containsKey("course_id") ||
+                extras.containsKey("courseId") ||
+                extras.containsKey("type") ||
+                extras.containsKey("deeplink") ||
+                extras.containsKey("deep_link") ||
+                extras.containsKey("url") ||
+                extras.containsKey("link")
+    }
+
+    @Suppress("DEPRECATION")
     private fun handlePushNotification(data: Bundle) {
-        val deepLink = DeepLink(data.toStringMap())
+        val map = mutableMapOf<String, String>()
+        for (key in data.keySet()) {
+            val value = data.get(key)?.toString()
+            if (value != null) {
+                map[key] = value
+            }
+        }
+        val deepLink = DeepLink(map)
         viewModel.makeExternalRoute(supportFragmentManager, deepLink)
     }
 

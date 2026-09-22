@@ -43,13 +43,29 @@ class OpenEdXFirebaseMessagingService : FirebaseMessagingService() {
     }
 
     private fun handlePushNotification(message: RemoteMessage) {
-        val notification = message.notification ?: return
         val data = message.data
+        val notification = message.notification
 
-        val intent = Intent(this, AppActivity::class.java)
-        intent.addFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP)
-        data.forEach { (k, v) ->
-            intent.putExtra(k, v)
+        val title = notification?.title
+            ?: data["title"]
+            ?: data["subject"]
+            ?: config.getPlatformName()
+
+        val body = notification?.body
+            ?: data["body"]
+            ?: data["message"]
+            ?: data["text"]
+
+        if (body.isNullOrBlank() && notification == null) {
+            return
+        }
+
+        val intent = Intent(this, AppActivity::class.java).apply {
+            action = Intent.ACTION_VIEW
+            flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TOP or Intent.FLAG_ACTIVITY_SINGLE_TOP
+            data.forEach { (k, v) ->
+                putExtra(k, v)
+            }
         }
 
         val code = createId()
@@ -64,25 +80,29 @@ class OpenEdXFirebaseMessagingService : FirebaseMessagingService() {
         val defaultSoundUri = RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION)
         val notificationBuilder = NotificationCompat.Builder(this, channelId)
             .setSmallIcon(R.mipmap.ic_launcher)
-            .setContentTitle(notification.title)
+            .setContentTitle(title)
             .setStyle(
                 NotificationCompat.BigTextStyle()
-                    .bigText(notification.body)
+                    .bigText(body ?: "")
             )
             .setAutoCancel(true)
             .setSound(defaultSoundUri)
             .setContentIntent(pendingIntent)
+            .setPriority(NotificationCompat.PRIORITY_HIGH)
 
         val notificationManager =
             getSystemService(NOTIFICATION_SERVICE) as NotificationManager
 
-        // Since android Oreo notification channel is needed.
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             val channel = NotificationChannel(
                 channelId,
                 config.getPlatformName(),
                 NotificationManager.IMPORTANCE_HIGH,
-            )
+            ).apply {
+                description = "Course and platform notifications"
+                enableLights(true)
+                enableVibration(true)
+            }
             notificationManager.createNotificationChannel(channel)
         }
 

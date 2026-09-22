@@ -9,9 +9,11 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.IntrinsicSize
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -334,7 +336,8 @@ private fun NewDashboardScreenContent(
                         val cards = statCards.take(4)
                         Row(
                             modifier = Modifier
-                                .fillMaxWidth(),
+                                .fillMaxWidth()
+                                .height(IntrinsicSize.Max),
                             horizontalArrangement = Arrangement.spacedBy(12.dp)
                         ) {
                             cards.forEachIndexed { index, item ->
@@ -344,7 +347,7 @@ private fun NewDashboardScreenContent(
                                     shape = MaterialTheme.appShapes.cardShape,
                                     modifier = Modifier
                                         .weight(1f)
-                                        .height(110.dp)
+                                        .fillMaxHeight()
                                         .clip(MaterialTheme.appShapes.cardShape)
                                         .clickable {
                                             val iconName = item.iconName
@@ -931,6 +934,7 @@ private fun RecommendationItem(r: RecommendationData, apiHostUrl: String, onClic
     ) {
         Row(
             modifier = Modifier
+                .height(IntrinsicSize.Min)
                 .clickable { onClick() },
             verticalAlignment = Alignment.CenterVertically
         ) {
@@ -955,24 +959,24 @@ private fun RecommendationItem(r: RecommendationData, apiHostUrl: String, onClic
                     .padding(12.dp)
             ) {
                 Row(verticalAlignment = Alignment.CenterVertically) {
-                if (!r.category.isNullOrBlank()) {
-                    Box(
-                        modifier = Modifier
-                            .background(
-                                MaterialTheme.appColors.primary.copy(alpha = 0.12f),
-                                MaterialTheme.appShapes.textFieldShape
+                    if (!r.category.isNullOrBlank()) {
+                        Box(
+                            modifier = Modifier
+                                .background(
+                                    MaterialTheme.appColors.primary.copy(alpha = 0.12f),
+                                    MaterialTheme.appShapes.textFieldShape
+                                )
+                                .clip(MaterialTheme.appShapes.textFieldShape)
+                                .padding(horizontal = 8.dp, vertical = 2.dp)
+                        ) {
+                            Text(
+                                text = r.category,
+                                style = MaterialTheme.appTypography.labelSmall,
+                                color = MaterialTheme.appColors.primary
                             )
-                            .clip(MaterialTheme.appShapes.textFieldShape)
-                            .padding(horizontal = 8.dp, vertical = 2.dp)
-                    ) {
-                        Text(
-                            text = r.category,
-                            style = MaterialTheme.appTypography.labelSmall,
-                            color = MaterialTheme.appColors.primary
-                        )
+                        }
+                        Spacer(Modifier.width(8.dp))
                     }
-                    Spacer(Modifier.width(8.dp))
-                }
                     Icon(
                         imageVector = Icons.Filled.Star,
                         contentDescription = null,

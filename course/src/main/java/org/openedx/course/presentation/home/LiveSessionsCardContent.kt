@@ -228,7 +228,7 @@ fun TabbedLiveSessions(
             sessions.take(5).forEach { session ->
                 LiveSessionItem(
                     session = session,
-                    isClickable = selectedTab == "today",
+                    isClickable = selectedTab == "today" || selectedTab == "past",
                     onJoinClick = { onJoinClick(session) }
                 )
                 Spacer(modifier = Modifier.height(8.dp))

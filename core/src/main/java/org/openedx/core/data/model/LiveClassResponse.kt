@@ -38,6 +38,8 @@ data class LiveClassModel(
     val joinUrl: String,
     @SerializedName("unit_url")
     val unitUrl: String?,
+    @SerializedName("recording_video")
+    val recordingVideo: String?,
     @SerializedName("meeting_info")
     val meetingInfo: MeetingInfo?
 )

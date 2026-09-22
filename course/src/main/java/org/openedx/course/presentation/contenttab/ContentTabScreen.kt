@@ -25,6 +25,7 @@ import androidx.compose.material.Divider
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Scaffold
 import androidx.compose.material.Text
+import androidx.compose.material.rememberScaffoldState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
@@ -45,6 +46,7 @@ import kotlinx.coroutines.launch
 import org.koin.androidx.compose.koinViewModel
 import org.koin.core.parameter.parametersOf
 import org.openedx.core.ui.CircularProgress
+import org.openedx.core.ui.HandleUIMessage
 import org.openedx.core.ui.HorizontalScrollbar
 import org.openedx.core.ui.WebContentScreen
 import org.openedx.core.ui.theme.OpenEdXTheme
@@ -77,9 +79,18 @@ fun ContentTabScreen(
     onNavigateToHome: () -> Unit = {},
 ) {
     val context = LocalContext.current
+    val scaffoldState = rememberScaffoldState()
+    val homeViewModel: CourseHomeViewModel = koinViewModel(
+        parameters = { parametersOf(courseId, courseName) }
+    )
+    val uiMessage by homeViewModel.uiMessage.collectAsState(null)
+
+    HandleUIMessage(uiMessage = uiMessage, scaffoldState = scaffoldState)
+
     ContentTabUI(
         windowSize = windowSize,
         pagerState = pagerState,
+        scaffoldState = scaffoldState,
         onTabSelected = onTabSelected,
         onTabClicked = {
             viewModel.logTabClickEvent(it)
@@ -131,22 +142,40 @@ fun ContentTabScreen(
                                     .padding(top = 16.dp),
                                 uiState = uiState,
                                 onJoinClick = { session ->
-                                    val meetingId = session.meetingInfo?.meetingId
-                                    val passcode = session.meetingInfo?.passcode
-                                    if (!meetingId.isNullOrEmpty() && !passcode.isNullOrEmpty()) {
-                                        ZoomMeetingHelper.getInstance().joinMeeting(
-                                            context,
-                                            meetingId,
-                                            passcode,
-                                            homeViewModel.userName,
-                                            homeViewModel.userID
-                                        )
+                                    val isPastSession = uiState.liveClassesPast.contains(session)
+                                    if (isPastSession) {
+                                        val unitId = session.recordingVideo.takeIf { !it.isNullOrEmpty() }
+                                            ?: session.unitUrl?.let { url ->
+                                                try {
+                                                    java.net.URLDecoder.decode(url, "UTF-8").split("/").lastOrNull()?.trimEnd('/')
+                                                } catch (e: Exception) {
+                                                    null
+                                                }
+                                            }
+                                        
+                                        if (!unitId.isNullOrEmpty()) {
+                                            homeViewModel.openPastMeetingBlock(fragmentManager, unitId)
+                                        } else {
+                                            homeViewModel.showRecordingNotExistMessage()
+                                        }
                                     } else {
-                                        homeViewModel.joinMeeting(
-                                            fragmentManager,
-                                            session.joinUrl,
-                                            session.topic
-                                        )
+                                        val meetingId = session.meetingInfo?.meetingId
+                                        val passcode = session.meetingInfo?.passcode
+                                        if (!meetingId.isNullOrEmpty() && !passcode.isNullOrEmpty()) {
+                                            ZoomMeetingHelper.getInstance().joinMeeting(
+                                                context,
+                                                meetingId,
+                                                passcode,
+                                                homeViewModel.userName,
+                                                homeViewModel.userID
+                                            )
+                                        } else {
+                                            homeViewModel.joinMeeting(
+                                                fragmentManager,
+                                                session.joinUrl,
+                                                session.topic
+                                            )
+                                        }
                                     }
                                 },
                                 onJoinOngoingClick = { ongoingSession ->
@@ -208,6 +237,7 @@ fun ContentTabScreen(
 private fun ContentTabUI(
     windowSize: WindowSize,
     pagerState: PagerState,
+    scaffoldState: androidx.compose.material.ScaffoldState,
     onTabSelected: (CourseContentTab) -> Unit = {},
     onTabClicked: (CourseContentTab) -> Unit = {},
     content: @Composable (Int) -> Unit
@@ -231,6 +261,7 @@ private fun ContentTabUI(
 
     Scaffold(
         modifier = Modifier.fillMaxSize(),
+        scaffoldState = scaffoldState,
         backgroundColor = MaterialTheme.appColors.background
     ) {
         Column(
@@ -380,9 +411,11 @@ private fun HandoutsUI(
 @Composable
 private fun ContentTabScreenPreview() {
     OpenEdXTheme {
+        val scaffoldState = rememberScaffoldState()
         ContentTabUI(
             windowSize = WindowSize(WindowType.Compact, WindowType.Compact),
             pagerState = rememberPagerState(initialPage = 3) { CourseContentTab.entries.size },
+            scaffoldState = scaffoldState,
             content = { page ->
                 Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
                     Text(text = "Page $page Content")

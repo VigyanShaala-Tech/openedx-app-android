@@ -529,6 +529,55 @@ class CourseHomeViewModel(
         }
     }
 
+    fun openPastMeetingBlock(fragmentManager: FragmentManager, blockId: String) {
+        viewModelScope.launch {
+            try {
+                val courseStructure = interactor.getCourseStructure(courseId, false)
+                val blocks = courseStructure.blockData
+                
+                val resumeBlock = blocks.firstOrNull { it.id == blockId }
+                val verticalBlock = if (resumeBlock?.type == org.openedx.core.BlockType.VERTICAL) {
+                    resumeBlock
+                } else {
+                    blocks.getVerticalBlocks().find { it.descendants.contains(resumeBlock?.id) }
+                }
+                val sectionBlock = blocks.getSequentialBlocks().find { it.descendants.contains(verticalBlock?.id) }
+                
+                if (sectionBlock != null && verticalBlock != null) {
+                    if (isCourseExpandableSectionsEnabled) {
+                        courseRouter.navigateToCourseContainer(
+                            fm = fragmentManager,
+                            courseId = courseId,
+                            unitId = verticalBlock.id,
+                            componentId = blockId,
+                            mode = CourseViewMode.FULL
+                        )
+                    } else {
+                        courseRouter.navigateToCourseSubsections(
+                            fragmentManager,
+                            courseId = courseId,
+                            subSectionId = sectionBlock.id,
+                            mode = CourseViewMode.FULL,
+                            unitId = verticalBlock.id,
+                            componentId = blockId
+                        )
+                    }
+                } else {
+                    showRecordingNotExistMessage()
+                }
+            } catch (e: Exception) {
+                e.printStackTrace()
+                showRecordingNotExistMessage()
+            }
+        }
+    }
+
+    fun showRecordingNotExistMessage() {
+        viewModelScope.launch {
+            _uiMessage.emit(UIMessage.SnackBarMessage("This recording does not exist."))
+        }
+    }
+
     fun downloadBlocks(blocksIds: List<String>, fragmentManager: FragmentManager) {
         viewModelScope.launch {
             val courseData = _uiState.value as? CourseHomeUIState.CourseData ?: return@launch

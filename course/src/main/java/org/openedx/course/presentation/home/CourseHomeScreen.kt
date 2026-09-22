@@ -188,22 +188,40 @@ fun CourseHomeScreen(
             )
         },
         onJoinClick = { session ->
-            val meetingId = session.meetingInfo?.meetingId
-            val passcode = session.meetingInfo?.passcode
-            if (!meetingId.isNullOrEmpty() && !passcode.isNullOrEmpty()) {
-                ZoomMeetingHelper.getInstance().joinMeeting(
-                    context,
-                    meetingId,
-                    passcode,
-                    viewModel.userName,
-                    viewModel.userID
-                )
+            val isPastSession = (uiState as? CourseHomeUIState.CourseData)?.liveClassesPast?.contains(session) == true
+            if (isPastSession) {
+                val unitId = session.recordingVideo.takeIf { !it.isNullOrEmpty() } 
+                    ?: session.unitUrl?.let { url ->
+                        try {
+                            java.net.URLDecoder.decode(url, "UTF-8").split("/").lastOrNull()?.trimEnd('/')
+                        } catch (e: Exception) {
+                            null
+                        }
+                    }
+                
+                if (!unitId.isNullOrEmpty()) {
+                    viewModel.openPastMeetingBlock(fragmentManager, unitId)
+                } else {
+                    viewModel.showRecordingNotExistMessage()
+                }
             } else {
-                viewModel.joinMeeting(
-                    fragmentManager,
-                    session.joinUrl,
-                    session.topic
-                )
+                val meetingId = session.meetingInfo?.meetingId
+                val passcode = session.meetingInfo?.passcode
+                if (!meetingId.isNullOrEmpty() && !passcode.isNullOrEmpty()) {
+                    ZoomMeetingHelper.getInstance().joinMeeting(
+                        context,
+                        meetingId,
+                        passcode,
+                        viewModel.userName,
+                        viewModel.userID
+                    )
+                } else {
+                    viewModel.joinMeeting(
+                        fragmentManager,
+                        session.joinUrl,
+                        session.topic
+                    )
+                }
             }
         },
         onJoinOngoingClick = { ongoingSession ->

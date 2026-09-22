@@ -45,6 +45,7 @@ import kotlinx.coroutines.launch
 import org.koin.androidx.compose.koinViewModel
 import org.koin.core.parameter.parametersOf
 import org.openedx.core.ui.CircularProgress
+import org.openedx.core.ui.HorizontalScrollbar
 import org.openedx.core.ui.WebContentScreen
 import org.openedx.core.ui.theme.OpenEdXTheme
 import org.openedx.core.ui.theme.appColors
@@ -238,59 +239,71 @@ private fun ContentTabUI(
                 .padding(it),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
-            Row(
+            val subTabScrollState = rememberScrollState()
+            Column(
                 modifier = Modifier
                     .padding(16.dp)
-                    .then(tabsWidth)
-                    .height(IntrinsicSize.Min)
-                    .clip(MaterialTheme.appShapes.buttonShape)
-                    .border(
-                        1.dp,
-                        MaterialTheme.appColors.primary,
-                        MaterialTheme.appShapes.buttonShape
-                    )
-                    .horizontalScroll(rememberScrollState()),
-                verticalAlignment = Alignment.CenterVertically
+                    .then(tabsWidth),
+                horizontalAlignment = Alignment.CenterHorizontally
             ) {
-                CourseContentTab.entries.forEachIndexed { index, tab ->
-                    val isSelected = pagerState.currentPage == index
-                    Box(
-                        modifier = Modifier
-                            .background(
-                                if (isSelected)
-                                    MaterialTheme.appColors.primary
-                                else
-                                    MaterialTheme.appColors.background
-                            )
-                            .clickable {
-                                scope.launch {
-                                    pagerState.scrollToPage(index)
-                                }
-                                onTabClicked(tab)
-                            }
-                            .padding(horizontal = 12.dp, vertical = 10.dp),
-                        contentAlignment = Alignment.Center
-                    ) {
-                        Text(
-                            text = stringResource(tab.labelResId),
-                            color = if (isSelected)
-                                MaterialTheme.appColors.primaryButtonText
-                            else
-                                MaterialTheme.appColors.primary,
-                            style = MaterialTheme.typography.button,
-                            maxLines = 1
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(IntrinsicSize.Min)
+                        .clip(MaterialTheme.appShapes.buttonShape)
+                        .border(
+                            1.dp,
+                            MaterialTheme.appColors.primary,
+                            MaterialTheme.appShapes.buttonShape
                         )
-                    }
-
-                    if (index != CourseContentTab.entries.lastIndex) {
-                        Divider(
+                        .horizontalScroll(subTabScrollState),
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    CourseContentTab.entries.forEachIndexed { index, tab ->
+                        val isSelected = pagerState.currentPage == index
+                        Box(
                             modifier = Modifier
-                                .fillMaxHeight()
-                                .width(1.dp),
-                            color = MaterialTheme.appColors.primary
-                        )
+                                .background(
+                                    if (isSelected)
+                                        MaterialTheme.appColors.primary
+                                    else
+                                        MaterialTheme.appColors.background
+                                )
+                                .clickable {
+                                    scope.launch {
+                                        pagerState.scrollToPage(index)
+                                    }
+                                    onTabClicked(tab)
+                                }
+                                .padding(horizontal = 12.dp, vertical = 10.dp),
+                            contentAlignment = Alignment.Center
+                        ) {
+                            Text(
+                                text = stringResource(tab.labelResId),
+                                color = if (isSelected)
+                                    MaterialTheme.appColors.primaryButtonText
+                                else
+                                    MaterialTheme.appColors.primary,
+                                style = MaterialTheme.typography.button,
+                                maxLines = 1
+                            )
+                        }
+
+                        if (index != CourseContentTab.entries.lastIndex) {
+                            Divider(
+                                modifier = Modifier
+                                    .fillMaxHeight()
+                                    .width(1.dp),
+                                color = MaterialTheme.appColors.primary
+                            )
+                        }
                     }
                 }
+                HorizontalScrollbar(
+                    scrollState = subTabScrollState,
+                    color = MaterialTheme.appColors.primary,
+                    modifier = Modifier.padding(top = 6.dp)
+                )
             }
 
             HorizontalPager(

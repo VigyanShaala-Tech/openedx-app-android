@@ -96,6 +96,7 @@ import org.openedx.core.domain.model.Media
 import org.openedx.core.ui.AuthButtonsPanel
 import org.openedx.core.ui.AutoSizeText
 import org.openedx.core.ui.HandleUIMessage
+import org.openedx.core.ui.HorizontalScrollbar
 import org.openedx.core.ui.OfflineModeDialog
 import org.openedx.core.ui.OpenEdXButton
 import org.openedx.core.ui.Toolbar
@@ -558,44 +559,52 @@ private fun CourseDetailNativeContent(
 
             var selectedTab by rememberSaveable { mutableStateOf(0) }
             val tabs = listOf("Overview", "Curriculum", "Instructor", "Reviews")
+            val detailsTabScrollState = rememberScrollState()
 
-            Row(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .horizontalScroll(rememberScrollState()),
-                horizontalArrangement = Arrangement.spacedBy(24.dp)
-            ) {
-                tabs.forEachIndexed { index, label ->
-                    Column(
-                        modifier = Modifier
-                            .clickable { selectedTab = index }
-                            .width(IntrinsicSize.Min),
-                        horizontalAlignment = Alignment.Start
-                    ) {
-                        Text(
-                            text = label,
-                            style = MaterialTheme.appTypography.titleSmall,
-                            color = if (selectedTab == index)
-                                MaterialTheme.appColors.primary
-                            else
-                                MaterialTheme.appColors.textSecondary
-                        )
-
-                        Spacer(Modifier.height(4.dp))
-
-                        Box(
+            Column(modifier = Modifier.fillMaxWidth()) {
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .horizontalScroll(detailsTabScrollState),
+                    horizontalArrangement = Arrangement.spacedBy(24.dp)
+                ) {
+                    tabs.forEachIndexed { index, label ->
+                        Column(
                             modifier = Modifier
-                                .fillMaxWidth()
-                                .height(2.dp)
-                                .background(
-                                    if (selectedTab == index)
-                                        MaterialTheme.appColors.primary
-                                    else
-                                        Color.Transparent
-                                )
-                        )
+                                .clickable { selectedTab = index }
+                                .width(IntrinsicSize.Min),
+                            horizontalAlignment = Alignment.Start
+                        ) {
+                            Text(
+                                text = label,
+                                style = MaterialTheme.appTypography.titleSmall,
+                                color = if (selectedTab == index)
+                                    MaterialTheme.appColors.primary
+                                else
+                                    MaterialTheme.appColors.textSecondary
+                            )
+
+                            Spacer(Modifier.height(4.dp))
+
+                            Box(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .height(2.dp)
+                                    .background(
+                                        if (selectedTab == index)
+                                            MaterialTheme.appColors.primary
+                                        else
+                                            Color.Transparent
+                                    )
+                            )
+                        }
                     }
                 }
+                HorizontalScrollbar(
+                    scrollState = detailsTabScrollState,
+                    color = MaterialTheme.appColors.primary,
+                    modifier = Modifier.padding(top = 6.dp)
+                )
             }
 
             Spacer(Modifier.height(16.dp))

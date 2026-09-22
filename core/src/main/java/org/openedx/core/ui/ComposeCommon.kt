@@ -1307,48 +1307,54 @@ fun RoundTabsBar(
     }
 
     val scope = rememberCoroutineScope()
-    LazyRow(
-        modifier = modifier,
-        state = rowState,
-        horizontalArrangement = Arrangement.spacedBy(8.dp),
-        contentPadding = contentPadding,
-    ) {
-        itemsIndexed(items) { index, item ->
-            val isSelected = pagerState.currentPage == index
-            val backgroundColor = if (isSelected) {
-                MaterialTheme.appColors.primary
-            } else {
-                MaterialTheme.appColors.cardViewBackground
-            }
-            val contentColor = if (isSelected) {
-                MaterialTheme.appColors.tabSelectedBtnContent
-            } else {
-                MaterialTheme.appColors.textPrimary
-            }
-            val borderModifier = if (isSelected) {
-                Modifier
-            } else {
-                Modifier.border(1.dp, MaterialTheme.appColors.cardViewBorder, CircleShape)
-            }
+    Column(modifier = modifier) {
+        LazyRow(
+            state = rowState,
+            horizontalArrangement = Arrangement.spacedBy(8.dp),
+            contentPadding = contentPadding,
+        ) {
+            itemsIndexed(items) { index, item ->
+                val isSelected = pagerState.currentPage == index
+                val backgroundColor = if (isSelected) {
+                    MaterialTheme.appColors.primary
+                } else {
+                    MaterialTheme.appColors.cardViewBackground
+                }
+                val contentColor = if (isSelected) {
+                    MaterialTheme.appColors.tabSelectedBtnContent
+                } else {
+                    MaterialTheme.appColors.textPrimary
+                }
+                val borderModifier = if (isSelected) {
+                    Modifier
+                } else {
+                    Modifier.border(1.dp, MaterialTheme.appColors.cardViewBorder, CircleShape)
+                }
 
-            RoundTab(
-                modifier = Modifier
-                    .height(40.dp)
-                    .then(borderModifier)
-                    .clip(CircleShape)
-                    .background(backgroundColor)
-                    .clickable {
-                        scope.launch {
-                            onTabClicked(index)
-                            pagerState.scrollToPage(index)
-                            rowState.animateScrollToItem(index)
+                RoundTab(
+                    modifier = Modifier
+                        .height(40.dp)
+                        .then(borderModifier)
+                        .clip(CircleShape)
+                        .background(backgroundColor)
+                        .clickable {
+                            scope.launch {
+                                onTabClicked(index)
+                                pagerState.scrollToPage(index)
+                                rowState.animateScrollToItem(index)
+                            }
                         }
-                    }
-                    .padding(horizontal = 16.dp),
-                item = item,
-                contentColor = contentColor
-            )
+                        .padding(horizontal = 16.dp),
+                    item = item,
+                    contentColor = contentColor
+                )
+            }
         }
+        HorizontalLazyListScrollbar(
+            state = rowState,
+            color = MaterialTheme.appColors.primary,
+            modifier = Modifier.padding(top = 4.dp)
+        )
     }
 }
 

@@ -1,9 +1,13 @@
 package org.openedx.core.ui
 
 import android.content.res.Configuration
+import androidx.compose.foundation.ScrollState
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.WindowInsets
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.ime
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyListState
@@ -246,6 +250,134 @@ fun Modifier.horizontalScrollbar(
                 topLeft = Offset(scrollbarOffset.coerceIn(layoutInfo.beforeContentPadding.toFloat(), viewportSize - layoutInfo.afterContentPadding - scrollbarWidth), size.height - thicknessPx),
                 size = Size(scrollbarWidth, thicknessPx),
                 alpha = 0.6f
+            )
+        }
+    }
+}
+
+fun Modifier.horizontalScrollbar(
+    state: ScrollState,
+    color: Color,
+    thickness: Dp = 3.dp
+): Modifier = composed {
+    val density = LocalDensity.current
+    val thicknessPx = with(density) { thickness.toPx() }
+
+    this.drawWithContent {
+        drawContent()
+
+        val maxValue = state.maxValue
+        if (maxValue > 0) {
+            val viewportWidth = size.width
+            val totalWidth = viewportWidth + maxValue
+            val scrollbarWidth = ((viewportWidth / totalWidth) * viewportWidth).coerceAtLeast(24.dp.toPx())
+            val scrollbarOffset = (state.value.toFloat() / maxValue.toFloat()) * (viewportWidth - scrollbarWidth)
+
+            // Draw track
+            drawRect(
+                color = color.copy(alpha = 0.2f),
+                topLeft = Offset(0f, size.height - thicknessPx),
+                size = Size(viewportWidth, thicknessPx)
+            )
+
+            // Draw thumb
+            drawRect(
+                color = color,
+                topLeft = Offset(scrollbarOffset.coerceIn(0f, viewportWidth - scrollbarWidth), size.height - thicknessPx),
+                size = Size(scrollbarWidth, thicknessPx),
+                alpha = 0.8f
+            )
+        }
+    }
+}
+
+@Composable
+fun HorizontalScrollbar(
+    scrollState: ScrollState,
+    color: Color,
+    modifier: Modifier = Modifier,
+    thickness: Dp = 3.dp
+) {
+    if (scrollState.maxValue > 0) {
+        Box(
+            modifier = modifier
+                .fillMaxWidth()
+                .height(thickness)
+                .drawWithContent {
+                    val maxValue = scrollState.maxValue
+                    val viewportWidth = size.width
+                    val totalWidth = viewportWidth + maxValue
+                    val scrollbarWidth = ((viewportWidth / totalWidth) * viewportWidth).coerceAtLeast(24.dp.toPx())
+                    val scrollbarOffset = (scrollState.value.toFloat() / maxValue.toFloat()) * (viewportWidth - scrollbarWidth)
+
+                    // Draw track
+                    drawRect(
+                        color = color.copy(alpha = 0.15f),
+                        topLeft = Offset(0f, 0f),
+                        size = Size(viewportWidth, size.height)
+                    )
+
+                    // Draw thumb
+                    drawRect(
+                        color = color,
+                        topLeft = Offset(scrollbarOffset.coerceIn(0f, viewportWidth - scrollbarWidth), 0f),
+                        size = Size(scrollbarWidth, size.height),
+                        alpha = 0.8f
+                    )
+                }
+        )
+    }
+}
+
+@Composable
+fun HorizontalLazyListScrollbar(
+    state: LazyListState,
+    color: Color,
+    modifier: Modifier = Modifier,
+    thickness: Dp = 3.dp
+) {
+    val layoutInfo = state.layoutInfo
+    val visibleItemsInfo = layoutInfo.visibleItemsInfo
+    if (visibleItemsInfo.isNotEmpty()) {
+        val totalItemsCount = layoutInfo.totalItemsCount
+        val viewportSize = layoutInfo.viewportSize.width.toFloat()
+        val averageItemSize = visibleItemsInfo.map { it.size }.average().toFloat()
+        val estimatedTotalWidth =
+            totalItemsCount * averageItemSize + (totalItemsCount - 1) * layoutInfo.mainAxisItemSpacing
+
+        if (estimatedTotalWidth > viewportSize) {
+            Box(
+                modifier = modifier
+                    .fillMaxWidth()
+                    .height(thickness)
+                    .drawWithContent {
+                        val scrollbarAreaWidth = viewportSize - layoutInfo.beforeContentPadding - layoutInfo.afterContentPadding
+                        val scrollbarWidth = ((viewportSize / estimatedTotalWidth) * scrollbarAreaWidth).coerceAtLeast(24.dp.toPx())
+                        val scrollOffset =
+                            state.firstVisibleItemIndex * (averageItemSize + layoutInfo.mainAxisItemSpacing) + state.firstVisibleItemScrollOffset
+                        val scrollbarOffset = layoutInfo.beforeContentPadding + (scrollOffset / estimatedTotalWidth) * scrollbarAreaWidth
+
+                        // Draw track
+                        drawRect(
+                            color = color.copy(alpha = 0.15f),
+                            topLeft = Offset(layoutInfo.beforeContentPadding.toFloat(), 0f),
+                            size = Size(scrollbarAreaWidth, size.height)
+                        )
+
+                        // Draw thumb
+                        drawRect(
+                            color = color,
+                            topLeft = Offset(
+                                scrollbarOffset.coerceIn(
+                                    layoutInfo.beforeContentPadding.toFloat(),
+                                    viewportSize - layoutInfo.afterContentPadding - scrollbarWidth
+                                ),
+                                0f
+                            ),
+                            size = Size(scrollbarWidth, size.height),
+                            alpha = 0.8f
+                        )
+                    }
             )
         }
     }

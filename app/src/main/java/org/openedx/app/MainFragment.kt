@@ -1,5 +1,10 @@
 package org.openedx.app
 
+import android.content.res.ColorStateList
+import android.graphics.Canvas
+import android.graphics.ColorFilter
+import android.graphics.Rect
+import android.graphics.drawable.Drawable
 import android.os.Bundle
 import android.view.Menu
 import android.view.View
@@ -159,12 +164,14 @@ class MainFragment : Fragment(R.layout.fragment_main) {
         viewModel.profileImageUrl.observe(viewLifecycleOwner) { imageUrl ->
             val profileMenuItem = binding.bottomNavView.menu.findItem(R.id.fragmentProfile) ?: return@observe
             if (!imageUrl.isNullOrBlank()) {
+                val iconSizePx = (24 * resources.displayMetrics.density).toInt()
                 val request = ImageRequest.Builder(requireContext())
                     .data(imageUrl)
+                    .size(iconSizePx, iconSizePx)
                     .transformations(CircleCropTransformation())
                     .target(
                         onSuccess = { drawable ->
-                            profileMenuItem.icon = drawable
+                            profileMenuItem.icon = UnTintableDrawable(drawable)
                         },
                         onError = {
                             profileMenuItem.setIcon(R.drawable.app_ic_profile_selector)
@@ -287,4 +294,43 @@ class MainFragment : Fragment(R.layout.fragment_main) {
             return fragment
         }
     }
+}
+
+private class UnTintableDrawable(private val drawable: Drawable) : Drawable() {
+    override fun draw(canvas: Canvas) {
+        drawable.draw(canvas)
+    }
+
+    override fun setAlpha(alpha: Int) {
+        drawable.alpha = alpha
+    }
+
+    override fun setColorFilter(colorFilter: ColorFilter?) {
+        // Prevent BottomNavigationView from applying tint color filters over the profile image
+    }
+
+    override fun setTintList(tint: ColorStateList?) {
+        // Prevent BottomNavigationView from applying tint list over the profile image
+    }
+
+    override fun setTint(tintColor: Int) {
+        // Prevent BottomNavigationView from applying tint over the profile image
+    }
+
+    @Suppress("DEPRECATION")
+    @Deprecated("Deprecated in Java")
+    override fun getOpacity(): Int = drawable.opacity
+
+    override fun setBounds(left: Int, top: Int, right: Int, bottom: Int) {
+        super.setBounds(left, top, right, bottom)
+        drawable.setBounds(left, top, right, bottom)
+    }
+
+    override fun setBounds(bounds: Rect) {
+        super.setBounds(bounds)
+        drawable.bounds = bounds
+    }
+
+    override fun getIntrinsicWidth(): Int = drawable.intrinsicWidth
+    override fun getIntrinsicHeight(): Int = drawable.intrinsicHeight
 }

@@ -14,6 +14,9 @@ import androidx.fragment.app.Fragment
 import androidx.fragment.app.setFragmentResultListener
 import androidx.lifecycle.lifecycleScope
 import androidx.viewpager2.widget.ViewPager2
+import coil.Coil
+import coil.request.ImageRequest
+import coil.transform.CircleCropTransformation
 import kotlinx.coroutines.launch
 import org.koin.android.ext.android.inject
 import org.koin.androidx.viewmodel.ext.android.viewModel
@@ -28,10 +31,8 @@ import org.openedx.core.presentation.global.appupgrade.UpgradeRequiredFragment
 import org.openedx.core.presentation.global.viewBinding
 import org.openedx.core.system.notifier.app.AppUpgradeEvent
 import org.openedx.discovery.presentation.DiscoveryRouter
-import org.openedx.downloads.presentation.download.DownloadsFragment
 import org.openedx.learn.presentation.LearnFragment
 import org.openedx.learn.presentation.LearnTab
-import org.openedx.profile.presentation.profile.ProfileFragment
 
 class MainFragment : Fragment(R.layout.fragment_main) {
 
@@ -153,6 +154,27 @@ class MainFragment : Fragment(R.layout.fragment_main) {
     private fun observeViewModel() {
         viewModel.isBottomBarEnabled.observe(viewLifecycleOwner) { isBottomBarEnabled ->
             enableBottomBar(isBottomBarEnabled)
+        }
+
+        viewModel.profileImageUrl.observe(viewLifecycleOwner) { imageUrl ->
+            val profileMenuItem = binding.bottomNavView.menu.findItem(R.id.fragmentProfile) ?: return@observe
+            if (!imageUrl.isNullOrBlank()) {
+                val request = ImageRequest.Builder(requireContext())
+                    .data(imageUrl)
+                    .transformations(CircleCropTransformation())
+                    .target(
+                        onSuccess = { drawable ->
+                            profileMenuItem.icon = drawable
+                        },
+                        onError = {
+                            profileMenuItem.setIcon(R.drawable.app_ic_profile_selector)
+                        }
+                    )
+                    .build()
+                Coil.imageLoader(requireContext()).enqueue(request)
+            } else {
+                profileMenuItem.setIcon(R.drawable.app_ic_profile_selector)
+            }
         }
 
         viewLifecycleOwner.lifecycleScope.launch {

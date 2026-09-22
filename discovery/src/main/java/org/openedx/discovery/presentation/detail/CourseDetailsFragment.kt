@@ -16,6 +16,7 @@ import android.webkit.WebView
 import android.webkit.WebViewClient
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -32,7 +33,6 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.widthIn
-import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.verticalScroll
@@ -559,12 +559,13 @@ private fun CourseDetailNativeContent(
             var selectedTab by rememberSaveable { mutableStateOf(0) }
             val tabs = listOf("Overview", "Curriculum", "Instructor", "Reviews")
 
-            LazyRow(
-                modifier = Modifier.fillMaxWidth(),
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .horizontalScroll(rememberScrollState()),
                 horizontalArrangement = Arrangement.spacedBy(24.dp)
             ) {
-                items(tabs.size) { index ->
-                    val label = tabs[index]
+                tabs.forEachIndexed { index, label ->
                     Column(
                         modifier = Modifier
                             .clickable { selectedTab = index }

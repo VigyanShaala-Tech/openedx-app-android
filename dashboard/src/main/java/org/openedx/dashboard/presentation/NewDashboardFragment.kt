@@ -9,11 +9,9 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.IntrinsicSize
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -336,8 +334,7 @@ private fun NewDashboardScreenContent(
                         val cards = statCards.take(4)
                         Row(
                             modifier = Modifier
-                                .fillMaxWidth()
-                                .height(IntrinsicSize.Max),
+                                .fillMaxWidth(),
                             horizontalArrangement = Arrangement.spacedBy(12.dp)
                         ) {
                             cards.forEachIndexed { index, item ->
@@ -347,7 +344,7 @@ private fun NewDashboardScreenContent(
                                     shape = MaterialTheme.appShapes.cardShape,
                                     modifier = Modifier
                                         .weight(1f)
-                                        .fillMaxHeight()
+                                        .height(110.dp)
                                         .clip(MaterialTheme.appShapes.cardShape)
                                         .clickable {
                                             val iconName = item.iconName
@@ -934,7 +931,6 @@ private fun RecommendationItem(r: RecommendationData, apiHostUrl: String, onClic
     ) {
         Row(
             modifier = Modifier
-                .height(IntrinsicSize.Min)
                 .clickable { onClick() },
             verticalAlignment = Alignment.CenterVertically
         ) {

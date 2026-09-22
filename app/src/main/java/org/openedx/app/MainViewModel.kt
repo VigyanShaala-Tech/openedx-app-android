@@ -17,14 +17,20 @@ import org.openedx.core.system.notifier.DiscoveryNotifier
 import org.openedx.core.system.notifier.NavigationToDiscovery
 import org.openedx.core.system.notifier.app.AppNotifier
 import org.openedx.core.system.notifier.app.AppUpgradeEvent
-import org.openedx.discovery.presentation.DiscoveryNavigator
+import org.openedx.foundation.extension.toImageLink
 import org.openedx.foundation.presentation.BaseViewModel
+import org.openedx.profile.data.repository.ProfileRepository
+import org.openedx.profile.domain.model.Account
+import org.openedx.profile.system.notifier.account.AccountUpdated
+import org.openedx.profile.system.notifier.profile.ProfileNotifier
 
 class MainViewModel(
     private val config: Config,
     private val notifier: DiscoveryNotifier,
     private val analytics: AppAnalytics,
     private val appNotifier: AppNotifier,
+    private val profileRepository: ProfileRepository,
+    private val profileNotifier: ProfileNotifier,
 ) : BaseViewModel() {
 
     private val _isBottomBarEnabled = MutableLiveData(true)
@@ -39,6 +45,10 @@ class MainViewModel(
     val appUpgradeEvent: LiveData<AppUpgradeEvent>
         get() = _appUpgradeEvent
 
+    private val _profileImageUrl = MutableLiveData<String?>()
+    val profileImageUrl: LiveData<String?>
+        get() = _profileImageUrl
+
     val isDiscoveryTypeWebView get() = config.getDiscoveryConfig().isViewTypeWebView()
 //    val getDiscoveryFragment get() = DiscoveryNavigator(isDiscoveryTypeWebView).getDiscoveryFragment()
     val getDiscoveryFragment get() = LogistrationFragment.newInstance(null, "RECOMMENDED")
@@ -49,6 +59,8 @@ class MainViewModel(
         super.onCreate(owner)
         collectDiscoveryEvents()
         collectAppUpgradeEvent()
+        collectProfileEvents()
+        loadProfileImage()
     }
 
     fun enableBottomBar(enable: Boolean) {
@@ -78,6 +90,40 @@ class MainViewModel(
                 put(AppAnalyticsKey.NAME.key, event.biValue)
             }
         )
+    }
+
+    fun loadProfileImage() {
+        viewModelScope.launch {
+            try {
+                val cachedAccount = profileRepository.getCachedAccount()
+                updateProfileImageUrl(cachedAccount)
+                val account = profileRepository.getAccount()
+                updateProfileImageUrl(account)
+            } catch (e: Exception) {
+                e.printStackTrace()
+            }
+        }
+    }
+
+    private fun updateProfileImageUrl(account: Account?) {
+        if (account?.profileImage?.hasImage == true && account.profileImage.imageUrlFull.isNotBlank()) {
+            val imageUrl = account.profileImage.imageUrlFull.toImageLink(config.getApiHostURL())
+            _profileImageUrl.postValue(imageUrl)
+        } else {
+            _profileImageUrl.postValue(null)
+        }
+    }
+
+    private fun collectProfileEvents() {
+        viewModelScope.launch {
+            profileNotifier.notifier
+                .onEach { event ->
+                    if (event is AccountUpdated) {
+                        loadProfileImage()
+                    }
+                }
+                .launchIn(viewModelScope)
+        }
     }
 
     private fun collectDiscoveryEvents() {

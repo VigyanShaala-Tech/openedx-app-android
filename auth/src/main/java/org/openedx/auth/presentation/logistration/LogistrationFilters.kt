@@ -14,12 +14,16 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.DropdownMenu
 import androidx.compose.material.DropdownMenuItem
 import androidx.compose.material.Icon
@@ -182,19 +186,31 @@ private fun FilterPill(
             expanded = expanded,
             onDismissRequest = { expanded = false },
             modifier = Modifier
+                .widthIn(min = 180.dp, max = 280.dp)
+                .heightIn(max = 280.dp)
                 .background(MaterialTheme.appColors.cardViewBackground)
-                .clip(RoundedCornerShape(8.dp)) // Rounded corners for dropdown menu
+                .clip(RoundedCornerShape(8.dp))
         ) {
-            options.forEach { opt ->
-                DropdownMenuItem(onClick = {
-                    expanded = false
-                    onSelect(opt)
-                }) {
-                    Text(
-                        text = opt, 
-                        style = MaterialTheme.appTypography.bodyMedium,
-                        color = MaterialTheme.appColors.textDark
-                    )
+            val scrollState = rememberScrollState()
+            Column(
+                modifier = Modifier
+                    .heightIn(max = 280.dp)
+                    .verticalScroll(scrollState)
+            ) {
+                options.forEach { opt ->
+                    DropdownMenuItem(
+                        onClick = {
+                            expanded = false
+                            onSelect(opt)
+                        },
+                        contentPadding = PaddingValues(start = 16.dp, end = 16.dp)
+                    ) {
+                        Text(
+                            text = opt,
+                            style = MaterialTheme.appTypography.bodyMedium,
+                            color = MaterialTheme.appColors.textDark
+                        )
+                    }
                 }
             }
         }

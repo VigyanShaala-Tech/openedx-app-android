@@ -104,7 +104,7 @@ val screenModule = module {
             get(),
         )
     }
-    viewModel { MainViewModel(get(), get(), get(), get()) }
+    viewModel { MainViewModel(get(), get(), get(), get(), get(), get()) }
 
     factory { AuthRepository(get(), get(), get(), get()) }
     factory { AuthInteractor(get()) }

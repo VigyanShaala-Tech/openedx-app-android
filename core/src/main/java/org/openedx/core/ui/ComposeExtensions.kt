@@ -23,8 +23,8 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.composed
 import androidx.compose.ui.draw.drawWithCache
-import androidx.compose.ui.draw.paint
 import androidx.compose.ui.draw.drawWithContent
+import androidx.compose.ui.draw.paint
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Color
@@ -246,6 +246,61 @@ fun Modifier.horizontalScrollbar(
                 topLeft = Offset(scrollbarOffset.coerceIn(layoutInfo.beforeContentPadding.toFloat(), viewportSize - layoutInfo.afterContentPadding - scrollbarWidth), size.height - thicknessPx),
                 size = Size(scrollbarWidth, thicknessPx),
                 alpha = 0.6f
+            )
+        }
+    }
+}
+
+fun Modifier.leftVerticalScrollbar(
+    state: LazyListState,
+    color: Color,
+    thickness: Dp = 4.dp,
+    padding: Dp = 4.dp
+): Modifier = composed {
+    val density = LocalDensity.current
+    val thicknessPx = with(density) { thickness.toPx() }
+    val paddingPx = with(density) { padding.toPx() }
+
+    this.drawWithContent {
+        drawContent()
+
+        val layoutInfo = state.layoutInfo
+        val visibleItemsInfo = layoutInfo.visibleItemsInfo
+        if (visibleItemsInfo.isEmpty()) return@drawWithContent
+
+        val totalItemsCount = layoutInfo.totalItemsCount
+        val viewportHeight = layoutInfo.viewportSize.height.toFloat()
+
+        val averageItemSize = visibleItemsInfo.map { it.size }.average().toFloat()
+        val estimatedTotalHeight =
+            totalItemsCount * averageItemSize + (totalItemsCount - 1) * layoutInfo.mainAxisItemSpacing
+
+        if (estimatedTotalHeight > viewportHeight) {
+            val scrollbarAreaHeight = viewportHeight - layoutInfo.beforeContentPadding - layoutInfo.afterContentPadding
+            val scrollbarHeight = ((viewportHeight / estimatedTotalHeight) * scrollbarAreaHeight).coerceAtLeast(24.dp.toPx())
+            val scrollOffset =
+                state.firstVisibleItemIndex * (averageItemSize + layoutInfo.mainAxisItemSpacing) + state.firstVisibleItemScrollOffset
+            val scrollbarOffset = layoutInfo.beforeContentPadding + (scrollOffset / estimatedTotalHeight) * scrollbarAreaHeight
+
+            // Draw track on left side
+            drawRect(
+                color = color.copy(alpha = 0.15f),
+                topLeft = Offset(paddingPx, layoutInfo.beforeContentPadding.toFloat()),
+                size = Size(thicknessPx, scrollbarAreaHeight)
+            )
+
+            // Draw thumb on left side
+            drawRect(
+                color = color,
+                topLeft = Offset(
+                    paddingPx,
+                    scrollbarOffset.coerceIn(
+                        layoutInfo.beforeContentPadding.toFloat(),
+                        viewportHeight - layoutInfo.afterContentPadding - scrollbarHeight
+                    )
+                ),
+                size = Size(thicknessPx, scrollbarHeight),
+                alpha = 0.7f
             )
         }
     }

@@ -7,6 +7,7 @@ import android.view.LayoutInflater
 import android.view.ViewGroup
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -33,8 +34,6 @@ import androidx.compose.material.ModalBottomSheetValue
 import androidx.compose.material.OutlinedTextField
 import androidx.compose.material.Scaffold
 import androidx.compose.material.Surface
-import androidx.compose.material.Tab
-import androidx.compose.material.TabRow
 import androidx.compose.material.Text
 import androidx.compose.material.TextFieldDefaults
 import androidx.compose.material.icons.Icons
@@ -476,9 +475,7 @@ private fun Tabs(
     isLimited: Boolean = false,
 ) {
     val isFirstPage = currentPage == 0
-    TabRow(
-        selectedTabIndex = currentPage,
-        backgroundColor = MaterialTheme.appColors.surface,
+    Row(
         modifier = Modifier
             .fillMaxWidth()
             .padding(vertical = 4.dp)
@@ -487,10 +484,8 @@ private fun Tabs(
                 1.dp,
                 MaterialTheme.appColors.cardViewBorder,
                 RoundedCornerShape(percent = 20)
-            ),
-        indicator = { _ ->
-            Box {}
-        }
+            )
+            .background(MaterialTheme.appColors.surface)
     ) {
         tabs.forEachIndexed { index, text ->
             val selected = currentPage == index
@@ -499,28 +494,27 @@ private fun Tabs(
             } else {
                 MaterialTheme.appColors.textPrimaryVariant
             }
-            Tab(
-                modifier = if (selected) {
-                    Modifier
-                        .clip(RoundedCornerShape(percent = 20))
-                        .background(
+            Box(
+                modifier = Modifier
+                    .weight(1f)
+                    .clip(RoundedCornerShape(percent = 20))
+                    .background(
+                        if (selected) {
                             MaterialTheme.appColors.primary
-                        )
-                } else {
-                    Modifier
-                        .clip(RoundedCornerShape(percent = 20))
-                        .background(
+                        } else {
                             MaterialTheme.appColors.surface
-                        )
-                },
-                selected = selected,
-                onClick = {
-                    if (!isLimited && !selected) {
-                        onItemClick(isFirstPage)
+                        }
+                    )
+                    .clickable {
+                        if (!isLimited && !selected) {
+                            onItemClick(isFirstPage)
+                        }
                     }
-                },
-                text = { Text(text = text, color = textColor) }
-            )
+                    .padding(vertical = 12.dp),
+                contentAlignment = Alignment.Center
+            ) {
+                Text(text = text, color = textColor)
+            }
         }
     }
 }

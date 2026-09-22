@@ -5,6 +5,7 @@ import android.view.LayoutInflater
 import android.view.ViewGroup
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -29,8 +30,6 @@ import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Scaffold
 import androidx.compose.material.Switch
 import androidx.compose.material.SwitchDefaults
-import androidx.compose.material.Tab
-import androidx.compose.material.TabRow
 import androidx.compose.material.Text
 import androidx.compose.material.rememberScaffoldState
 import androidx.compose.runtime.Composable
@@ -216,38 +215,48 @@ private fun SyncCourseTabRow(
     var selectedTab by remember { mutableStateOf(SyncCourseTab.SYNCED) }
     val selectedTabIndex = SyncCourseTab.entries.indexOf(selectedTab)
 
-    Column {
-        TabRow(
+    Column(modifier = Modifier.fillMaxSize()) {
+        Row(
             modifier = Modifier
+                .fillMaxWidth()
                 .clip(MaterialTheme.appShapes.buttonShape)
                 .border(
                     1.dp,
                     MaterialTheme.appColors.textAccent,
                     MaterialTheme.appShapes.buttonShape
-                ),
-            selectedTabIndex = selectedTabIndex,
-            backgroundColor = MaterialTheme.appColors.background,
-            indicator = {}
+                )
+                .background(MaterialTheme.appColors.background)
         ) {
             SyncCourseTab.entries.forEachIndexed { index, tab ->
-                val backgroundColor = if (selectedTabIndex == index) {
+                val isSelected = selectedTabIndex == index
+                val backgroundColor = if (isSelected) {
                     MaterialTheme.appColors.textAccent
                 } else {
                     MaterialTheme.appColors.background
                 }
-                Tab(
+                val textColor = if (isSelected) {
+                    MaterialTheme.appColors.background
+                } else {
+                    MaterialTheme.appColors.textAccent
+                }
+                Box(
                     modifier = Modifier
-                        .background(backgroundColor),
-                    text = { Text(stringResource(id = tab.title)) },
-                    selected = selectedTabIndex == index,
-                    onClick = { selectedTab = SyncCourseTab.entries[index] },
-                    unselectedContentColor = MaterialTheme.appColors.textAccent,
-                    selectedContentColor = MaterialTheme.appColors.background
-                )
+                        .weight(1f)
+                        .background(backgroundColor)
+                        .clickable { selectedTab = SyncCourseTab.entries[index] }
+                        .padding(vertical = 12.dp),
+                    contentAlignment = Alignment.Center
+                ) {
+                    Text(
+                        text = stringResource(id = tab.title),
+                        color = textColor
+                    )
+                }
             }
         }
 
         CourseCheckboxList(
+            modifier = Modifier.weight(1f),
             selectedTab = selectedTab,
             uiState = uiState,
             onCourseSyncCheckChange = onCourseSyncCheckChange
@@ -257,13 +266,14 @@ private fun SyncCourseTabRow(
 
 @Composable
 private fun CourseCheckboxList(
+    modifier: Modifier = Modifier,
     selectedTab: SyncCourseTab,
     uiState: CoursesToSyncUIState,
     onCourseSyncCheckChange: (Boolean, String) -> Unit
 ) {
     if (uiState.isLoading) {
         Box(
-            modifier = Modifier
+            modifier = modifier
                 .fillMaxSize(),
             contentAlignment = Alignment.Center
         ) {
@@ -271,7 +281,7 @@ private fun CourseCheckboxList(
         }
     } else {
         LazyColumn(
-            modifier = Modifier.padding(8.dp),
+            modifier = modifier.padding(8.dp),
         ) {
             val courseIds = uiState.coursesCalendarState
                 .filter { it.isCourseSyncEnabled == (selectedTab == SyncCourseTab.SYNCED) }

@@ -106,6 +106,10 @@ fun CourseHomeScreen(
         windowSize = windowSize,
         uiState = uiState,
         uiMessage = uiMessage,
+        initialLiveSessionsTab = viewModel.savedLiveSessionsTab,
+        onLiveSessionsTabChanged = { tab ->
+            viewModel.savedLiveSessionsTab = tab
+        },
         onSubSectionClick = { subSectionBlock ->
             // Log section/subsection click event
             viewModel.logSectionSubsectionClick(
@@ -275,6 +279,8 @@ private fun CourseHomeUI(
     onJoinClick: (LiveClassModel) -> Unit,
     onJoinOngoingClick: (OngoingSessionModel) -> Unit,
     onViewAllLiveSessionsClick: () -> Unit,
+    initialLiveSessionsTab: String,
+    onLiveSessionsTabChanged: (String) -> Unit,
     onRetry: () -> Unit,
 ) {
     val scaffoldState = rememberScaffoldState()
@@ -368,6 +374,8 @@ private fun CourseHomeUI(
                                     LiveSessionsCardContent(
                                         isHomeScreen = true,
                                         uiState = uiState,
+                                        initialTab = initialLiveSessionsTab,
+                                        onTabChanged = onLiveSessionsTabChanged,
                                         onJoinClick = onJoinClick,
                                         onJoinOngoingClick = onJoinOngoingClick,
                                         onViewAllLiveSessionsClick = onViewAllLiveSessionsClick
@@ -772,6 +780,8 @@ private fun CourseHomeScreenPreview() {
             onJoinClick = {},
             onJoinOngoingClick = { _ -> },
             onViewAllLiveSessionsClick = {},
+            initialLiveSessionsTab = "today",
+            onLiveSessionsTabChanged = {},
             onRetry = {}
         )
     }

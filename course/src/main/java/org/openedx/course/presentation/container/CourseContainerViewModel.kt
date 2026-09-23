@@ -108,6 +108,10 @@ class CourseContainerViewModel(
     val uiMessage: SharedFlow<UIMessage>
         get() = _uiMessage.asSharedFlow()
 
+    var savedMainPage: Int? = null
+    var savedContentPage: Int? = null
+    var savedSelectedContentTab: CourseContentTab? = null
+
     private var _courseDetails: CourseEnrollmentDetails? = null
     val courseDetails: CourseEnrollmentDetails?
         get() = _courseDetails

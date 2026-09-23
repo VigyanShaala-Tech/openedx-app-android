@@ -14,7 +14,6 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
-import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.navigationBarsPadding
@@ -28,8 +27,6 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.Divider
 import androidx.compose.material.ExperimentalMaterialApi
-import androidx.compose.material.Icon
-import androidx.compose.material.IconButton
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Scaffold
 import androidx.compose.material.SnackbarData
@@ -38,7 +35,6 @@ import androidx.compose.material.SnackbarHost
 import androidx.compose.material.SnackbarHostState
 import androidx.compose.material.Text
 import androidx.compose.material.TextButton
-import androidx.compose.material.icons.Icons
 import androidx.compose.material.pullrefresh.PullRefreshIndicator
 import androidx.compose.material.pullrefresh.pullRefresh
 import androidx.compose.material.pullrefresh.rememberPullRefreshState
@@ -64,7 +60,6 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
-import androidx.core.content.ContextCompat
 import androidx.core.os.bundleOf
 import androidx.core.view.isVisible
 import androidx.fragment.app.Fragment
@@ -287,17 +282,27 @@ fun CourseDashboard(
     }
 
     val pagerState = rememberPagerState(
-        initialPage = CourseContainerTab.entries.indexOf(requiredTab),
+        initialPage = viewModel.savedMainPage ?: CourseContainerTab.entries.indexOf(requiredTab),
         pageCount = { CourseContainerTab.entries.size }
     )
     val contentTabPagerState = rememberPagerState(
-        initialPage = 0,
+        initialPage = viewModel.savedContentPage ?: 0,
         pageCount = { CourseContentTab.entries.size }
     )
     val accessStatus = viewModel.courseAccessStatus.observeAsState()
     val tabState = rememberLazyListState()
     val snackState = remember { SnackbarHostState() }
-    var selectedContentTab by remember { mutableStateOf(CourseContentTab.ALL) }
+    var selectedContentTab by rememberSaveable { mutableStateOf(viewModel.savedSelectedContentTab ?: CourseContentTab.ALL) }
+
+    LaunchedEffect(pagerState.currentPage) {
+        viewModel.savedMainPage = pagerState.currentPage
+    }
+    LaunchedEffect(contentTabPagerState.currentPage) {
+        viewModel.savedContentPage = contentTabPagerState.currentPage
+    }
+    LaunchedEffect(selectedContentTab) {
+        viewModel.savedSelectedContentTab = selectedContentTab
+    }
     val pullRefreshState = rememberPullRefreshState(
         refreshing = refreshing,
         onRefresh = { onRefresh(pagerState.currentPage) }

@@ -141,6 +141,10 @@ fun ContentTabScreen(
                                     .verticalScroll(rememberScrollState())
                                     .padding(top = 16.dp),
                                 uiState = uiState,
+                                initialTab = homeViewModel.savedLiveSessionsTab,
+                                onTabChanged = { tab ->
+                                    homeViewModel.savedLiveSessionsTab = tab
+                                },
                                 onJoinClick = { session ->
                                     val isPastSession = uiState.liveClassesPast.contains(session)
                                     if (isPastSession) {

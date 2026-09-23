@@ -25,9 +25,10 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Sensors
 import androidx.compose.material.icons.filled.Videocam
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -53,6 +54,8 @@ fun LiveSessionsCardContent(
     isHomeScreen: Boolean = false,
     showTitle: Boolean = true,
     uiState: CourseHomeUIState.CourseData,
+    initialTab: String = "today",
+    onTabChanged: (String) -> Unit = {},
     onJoinClick: (LiveClassModel) -> Unit,
     onJoinOngoingClick: (OngoingSessionModel) -> Unit,
     onViewAllLiveSessionsClick: () -> Unit
@@ -87,7 +90,14 @@ fun LiveSessionsCardContent(
             )
         }
     } else {
-        TabbedLiveSessions(uiState, onJoinClick, onJoinOngoingClick, onViewAllLiveSessionsClick)
+        TabbedLiveSessions(
+            uiState = uiState,
+            initialTab = initialTab,
+            onTabChanged = onTabChanged,
+            onJoinClick = onJoinClick,
+            onJoinOngoingClick = onJoinOngoingClick,
+            onViewAllLiveSessionsClick = onViewAllLiveSessionsClick
+        )
     }
 }
 
@@ -157,11 +167,17 @@ fun OngoingSessionItem(
 @Composable
 fun TabbedLiveSessions(
     uiState: CourseHomeUIState.CourseData,
+    initialTab: String,
+    onTabChanged: (String) -> Unit,
     onJoinClick: (LiveClassModel) -> Unit,
     onJoinOngoingClick: (OngoingSessionModel) -> Unit,
     onViewAllLiveSessionsClick: () -> Unit
 ) {
-    var selectedTab by remember { mutableStateOf("today") }
+    var selectedTab by rememberSaveable { mutableStateOf(initialTab) }
+
+    LaunchedEffect(selectedTab) {
+        onTabChanged(selectedTab)
+    }
 
     val sessions = when (selectedTab) {
         "today" -> uiState.liveClassesToday

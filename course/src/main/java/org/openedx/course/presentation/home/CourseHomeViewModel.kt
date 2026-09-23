@@ -87,6 +87,8 @@ class CourseHomeViewModel(
     val uiMessage: SharedFlow<UIMessage>
         get() = _uiMessage.asSharedFlow()
 
+    var savedLiveSessionsTab: String = "today"
+
     private val _resumeBlockId = MutableSharedFlow<String>()
     val resumeBlockId: SharedFlow<String>
         get() = _resumeBlockId.asSharedFlow()

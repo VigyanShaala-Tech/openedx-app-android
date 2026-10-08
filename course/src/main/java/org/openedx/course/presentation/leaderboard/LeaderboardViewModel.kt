@@ -54,11 +54,19 @@ class LeaderboardViewModel(
                 }
                 val universities = listOf(University("0", "All Colleges")) + filteredFetched
 
-                val rankingOptions = try {
-                    interactor.getRankingOptions().ifEmpty { listOf(RankingOption("all", "All Students")) }
+                val rankingOptionsRaw = try {
+                    interactor.getRankingOptions().ifEmpty { listOf(RankingOption("all", "All Users")) }
                 } catch (e: Exception) {
                     _uiMessage.emit(UIMessage.SnackBarMessage("Failed to load ranking options: ${e.message}"))
-                    listOf(RankingOption("all", "All Students"))
+                    listOf(RankingOption("all", "All Users"))
+                }
+                
+                val rankingOptions = rankingOptionsRaw.map {
+                    if (it.label.equals("All Students", ignoreCase = true)) {
+                        it.copy(label = "All Users")
+                    } else {
+                        it
+                    }
                 }
 
                 val userRanking = try {
@@ -154,7 +162,7 @@ data class LeaderboardUIState(
     val userRanking: UserRanking? = null,
     val leaderboardEntries: List<LeaderboardEntry> = emptyList(),
     val selectedUniversity: University? = null,
-    val selectedRankingOption: RankingOption = RankingOption("all", "All Students"),
+    val selectedRankingOption: RankingOption = RankingOption("all", "All Users"),
     val page: Int = 1,
     val hasMore: Boolean = false
 )

@@ -119,6 +119,7 @@ class DownloadsViewModel(
                 _uiState.update { state ->
                     state.copy(downloadModels = downloadModels)
                 }
+                updateCourseStatesFromModels(downloadModels)
             }
         }
     }
@@ -130,7 +131,12 @@ class DownloadsViewModel(
                     val currentCourseState = uiState.value.courseDownloadState[courseId]
                     val blockStates = blockIds.mapNotNull { statusMap[it] }
                     val computedState = if (blockStates.isEmpty()) {
-                        DownloadedState.NOT_DOWNLOADED
+                        val downloadedModels = _uiState.value.downloadModels.filter { it.courseId == courseId }
+                        if (downloadedModels.any { it.downloadedState == DownloadedState.DOWNLOADED }) {
+                            DownloadedState.DOWNLOADED
+                        } else {
+                            DownloadedState.NOT_DOWNLOADED
+                        }
                     } else {
                         val downloadedSize = _uiState.value.downloadModels
                             .filter { it.courseId == courseId }
@@ -138,7 +144,7 @@ class DownloadsViewModel(
                         val courseSize = _uiState.value.downloadCoursePreviews
                             .find { it.id == courseId }?.totalSize ?: 0
                         val isSizeMatch: Boolean =
-                            downloadedSize.toDouble() / courseSize >= SIZE_MATCH_THRESHOLD
+                            courseSize > 0 && downloadedSize.toDouble() / courseSize >= SIZE_MATCH_THRESHOLD
                         determineCourseState(blockStates, isSizeMatch)
                     }
                     if (currentCourseState == DownloadedState.LOADING_COURSE_STRUCTURE &&
@@ -154,6 +160,31 @@ class DownloadsViewModel(
                     state.copy(courseDownloadState = updatedCourseStates)
                 }
             }
+        }
+    }
+
+    private fun updateCourseStatesFromModels(downloadModels: List<org.openedx.core.module.db.DownloadModel>) {
+        val previews = uiState.value.downloadCoursePreviews
+        if (previews.isEmpty()) return
+
+        val currentStates = uiState.value.courseDownloadState.toMutableMap()
+        previews.forEach { preview ->
+            val courseModels = downloadModels.filter { it.courseId == preview.id }
+            if (courseModels.isNotEmpty()) {
+                val downloadedSize = courseModels.filter { it.downloadedState == DownloadedState.DOWNLOADED }.sumOf { it.size }
+                val isSizeMatch = preview.totalSize > 0 && downloadedSize.toDouble() / preview.totalSize >= SIZE_MATCH_THRESHOLD
+                val computedState = when {
+                    courseModels.all { it.downloadedState == DownloadedState.DOWNLOADED } || isSizeMatch -> DownloadedState.DOWNLOADED
+                    courseModels.any { it.downloadedState == DownloadedState.DOWNLOADING } -> DownloadedState.DOWNLOADING
+                    courseModels.any { it.downloadedState == DownloadedState.WAITING } -> DownloadedState.WAITING
+                    courseModels.any { it.downloadedState == DownloadedState.DOWNLOADED } -> DownloadedState.DOWNLOADED
+                    else -> DownloadedState.NOT_DOWNLOADED
+                }
+                currentStates[preview.id] = computedState
+            }
+        }
+        _uiState.update { state ->
+            state.copy(courseDownloadState = currentStates)
         }
     }
 
@@ -183,7 +214,12 @@ class DownloadsViewModel(
                 .collect { downloadCoursePreviews ->
                     downloadCoursePreviews.forEach { preview ->
                         runCatching { initializeCourseBlocks(preview.id, useCache = true) }
-                            .onFailure { it.printStackTrace() }
+                            .onFailure {
+                                val courseModels = interactor.getDownloadModelsByCourseIds(preview.id)
+                                if (courseModels.isNotEmpty()) {
+                                    courseBlockIds[preview.id] = courseModels.map { it.id }
+                                }
+                            }
                     }
                     allBlocks.values
                         .filter { it.type == BlockType.SEQUENTIAL }
@@ -196,6 +232,7 @@ class DownloadsViewModel(
                             isRefreshing = false
                         )
                     }
+                    updateCourseStatesFromModels(_uiState.value.downloadModels)
                 }
         }
     }

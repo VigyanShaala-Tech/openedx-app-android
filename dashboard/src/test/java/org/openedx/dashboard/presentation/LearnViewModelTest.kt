@@ -30,6 +30,8 @@ class LearnViewModelTest {
     private val dashboardRouter = mockk<DashboardRouter>(relaxed = true)
     private val analytics = mockk<DashboardAnalytics>(relaxed = true)
     private val fragmentManager = mockk<FragmentManager>()
+    private val corePreferences = mockk<org.openedx.core.data.storage.CorePreferences>(relaxed = true)
+    private val dashboardInteractor = mockk<org.openedx.dashboard.domain.interactor.DashboardInteractor>(relaxed = true)
 
     @Before
     fun setUp() {
@@ -43,14 +45,14 @@ class LearnViewModelTest {
 
     @Test
     fun `onSettingsClick calls navigateToSettings`() = runTest {
-        val viewModel = LearnViewModel(LearnTab.COURSES.name, config, dashboardRouter, analytics)
+        val viewModel = LearnViewModel(LearnTab.COURSES.name, config, dashboardRouter, analytics, corePreferences, dashboardInteractor)
         viewModel.onSettingsClick(fragmentManager)
         verify { dashboardRouter.navigateToSettings(fragmentManager) }
     }
 
     @Test
     fun `getDashboardFragment returns correct fragment based on dashboardType`() = runTest {
-        val viewModel = LearnViewModel(LearnTab.COURSES.name, config, dashboardRouter, analytics)
+        val viewModel = LearnViewModel(LearnTab.COURSES.name, config, dashboardRouter, analytics, corePreferences, dashboardInteractor)
         DashboardConfig.DashboardType.entries.forEach { type ->
             every { config.getDashboardConfig().getType() } returns type
             val dashboardFragment = viewModel.getDashboardFragment
@@ -60,21 +62,21 @@ class LearnViewModelTest {
 
     @Test
     fun `getProgramFragment returns correct program fragment`() = runTest {
-        val viewModel = LearnViewModel(LearnTab.COURSES.name, config, dashboardRouter, analytics)
+        val viewModel = LearnViewModel(LearnTab.COURSES.name, config, dashboardRouter, analytics, corePreferences, dashboardInteractor)
         viewModel.getProgramFragment
         verify { dashboardRouter.getProgramFragment() }
     }
 
     @Test
     fun `isProgramTypeWebView returns correct view type`() = runTest {
-        val viewModel = LearnViewModel(LearnTab.COURSES.name, config, dashboardRouter, analytics)
+        val viewModel = LearnViewModel(LearnTab.COURSES.name, config, dashboardRouter, analytics, corePreferences, dashboardInteractor)
         every { config.getProgramConfig().isViewTypeWebView() } returns true
         assertTrue(viewModel.isProgramTypeWebView)
     }
 
     @Test
     fun `logMyCoursesTabClickedEvent logs correct analytics event`() = runTest {
-        val viewModel = LearnViewModel(LearnTab.COURSES.name, config, dashboardRouter, analytics)
+        val viewModel = LearnViewModel(LearnTab.COURSES.name, config, dashboardRouter, analytics, corePreferences, dashboardInteractor)
         viewModel.logMyCoursesTabClickedEvent()
 
         verify {
@@ -89,7 +91,7 @@ class LearnViewModelTest {
 
     @Test
     fun `logMyProgramsTabClickedEvent logs correct analytics event`() = runTest {
-        val viewModel = LearnViewModel(LearnTab.COURSES.name, config, dashboardRouter, analytics)
+        val viewModel = LearnViewModel(LearnTab.COURSES.name, config, dashboardRouter, analytics, corePreferences, dashboardInteractor)
         viewModel.logMyProgramsTabClickedEvent()
 
         verify {

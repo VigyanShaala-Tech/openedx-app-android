@@ -4,8 +4,11 @@ import androidx.lifecycle.viewModelScope
 import kotlinx.coroutines.async
 import kotlinx.coroutines.launch
 import org.openedx.core.config.Config
-import org.openedx.core.system.connection.NetworkConnection
 import org.openedx.core.data.storage.CorePreferences
+import org.openedx.core.system.connection.NetworkConnection
+import org.openedx.core.system.notifier.CourseDashboardUpdate
+import org.openedx.core.system.notifier.DiscoveryNotifier
+import org.openedx.core.system.notifier.NavigationToDiscovery
 import org.openedx.dashboard.data.model.AchievementDto
 import org.openedx.dashboard.data.model.CourseItemDto
 import org.openedx.dashboard.data.model.PaginatedDto
@@ -18,9 +21,6 @@ import org.openedx.foundation.presentation.BaseViewModel
 import org.openedx.foundation.presentation.UIMessage
 import org.openedx.foundation.presentation.WindowSize
 import org.openedx.foundation.system.ResourceManager
-import org.openedx.core.system.notifier.CourseDashboardUpdate
-import org.openedx.core.system.notifier.DiscoveryNotifier
-import org.openedx.core.system.notifier.NavigationToDiscovery
 
 data class NewDashboardState(
     val loading: Boolean = true,
@@ -76,6 +76,13 @@ class NewDashboardViewModel(
     private fun loadAll(isRefreshing: Boolean) {
         viewModelScope.launch {
             _state.value = _state.value.copy(loading = !isRefreshing, refreshing = isRefreshing)
+            if (!networkConnection.isOnline()) {
+                loadFromCache()
+                _uiMessage.emit(
+                    UIMessage.SnackBarMessage(resourceManager.getString(org.openedx.core.R.string.core_error_no_connection))
+                )
+                return@launch
+            }
             try {
                 kotlinx.coroutines.supervisorScope {
                     val summary = async { interactor.getSummaryCards() }
@@ -85,23 +92,20 @@ class NewDashboardViewModel(
                     val wishlist = async { interactor.getWishlist() }
                     val inProgress = async { interactor.getInProgress() }
                     val completed = async { interactor.getCompleted() }
+                    val enrolledCoursesJob = async { runCatching { interactor.getEnrolledCourses(1) }.getOrNull() }
 
                     val summaryVal = try {
                         summary.await()
                     } catch (e: Exception) {
                         emptyList()
                     }
-                    val contLearnVal = try {
+                    var contLearnVal = try {
                         contLearn.await()
                     } catch (e: Exception) {
                         emptyList()
                     }
 
-                    _state.value = _state.value.copy(
-                        loading = false,
-                        summary = summaryVal,
-                        continueLearning = contLearnVal,
-                    )
+                    val enrolledList = enrolledCoursesJob.await()
 
                     val inProgressVal = try {
                         inProgress.await()
@@ -114,12 +118,35 @@ class NewDashboardViewModel(
                         null
                     }
 
-                    if (!isRefreshing && (inProgressVal?.results?.isEmpty() ?: true) && (completedVal?.results?.isEmpty() ?: true)) {
+                    if (contLearnVal.isEmpty()) {
+                        val enrolledCourses = enrolledList?.courses ?: runCatching { interactor.getEnrolledCoursesFromCache() }.getOrDefault(emptyList())
+                        if (enrolledCourses.isNotEmpty()) {
+                            contLearnVal = enrolledCourses.map { enrolled ->
+                                CourseItemDto(
+                                    id = enrolled.course.id,
+                                    title = enrolled.course.name,
+                                    course_image = enrolled.course.courseImage,
+                                    progress = enrolled.progress.value.toInt(),
+                                    category = "",
+                                    level = ""
+                                )
+                            }
+                        }
+                    }
+
+                    if (networkConnection.isOnline() && !isRefreshing &&
+                        (inProgressVal?.results?.isEmpty() ?: true) &&
+                        (completedVal?.results?.isEmpty() ?: true) &&
+                        contLearnVal.isEmpty()
+                    ) {
                         discoveryNotifier.send(NavigationToDiscovery())
                     }
 
                     _state.value = _state.value.copy(
+                        loading = false,
                         refreshing = false,
+                        summary = summaryVal,
+                        continueLearning = contLearnVal,
                         achievements = try {
                             achievements.await()
                         } catch (e: Exception) {
@@ -135,12 +162,12 @@ class NewDashboardViewModel(
                         } catch (e: Exception) {
                             null
                         },
-                        inProgress = inProgressVal,
+                        inProgress = inProgressVal ?: if (contLearnVal.isNotEmpty()) PaginatedDto(results = contLearnVal) else null,
                         completed = completedVal,
                     )
                 }
             } catch (e: Exception) {
-                _state.value = _state.value.copy(loading = false, refreshing = false)
+                loadFromCache()
                 if (e.isInternetError()) {
                     _uiMessage.emit(
                         UIMessage.SnackBarMessage(resourceManager.getString(org.openedx.core.R.string.core_error_no_connection))
@@ -151,6 +178,36 @@ class NewDashboardViewModel(
                     )
                 }
             }
+        }
+    }
+
+    private suspend fun loadFromCache() {
+        try {
+            val cachedCourses = interactor.getEnrolledCoursesFromCache()
+            if (cachedCourses.isNotEmpty()) {
+                val cachedItems = cachedCourses.map { enrolled ->
+                    CourseItemDto(
+                        id = enrolled.course.id,
+                        title = enrolled.course.name,
+                        course_image = enrolled.course.courseImage,
+                        progress = enrolled.progress.value.toInt(),
+                        category = "",
+                        level = ""
+                    )
+                }
+                _state.value = _state.value.copy(
+                    loading = false,
+                    refreshing = false,
+                    continueLearning = cachedItems,
+                    inProgress = PaginatedDto(
+                        results = cachedItems
+                    )
+                )
+            } else {
+                _state.value = _state.value.copy(loading = false, refreshing = false)
+            }
+        } catch (e: Exception) {
+            _state.value = _state.value.copy(loading = false, refreshing = false)
         }
     }
 

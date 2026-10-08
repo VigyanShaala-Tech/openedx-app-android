@@ -69,7 +69,26 @@ class DashboardGalleryViewModel(
             try {
                 val cachedCourseEnrollments = fileUtil.getObjectFromFile<CourseEnrollments>()
                 if (cachedCourseEnrollments == null) {
-                    if (networkConnection.isOnline()) {
+                    val cachedList = interactor.getEnrolledCoursesFromCache()
+                    if (cachedList.isNotEmpty()) {
+                        val domainEnrollments = org.openedx.core.domain.model.CourseEnrollments(
+                            enrollments = org.openedx.core.domain.model.DashboardCourseList(
+                                pagination = org.openedx.core.domain.model.Pagination(
+                                    count = cachedList.size,
+                                    numPages = 1,
+                                    previous = "",
+                                    next = ""
+                                ),
+                                courses = cachedList
+                            ),
+                            configs = org.openedx.core.domain.model.AppConfig(),
+                            primary = cachedList.firstOrNull()
+                        )
+                        _uiState.value = DashboardGalleryUIState.Courses(
+                            domainEnrollments,
+                            corePreferences.isRelativeDatesEnabled
+                        )
+                    } else if (networkConnection.isOnline()) {
                         _uiState.value = DashboardGalleryUIState.Loading
                     } else {
                         _uiState.value = DashboardGalleryUIState.Empty
@@ -99,18 +118,39 @@ class DashboardGalleryViewModel(
                     }
                 }
             } catch (e: Exception) {
-                if (e.isInternetError()) {
-                    _uiMessage.emit(
-                        UIMessage.SnackBarMessage(
-                            resourceManager.getString(R.string.core_error_no_connection)
-                        )
+                val cachedList = runCatching { interactor.getEnrolledCoursesFromCache() }.getOrDefault(emptyList())
+                if (cachedList.isNotEmpty() && _uiState.value is DashboardGalleryUIState.Loading) {
+                    val domainEnrollments = org.openedx.core.domain.model.CourseEnrollments(
+                        enrollments = org.openedx.core.domain.model.DashboardCourseList(
+                            pagination = org.openedx.core.domain.model.Pagination(
+                                count = cachedList.size,
+                                numPages = 1,
+                                previous = "",
+                                next = ""
+                            ),
+                            courses = cachedList
+                        ),
+                        configs = org.openedx.core.domain.model.AppConfig(),
+                        primary = cachedList.firstOrNull()
                     )
-                } else {
-                    _uiMessage.emit(
-                        UIMessage.SnackBarMessage(
-                            resourceManager.getString(R.string.core_error_unknown_error)
-                        )
+                    _uiState.value = DashboardGalleryUIState.Courses(
+                        domainEnrollments,
+                        corePreferences.isRelativeDatesEnabled
                     )
+                } else if (_uiState.value !is DashboardGalleryUIState.Courses) {
+                    if (e.isInternetError()) {
+                        _uiMessage.emit(
+                            UIMessage.SnackBarMessage(
+                                resourceManager.getString(R.string.core_error_no_connection)
+                            )
+                        )
+                    } else {
+                        _uiMessage.emit(
+                            UIMessage.SnackBarMessage(
+                                resourceManager.getString(R.string.core_error_unknown_error)
+                            )
+                        )
+                    }
                 }
             } finally {
                 _updating.value = false

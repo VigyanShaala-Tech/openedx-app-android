@@ -2,10 +2,15 @@ package org.openedx.dashboard.data.repository
 
 import org.openedx.core.data.api.CourseApi
 import org.openedx.core.data.model.room.WishlistEntity
+import org.openedx.core.data.model.room.discovery.CourseSharingUtmParametersDb
+import org.openedx.core.data.model.room.discovery.EnrolledCourseDataDb
+import org.openedx.core.data.model.room.discovery.EnrolledCourseEntity
+import org.openedx.core.data.model.room.discovery.ProgressDb
 import org.openedx.core.data.storage.CorePreferences
 import org.openedx.core.domain.model.CourseEnrollments
 import org.openedx.core.domain.model.DashboardCourseList
 import org.openedx.core.domain.model.EnrolledCourse
+import org.openedx.core.module.db.DownloadDao
 import org.openedx.dashboard.data.DashboardDao
 import org.openedx.dashboard.data.api.DashboardApi
 import org.openedx.dashboard.data.model.AchievementDto
@@ -29,6 +34,7 @@ class DashboardRepository(
     private val preferencesManager: CorePreferences,
     private val fileUtil: FileUtil,
     private val wishlistApi: org.openedx.dashboard.data.api.WishlistApi,
+    private val downloadDao: DownloadDao? = null,
 ) {
 
     suspend fun getEnrolledCourses(page: Int): DashboardCourseList {
@@ -49,7 +55,63 @@ class DashboardRepository(
 
     suspend fun getEnrolledCoursesFromCache(): List<EnrolledCourse> {
         val list = dao.readAllData()
-        return list.map { it.mapToDomain() }
+        val cachedEnrolled = list.map { it.mapToDomain() }
+        if (cachedEnrolled.isNotEmpty() || downloadDao == null) {
+            return cachedEnrolled
+        }
+        var downloadedPreviews = downloadDao.getDownloadCoursesPreview()
+        if (downloadedPreviews.isEmpty()) {
+            val downloadModels = downloadDao.readAllData().map { it.mapToDomain() }
+            if (downloadModels.isNotEmpty()) {
+                val coursesMap = downloadModels.groupBy { it.courseId }
+                downloadedPreviews = coursesMap.map { (courseId, models) ->
+                    org.openedx.core.data.model.room.DownloadCoursePreview(
+                        id = courseId,
+                        name = models.firstOrNull()?.title ?: courseId,
+                        image = "",
+                        totalSize = models.sumOf { it.size }
+                    )
+                }
+            }
+        }
+        if (downloadedPreviews.isNotEmpty()) {
+            return downloadedPreviews.map { preview ->
+                EnrolledCourseEntity(
+                    courseId = preview.id,
+                    auditAccessExpires = "",
+                    created = "",
+                    mode = "",
+                    isActive = true,
+                    course = EnrolledCourseDataDb(
+                        id = preview.id,
+                        name = preview.name ?: preview.id,
+                        number = "",
+                        org = "",
+                        start = "",
+                        startDisplay = "",
+                        startType = "",
+                        end = "",
+                        dynamicUpgradeDeadline = "",
+                        subscriptionId = "",
+                        coursewareAccess = null,
+                        media = null,
+                        courseImage = preview.image ?: "",
+                        courseAbout = "",
+                        courseSharingUtmParameters = CourseSharingUtmParametersDb("", ""),
+                        courseUpdates = "",
+                        courseHandouts = "",
+                        discussionUrl = "",
+                        videoOutline = "",
+                        isSelfPaced = false
+                    ),
+                    certificate = null,
+                    progress = ProgressDb.DEFAULT_PROGRESS,
+                    courseStatus = null,
+                    courseAssignments = null
+                ).mapToDomain()
+            }
+        }
+        return emptyList()
     }
 
     suspend fun getMainUserCourses(pageSize: Int): CourseEnrollments {

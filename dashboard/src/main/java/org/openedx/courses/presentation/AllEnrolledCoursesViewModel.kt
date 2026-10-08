@@ -151,22 +151,32 @@ class AllEnrolledCoursesViewModel(
                 isLoading = true
                 when (currentFilter.value) {
                     CourseStatusFilter.IN_PROGRESS -> {
-                        val response = interactor.getInProgress()
-                        val mapped = (response.results as? List<*>)?.mapNotNull { CourseItemDto.from(it)?.mapToEnrolled() } ?: emptyList()
+                        val response = if (networkConnection.isOnline()) runCatching { interactor.getInProgress() }.getOrNull() else null
+                        val mapped = (response?.results as? List<*>)?.mapNotNull { CourseItemDto.from(it)?.mapToEnrolled() } ?: emptyList()
                         _uiState.update { it.copy(canLoadMore = false) }
                         page = -1
-                        coursesList.addAll(mapped)
+                        if (mapped.isNotEmpty()) {
+                            coursesList.addAll(mapped)
+                        } else {
+                            val cachedList = interactor.getEnrolledCoursesFromCache()
+                            coursesList.addAll(cachedList)
+                        }
                     }
                     CourseStatusFilter.COMPLETE -> {
-                        val response = interactor.getCompleted()
-                        val mapped = (response.results as? List<*>)?.mapNotNull { CourseItemDto.from(it)?.mapToEnrolled() } ?: emptyList()
+                        val response = if (networkConnection.isOnline()) runCatching { interactor.getCompleted() }.getOrNull() else null
+                        val mapped = (response?.results as? List<*>)?.mapNotNull { CourseItemDto.from(it)?.mapToEnrolled() } ?: emptyList()
                         _uiState.update { it.copy(canLoadMore = false) }
                         page = -1
-                        coursesList.addAll(mapped)
+                        if (mapped.isNotEmpty()) {
+                            coursesList.addAll(mapped)
+                        } else {
+                            val cachedList = interactor.getEnrolledCoursesFromCache()
+                            coursesList.addAll(cachedList)
+                        }
                     }
                     else -> {
                         val response = if (networkConnection.isOnline() || page > 1) {
-                            interactor.getAllUserCourses(page, currentFilter.value)
+                            runCatching { interactor.getAllUserCourses(page, currentFilter.value) }.getOrNull()
                         } else {
                             null
                         }
@@ -189,18 +199,25 @@ class AllEnrolledCoursesViewModel(
                 }
                 _uiState.update { it.copy(courses = coursesList.toList()) }
             } catch (e: Exception) {
-                if (e.isInternetError()) {
-                    _uiMessage.emit(
-                        UIMessage.SnackBarMessage(
-                            resourceManager.getString(R.string.core_error_no_connection)
-                        )
-                    )
+                val cachedList = runCatching { interactor.getEnrolledCoursesFromCache() }.getOrDefault(emptyList())
+                if (cachedList.isNotEmpty()) {
+                    coursesList.clear()
+                    coursesList.addAll(cachedList)
+                    _uiState.update { it.copy(courses = coursesList.toList()) }
                 } else {
-                    _uiMessage.emit(
-                        UIMessage.SnackBarMessage(
-                            resourceManager.getString(R.string.core_error_unknown_error)
+                    if (e.isInternetError()) {
+                        _uiMessage.emit(
+                            UIMessage.SnackBarMessage(
+                                resourceManager.getString(R.string.core_error_no_connection)
+                            )
                         )
-                    )
+                    } else {
+                        _uiMessage.emit(
+                            UIMessage.SnackBarMessage(
+                                resourceManager.getString(R.string.core_error_unknown_error)
+                            )
+                        )
+                    }
                 }
             }
             _uiState.update { it.copy(refreshing = false, showProgress = false) }

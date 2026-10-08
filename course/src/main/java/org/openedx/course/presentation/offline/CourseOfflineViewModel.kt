@@ -12,6 +12,7 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import org.openedx.core.BlockType
+import org.openedx.core.config.Config
 import org.openedx.core.data.storage.CorePreferences
 import org.openedx.core.domain.model.Block
 import org.openedx.core.extension.safeDivBy
@@ -28,6 +29,8 @@ import org.openedx.core.system.connection.NetworkConnection
 import org.openedx.core.system.notifier.CourseNotifier
 import org.openedx.core.system.notifier.CourseStructureGot
 import org.openedx.course.domain.interactor.CourseInteractor
+import org.openedx.course.presentation.CourseRouter
+import org.openedx.course.presentation.unit.container.CourseViewMode
 import org.openedx.foundation.extension.toFileSize
 import org.openedx.foundation.utils.FileUtil
 
@@ -44,6 +47,8 @@ class CourseOfflineViewModel(
     downloadDao: DownloadDao,
     workerController: DownloadWorkerController,
     downloadHelper: DownloadHelper,
+    private val courseRouter: CourseRouter,
+    private val config: Config,
 ) : BaseDownloadViewModel(
     downloadDao,
     preferencesManager,
@@ -157,6 +162,59 @@ class CourseOfflineViewModel(
         }
     }
 
+    private var resumeSectionBlock: Block? = null
+    private var resumeVerticalBlock: Block? = null
+    private val isCourseExpandableSectionsEnabled get() = config.getCourseUIConfig().isCourseDropdownNavigationEnabled
+
+    fun openBlock(fragmentManager: FragmentManager, blockId: String) {
+        viewModelScope.launch {
+            val courseStructure = runCatching { courseInteractor.getCourseStructureFromCache(courseId) }.getOrNull()
+                ?: runCatching { courseInteractor.getCourseStructure(courseId, false) }.getOrNull()
+            if (courseStructure != null) {
+                val blocks = courseStructure.blockData
+                getResumeBlock(blocks, blockId)
+                resumeBlock(fragmentManager, blockId)
+            }
+        }
+    }
+
+    private fun getResumeBlock(
+        blocks: List<Block>,
+        continueBlockId: String,
+    ): Block? {
+        val resumeBlock = blocks.firstOrNull { it.id == continueBlockId }
+        resumeVerticalBlock =
+            blocks.firstOrNull { it.type == BlockType.VERTICAL && it.descendants.contains(resumeBlock?.id) }
+        resumeSectionBlock =
+            blocks.firstOrNull { it.type == BlockType.SEQUENTIAL && it.descendants.contains(resumeVerticalBlock?.id) }
+        return resumeBlock
+    }
+
+    private fun resumeBlock(fragmentManager: FragmentManager, blockId: String) {
+        resumeSectionBlock?.let { subSection ->
+            resumeVerticalBlock?.let { unit ->
+                if (isCourseExpandableSectionsEnabled) {
+                    courseRouter.navigateToCourseContainer(
+                        fm = fragmentManager,
+                        courseId = courseId,
+                        unitId = unit.id,
+                        componentId = blockId,
+                        mode = CourseViewMode.FULL
+                    )
+                } else {
+                    courseRouter.navigateToCourseSubsections(
+                        fragmentManager,
+                        courseId = courseId,
+                        subSectionId = subSection.id,
+                        mode = CourseViewMode.FULL,
+                        unitId = unit.id,
+                        componentId = blockId
+                    )
+                }
+            }
+        }
+    }
+
     fun removeDownloadModel() {
         viewModelScope.launch {
             courseInteractor.getAllDownloadModels()
@@ -186,9 +244,10 @@ class CourseOfflineViewModel(
     private fun getOfflineData() {
         viewModelScope.launch {
             val courseStructure = runCatching { courseInteractor.getCourseStructureFromCache(courseId) }.getOrNull()
-                ?: return@launch
-            val totalDownloadableSize = getFilesSize(courseStructure.blockData)
-            val hasDownloadableBlocks = courseStructure.blockData.any { it.isDownloadable }
+                ?: runCatching { courseInteractor.getCourseStructure(courseId, false) }.getOrNull()
+
+            val totalDownloadableSize = courseStructure?.let { getFilesSize(it.blockData) } ?: 0L
+            val hasDownloadableBlocks = courseStructure?.blockData?.any { it.isDownloadable } ?: false
 
             _uiState.update {
                 it.copy(isHaveDownloadableBlocks = hasDownloadableBlocks)
@@ -200,15 +259,27 @@ class CourseOfflineViewModel(
                     downloadModels.filter { it.downloadedState.isDownloaded && it.courseId == courseId }
                 val completedDownloadIds = completedDownloads.map { it.id }
                 val downloadedBlocks =
-                    courseStructure.blockData.filter { it.id in completedDownloadIds }
+                    courseStructure?.blockData?.filter { it.id in completedDownloadIds } ?: emptyList()
 
-                val downloadableItems = buildDownloadableItems(courseStructure, downloadModelsMap)
+                val downloadableItems = if (courseStructure != null) {
+                    buildDownloadableItems(courseStructure, downloadModelsMap)
+                } else {
+                    completedDownloads.map { model ->
+                        DownloadableItemModel(
+                            id = model.id,
+                            title = model.title,
+                            size = model.size,
+                            downloadedState = model.downloadedState,
+                            type = model.type
+                        )
+                    }
+                }
 
                 updateUIState(
                     totalDownloadableSize,
                     completedDownloads,
                     downloadedBlocks,
-                    hasDownloadableBlocks,
+                    hasDownloadableBlocks || completedDownloads.isNotEmpty(),
                     downloadableItems
                 )
             }

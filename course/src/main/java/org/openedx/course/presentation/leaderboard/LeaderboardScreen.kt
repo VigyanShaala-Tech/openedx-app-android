@@ -179,7 +179,8 @@ private fun LeaderboardUI(
                     title = "Select College",
                     options = uiState.universities,
                     labelExtractor = { it.name },
-                    onSelected = onUniversitySelected
+                    onSelected = onUniversitySelected,
+                    showSearch = true
                 )
 
                 Spacer(modifier = Modifier.height(12.dp))
@@ -190,7 +191,8 @@ private fun LeaderboardUI(
                     title = "Select Filter",
                     options = uiState.rankingOptions,
                     labelExtractor = { it.label },
-                    onSelected = onRankingOptionSelected
+                    onSelected = onRankingOptionSelected,
+                    showSearch = false
                 )
 
                 Spacer(modifier = Modifier.height(24.dp))
@@ -308,9 +310,25 @@ private fun <T> LeaderboardFilter(
     title: String,
     options: List<T>,
     labelExtractor: (T) -> String?,
-    onSelected: (T) -> Unit
+    onSelected: (T) -> Unit,
+    showSearch: Boolean = false
 ) {
     var showDialog by remember { mutableStateOf(false) }
+    var searchQuery by remember { mutableStateOf("") }
+
+    // Ensure "All Colleges" is always at the top of the filtered list, followed by matching colleges
+    val (allCollegesOption, otherOptions) = options.partition { labelExtractor(it).equals("All Colleges", ignoreCase = true) }
+    
+    val filteredOtherOptions = if (showSearch && searchQuery.isNotBlank()) {
+        otherOptions.filter { option ->
+            val text = labelExtractor(option) ?: ""
+            text.contains(searchQuery, ignoreCase = true)
+        }
+    } else {
+        otherOptions
+    }
+    
+    val filteredOptions = allCollegesOption + filteredOtherOptions
 
     Box(modifier = Modifier.fillMaxWidth()) {
         OutlinedTextField(
@@ -355,15 +373,34 @@ private fun <T> LeaderboardFilter(
                         fontWeight = FontWeight.Bold,
                         modifier = Modifier.padding(bottom = 16.dp)
                     )
+                    
+                    if (showSearch) {
+                        OutlinedTextField(
+                            value = searchQuery,
+                            onValueChange = { searchQuery = it },
+                            placeholder = { Text("Search college...") },
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(bottom = 16.dp),
+                            shape = RoundedCornerShape(8.dp),
+                            singleLine = true,
+                            colors = TextFieldDefaults.outlinedTextFieldColors(
+                                focusedBorderColor = MaterialTheme.appColors.primary,
+                                unfocusedBorderColor = Color.LightGray.copy(alpha = 0.5f)
+                            )
+                        )
+                    }
+                    
                     Divider()
                     LazyColumn(modifier = Modifier.weight(1f, fill = false)) {
-                        items(options) { option ->
+                        items(filteredOptions) { option ->
                             Box(
                                 modifier = Modifier
                                     .fillMaxWidth()
                                     .clickable {
                                         onSelected(option)
                                         showDialog = false
+                                        searchQuery = "" // reset search on select
                                     }
                                     .padding(vertical = 12.dp, horizontal = 8.dp)
                             ) {

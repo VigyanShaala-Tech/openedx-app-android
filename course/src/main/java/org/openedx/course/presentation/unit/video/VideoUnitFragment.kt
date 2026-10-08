@@ -220,9 +220,14 @@ class VideoUnitFragment : Fragment(R.layout.fragment_video_unit) {
             val movieMetadata = MediaMetadata.Builder()
                 .setMediaType(MediaMetadata.MEDIA_TYPE_MOVIE)
                 .build()
-            val mediaItem = MediaItem.Builder().setMediaMetadata(movieMetadata)
-                .setUri(viewModel.videoUrl)
-                .setMimeType("video/*")
+            val videoUri = if (viewModel.videoUrl.startsWith("/")) {
+                android.net.Uri.fromFile(java.io.File(viewModel.videoUrl))
+            } else {
+                android.net.Uri.parse(viewModel.videoUrl)
+            }
+            val mediaItem = MediaItem.Builder()
+                .setMediaMetadata(movieMetadata)
+                .setUri(videoUri)
                 .build()
 
             if (!viewModel.isPlayerSetUp) {

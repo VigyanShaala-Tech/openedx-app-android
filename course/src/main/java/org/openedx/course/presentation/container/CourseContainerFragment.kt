@@ -263,7 +263,7 @@ fun CourseDashboard(
     onShare: (Intent) -> Unit,
     onRefresh: (page: Int) -> Unit,
 ) {
-    val refreshing by viewModel.refreshing.collectAsState(true)
+    val refreshing by viewModel.refreshing.collectAsState()
     val courseImage by viewModel.courseImage.collectAsState()
     val uiMessage by viewModel.uiMessage.collectAsState(null)
     var showAttentionDialog by remember { mutableStateOf(false) }
@@ -281,8 +281,14 @@ fun CourseDashboard(
         else -> CourseContainerTab.HOME
     }
 
+    val targetTab = if (!viewModel.hasInternetConnection && requiredTab == CourseContainerTab.HOME) {
+        CourseContainerTab.CONTENT
+    } else {
+        requiredTab
+    }
+
     val pagerState = rememberPagerState(
-        initialPage = viewModel.savedMainPage ?: CourseContainerTab.entries.indexOf(requiredTab),
+        initialPage = viewModel.savedMainPage ?: CourseContainerTab.entries.indexOf(targetTab),
         pageCount = { CourseContainerTab.entries.size }
     )
     val contentTabPagerState = rememberPagerState(

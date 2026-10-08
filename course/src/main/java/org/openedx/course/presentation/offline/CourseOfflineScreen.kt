@@ -96,7 +96,13 @@ fun CourseOfflineScreen(
             viewModel.deleteAll(fragmentManager)
         },
         onDownloadItemClick = { itemId ->
-            viewModel.downloadSingleItem(itemId)
+            val isDownloaded = uiState.downloadableItems.find { it.id == itemId }?.downloadedState == DownloadedState.DOWNLOADED ||
+                               uiState.largestDownloads.find { it.id == itemId }?.downloadedState == DownloadedState.DOWNLOADED
+            if (isDownloaded) {
+                viewModel.openBlock(fragmentManager, itemId)
+            } else {
+                viewModel.downloadSingleItem(itemId)
+            }
         },
         onCancelItemClick = { itemId ->
             viewModel.cancelSingleItemDownload(itemId)
@@ -201,7 +207,7 @@ private fun CourseOfflineUI(
                                 }
                             )
                         }
-                        if (uiState.downloadableItems.isNotEmpty()) {
+                                if (uiState.downloadableItems.isNotEmpty()) {
                             Spacer(modifier = Modifier.height(24.dp))
                             AvailableDownloadsSection(
                                 downloadableItems = uiState.downloadableItems,
@@ -216,6 +222,7 @@ private fun CourseOfflineUI(
                                 isDownloading = uiState.isDownloading,
                                 onDeleteClick = onDeleteClick,
                                 onDeleteAllClick = onDeleteAllClick,
+                                onDownloadItemClick = onDownloadItemClick
                             )
                         }
                     }
@@ -259,8 +266,14 @@ private fun AvailableDownloadItem(
     } else {
         Icons.AutoMirrored.Outlined.InsertDriveFile
     }
+    
+    val itemClickModifier = if (item.downloadedState == DownloadedState.DOWNLOADED) {
+        Modifier.clickable { onDownloadClick() }
+    } else {
+        Modifier
+    }
 
-    Column {
+    Column(modifier = itemClickModifier) {
         Row(
             modifier = Modifier
                 .fillMaxWidth()
@@ -354,6 +367,7 @@ private fun LargestDownloads(
     isDownloading: Boolean,
     onDeleteClick: (downloadModel: DownloadModel) -> Unit,
     onDeleteAllClick: () -> Unit,
+    onDownloadItemClick: (String) -> Unit = {}
 ) {
     var isEditingEnabled by rememberSaveable {
         mutableStateOf(false)
@@ -394,7 +408,8 @@ private fun LargestDownloads(
             DownloadItem(
                 downloadModel = it,
                 isEditingEnabled = isEditingEnabled,
-                onDeleteClick = onDeleteClick
+                onDeleteClick = onDeleteClick,
+                onItemClick = { onDownloadItemClick(it.id) }
             )
         }
         if (!isDownloading) {
@@ -423,7 +438,8 @@ private fun DownloadItem(
     modifier: Modifier = Modifier,
     downloadModel: DownloadModel,
     isEditingEnabled: Boolean,
-    onDeleteClick: (downloadModel: DownloadModel) -> Unit
+    onDeleteClick: (downloadModel: DownloadModel) -> Unit,
+    onItemClick: () -> Unit = {}
 ) {
     val fileIcon = if (downloadModel.type == FileType.VIDEO) {
         Icons.Outlined.SmartDisplay
@@ -444,8 +460,14 @@ private fun DownloadItem(
         downloadIconTint = MaterialTheme.appColors.successGreen
         downloadIconClick = Modifier
     }
+    
+    val itemClickModifier = if (!isEditingEnabled) {
+        Modifier.clickable { onItemClick() }
+    } else {
+        Modifier
+    }
 
-    Column {
+    Column(modifier = itemClickModifier) {
         Row(
             modifier = modifier
                 .fillMaxWidth()

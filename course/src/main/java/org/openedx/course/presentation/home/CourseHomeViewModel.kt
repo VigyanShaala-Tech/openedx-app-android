@@ -186,24 +186,26 @@ class CourseHomeViewModel(
         viewModelScope.launch {
             try {
                 // 1. Fetch essential data (Structure and Status) first
-                val courseStructure = interactor.getCourseStructure(courseId, false)
-                val blocks = courseStructure.blockData
-                val courseStatus = interactor.getCourseStatus(courseId)
+                val courseStructure = runCatching { interactor.getCourseStructure(courseId, false) }.getOrNull()
+                val blocks = courseStructure?.blockData ?: emptyList()
+                val courseStatus = runCatching { interactor.getCourseStatus(courseId) }.getOrNull()
 
-                // 2. Initial render with essential data
-                initializeCourseData(
-                    blocks = blocks,
-                    courseStructure = courseStructure,
-                    courseStatus = courseStatus,
-                    datesBannerInfo = CourseDatesBannerInfo(
-                        missedDeadlines = false,
-                        missedGatedContent = false,
-                        verifiedUpgradeLink = "",
-                        contentTypeGatingEnabled = false,
-                        hasEnded = false
-                    ),
-                    courseProgress = null
-                )
+                if (courseStructure != null) {
+                    // 2. Initial render with essential data
+                    initializeCourseData(
+                        blocks = blocks,
+                        courseStructure = courseStructure,
+                        courseStatus = courseStatus,
+                        datesBannerInfo = CourseDatesBannerInfo(
+                            missedDeadlines = false,
+                            missedGatedContent = false,
+                            verifiedUpgradeLink = "",
+                            contentTypeGatingEnabled = false,
+                            hasEnded = false
+                        ),
+                        courseProgress = null
+                    )
+                }
 
                 // 3. Fetch auxiliary data in parallel and update UI incrementally
                 coroutineScope {
@@ -289,7 +291,7 @@ class CourseHomeViewModel(
     private suspend fun initializeCourseData(
         blocks: List<Block>,
         courseStructure: CourseStructure,
-        courseStatus: CourseComponentStatus,
+        courseStatus: CourseComponentStatus?,
         datesBannerInfo: CourseDatesBannerInfo,
         courseProgress: CourseProgress?,
         announcements: List<org.openedx.core.domain.model.AnnouncementModel> = emptyList(),
@@ -343,7 +345,7 @@ class CourseHomeViewModel(
             courseStructure = courseStructure,
             next = nextSection,
             downloadedState = getDownloadModelsStatus(),
-            resumeComponent = getResumeBlock(blocks, courseStatus.lastVisitedBlockId),
+            resumeComponent = getResumeBlock(blocks, courseStatus?.lastVisitedBlockId ?: ""),
             resumeUnitTitle = resumeVerticalBlock?.displayName ?: "",
             courseSubSections = courseSubSections,
             subSectionsDownloadsCount = subSectionsDownloadsCount,

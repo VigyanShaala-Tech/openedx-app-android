@@ -201,10 +201,24 @@ class CourseContainerViewModel(
                 when {
                     courseEnrollmentDetails != null -> handleCourseEnrollment(courseEnrollmentDetails)
                     courseStructure != null -> handleCourseStructureOnly(courseStructure)
-                    else -> _courseAccessStatus.value = CourseAccessError.UNKNOWN
+                    else -> checkOfflineAccess()
                 }
                 courseNotifier.send(CourseStructureGot(courseId))
             }
+        }
+    }
+
+    private suspend fun checkOfflineAccess() {
+        _showProgress.value = false
+        val downloadModels = runCatching { interactor.getAllDownloadModels() }.getOrDefault(emptyList())
+        val hasDownloads = downloadModels.any { it.courseId == courseId && it.downloadedState.isDownloaded }
+        if (hasDownloads) {
+            _dataReady.value = true
+            _isNavigationEnabled.value = true
+            _courseAccessStatus.value = CourseAccessError.NONE
+        } else {
+            _dataReady.value = false
+            _courseAccessStatus.value = CourseAccessError.UNKNOWN
         }
     }
 
@@ -237,6 +251,7 @@ class CourseContainerViewModel(
                 }
             }
             _dataReady.value = true
+            _showProgress.value = false
         }
     }
 
@@ -257,16 +272,26 @@ class CourseContainerViewModel(
             }
         }
         _dataReady.value = true
+        _showProgress.value = false
     }
 
     private fun handleFetchError(e: Throwable) {
         e.printStackTrace()
-        if (isNetworkRelatedError(e)) {
-            _errorMessage.value = resourceManager.getString(CoreR.string.core_error_no_connection)
+        val downloadModels = runCatching { kotlinx.coroutines.runBlocking { interactor.getAllDownloadModels() } }.getOrDefault(emptyList())
+        val hasDownloads = downloadModels.any { it.courseId == courseId && it.downloadedState.isDownloaded }
+        if (hasDownloads) {
+            _dataReady.value = true
+            _isNavigationEnabled.value = true
+            _courseAccessStatus.value = CourseAccessError.NONE
+            _showProgress.value = false
         } else {
-            _courseAccessStatus.value = CourseAccessError.UNKNOWN
+            if (isNetworkRelatedError(e)) {
+                _errorMessage.value = resourceManager.getString(CoreR.string.core_error_no_connection)
+            } else {
+                _courseAccessStatus.value = CourseAccessError.UNKNOWN
+            }
+            _showProgress.value = false
         }
-        _showProgress.value = false
     }
 
     private fun isNetworkRelatedError(e: Throwable): Boolean {

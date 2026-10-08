@@ -28,11 +28,12 @@ class CourseUnitContainerAdapter(
 
     private fun unitBlockFragment(block: Block): Fragment {
         val downloadedModel = viewModel.getDownloadModelById(block.id)
-        val offlineUrl = downloadedModel?.let { it.path + File.separator + "index.html" } ?: ""
+        val isVideoDownloaded = block.isVideoBlock && downloadedModel != null && File(downloadedModel.path).exists()
+        val offlineUrl = downloadedModel?.let { if (File(it.path).isDirectory) it.path + File.separator + "index.html" else it.path } ?: ""
         val noNetwork = !viewModel.hasNetworkConnection
 
         return when {
-            isBlockNotDownloaded(block, noNetwork, offlineUrl) -> {
+            isBlockNotDownloaded(block, noNetwork, isVideoDownloaded, offlineUrl) -> {
                 createNotAvailableUnitFragment(block, NotAvailableUnitType.NOT_DOWNLOADED)
             }
 
@@ -40,7 +41,7 @@ class CourseUnitContainerAdapter(
                 createNotAvailableUnitFragment(block, NotAvailableUnitType.OFFLINE_UNSUPPORTED)
             }
 
-            isVideoBlockAvailable(block) -> {
+            isVideoBlockAvailable(block, isVideoDownloaded) -> {
                 createVideoFragment(block)
             }
 
@@ -66,18 +67,20 @@ class CourseUnitContainerAdapter(
         }
     }
 
-    private fun isBlockNotDownloaded(block: Block, noNetwork: Boolean, offlineUrl: String): Boolean {
-        return noNetwork && block.isDownloadable && offlineUrl.isEmpty()
+    private fun isBlockNotDownloaded(block: Block, noNetwork: Boolean, isVideoDownloaded: Boolean, offlineUrl: String): Boolean {
+        if (!noNetwork || !block.isDownloadable) return false
+        if (block.isVideoBlock) return !isVideoDownloaded
+        return offlineUrl.isEmpty()
     }
 
     private fun isBlockOfflineUnsupported(block: Block, noNetwork: Boolean): Boolean {
         return noNetwork && !block.isDownloadable
     }
 
-    private fun isVideoBlockAvailable(block: Block): Boolean {
+    private fun isVideoBlockAvailable(block: Block, isVideoDownloaded: Boolean = false): Boolean {
         val encodedVideos = block.studentViewData?.encodedVideos
         val hasVideo = encodedVideos?.hasVideoUrl == true || encodedVideos?.hasYoutubeUrl == true
-        return block.isVideoBlock && hasVideo
+        return block.isVideoBlock && (isVideoDownloaded || hasVideo)
     }
 
     private fun isDiscussionBlockAvailable(block: Block): Boolean {
@@ -132,11 +135,11 @@ class CourseUnitContainerAdapter(
     }
 
     private fun createVideoFragment(block: Block): Fragment {
-        val encodedVideos = block.studentViewData!!.encodedVideos!!
-        val transcripts = block.studentViewData!!.transcripts ?: emptyMap()
+        val encodedVideos = block.studentViewData?.encodedVideos
+        val transcripts = block.studentViewData?.transcripts ?: emptyMap()
         val downloadedModel = viewModel.getDownloadModelById(block.id)
-        val isDownloaded = downloadedModel != null
-        val videoUrl = downloadedModel?.path ?: encodedVideos.videoUrl
+        val isDownloaded = downloadedModel?.path?.let { File(it).exists() } == true
+        val videoUrl = if (isDownloaded) downloadedModel?.path.orEmpty() else encodedVideos?.videoUrl.orEmpty()
 
         return if (videoUrl.isNotEmpty()) {
             VideoUnitFragment.newInstance(
@@ -151,7 +154,7 @@ class CourseUnitContainerAdapter(
             YoutubeVideoUnitFragment.newInstance(
                 block.id,
                 viewModel.courseId,
-                encodedVideos.youtube?.url ?: "",
+                encodedVideos?.youtube?.url ?: "",
                 transcripts,
                 block.displayName
             )

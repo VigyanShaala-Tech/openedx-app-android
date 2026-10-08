@@ -54,6 +54,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
@@ -91,12 +92,14 @@ fun CourseRegistrationScreen(
     isFieldVisible: (EnrollmentRegistrationField) -> Boolean
 ) {
     val scaffoldState = rememberScaffoldState()
+    val keyboardController = LocalSoftwareKeyboardController.current
 
     BackHandler(enabled = (uiState is CourseRegistrationUIState.CourseData && uiState.currentStep > 1)) {
         onPreviousClick()
     }
 
     Scaffold(
+        modifier = Modifier.clickable { keyboardController?.hide() },
         scaffoldState = scaffoldState,
         topBar = {
             Column(
@@ -156,6 +159,11 @@ fun CourseRegistrationScreen(
             modifier = Modifier
                 .fillMaxSize()
                 .padding(paddingValues)
+                .clickable(
+                    interactionSource = remember { androidx.compose.foundation.interaction.MutableInteractionSource() },
+                    indication = null,
+                    onClick = { keyboardController?.hide() }
+                )
         ) {
             when (uiState) {
                 is CourseRegistrationUIState.Loading -> {

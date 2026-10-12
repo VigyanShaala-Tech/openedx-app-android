@@ -425,7 +425,7 @@ private fun CourseDetailNativeContent(
                     .aspectRatio(ratio = 1.86f)
                     .padding(6.dp),
                 apiHostUrl = apiHostUrl,
-                courseImage = course.media?.image?.large,
+                courseImage = course.courseImage.takeIf { !it.isNullOrBlank() } ?: course.media?.courseImageMobile?.uri ?: course.media?.courseImage?.uri ?: course.media?.image?.large,
                 courseName = course.name.orEmpty()
             )
             IconButton(

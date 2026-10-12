@@ -111,10 +111,11 @@ fun DiscoveryCourseItem(
             horizontalArrangement = Arrangement.spacedBy(MaterialTheme.appDimens.doublePadding),
             verticalAlignment = Alignment.Top
         ) {
-            val imageUrl = (course.media?.image?.small.takeIf { !it.isNullOrEmpty() }
-                ?: course.media?.bannerImage?.uriAbsolute.takeIf { !it.isNullOrEmpty() }
-                ?: course.courseImage.takeIf { !it.isNullOrEmpty() }
+            val imageUrl = (course.courseImage.takeIf { !it.isNullOrEmpty() }
+                ?: course.media?.courseImageMobile?.uri.takeIf { !it.isNullOrEmpty() }
                 ?: course.media?.courseImage?.uri.takeIf { !it.isNullOrEmpty() }
+                ?: course.media?.image?.small.takeIf { !it.isNullOrEmpty() }
+                ?: course.media?.bannerImage?.uriAbsolute.takeIf { !it.isNullOrEmpty() }
                 ?: course.media?.image?.large.takeIf { !it.isNullOrEmpty() }
                 ?: "").trim()
 

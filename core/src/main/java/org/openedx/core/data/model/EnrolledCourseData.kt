@@ -33,6 +33,8 @@ data class EnrolledCourseData(
     var media: Media?,
     @SerializedName("course_image")
     var courseImage: String?,
+    @SerializedName("course_image_mobile")
+    var courseImageMobile: String? = null,
     @SerializedName("course_about")
     var courseAbout: String?,
     @SerializedName("course_sharing_utm_parameters")
@@ -63,7 +65,7 @@ data class EnrolledCourseData(
             subscriptionId = subscriptionId.orEmpty(),
             coursewareAccess = coursewareAccess?.mapToDomain(),
             media = media?.mapToDomain(),
-            courseImage = courseImage.orEmpty(),
+            courseImage = courseImageMobile.takeIf { !it.isNullOrBlank() } ?: media?.courseImageMobile?.uri ?: media?.courseImage?.uri ?: courseImage.orEmpty(),
             courseAbout = courseAbout.orEmpty(),
             courseSharingUtmParameters = courseSharingUtmParameters?.mapToDomain()!!,
             courseUpdates = courseUpdates.orEmpty(),
@@ -88,7 +90,7 @@ data class EnrolledCourseData(
             subscriptionId = subscriptionId.orEmpty(),
             coursewareAccess = coursewareAccess?.mapToRoomEntity(),
             media = MediaDb.createFrom(media),
-            courseImage = courseImage.orEmpty(),
+            courseImage = courseImageMobile.takeIf { !it.isNullOrBlank() } ?: media?.courseImageMobile?.uri ?: media?.courseImage?.uri ?: courseImage.orEmpty(),
             courseAbout = courseAbout.orEmpty(),
             courseSharingUtmParameters = courseSharingUtmParameters?.mapToRoomEntity()!!,
             courseUpdates = courseUpdates.orEmpty(),

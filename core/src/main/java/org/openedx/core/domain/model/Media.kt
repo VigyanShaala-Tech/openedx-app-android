@@ -12,13 +12,14 @@ import org.openedx.core.data.model.room.MediaDb
 data class Media(
     val bannerImage: BannerImage? = null,
     val courseImage: CourseImage? = null,
+    val courseImageMobile: CourseImage? = null,
     val courseVideo: CourseVideo? = null,
     val image: Image? = null
 ) : Parcelable {
 
     fun mapToEntity() = MediaDb(
         bannerImage = bannerImage?.mapToEntity(),
-        courseImage = courseImage?.mapToEntity(),
+        courseImage = courseImageMobile?.mapToEntity() ?: courseImage?.mapToEntity(),
         courseVideo = courseVideo?.mapToEntity(),
         image = image?.mapToEntity()
     )

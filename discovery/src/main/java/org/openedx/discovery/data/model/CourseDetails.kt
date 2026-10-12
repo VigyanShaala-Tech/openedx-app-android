@@ -58,6 +58,8 @@ data class CourseDetails(
     val isWishlisted: Boolean?,
     @SerializedName("instructor_name")
     val instructorName: String?,
+    @SerializedName("course_image_mobile")
+    val courseImageMobile: String? = null,
     @SerializedName("level")
     val level: String?,
     @SerializedName("category")
@@ -96,7 +98,7 @@ data class CourseDetails(
             instructorName = instructorName,
             category = category,
             level = level,
-            courseImage = media?.courseImage?.uri ?: media?.image?.small,
+            courseImage = courseImageMobile.takeIf { !it.isNullOrBlank() } ?: media?.courseImageMobile?.uri ?: media?.courseImage?.uri ?: media?.image?.small,
             cohortFormId = cohortFormId
         )
     }

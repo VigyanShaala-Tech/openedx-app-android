@@ -44,8 +44,13 @@ data class CourseItemDto(
     @SerializedName("category")
     val category: String? = null,
     @SerializedName("level")
-    val level: String? = null
+    val level: String? = null,
+    @SerializedName("course_image_mobile")
+    val course_image_mobile: String? = null
 ) {
+    val imageUrl: String?
+        get() = course_image_mobile.takeIf { !it.isNullOrBlank() } ?: course_image
+
     companion object {
         fun from(item: Any?): CourseItemDto? {
             if (item == null) return null
@@ -62,7 +67,8 @@ data class CourseItemDto(
                     course_image = item["course_image"]?.toString(),
                     progress = progressInt,
                     category = item["category"]?.toString(),
-                    level = item["level"]?.toString()
+                    level = item["level"]?.toString(),
+                    course_image_mobile = item["course_image_mobile"]?.toString()
                 )
             }
             return null
@@ -116,8 +122,13 @@ data class RecommendationDto(
     @SerializedName("reviews")
     val reviews: Int? = null,
     @SerializedName("instructor")
-    val instructor: String? = null
+    val instructor: String? = null,
+    @SerializedName("course_image_mobile")
+    val course_image_mobile: String? = null
 ) {
+    val imageUrl: String?
+        get() = course_image_mobile.takeIf { !it.isNullOrBlank() } ?: image
+
     companion object {
         fun from(item: Any?): RecommendationDto? {
             if (item == null) return null
@@ -133,7 +144,8 @@ data class RecommendationDto(
                     image = item["image"]?.toString(),
                     rating = (item["rating"] as? Number)?.toDouble() ?: item["rating"]?.toString()?.toDoubleOrNull(),
                     reviews = (item["reviews"] as? Number)?.toInt() ?: item["reviews"]?.toString()?.toIntOrNull(),
-                    instructor = item["instructor"]?.toString()
+                    instructor = item["instructor"]?.toString(),
+                    course_image_mobile = item["course_image_mobile"]?.toString()
                 )
             }
             return null
@@ -201,7 +213,12 @@ data class WishlistItemData(
     val reviews: Int? = null,
     @SerializedName("instructor")
     val instructor: String? = null,
+    @SerializedName("course_image_mobile")
+    val course_image_mobile: String? = null,
 ) {
+    val imageUrl: String?
+        get() = course_image_mobile.takeIf { !it.isNullOrBlank() } ?: image
+
     companion object {
         fun from(item: Any?): WishlistItemData? {
             if (item == null) return null
@@ -218,7 +235,8 @@ data class WishlistItemData(
                     level = item["level"]?.toString(),
                     rating = (item["rating"] as? Number)?.toFloat() ?: item["rating"]?.toString()?.toFloatOrNull(),
                     reviews = (item["reviews"] as? Number)?.toInt() ?: item["reviews"]?.toString()?.toIntOrNull(),
-                    instructor = item["instructor"]?.toString()
+                    instructor = item["instructor"]?.toString(),
+                    course_image_mobile = item["course_image_mobile"]?.toString()
                 )
             }
             return null

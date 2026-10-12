@@ -228,7 +228,7 @@ class CourseContainerViewModel(
     private fun handleCourseEnrollment(courseDetails: CourseEnrollmentDetails) {
         _courseDetails = courseDetails
         courseName = courseDetails.courseInfoOverview.name
-        loadCourseImage(courseDetails.courseInfoOverview.media?.image?.large)
+        loadCourseImage(courseDetails.courseInfoOverview.media?.courseImageMobile?.uri ?: courseDetails.courseInfoOverview.media?.courseImage?.uri ?: courseDetails.courseInfoOverview.media?.image?.large)
 
         if (courseDetails.hasAccess.isFalse()) {
             _dataReady.value = false
@@ -259,7 +259,7 @@ class CourseContainerViewModel(
      * Handles the scenario where we only have [CourseStructure] but no enrollment details.
      */
     private fun handleCourseStructureOnly(courseStructure: CourseStructure) {
-        loadCourseImage(courseStructure.media?.image?.large)
+        loadCourseImage(courseStructure.media?.courseImageMobile?.uri ?: courseStructure.media?.courseImage?.uri ?: courseStructure.media?.image?.large)
         _courseAccessStatus.value = CourseAccessError.NONE
         _isNavigationEnabled.value = true
         _calendarSyncUIState.update { state ->

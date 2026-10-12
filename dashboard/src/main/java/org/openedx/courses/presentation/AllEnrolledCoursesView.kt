@@ -449,7 +449,7 @@ private fun CourseCard(
                         .fillMaxWidth()
                         .height(120.dp)
                         .clip(MaterialTheme.appShapes.cardShape),
-                    contentScale = ContentScale.Crop,
+                    contentScale = ContentScale.FillBounds,
                     model = ImageRequest.Builder(LocalContext.current)
                         .data(course.course.courseImage.toImageLink(apiHostUrl))
                         .error(R.drawable.core_no_image_course)

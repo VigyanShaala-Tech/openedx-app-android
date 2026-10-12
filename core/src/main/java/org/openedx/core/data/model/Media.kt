@@ -1,23 +1,25 @@
 package org.openedx.core.data.model
 
 import com.google.gson.annotations.SerializedName
-import org.openedx.core.domain.model.Media
 
 data class Media(
     @SerializedName("banner_image")
     val bannerImage: BannerImage?,
     @SerializedName("course_image")
     val courseImage: CourseImage?,
+    @SerializedName("course_image_mobile")
+    val courseImageMobile: CourseImage?,
     @SerializedName("course_video")
     val courseVideo: CourseVideo?,
     @SerializedName("image")
     val image: Image?,
 ) {
 
-    fun mapToDomain(): Media {
-        return Media(
+    fun mapToDomain(): org.openedx.core.domain.model.Media {
+        return org.openedx.core.domain.model.Media(
             bannerImage = bannerImage?.mapToDomain(),
-            courseImage = courseImage?.mapToDomain(),
+            courseImage = courseImageMobile?.mapToDomain() ?: courseImage?.mapToDomain(),
+            courseImageMobile = courseImageMobile?.mapToDomain(),
             courseVideo = courseVideo?.mapToDomain(),
             image = image?.mapToDomain()
         )

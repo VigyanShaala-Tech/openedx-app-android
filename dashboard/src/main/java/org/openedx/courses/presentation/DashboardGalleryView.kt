@@ -579,7 +579,6 @@ private fun PrimaryCourseCard(
                         modifier = Modifier.weight(1f),
                         primaryCourse = primaryCourse,
                         apiHostUrl = apiHostUrl,
-                        imageHeight = null,
                     )
                     PrimaryCourseButtons(
                         modifier = Modifier.weight(1f),
@@ -706,20 +705,10 @@ private fun PrimaryCourseButtons(
 private fun PrimaryCourseCaption(
     modifier: Modifier = Modifier,
     primaryCourse: EnrolledCourse,
-    imageHeight: Dp? = 140.dp,
     apiHostUrl: String,
 ) {
     val context = LocalContext.current
     Column(modifier = modifier) {
-        val imageModifier = imageHeight?.let {
-            Modifier
-                .height(it)
-                .fillMaxWidth()
-        } ?: Modifier
-            .height(140.dp)
-            .fillMaxWidth()
-            .weight(1f)
-
         AsyncImage(
             model = ImageRequest.Builder(context)
                 .data(primaryCourse.course.courseImage.toImageLink(apiHostUrl))
@@ -729,7 +718,9 @@ private fun PrimaryCourseCaption(
             contentDescription = null,
             contentScale = ContentScale.FillBounds,
             alignment = Alignment.Center,
-            modifier = imageModifier,
+            modifier = Modifier
+                .fillMaxWidth()
+                .height(140.dp),
         )
         LinearProgressIndicator(
             modifier = Modifier

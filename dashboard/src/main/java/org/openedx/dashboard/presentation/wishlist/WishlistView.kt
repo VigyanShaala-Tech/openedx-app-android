@@ -205,9 +205,9 @@ private fun WishlistGridItem(item: WishlistItemData, onRemove: (String) -> Unit)
                         .fillMaxWidth()
                         .height(110.dp)
                         .clip(MaterialTheme.appShapes.cardShape),
-                    contentScale = ContentScale.Crop,
+                    contentScale = ContentScale.FillBounds,
                     model = ImageRequest.Builder(LocalContext.current)
-                        .data(item.image)
+                        .data(item.imageUrl)
                         .error(CoreR.drawable.core_no_image_course)
                         .placeholder(CoreR.drawable.core_no_image_course)
                         .crossfade(true)

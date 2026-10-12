@@ -862,9 +862,9 @@ private fun WishlistItem(w: WishlistItemData, apiHostUrl: String, onRemove: (Str
                     modifier = Modifier
                         .size(64.dp)
                         .clip(MaterialTheme.appShapes.cardShape),
-                    contentScale = ContentScale.Crop,
+                    contentScale = ContentScale.FillBounds,
                     model = ImageRequest.Builder(LocalContext.current)
-                        .data((w.image ?: "").toImageLink(apiHostUrl))
+                        .data((w.imageUrl ?: "").toImageLink(apiHostUrl))
                         .error(CoreR.drawable.core_no_image_course)
                         .placeholder(CoreR.drawable.core_no_image_course)
                         .crossfade(true)

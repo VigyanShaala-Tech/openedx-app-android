@@ -54,7 +54,6 @@ import androidx.compose.ui.layout.onSizeChanged
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.tooling.preview.Devices
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.Density
 import androidx.compose.ui.unit.Dp
@@ -295,7 +294,7 @@ private fun CollapsingLayoutTablet(
                 },
             bitmap = courseImage.asImageBitmap(),
             contentDescription = null,
-            contentScale = ContentScale.Crop
+            contentScale = ContentScale.FillBounds
         )
         Box(
             modifier = Modifier
@@ -351,7 +350,7 @@ private fun CollapsingLayoutTablet(
                 },
             bitmap = courseImage.asImageBitmap(),
             contentDescription = null,
-            contentScale = ContentScale.Crop
+            contentScale = ContentScale.FillBounds
         )
         Box(
             modifier = Modifier

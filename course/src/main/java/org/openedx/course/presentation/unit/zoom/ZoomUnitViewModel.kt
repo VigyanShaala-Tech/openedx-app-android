@@ -26,6 +26,17 @@ class ZoomUnitViewModel(
         loadBlock()
     }
 
+    fun markBlockCompleted() {
+        viewModelScope.launch {
+            try {
+                interactor.markBlocksCompletion(courseId, listOf(blockId))
+                interactor.markTopicCompleted(courseId, blockId)
+            } catch (e: Exception) {
+                e.printStackTrace()
+            }
+        }
+    }
+
     private fun loadBlock() {
         viewModelScope.launch {
             try {

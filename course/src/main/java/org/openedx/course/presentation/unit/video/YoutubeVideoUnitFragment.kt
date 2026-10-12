@@ -287,7 +287,7 @@ class YoutubeVideoUnitFragment : Fragment(R.layout.fragment_youtube_video_unit) 
         private const val ARG_COURSE_ID = "courseId"
         private const val ARG_TITLE = "blockTitle"
 
-        const val VIDEO_COMPLETION_THRESHOLD = 0.8f
+        const val VIDEO_COMPLETION_THRESHOLD = 0.75f
         const val RATE_DIALOG_THRESHOLD = 0.99f
 
         fun newInstance(

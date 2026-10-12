@@ -143,6 +143,25 @@ open class VideoUnitViewModel(
         }
     }
 
+    var accumulatedWatchTimeMs = 0L
+
+    fun addWatchTime(deltaMs: Long, speed: Float = 1.0f) {
+        if (deltaMs > 0L && deltaMs < 2000L) {
+            val scaled = (deltaMs * speed).toLong()
+            accumulatedWatchTimeMs += scaled
+        }
+    }
+
+    fun checkAndMarkCompleted(currentPositionMs: Long, durationMs: Long, medium: String) {
+        if (durationMs <= 0L) return
+        val currentPositionRatio = currentPositionMs.toDouble() / durationMs.toDouble()
+        val watchTimeRatio = accumulatedWatchTimeMs.toDouble() / durationMs.toDouble()
+
+        if (watchTimeRatio >= VIDEO_COMPLETION_THRESHOLD || currentPositionRatio >= VIDEO_COMPLETION_THRESHOLD) {
+            markBlockCompleted(blockId, medium)
+        }
+    }
+
     open fun markBlockCompleted(blockId: String, medium: String) {
         if (!isBlockAlreadyCompleted) {
             logLoadedCompletedEvent(videoUrl, false, getCurrentVideoTime(), medium)
@@ -193,5 +212,9 @@ open class VideoUnitViewModel(
                 e.printStackTrace()
             }
         }
+    }
+
+    companion object {
+        const val VIDEO_COMPLETION_THRESHOLD = 0.75f
     }
 }

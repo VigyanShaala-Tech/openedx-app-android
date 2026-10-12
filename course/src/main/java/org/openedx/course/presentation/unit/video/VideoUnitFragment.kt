@@ -58,20 +58,28 @@ class VideoUnitFragment : Fragment(R.layout.fragment_video_unit) {
 
     private var windowSize: WindowSize? = null
 
+    private var lastRunTimestamp = 0L
     private val handler = Handler(Looper.getMainLooper())
     private var videoTimeRunnable: Runnable = object : Runnable {
         override fun run() {
+            val now = System.currentTimeMillis()
+            val deltaMs = if (lastRunTimestamp > 0L) now - lastRunTimestamp else 0L
+            lastRunTimestamp = now
+
             viewModel.getActivePlayer()?.let {
                 if (it.isPlaying) {
                     viewModel.setCurrentVideoTime(it.currentPosition)
+                    val speed = it.playbackParameters.speed
+                    viewModel.addWatchTime(deltaMs, speed)
                 }
                 if (it.duration > 1000L) {
                     viewModel.duration = it.duration
                     if (it.currentPosition > 0L) {
-                        val completePercentage = it.currentPosition.toDouble() / it.duration.toDouble()
-                        if (completePercentage >= 0.95f) {
-                            viewModel.markBlockCompleted(viewModel.blockId, CourseAnalyticsKey.NATIVE.key)
-                        }
+                        viewModel.checkAndMarkCompleted(
+                            it.currentPosition,
+                            it.duration,
+                            CourseAnalyticsKey.NATIVE.key
+                        )
                     }
                 }
             }

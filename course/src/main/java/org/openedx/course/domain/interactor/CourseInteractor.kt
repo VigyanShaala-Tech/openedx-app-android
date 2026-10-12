@@ -137,6 +137,9 @@ class CourseInteractor(
     suspend fun getJoinMeetingUrl(meetingId: String) =
         repository.getJoinMeetingUrl(meetingId)
 
+    suspend fun markBlocksCompletion(courseId: String, blocksId: List<String>) =
+        repository.markBlocksCompletion(courseId, blocksId)
+
     suspend fun markTopicCompleted(courseId: String, blockId: String) =
         repository.markTopicCompleted(courseId, blockId)
 }

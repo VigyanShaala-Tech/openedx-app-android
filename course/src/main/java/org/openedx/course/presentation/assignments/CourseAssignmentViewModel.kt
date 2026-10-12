@@ -1,5 +1,6 @@
 package org.openedx.course.presentation.assignments
 
+import androidx.fragment.app.FragmentManager
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -8,10 +9,14 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.launch
+import org.openedx.core.BlockType
+import org.openedx.core.config.Config
 import org.openedx.core.domain.model.Block
 import org.openedx.core.domain.model.CourseProgress
 import org.openedx.core.domain.model.CourseStructure
 import org.openedx.core.domain.model.Progress
+import org.openedx.core.extension.getSequentialBlocks
+import org.openedx.core.extension.getVerticalBlocks
 import org.openedx.core.system.notifier.CourseNotifier
 import org.openedx.core.system.notifier.CourseStructureUpdated
 import org.openedx.course.domain.interactor.CourseInteractor
@@ -19,14 +24,18 @@ import org.openedx.course.presentation.CourseAnalytics
 import org.openedx.course.presentation.CourseAnalyticsEvent
 import org.openedx.course.presentation.CourseAnalyticsKey
 import org.openedx.course.presentation.CourseRouter
+import org.openedx.course.presentation.unit.container.CourseViewMode
 
 class CourseAssignmentViewModel(
     val courseId: String,
     val courseRouter: CourseRouter,
+    private val config: Config,
     private val interactor: CourseInteractor,
     private val courseNotifier: CourseNotifier,
     private val analytics: CourseAnalytics,
 ) : ViewModel() {
+
+    val isCourseExpandableSectionsEnabled get() = config.getCourseUIConfig().isCourseDropdownNavigationEnabled
     private val _uiState =
         MutableStateFlow<CourseAssignmentUIState>(CourseAssignmentUIState.Loading)
     val uiState: StateFlow<CourseAssignmentUIState> = _uiState.asStateFlow()
@@ -137,5 +146,60 @@ class CourseAssignmentViewModel(
 
     private fun findChapterForAssignment(assignmentId: String, blocks: List<Block>): Block? {
         return blocks.firstOrNull { it.descendants.contains(assignmentId) }
+    }
+
+    fun openAssignmentBlock(fragmentManager: FragmentManager, blockId: String) {
+        viewModelScope.launch {
+            try {
+                val courseStructure = interactor.getCourseStructure(courseId, false)
+                val blocks = courseStructure.blockData
+
+                val targetBlock = blocks.firstOrNull { it.id == blockId }
+                val verticalBlock = when (targetBlock?.type) {
+                    BlockType.VERTICAL -> targetBlock
+                    BlockType.SEQUENTIAL -> blocks.getVerticalBlocks().firstOrNull { it.id in targetBlock.descendants }
+                    else -> blocks.getVerticalBlocks().find { it.descendants.contains(blockId) }
+                }
+                val sectionBlock = if (verticalBlock != null) {
+                    blocks.getSequentialBlocks().find { it.descendants.contains(verticalBlock.id) }
+                } else null
+
+                val componentId = if (targetBlock != null && !targetBlock.type.isContainer()) {
+                    blockId
+                } else ""
+
+                if (verticalBlock != null) {
+                    logAssignmentClick(blockId)
+                    if (isCourseExpandableSectionsEnabled) {
+                        courseRouter.navigateToCourseContainer(
+                            fm = fragmentManager,
+                            courseId = courseId,
+                            unitId = verticalBlock.id,
+                            componentId = componentId,
+                            mode = CourseViewMode.FULL
+                        )
+                    } else if (sectionBlock != null) {
+                        courseRouter.navigateToCourseSubsections(
+                            fm = fragmentManager,
+                            courseId = courseId,
+                            subSectionId = sectionBlock.id,
+                            mode = CourseViewMode.FULL,
+                            unitId = verticalBlock.id,
+                            componentId = componentId
+                        )
+                    } else {
+                        courseRouter.navigateToCourseContainer(
+                            fm = fragmentManager,
+                            courseId = courseId,
+                            unitId = verticalBlock.id,
+                            componentId = componentId,
+                            mode = CourseViewMode.FULL
+                        )
+                    }
+                }
+            } catch (e: Exception) {
+                e.printStackTrace()
+            }
+        }
     }
 }

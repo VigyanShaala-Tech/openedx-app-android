@@ -71,7 +71,6 @@ import org.openedx.core.utils.TimeUtils
 import org.openedx.course.R
 import org.openedx.course.presentation.contenttab.CourseContentAssignmentEmptyState
 import org.openedx.course.presentation.ui.CourseProgress
-import org.openedx.course.presentation.unit.container.CourseViewMode
 import org.openedx.foundation.presentation.WindowSize
 import org.openedx.foundation.presentation.WindowType
 import org.openedx.foundation.presentation.windowSizeValue
@@ -99,14 +98,8 @@ fun CourseContentAssignmentScreen(
         uiState = uiState,
         windowSize = windowSize,
         onNavigateToHome = onNavigateToHome,
-        onAssignmentClick = { subSectionBlock ->
-            viewModel.courseRouter.navigateToCourseSubsections(
-                fm = fragmentManager,
-                courseId = viewModel.courseId,
-                subSectionId = subSectionBlock.id,
-                mode = CourseViewMode.FULL
-            )
-            viewModel.logAssignmentClick(subSectionBlock.id)
+        onAssignmentClick = { assignmentBlock ->
+            viewModel.openAssignmentBlock(fragmentManager, assignmentBlock.id)
         },
     )
 }

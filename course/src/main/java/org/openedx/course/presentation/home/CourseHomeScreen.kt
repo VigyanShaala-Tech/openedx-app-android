@@ -168,13 +168,7 @@ fun CourseHomeScreen(
             viewModel.logVideoClick(videoBlock.id)
         },
         onAssignmentClick = { assignmentBlock ->
-            viewModel.courseRouter.navigateToCourseContainer(
-                fragmentManager,
-                courseId = viewModel.courseId,
-                unitId = viewModel.getBlockParent(assignmentBlock.id)?.id ?: return@CourseHomeUI,
-                mode = CourseViewMode.FULL
-            )
-            viewModel.logAssignmentClick(assignmentBlock.id)
+            viewModel.openAssignmentBlock(fragmentManager, assignmentBlock.id)
         },
         onNavigateToContent = onNavigateToContent,
         onNavigateToProgress = onNavigateToProgress,

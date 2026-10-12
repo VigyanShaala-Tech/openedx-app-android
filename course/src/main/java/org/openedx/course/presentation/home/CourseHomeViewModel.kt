@@ -507,6 +507,61 @@ class CourseHomeViewModel(
         }
     }
 
+    fun openAssignmentBlock(fragmentManager: FragmentManager, blockId: String) {
+        viewModelScope.launch {
+            try {
+                val courseStructure = interactor.getCourseStructure(courseId, false)
+                val blocks = courseStructure.blockData
+
+                val targetBlock = blocks.firstOrNull { it.id == blockId }
+                val verticalBlock = when (targetBlock?.type) {
+                    BlockType.VERTICAL -> targetBlock
+                    BlockType.SEQUENTIAL -> blocks.getVerticalBlocks().firstOrNull { it.id in targetBlock.descendants }
+                    else -> blocks.getVerticalBlocks().find { it.descendants.contains(blockId) }
+                }
+                val sectionBlock = if (verticalBlock != null) {
+                    blocks.getSequentialBlocks().find { it.descendants.contains(verticalBlock.id) }
+                } else null
+
+                val componentId = if (targetBlock != null && !targetBlock.type.isContainer()) {
+                    blockId
+                } else ""
+
+                if (verticalBlock != null) {
+                    logAssignmentClick(blockId)
+                    if (isCourseExpandableSectionsEnabled) {
+                        courseRouter.navigateToCourseContainer(
+                            fm = fragmentManager,
+                            courseId = courseId,
+                            unitId = verticalBlock.id,
+                            componentId = componentId,
+                            mode = CourseViewMode.FULL
+                        )
+                    } else if (sectionBlock != null) {
+                        courseRouter.navigateToCourseSubsections(
+                            fragmentManager,
+                            courseId = courseId,
+                            subSectionId = sectionBlock.id,
+                            mode = CourseViewMode.FULL,
+                            unitId = verticalBlock.id,
+                            componentId = componentId
+                        )
+                    } else {
+                        courseRouter.navigateToCourseContainer(
+                            fm = fragmentManager,
+                            courseId = courseId,
+                            unitId = verticalBlock.id,
+                            componentId = componentId,
+                            mode = CourseViewMode.FULL
+                        )
+                    }
+                }
+            } catch (e: Exception) {
+                e.printStackTrace()
+            }
+        }
+    }
+
     private fun resumeBlock(fragmentManager: FragmentManager, blockId: String) {
         resumeSectionBlock?.let { subSection ->
             resumeCourseTappedEvent(subSection.id)

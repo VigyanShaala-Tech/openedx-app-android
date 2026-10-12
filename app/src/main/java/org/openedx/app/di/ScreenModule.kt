@@ -666,6 +666,7 @@ val screenModule = module {
     viewModel { (courseId: String) ->
         CourseAssignmentViewModel(
             courseId = courseId,
+            config = get(),
             interactor = get(),
             courseRouter = get(),
             courseNotifier = get(),

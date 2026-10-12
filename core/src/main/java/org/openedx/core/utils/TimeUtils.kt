@@ -78,7 +78,7 @@ object TimeUtils {
             }
         }
     }
-    fun formatToDueInString(context: Context, date: Date): String {
+    fun formatToDueInString(context: Context, date: Date, assignmentName: String? = null): String {
         val now = Calendar.getInstance()
         val dueDate = Calendar.getInstance().apply { time = date }
         now.set(Calendar.HOUR_OF_DAY, 0)
@@ -91,10 +91,15 @@ object TimeUtils {
         dueDate.set(Calendar.MILLISECOND, 0)
         val daysDifference =
             ((dueDate.timeInMillis - now.timeInMillis) / (24 * 60 * 60 * 1000)).toInt()
-        return when {
+        val dueString = when {
             daysDifference < 0 -> context.getString(R.string.core_date_type_past_due)
             daysDifference == 0 -> context.getString(R.string.core_date_type_today)
             else -> context.getString(R.string.core_date_format_due_in_days, daysDifference)
+        }
+        return if (!assignmentName.isNullOrEmpty()) {
+            "$assignmentName $dueString"
+        } else {
+            dueString
         }
     }
 

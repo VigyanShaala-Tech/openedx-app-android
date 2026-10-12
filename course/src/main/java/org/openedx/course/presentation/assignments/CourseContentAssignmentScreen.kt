@@ -277,10 +277,10 @@ private fun AssignmentGroupSection(
                     modifier = Modifier.padding(vertical = 8.dp),
                     contentPadding = PaddingValues(horizontal = 24.dp)
                 ) {
-                    itemsIndexed(assignments) { index, assignment ->
+                    itemsIndexed(assignments) { _, assignment ->
                         AssignmentButton(
                             assignment = assignment,
-                            index = index + 1,
+                            groupType = label,
                             isSelected = assignment.id == selectedId,
                             onClick = {
                                 selectedId = assignment.id
@@ -297,7 +297,7 @@ private fun AssignmentGroupSection(
                         modifier = Modifier
                             .padding(horizontal = 24.dp),
                         assignment = assignment,
-                        index = selectedIndex + 1,
+                        groupType = label,
                         sectionName = sectionNames[assignment.id] ?: "",
                         onAssignmentClick = onAssignmentClick
                     )
@@ -309,7 +309,7 @@ private fun AssignmentGroupSection(
                         .padding(horizontal = 24.dp)
                         .padding(top = 12.dp),
                     assignment = assignment,
-                    index = 1,
+                    groupType = label,
                     sectionName = sectionNames[assignment.id] ?: "",
                     onAssignmentClick = onAssignmentClick
                 )
@@ -323,7 +323,12 @@ private fun AssignmentGroupSection(
 }
 
 @Composable
-private fun AssignmentButton(assignment: Block, index: Int, isSelected: Boolean, onClick: () -> Unit) {
+private fun AssignmentButton(
+    assignment: Block,
+    groupType: String = "",
+    isSelected: Boolean,
+    onClick: () -> Unit
+) {
     val isDuePast = assignment.due != null && assignment.due!! < Date()
     val cardBorderColor = when {
         isSelected -> MaterialTheme.appColors.primary
@@ -353,6 +358,18 @@ private fun AssignmentButton(assignment: Block, index: Int, isSelected: Boolean,
         isDuePast -> MaterialTheme.appColors.warning.copy(ASSIGNMENT_BUTTON_CARD_BACKGROUND_ALPHA)
         else -> MaterialTheme.appColors.cardViewBackground
     }
+
+    val buttonText = remember(assignment, groupType) {
+        val shortLabel = assignment.assignmentProgress?.shortLabel
+        if (!shortLabel.isNullOrEmpty()) {
+            shortLabel
+        } else if (!assignment.displayName.isNullOrEmpty()) {
+            assignment.displayName
+        } else {
+            groupType
+        }
+    }
+
     Column(
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
@@ -380,7 +397,7 @@ private fun AssignmentButton(assignment: Block, index: Int, isSelected: Boolean,
                 ) {
                     Text(
                         modifier = Modifier.align(Alignment.Center),
-                        text = "Assignment $index",
+                        text = buttonText,
                         color = MaterialTheme.appColors.textDark,
                         style = MaterialTheme.appTypography.labelMedium,
                         maxLines = 1,
@@ -421,7 +438,7 @@ private fun AssignmentButton(assignment: Block, index: Int, isSelected: Boolean,
 private fun AssignmentDetails(
     modifier: Modifier = Modifier,
     assignment: Block,
-    index: Int,
+    groupType: String = "",
     sectionName: String,
     onAssignmentClick: (Block) -> Unit,
 ) {
@@ -436,7 +453,7 @@ private fun AssignmentDetails(
         isDuePast -> MaterialTheme.appColors.warning
         else -> MaterialTheme.appColors.assignmentCardBorder
     }
-    val label = assignment.assignmentProgress?.label
+    val label = assignment.assignmentProgress?.label ?: assignment.displayName ?: groupType
     val description = when {
         assignment.isCompleted() -> {
             "$label " + stringResource(
@@ -460,7 +477,8 @@ private fun AssignmentDetails(
         }
 
         else -> {
-            "$label $dueDate"
+            val name = assignment.displayName?.takeIf { it.isNotEmpty() } ?: label
+            if (dueDate.isNotEmpty()) "$name $dueDate" else name
         }
     }
     val displayNameText = assignment.displayName ?: ""
@@ -484,6 +502,18 @@ private fun AssignmentDetails(
             AnnotatedString(displayNameText)
         }
     }
+
+    val headerTitle = remember(assignment, groupType) {
+        val shortLabel = assignment.assignmentProgress?.shortLabel
+        if (!shortLabel.isNullOrEmpty()) {
+            shortLabel
+        } else if (!assignment.displayName.isNullOrEmpty()) {
+            assignment.displayName
+        } else {
+            groupType
+        }
+    }
+
     Card(
         modifier = modifier
             .fillMaxWidth()
@@ -516,7 +546,7 @@ private fun AssignmentDetails(
             ) {
                 Column {
                     Text(
-                        text = "Assignment $index",
+                        text = headerTitle,
                         style = MaterialTheme.appTypography.bodyLarge,
                         color = MaterialTheme.appColors.textDark,
                         fontWeight = FontWeight.Bold

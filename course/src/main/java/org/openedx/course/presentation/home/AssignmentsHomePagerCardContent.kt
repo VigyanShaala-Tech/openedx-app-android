@@ -187,9 +187,19 @@ private fun AssignmentCard(
                         AnnotatedString(displayNameText)
                     }
                 }
-                // Assignment and section name
+                val headerTitle = remember(assignment) {
+                    val shortLabel = assignment.assignmentProgress?.shortLabel
+                    if (!shortLabel.isNullOrEmpty()) {
+                        shortLabel
+                    } else if (!assignment.displayName.isNullOrEmpty()) {
+                        assignment.displayName
+                    } else {
+                        assignment.assignmentProgress?.assignmentType ?: "Assignment"
+                    }
+                }
+                // Assignment / Quiz / Homework title
                 Text(
-                    text = "Assignment $index",
+                    text = headerTitle,
                     style = MaterialTheme.appTypography.titleSmall,
                     color = MaterialTheme.appColors.textDark,
                     fontWeight = FontWeight.Bold

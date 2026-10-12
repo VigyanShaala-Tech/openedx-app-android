@@ -73,12 +73,15 @@ class CourseAssignmentViewModel(
                 courseProgress.gradingPolicy?.assignmentPolicies?.map { it.type } ?: emptyList()
             val filteredAssignments = assignments
                 .filter { assignment ->
-                    assignmentTypeOrder.contains(assignment.assignmentProgress?.assignmentType)
+                    assignmentTypeOrder.isEmpty() || assignmentTypeOrder.contains(assignment.assignmentProgress?.assignmentType)
                 }
                 .filter { it.graded }
             val grouped = filteredAssignments
-                .groupBy { it.assignmentProgress?.assignmentType ?: "" }
-                .toSortedMap(compareBy { assignmentTypeOrder.indexOf(it) })
+                .groupBy { it.assignmentProgress?.assignmentType ?: "Assignment" }
+                .toSortedMap(compareBy { 
+                    val idx = assignmentTypeOrder.indexOf(it)
+                    if (idx != -1) idx else Int.MAX_VALUE
+                })
             val completed = assignments.count { it.isCompleted() }
             val total = assignments.size
             val progress = Progress(completed, total)

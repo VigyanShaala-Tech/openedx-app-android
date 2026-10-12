@@ -1,34 +1,40 @@
 package org.openedx.app.deeplink
 
+import android.net.Uri
+
 class DeepLink(params: Map<String, String>) {
 
-    private val screenName = params[Keys.SCREEN_NAME.value]
-        ?: params["screen_name"]
-        ?: params["screenName"]
-        ?: params["screen"]
-    private val notificationType = params[Keys.NOTIFICATION_TYPE.value]
-        ?: params["notification_type"]
-        ?: params["notificationType"]
-        ?: params["type"]
-        ?: params["action"]
-    val courseId = params[Keys.COURSE_ID.value]
-        ?: params[Keys.COURSE_ID_ALT.value]
-        ?: params["course_id"]
-        ?: params["courseId"]
-        ?: params["course"]
-        ?: params["c_id"]
-        ?: params["CId"]
-    val pathId = params[Keys.PATH_ID.value] ?: params["path_id"] ?: params["pathId"]
-    val componentId = params[Keys.COMPONENT_ID.value] ?: params["component_id"] ?: params["componentId"]
-    val topicId = params[Keys.TOPIC_ID.value] ?: params["topic_id"] ?: params["topicId"]
-    val threadId = params[Keys.THREAD_ID.value] ?: params["thread_id"] ?: params["threadId"]
-    val commentId = params[Keys.COMMENT_ID.value] ?: params["comment_id"] ?: params["commentId"]
-    val parentId = params[Keys.PARENT_ID.value] ?: params["parent_id"] ?: params["parentId"]
-    val token = params[Keys.TOKEN.value] ?: params["token"]
-    val activationId = params[Keys.ACTIVATION_ID.value] ?: params["activationId"] ?: params["activation_id"]
-    val meetingId = params[Keys.MEETING_ID.value] ?: params["meetingId"] ?: params["meeting_id"]
+    private val mergedParams: Map<String, String> = mergeUrlParams(params)
 
-    val type: DeepLinkType = determineType(screenName, notificationType, params)
+    private val screenName = mergedParams[Keys.SCREEN_NAME.value]
+        ?: mergedParams["screen_name"]
+        ?: mergedParams["screenName"]
+        ?: mergedParams["screen"]
+        ?: mergedParams["scr"]
+    private val notificationType = mergedParams[Keys.NOTIFICATION_TYPE.value]
+        ?: mergedParams["notification_type"]
+        ?: mergedParams["notificationType"]
+        ?: mergedParams["type"]
+        ?: mergedParams["action"]
+        ?: mergedParams["act"]
+    val courseId = mergedParams[Keys.COURSE_ID.value]
+        ?: mergedParams[Keys.COURSE_ID_ALT.value]
+        ?: mergedParams["course_id"]
+        ?: mergedParams["courseId"]
+        ?: mergedParams["course"]
+        ?: mergedParams["c_id"]
+        ?: mergedParams["CId"]
+    val pathId = mergedParams[Keys.PATH_ID.value] ?: mergedParams["path_id"] ?: mergedParams["pathId"]
+    val componentId = mergedParams[Keys.COMPONENT_ID.value] ?: mergedParams["component_id"] ?: mergedParams["componentId"]
+    val topicId = mergedParams[Keys.TOPIC_ID.value] ?: mergedParams["topic_id"] ?: mergedParams["topicId"]
+    val threadId = mergedParams[Keys.THREAD_ID.value] ?: mergedParams["thread_id"] ?: mergedParams["threadId"]
+    val commentId = mergedParams[Keys.COMMENT_ID.value] ?: mergedParams["comment_id"] ?: mergedParams["commentId"]
+    val parentId = mergedParams[Keys.PARENT_ID.value] ?: mergedParams["parent_id"] ?: mergedParams["parentId"]
+    val token = mergedParams[Keys.TOKEN.value] ?: mergedParams["token"]
+    val activationId = mergedParams[Keys.ACTIVATION_ID.value] ?: mergedParams["activationId"] ?: mergedParams["activation_id"]
+    val meetingId = mergedParams[Keys.MEETING_ID.value] ?: mergedParams["meetingId"] ?: mergedParams["meeting_id"] ?: mergedParams["mId"]
+
+    val type: DeepLinkType = determineType(screenName, notificationType, mergedParams)
 
     private fun determineType(
         screenName: String?,
@@ -43,15 +49,79 @@ class DeepLink(params: Map<String, String>) {
             val resolved = DeepLinkType.typeOf(notificationType)
             if (resolved != DeepLinkType.NONE) return resolved
         }
-        val typeParam = params["type"] ?: params["screen"] ?: params["action"] ?: params["notification_type"]
+        val typeParam = params["type"] ?: params["screen"] ?: params["action"] ?: params["notification_type"] ?: params["scr"] ?: params["act"]
         if (!typeParam.isNullOrBlank()) {
             val resolved = DeepLinkType.typeOf(typeParam)
             if (resolved != DeepLinkType.NONE) return resolved
+        }
+        if (!meetingId.isNullOrBlank()) {
+            return DeepLinkType.MEETING
         }
         if (!courseId.isNullOrBlank()) {
             return DeepLinkType.COURSE_DASHBOARD
         }
         return DeepLinkType.NONE
+    }
+
+    companion object {
+        fun mergeUrlParams(params: Map<String, String>): Map<String, String> {
+            val map = params.toMutableMap()
+            val urlCandidate = map["url"]
+                ?: map["link"]
+                ?: map["deeplink"]
+                ?: map["deep_link"]
+                ?: map["target_url"]
+                ?: map["uri"]
+                ?: map.values.firstOrNull { it.startsWith("http://") || it.startsWith("https://") }
+
+            if (!urlCandidate.isNullOrBlank()) {
+                try {
+                    val cleanUrl = urlCandidate.replace("&&", "&")
+                    val uri = Uri.parse(cleanUrl)
+                    uri.queryParameterNames.forEach { name ->
+                        uri.getQueryParameter(name)?.let { value ->
+                            if (!map.containsKey(name)) {
+                                map[name] = if (name == "CId" || name == "course_id") {
+                                    value.replace(" ", "+")
+                                } else {
+                                    value
+                                }
+                            }
+                        }
+                    }
+                    val pathSegments = uri.pathSegments
+                    if (pathSegments.isNotEmpty()) {
+                        for (i in pathSegments.indices) {
+                            val segment = pathSegments[i]
+                            if ((segment == "course" || segment == "courses") && i + 1 < pathSegments.size) {
+                                if (!map.containsKey("course_id") && !map.containsKey("CId")) {
+                                    map["course_id"] = pathSegments[i + 1].replace(" ", "+")
+                                }
+                            }
+                            if ((segment == "join" || segment == "meeting" || segment == "live-session") && i + 1 < pathSegments.size) {
+                                val possibleMeetingId = pathSegments[i + 1]
+                                if (possibleMeetingId != "join" && possibleMeetingId != "meeting") {
+                                    if (!map.containsKey("mId") && !map.containsKey("meetingId")) {
+                                        map["mId"] = possibleMeetingId
+                                    }
+                                }
+                                if (!map.containsKey("screen_name") && !map.containsKey("scr")) {
+                                    map["screen_name"] = "meeting"
+                                }
+                            }
+                            if (segment == "live-session" || segment == "meeting") {
+                                if (!map.containsKey("screen_name") && !map.containsKey("scr")) {
+                                    map["screen_name"] = "meeting"
+                                }
+                            }
+                        }
+                    }
+                } catch (e: Exception) {
+                    e.printStackTrace()
+                }
+            }
+            return map
+        }
     }
 
     enum class Keys(val value: String) {

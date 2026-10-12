@@ -186,51 +186,52 @@ class AppActivity : AppCompatActivity(), InsetHolder, WindowSizeHolder {
                     (data.scheme == BuildConfig.APPLICATION_ID && data.host == "open")
 
         if (isVigyanShaalaDeepLink) {
-            val screen = data.getQueryParameter("scr")
-            if (screen != null) {
-                val params = mutableMapOf<String, String>()
-                params[DeepLink.Keys.SCREEN_NAME.value] = screen
-                data.queryParameterNames.forEach { name ->
-                    data.getQueryParameter(name)?.let { value ->
-                        params[name] = if (name == "CId" || name == "course_id") {
-                            value.replace(" ", "+")
-                        } else {
-                            value
-                        }
-                    }
-                }
-
-                // Extract token for PasswordReset from path if missing in query
-                if (screen == "PasswordReset" && !params.containsKey(DeepLink.Keys.TOKEN.value)) {
-                    val segments = data.pathSegments
-                    if (segments.size >= 3 && segments[1] == "password_reset_confirm") {
-                        params[DeepLink.Keys.TOKEN.value] = segments[2]
-                    }
-                }
-
-                // Extract activationId for accActivation from path if missing in query
-                if (screen == "accActivation") {
-                    val id = if (!params.containsKey(DeepLink.Keys.ACTIVATION_ID.value)) {
-                        val segments = data.pathSegments
-                        if (segments.size >= 2 && segments[0] == "activate") {
-                            segments[1]
-                        } else {
-                            ""
-                        }
+            val params = mutableMapOf<String, String>()
+            params["url"] = data.toString()
+            data.queryParameterNames.forEach { name ->
+                data.getQueryParameter(name)?.let { value ->
+                    params[name] = if (name == "CId" || name == "course_id") {
+                        value.replace(" ", "+")
                     } else {
-                        params[DeepLink.Keys.ACTIVATION_ID.value] ?: ""
-                    }
-                    if (id.isNotEmpty()) {
-                        viewModel.activateAccount(id)
-                        return
+                        value
                     }
                 }
-
-                viewModel.makeExternalRoute(
-                    supportFragmentManager,
-                    DeepLink(params)
-                )
             }
+            val screen = data.getQueryParameter("scr") ?: data.getQueryParameter("screen") ?: data.getQueryParameter("screen_name")
+            if (screen != null) {
+                params[DeepLink.Keys.SCREEN_NAME.value] = screen
+            }
+
+            // Extract token for PasswordReset from path if missing in query
+            if ((screen == "PasswordReset" || data.path?.contains("password_reset") == true) && !params.containsKey(DeepLink.Keys.TOKEN.value)) {
+                val segments = data.pathSegments
+                if (segments.size >= 3 && segments[1] == "password_reset_confirm") {
+                    params[DeepLink.Keys.TOKEN.value] = segments[2]
+                }
+            }
+
+            // Extract activationId for accActivation from path if missing in query
+            if (screen == "accActivation" || data.path?.contains("activate") == true) {
+                val id = if (!params.containsKey(DeepLink.Keys.ACTIVATION_ID.value)) {
+                    val segments = data.pathSegments
+                    if (segments.size >= 2 && segments[0] == "activate") {
+                        segments[1]
+                    } else {
+                        ""
+                    }
+                } else {
+                    params[DeepLink.Keys.ACTIVATION_ID.value] ?: ""
+                }
+                if (id.isNotEmpty()) {
+                    viewModel.activateAccount(id)
+                    return
+                }
+            }
+
+            viewModel.makeExternalRoute(
+                supportFragmentManager,
+                DeepLink(params)
+            )
         }
     }
 

@@ -221,29 +221,62 @@ class DeepLinkRouter(
 
     private fun navigateToMeeting(fm: FragmentManager, deepLink: DeepLink) {
         val courseId = deepLink.courseId ?: return
-        val meetingId = deepLink.meetingId ?: return
+        val meetingId = deepLink.meetingId
         Log.d("DeepLinkRouter", "navigateToMeeting: courseId=$courseId, meetingId=$meetingId")
         launch {
             try {
-                val liveClassesToday = courseInteractor.getLiveClasses(courseId, "today", 1).results
-                val liveClassesUpcoming = courseInteractor.getLiveClasses(courseId, "upcoming", 1).results
-                val allLiveClasses = liveClassesToday + liveClassesUpcoming
+                val course = getCourseDetails(courseId)
+                val courseTitle = course?.name.orEmpty()
+
+                launch(Dispatchers.Main) {
+                    appRouter.navigateToCourseOutline(
+                        fm = fm,
+                        courseId = courseId,
+                        courseTitle = courseTitle,
+                        openTab = "HOME"
+                    )
+                }
+
+                if (meetingId.isNullOrEmpty()) return@launch
+
+                val liveClassesToday = runCatching { courseInteractor.getLiveClasses(courseId, "today", 1).results }.getOrDefault(emptyList())
+                val liveClassesUpcoming = runCatching { courseInteractor.getLiveClasses(courseId, "upcoming", 1).results }.getOrDefault(emptyList())
+                val liveClassesPast = runCatching { courseInteractor.getLiveClasses(courseId, "past", 1).results }.getOrDefault(emptyList())
+                val allLiveClasses = liveClassesToday + liveClassesUpcoming + liveClassesPast
+
                 Log.d("DeepLinkRouter", "Found ${allLiveClasses.size} live classes")
-                val meeting = allLiveClasses.find { it.id == meetingId }
-                
+                val meeting = allLiveClasses.find { it.id == meetingId || it.meetingInfo?.meetingId == meetingId }
+
                 if (meeting != null) {
-                    Log.d("DeepLinkRouter", "Meeting found: ${meeting.topic}, navigating...")
+                    Log.d("DeepLinkRouter", "Meeting found: ${meeting.topic}, attempting join...")
+                    val zoomMeetingId = meeting.meetingInfo?.meetingId
+                    val passcode = meeting.meetingInfo?.passcode
+
                     launch(Dispatchers.Main) {
-                        val joinUrl = Uri.parse(meeting.joinUrl).buildUpon()
-                            .appendQueryParameter("isMobile", "true")
-                            .build().toString()
-                        appRouter.navigateToWebContent(fm, meeting.topic, joinUrl)
+                        val fragment = fm.findFragmentById(R.id.container) ?: fm.fragments.firstOrNull()
+                        val context = fragment?.context ?: fm.fragments.firstOrNull()?.context
+                        if (!zoomMeetingId.isNullOrEmpty() && !passcode.isNullOrEmpty() && context != null) {
+                            val userName = corePreferences.user?.name.orEmpty().ifEmpty { corePreferences.user?.username.orEmpty() }
+                            val userId = corePreferences.user?.id?.toString() ?: ""
+                            us.zoom.sdkhelper.ZoomMeetingHelper.getInstance().joinMeeting(
+                                context,
+                                zoomMeetingId,
+                                passcode,
+                                userName,
+                                userId
+                            )
+                        } else if (!meeting.joinUrl.isNullOrEmpty()) {
+                            val joinUrl = Uri.parse(meeting.joinUrl).buildUpon()
+                                .appendQueryParameter("isMobile", "true")
+                                .build().toString()
+                            appRouter.navigateToWebContent(fm, meeting.topic, joinUrl)
+                        }
                     }
                 } else {
                     Log.d("DeepLinkRouter", "Meeting NOT found in live classes list")
                 }
             } catch (e: Exception) {
-                Log.e("DeepLinkRouter", "Error fetching live classes", e)
+                Log.e("DeepLinkRouter", "Error fetching live classes for meeting deep link", e)
             }
         }
     }

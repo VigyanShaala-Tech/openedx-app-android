@@ -70,15 +70,18 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
 import org.koin.androidx.compose.koinViewModel
 import org.koin.androidx.viewmodel.ext.android.viewModel
+import org.koin.compose.koinInject
 import org.koin.core.parameter.parametersOf
 import org.openedx.core.domain.model.CourseAccessError
 import org.openedx.core.extension.isFalse
 import org.openedx.core.presentation.global.viewBinding
+import org.openedx.core.system.AppCookieManager
 import org.openedx.core.ui.HandleUIMessage
 import org.openedx.core.ui.IconText
 import org.openedx.core.ui.OfflineModeDialog
 import org.openedx.core.ui.OpenEdXButton
 import org.openedx.core.ui.RoundTabsBar
+import org.openedx.core.ui.WebContentScreen
 import org.openedx.core.ui.statusBarsInset
 import org.openedx.core.ui.theme.OpenEdXTheme
 import org.openedx.core.ui.theme.appColors
@@ -95,7 +98,6 @@ import org.openedx.course.presentation.home.CourseHomeScreen
 import org.openedx.course.presentation.home.ItemsRequiringAttentionDialog
 import org.openedx.course.presentation.notifications.CourseNotificationsDialog
 import org.openedx.course.presentation.offline.CourseOfflineScreen
-import org.openedx.course.presentation.progress.CourseProgressScreen
 import org.openedx.course.presentation.ui.DatesShiftedSnackBar
 import org.openedx.discussion.presentation.topics.DiscussionTopicsScreen
 import org.openedx.foundation.extension.takeIfNotEmpty
@@ -573,9 +575,22 @@ private fun DashboardPager(
             }
 
             CourseContainerTab.PROGRESS -> {
-                CourseProgressScreen(
+                // CourseProgressScreen(
+                //     windowSize = windowSize,
+                //     viewModel = koinViewModel(parameters = { parametersOf(viewModel.courseId) }),
+                // )
+                val edxCookieManager = koinInject<AppCookieManager>()
+                val baseUrl = viewModel.apiHostUrl.removeSuffix("/")
+                val webAppsUrl = if (baseUrl.contains("://apps.")) baseUrl else baseUrl.replace("://", "://apps.")
+                val progressUrl = "$webAppsUrl/progress/${viewModel.courseId}/?mobile=True"
+                WebContentScreen(
                     windowSize = windowSize,
-                    viewModel = koinViewModel(parameters = { parametersOf(viewModel.courseId) }),
+                    apiHostUrl = webAppsUrl,
+                    cookieManager = edxCookieManager,
+                    title = "",
+                    canShowBackBtn = false,
+                    contentUrl = progressUrl,
+                    onBackClick = {}
                 )
             }
 

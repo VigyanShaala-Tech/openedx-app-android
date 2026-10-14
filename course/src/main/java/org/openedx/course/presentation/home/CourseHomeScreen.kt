@@ -432,17 +432,17 @@ private fun CourseHomeUI(
                             }
 
                             // Grades Card
-                            item(key = "grades") {
-                                DashboardCard {
-                                    GradesHomePagerCardContent(
-                                        uiState = uiState,
-                                        onViewProgressClick = {
-                                            onViewProgressClick()
-                                            onNavigateToProgress()
-                                        }
-                                    )
-                                }
-                            }
+                            // item(key = "grades") {
+                            //     DashboardCard {
+                            //         GradesHomePagerCardContent(
+                            //             uiState = uiState,
+                            //             onViewProgressClick = {
+                            //                 onViewProgressClick()
+                            //                 onNavigateToProgress()
+                            //             }
+                            //         )
+                            //     }
+                            // }
                         }
                     }
 

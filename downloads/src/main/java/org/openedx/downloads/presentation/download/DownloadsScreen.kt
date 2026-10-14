@@ -314,6 +314,8 @@ private fun CourseItem(
                         .data(downloadCoursePreview.image.toImageLink(apiHostUrl))
                         .error(org.openedx.core.R.drawable.core_no_image_course)
                         .placeholder(org.openedx.core.R.drawable.core_no_image_course)
+                        .diskCachePolicy(coil.request.CachePolicy.ENABLED)
+                        .memoryCachePolicy(coil.request.CachePolicy.ENABLED)
                         .build(),
                     contentDescription = null,
                     contentScale = ContentScale.Crop,

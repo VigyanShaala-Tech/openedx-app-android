@@ -8,7 +8,6 @@ import org.openedx.core.data.storage.CorePreferences
 import org.openedx.core.system.connection.NetworkConnection
 import org.openedx.core.system.notifier.CourseDashboardUpdate
 import org.openedx.core.system.notifier.DiscoveryNotifier
-import org.openedx.core.system.notifier.NavigationToDiscovery
 import org.openedx.dashboard.data.model.AchievementDto
 import org.openedx.dashboard.data.model.CourseItemDto
 import org.openedx.dashboard.data.model.PaginatedDto
@@ -134,13 +133,6 @@ class NewDashboardViewModel(
                         }
                     }
 
-                    if (networkConnection.isOnline() && !isRefreshing &&
-                        (inProgressVal?.results?.isEmpty() ?: true) &&
-                        (completedVal?.results?.isEmpty() ?: true) &&
-                        contLearnVal.isEmpty()
-                    ) {
-                        discoveryNotifier.send(NavigationToDiscovery())
-                    }
 
                     _state.value = _state.value.copy(
                         loading = false,

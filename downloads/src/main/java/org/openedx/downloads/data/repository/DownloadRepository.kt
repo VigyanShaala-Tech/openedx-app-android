@@ -18,7 +18,7 @@ class DownloadRepository(
     private val corePreferences: CorePreferences,
 ) {
     fun getDownloadCoursesPreview(refresh: Boolean) = flow {
-        val cachedDownloadCoursesPreview = getCachedAndDownloadedCoursesPreview()
+        val cachedDownloadCoursesPreview = runCatching { getCachedAndDownloadedCoursesPreview() }.getOrDefault(emptyList())
         if (cachedDownloadCoursesPreview.isNotEmpty()) {
             emit(cachedDownloadCoursesPreview)
         }
@@ -28,45 +28,70 @@ class DownloadRepository(
                 val response = api.getDownloadCoursesPreview(username)
                 val downloadCoursesPreview = response.map { it.mapToDomain() }
                 val downloadCoursesPreviewEntity = response.map { it.mapToRoomEntity() }
-                dao.insertDownloadCoursePreview(downloadCoursesPreviewEntity)
+                if (downloadCoursesPreviewEntity.isNotEmpty()) {
+                    runCatching { dao.insertDownloadCoursePreview(downloadCoursesPreviewEntity) }
+                }
                 val mergedPreviews = mergeWithDownloadedModels(downloadCoursesPreview)
-                emit(mergedPreviews)
+                if (mergedPreviews.isNotEmpty()) {
+                    emit(mergedPreviews)
+                } else if (cachedDownloadCoursesPreview.isNotEmpty()) {
+                    emit(cachedDownloadCoursesPreview)
+                } else {
+                    emit(emptyList())
+                }
             } catch (_: Exception) {
-                val fallback = getCachedAndDownloadedCoursesPreview()
+                val fallback = runCatching { getCachedAndDownloadedCoursesPreview() }.getOrDefault(emptyList())
                 if (fallback.isNotEmpty()) {
                     emit(fallback)
-                } else if (cachedDownloadCoursesPreview.isEmpty()) {
+                } else if (cachedDownloadCoursesPreview.isNotEmpty()) {
+                    emit(cachedDownloadCoursesPreview)
+                } else {
                     emit(emptyList())
                 }
             }
         } else {
-            if (cachedDownloadCoursesPreview.isEmpty()) {
+            if (cachedDownloadCoursesPreview.isNotEmpty()) {
+                emit(cachedDownloadCoursesPreview)
+            } else {
                 emit(emptyList())
             }
         }
     }
 
     private suspend fun getCachedAndDownloadedCoursesPreview(): List<DomainDownloadCoursePreview> {
-        val cached = dao.getDownloadCoursesPreview().map { it.mapToDomain() }
-        return mergeWithDownloadedModels(cached)
+        val cached = runCatching { dao.getDownloadCoursesPreview().map { it.mapToDomain() } }.getOrDefault(emptyList())
+        val merged = mergeWithDownloadedModels(cached)
+        if (merged.isNotEmpty()) {
+            return merged
+        }
+        return cached
     }
 
     private suspend fun mergeWithDownloadedModels(
         previews: List<DomainDownloadCoursePreview>
     ): List<DomainDownloadCoursePreview> {
-        val downloadModels = dao.readAllData().map { it.mapToDomain() }
-        if (downloadModels.isEmpty()) return previews
-
+        val downloadModels = runCatching { dao.readAllData().map { it.mapToDomain() } }.getOrDefault(emptyList())
         val previewMap = previews.associateBy { it.id }.toMutableMap()
+
+        val roomPreviews = runCatching { dao.getDownloadCoursesPreview().map { it.mapToDomain() } }.getOrDefault(emptyList())
+        roomPreviews.forEach { roomPreview ->
+            if (!previewMap.containsKey(roomPreview.id) && roomPreview.id.isNotEmpty()) {
+                previewMap[roomPreview.id] = roomPreview
+            }
+        }
+
+        if (downloadModels.isEmpty()) return previewMap.values.toList()
+
         val downloadedByCourse = downloadModels.groupBy { it.courseId }
 
         downloadedByCourse.forEach { (courseId, models) ->
             if (courseId.isNotEmpty()) {
-                val cachedCourseStructure = courseDao.getCourseStructureById(courseId)
+                val cachedCourseStructure = runCatching { courseDao.getCourseStructureById(courseId) }.getOrNull()
                 val courseName = cachedCourseStructure?.name
                     ?: models.firstOrNull()?.title
                     ?: courseId
                 val courseImage = cachedCourseStructure?.media?.courseImage?.uri
+                    ?: cachedCourseStructure?.media?.image?.large
                     ?: ""
                 val downloadedModels = models.filter { it.downloadedState == DownloadedState.DOWNLOADED }
                 val totalDownloadedSize = if (downloadedModels.isNotEmpty()) downloadedModels.sumOf { it.size } else models.sumOf { it.size }
@@ -76,7 +101,7 @@ class DownloadRepository(
                     existingPreview.copy(
                         name = if (existingPreview.name.isEmpty() || existingPreview.name == courseId) courseName else existingPreview.name,
                         image = if (existingPreview.image.isEmpty()) courseImage else existingPreview.image,
-                        totalSize = if (totalDownloadedSize > 0) totalDownloadedSize else existingPreview.totalSize
+                        totalSize = maxOf(existingPreview.totalSize, totalDownloadedSize)
                     )
                 } else {
                     DomainDownloadCoursePreview(
@@ -94,7 +119,7 @@ class DownloadRepository(
                     image = updatedPreview.image,
                     totalSize = updatedPreview.totalSize
                 )
-                dao.insertDownloadCoursePreview(listOf(roomEntity))
+                runCatching { dao.insertDownloadCoursePreview(listOf(roomEntity)) }
             }
         }
         return previewMap.values.toList()

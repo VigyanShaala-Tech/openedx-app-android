@@ -225,14 +225,16 @@ class DownloadsViewModel(
                         .filter { it.type == BlockType.SEQUENTIAL }
                         .forEach { addDownloadableChildrenForSequentialBlock(it) }
                     initDownloadModelsStatus()
+                    val currentDownloadModels = getDownloadModelList()
                     _uiState.update { state ->
                         state.copy(
                             downloadCoursePreviews = downloadCoursePreviews,
+                            downloadModels = currentDownloadModels,
                             isLoading = false,
                             isRefreshing = false
                         )
                     }
-                    updateCourseStatesFromModels(_uiState.value.downloadModels)
+                    updateCourseStatesFromModels(currentDownloadModels)
                 }
         }
     }

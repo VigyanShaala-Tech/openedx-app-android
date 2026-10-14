@@ -118,11 +118,13 @@ class EncodedVideoUnitViewModel(
         }
         initPlayer()
 
-        val executor = Executors.newSingleThreadExecutor()
-        CastContext.getSharedInstance(context, executor).addOnCompleteListener {
-            it.result?.let { castContext ->
-                castPlayer = CastPlayer(castContext)
-                isUpdatedMutable.value = true
+        runCatching {
+            val executor = Executors.newSingleThreadExecutor()
+            CastContext.getSharedInstance(context, executor).addOnCompleteListener {
+                it.result?.let { castContext ->
+                    castPlayer = CastPlayer(castContext)
+                    isUpdatedMutable.value = true
+                }
             }
         }
     }

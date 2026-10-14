@@ -9,7 +9,6 @@ import org.openedx.auth.presentation.logistration.LogistrationFragment
 import org.openedx.auth.presentation.restore.ResetPasswordFragment
 import org.openedx.auth.presentation.restore.RestorePasswordFragment
 import org.openedx.auth.presentation.signin.SignInFragment
-import org.openedx.auth.presentation.signup.SignUpFragment
 import org.openedx.auth.presentation.signup.VsSignUpFragment
 import org.openedx.core.CalendarRouter
 import org.openedx.core.FragmentViewType
@@ -20,6 +19,7 @@ import org.openedx.core.presentation.settings.video.VideoQualityFragment
 import org.openedx.core.presentation.settings.video.VideoQualityType
 import org.openedx.course.presentation.CourseRouter
 import org.openedx.course.presentation.container.CourseContainerFragment
+import org.openedx.course.presentation.container.CourseContainerTab
 import org.openedx.course.presentation.container.NoAccessCourseContainerFragment
 import org.openedx.course.presentation.handouts.HandoutsType
 import org.openedx.course.presentation.handouts.HandoutsWebViewFragment
@@ -32,6 +32,9 @@ import org.openedx.course.presentation.unit.video.YoutubeVideoFullScreenFragment
 import org.openedx.course.settings.download.DownloadQueueFragment
 import org.openedx.courses.presentation.AllEnrolledCoursesFragment
 import org.openedx.dashboard.presentation.DashboardRouter
+import org.openedx.dashboard.presentation.achievements.AchievementsFragment
+import org.openedx.dashboard.presentation.notifications.NotificationsFragment
+import org.openedx.dashboard.presentation.wishlist.WishlistFragment
 import org.openedx.discovery.presentation.DiscoveryRouter
 import org.openedx.discovery.presentation.NativeDiscoveryFragment
 import org.openedx.discovery.presentation.WebViewDiscoveryFragment
@@ -63,9 +66,6 @@ import org.openedx.profile.presentation.vsprofile.AboutVigyanshaalaFragment
 import org.openedx.profile.presentation.vsprofile.VsSettingsFragment
 import org.openedx.whatsnew.WhatsNewRouter
 import org.openedx.whatsnew.presentation.whatsnew.WhatsNewFragment
-import org.openedx.dashboard.presentation.wishlist.WishlistFragment
-import org.openedx.dashboard.presentation.achievements.AchievementsFragment
-import org.openedx.dashboard.presentation.notifications.NotificationsFragment
 
 class AppRouter :
     AuthRouter,
@@ -229,7 +229,11 @@ class AppRouter :
     ) {
         replaceFragmentWithBackStack(
             fm,
-            CourseContainerFragment.newInstance(courseId, courseTitle)
+            CourseContainerFragment.newInstance(
+                courseId = courseId,
+                courseTitle = courseTitle,
+                openTab = CourseContainerTab.OFFLINE.name
+            )
         )
     }
     // endregion

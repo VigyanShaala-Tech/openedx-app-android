@@ -182,36 +182,59 @@ class CourseOfflineViewModel(
         blocks: List<Block>,
         continueBlockId: String,
     ): Block? {
-        val resumeBlock = blocks.firstOrNull { it.id == continueBlockId }
-        resumeVerticalBlock =
-            blocks.firstOrNull { it.type == BlockType.VERTICAL && it.descendants.contains(resumeBlock?.id) }
-        resumeSectionBlock =
-            blocks.firstOrNull { it.type == BlockType.SEQUENTIAL && it.descendants.contains(resumeVerticalBlock?.id) }
-        return resumeBlock
+        val targetBlock = blocks.firstOrNull { it.id == continueBlockId } ?: return null
+
+        when {
+            targetBlock.type == BlockType.SEQUENTIAL -> {
+                resumeSectionBlock = targetBlock
+                resumeVerticalBlock = blocks.firstOrNull {
+                    it.type == BlockType.VERTICAL && targetBlock.descendants.contains(it.id)
+                }
+            }
+            targetBlock.type == BlockType.VERTICAL -> {
+                resumeVerticalBlock = targetBlock
+                resumeSectionBlock = blocks.firstOrNull {
+                    it.type == BlockType.SEQUENTIAL && it.descendants.contains(targetBlock.id)
+                }
+            }
+            else -> {
+                resumeVerticalBlock = blocks.firstOrNull {
+                    it.type == BlockType.VERTICAL && it.descendants.contains(targetBlock.id)
+                }
+                resumeSectionBlock = blocks.firstOrNull {
+                    it.type == BlockType.SEQUENTIAL && it.descendants.contains(resumeVerticalBlock?.id)
+                }
+            }
+        }
+        return targetBlock
     }
 
     private fun resumeBlock(fragmentManager: FragmentManager, blockId: String) {
-        resumeSectionBlock?.let { subSection ->
-            resumeVerticalBlock?.let { unit ->
-                if (isCourseExpandableSectionsEnabled) {
-                    courseRouter.navigateToCourseContainer(
-                        fm = fragmentManager,
-                        courseId = courseId,
-                        unitId = unit.id,
-                        componentId = blockId,
-                        mode = CourseViewMode.FULL
-                    )
-                } else {
-                    courseRouter.navigateToCourseSubsections(
-                        fragmentManager,
-                        courseId = courseId,
-                        subSectionId = subSection.id,
-                        mode = CourseViewMode.FULL,
-                        unitId = unit.id,
-                        componentId = blockId
-                    )
-                }
-            }
+        val subSection = resumeSectionBlock ?: return
+        val unit = resumeVerticalBlock ?: return
+        val componentId = if (blockId == subSection.id || blockId == unit.id) {
+            unit.descendants.firstOrNull() ?: ""
+        } else {
+            blockId
+        }
+
+        if (isCourseExpandableSectionsEnabled) {
+            courseRouter.navigateToCourseContainer(
+                fm = fragmentManager,
+                courseId = courseId,
+                unitId = unit.id,
+                componentId = componentId,
+                mode = CourseViewMode.FULL
+            )
+        } else {
+            courseRouter.navigateToCourseSubsections(
+                fragmentManager,
+                courseId = courseId,
+                subSectionId = subSection.id,
+                mode = CourseViewMode.FULL,
+                unitId = unit.id,
+                componentId = componentId
+            )
         }
     }
 

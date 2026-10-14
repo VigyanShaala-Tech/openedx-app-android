@@ -31,10 +31,10 @@ abstract class BaseDownloadViewModel(
     private val downloadableChildrenMap = hashMapOf<String, List<String>>()
     private val downloadModelsStatus = hashMapOf<String, DownloadedState>()
 
-    private val _downloadModelsStatusFlow = MutableSharedFlow<HashMap<String, DownloadedState>>()
+    private val _downloadModelsStatusFlow = MutableSharedFlow<HashMap<String, DownloadedState>>(replay = 1)
     protected val downloadModelsStatusFlow = _downloadModelsStatusFlow.asSharedFlow()
 
-    private val _downloadingModelsFlow = MutableSharedFlow<List<DownloadModel>>()
+    private val _downloadingModelsFlow = MutableSharedFlow<List<DownloadModel>>(replay = 1)
     protected val downloadingModelsFlow = _downloadingModelsFlow.asSharedFlow()
 
     init {
@@ -129,7 +129,7 @@ abstract class BaseDownloadViewModel(
 
     open fun saveDownloadModels(folder: String, courseId: String, id: String) {
         viewModelScope.launch {
-            val saveBlocksIds = downloadableChildrenMap[id] ?: listOf()
+            val saveBlocksIds = downloadableChildrenMap[id]?.ifEmpty { listOf(id) } ?: listOf(id)
             logSubsectionDownloadEvent(id, saveBlocksIds.size, courseId)
             saveDownloadModels(folder, courseId, saveBlocksIds)
         }

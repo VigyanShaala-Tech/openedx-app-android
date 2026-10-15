@@ -308,10 +308,17 @@ private fun CourseItem(
                     } else {
                         Modifier.height(120.dp)
                     }
+                val imagePath = downloadCoursePreview.image
+                val localFile = if (imagePath.isNotEmpty()) java.io.File(imagePath.removePrefix("file://")) else null
+                val imageModel: Any = if (localFile != null && localFile.exists() && localFile.isFile) {
+                    localFile
+                } else {
+                    imagePath.toImageLink(apiHostUrl)
+                }
                 AsyncImage(
                     modifier = imageModifier.fillMaxWidth(),
                     model = ImageRequest.Builder(LocalContext.current)
-                        .data(downloadCoursePreview.image.toImageLink(apiHostUrl))
+                        .data(imageModel)
                         .error(org.openedx.core.R.drawable.core_no_image_course)
                         .placeholder(org.openedx.core.R.drawable.core_no_image_course)
                         .diskCachePolicy(coil.request.CachePolicy.ENABLED)

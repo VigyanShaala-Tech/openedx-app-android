@@ -635,7 +635,9 @@ val screenModule = module {
             api = get(),
             corePreferences = get(),
             dao = get(),
-            courseDao = get()
+            courseDao = get(),
+            fileUtil = get(),
+            config = get()
         )
     }
     single {

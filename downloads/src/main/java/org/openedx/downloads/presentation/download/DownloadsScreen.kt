@@ -325,7 +325,7 @@ private fun CourseItem(
                         .memoryCachePolicy(coil.request.CachePolicy.ENABLED)
                         .build(),
                     contentDescription = null,
-                    contentScale = ContentScale.Crop,
+                    contentScale = ContentScale.FillBounds,
                 )
                 Column(
                     modifier = Modifier

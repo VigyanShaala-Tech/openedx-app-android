@@ -85,7 +85,6 @@ class EncodedVideoUnitViewModel(
 
         override fun onPlayWhenReadyChanged(playWhenReady: Boolean, reason: Int) {
             super.onPlayWhenReadyChanged(playWhenReady, reason)
-            isPlaying = playWhenReady
         }
 
         override fun onPlaybackStateChanged(playbackState: Int) {
@@ -102,15 +101,18 @@ class EncodedVideoUnitViewModel(
             }
         }
 
-        override fun onIsPlayingChanged(isPlaying: Boolean) {
-            super.onIsPlayingChanged(isPlaying)
-            logPlayPauseEvent(videoUrl, isPlaying, getCurrentVideoTime(), getPlayingMedium())
-            trackVideoEvent(
-                eventType = if (isPlaying) "play_video" else "pause_video",
-                blockId = blockId,
-                duration = duration,
-                currentTime = getCurrentVideoTime().toDouble() / 1000.0
-            )
+        override fun onIsPlayingChanged(newIsPlaying: Boolean) {
+            super.onIsPlayingChanged(newIsPlaying)
+            if (this@EncodedVideoUnitViewModel.isPlaying != newIsPlaying) {
+                this@EncodedVideoUnitViewModel.isPlaying = newIsPlaying
+                logPlayPauseEvent(videoUrl, newIsPlaying, getCurrentVideoTime(), getPlayingMedium())
+                trackVideoEvent(
+                    eventType = if (newIsPlaying) "play_video" else "pause_video",
+                    blockId = blockId,
+                    duration = duration,
+                    currentTime = getCurrentVideoTime().toDouble() / 1000.0
+                )
+            }
         }
 
         override fun onPositionDiscontinuity(
@@ -169,8 +171,8 @@ class EncodedVideoUnitViewModel(
 
     override fun onPause(owner: LifecycleOwner) {
         super.onPause(owner)
-        exoPlayer?.removeListener(exoPlayerListener)
         exoPlayer?.pause()
+        exoPlayer?.removeListener(exoPlayerListener)
     }
 
     fun getActivePlayer(): Player? {

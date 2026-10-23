@@ -5,12 +5,9 @@ package org.openedx.profile.presentation.edit
 import android.content.res.Configuration
 import android.content.res.Configuration.UI_MODE_NIGHT_YES
 import android.graphics.Bitmap
-import android.graphics.ImageDecoder
 import android.graphics.Matrix
 import android.net.Uri
-import android.os.Build
 import android.os.Bundle
-import android.provider.MediaStore
 import android.view.LayoutInflater
 import android.view.ViewGroup
 import androidx.activity.result.contract.ActivityResultContracts
@@ -282,7 +279,6 @@ class EditProfileFragment : Fragment() {
         return Uri.fromFile(newFile)
     }
 
-    @Suppress("DEPRECATION")
     private fun cropImage(uri: Uri): Uri? {
         return try {
             val contentResolver = requireContext().contentResolver
@@ -299,21 +295,21 @@ class EditProfileFragment : Fragment() {
                 android.media.ExifInterface.ORIENTATION_NORMAL
             }
 
-            val originalBitmap = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
-                ImageDecoder.decodeBitmap(
-                    ImageDecoder.createSource(contentResolver, uri)
-                ) { decoder, info, _ ->
-                    decoder.allocator = ImageDecoder.ALLOCATOR_SOFTWARE
-                    decoder.isMutableRequired = true
-                    val srcWidth = info.size.width
-                    if (srcWidth > TARGET_IMAGE_WIDTH * 2) {
-                        val sampleSize = srcWidth / TARGET_IMAGE_WIDTH
-                        decoder.setTargetSampleSize(sampleSize)
-                    }
-                }
-            } else {
-                MediaStore.Images.Media.getBitmap(contentResolver, uri)
+            val options = android.graphics.BitmapFactory.Options().apply {
+                inJustDecodeBounds = true
             }
+            contentResolver.openInputStream(uri)?.use { stream ->
+                android.graphics.BitmapFactory.decodeStream(stream, null, options)
+            }
+
+            options.inJustDecodeBounds = false
+            if (options.outWidth > TARGET_IMAGE_WIDTH * 2) {
+                options.inSampleSize = options.outWidth / TARGET_IMAGE_WIDTH
+            }
+
+            val originalBitmap = contentResolver.openInputStream(uri)?.use { stream ->
+                android.graphics.BitmapFactory.decodeStream(stream, null, options)
+            } ?: return null
 
             val rotatedBitmap = when (orientation) {
                 android.media.ExifInterface.ORIENTATION_ROTATE_90 -> rotateBitmap(originalBitmap, 90f)

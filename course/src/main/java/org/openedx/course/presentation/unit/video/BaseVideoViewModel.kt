@@ -1,6 +1,5 @@
 package org.openedx.course.presentation.unit.video
 
-import androidx.lifecycle.viewModelScope
 import kotlinx.coroutines.launch
 import org.openedx.core.config.Config
 import org.openedx.course.data.repository.CourseRepository
@@ -24,7 +23,7 @@ open class BaseVideoViewModel(
         oldTime: Double? = null,
         newTime: Double? = null,
     ) {
-        viewModelScope.launch {
+        kotlinx.coroutines.GlobalScope.launch(kotlinx.coroutines.Dispatchers.IO) {
             val videoId = blockId.substringAfterLast("block@") // unique video id
             val blockUrl = "${config.getApiHostURL()}/xblock/$blockId?exam_access=&preview=0&recheck_access=1&show_bookmark=0&show_title=0&view=student_view"
 

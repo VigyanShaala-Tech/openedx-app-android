@@ -200,23 +200,27 @@ class YoutubeVideoUnitFragment : Fragment(R.layout.fragment_youtube_video_unit) 
                     viewModel.markBlockCompleted(blockId, CourseAnalyticsKey.YOUTUBE.key)
                 }
 
-                viewModel.isPlaying = when (state) {
+                val newIsPlaying = when (state) {
                     PlayerConstants.PlayerState.PLAYING -> true
                     PlayerConstants.PlayerState.PAUSED -> false
                     else -> return
                 }
-                viewModel.logPlayPauseEvent(
-                    viewModel.videoUrl,
-                    viewModel.isPlaying,
-                    viewModel.getCurrentVideoTime(),
-                    CourseAnalyticsKey.YOUTUBE.key
-                )
-                viewModel.trackVideoEvent(
-                    eventType = if (viewModel.isPlaying) "play_video" else "pause_video",
-                    blockId = blockId,
-                    duration = viewModel.duration,
-                    currentTime = viewModel.getCurrentVideoTime().toDouble() / 1000.0
-                )
+                
+                if (viewModel.isPlaying != newIsPlaying) {
+                    viewModel.isPlaying = newIsPlaying
+                    viewModel.logPlayPauseEvent(
+                        viewModel.videoUrl,
+                        viewModel.isPlaying,
+                        viewModel.getCurrentVideoTime(),
+                        CourseAnalyticsKey.YOUTUBE.key
+                    )
+                    viewModel.trackVideoEvent(
+                        eventType = if (viewModel.isPlaying) "play_video" else "pause_video",
+                        blockId = blockId,
+                        duration = viewModel.duration,
+                        currentTime = viewModel.getCurrentVideoTime().toDouble() / 1000.0
+                    )
+                }
             }
 
             override fun onReady(youTubePlayer: YouTubePlayer) {
@@ -276,6 +280,21 @@ class YoutubeVideoUnitFragment : Fragment(R.layout.fragment_youtube_video_unit) 
 
     override fun onPause() {
         super.onPause()
+        if (viewModel.isPlaying) {
+            viewModel.isPlaying = false
+            viewModel.logPlayPauseEvent(
+                viewModel.videoUrl,
+                false,
+                viewModel.getCurrentVideoTime(),
+                CourseAnalyticsKey.YOUTUBE.key
+            )
+            viewModel.trackVideoEvent(
+                eventType = "pause_video",
+                blockId = blockId,
+                duration = viewModel.duration,
+                currentTime = viewModel.getCurrentVideoTime().toDouble() / 1000.0
+            )
+        }
         _youTubePlayer?.pause()
     }
 

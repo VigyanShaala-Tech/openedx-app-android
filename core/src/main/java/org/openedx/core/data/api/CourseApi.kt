@@ -227,7 +227,7 @@ interface CourseApi {
 
     @FormUrlEncoded
 //    @POST("/event")
-    @POST("/api/v1/course-progress/video-events/")
+    @POST("/api/v1/course-progress/event/")
     suspend fun trackVideoEvent(
         @Header("Referer") referer: String,
         // @Header("X-CSRFToken") csrfToken: String,

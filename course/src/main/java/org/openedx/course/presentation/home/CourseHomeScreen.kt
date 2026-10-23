@@ -378,7 +378,7 @@ private fun CourseHomeUI(
                             }
 
                             // Course Completion Card
-                            item(key = "course_completion") {
+                            /*item(key = "course_completion") {
                                 DashboardCard {
                                     CourseCompletionHomePagerCardContent(
                                         uiState = uiState,
@@ -390,7 +390,7 @@ private fun CourseHomeUI(
                                         onSubSectionClick = onSubSectionClick
                                     )
                                 }
-                            }
+                            }*/
 
                             // Announcements Card
                             item(key = "announcements") {

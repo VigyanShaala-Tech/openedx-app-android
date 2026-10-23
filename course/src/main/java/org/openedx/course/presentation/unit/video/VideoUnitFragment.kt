@@ -211,7 +211,7 @@ class VideoUnitFragment : Fragment(R.layout.fragment_video_unit) {
 
     override fun onResume() {
         super.onResume()
-        viewModel.getActivePlayer()?.seekTo(viewModel.getCurrentVideoTime())
+        viewModel.seekToProgrammatically(viewModel.getCurrentVideoTime())
     }
 
     @androidx.annotation.OptIn(UnstableApi::class)
@@ -244,7 +244,7 @@ class VideoUnitFragment : Fragment(R.layout.fragment_video_unit) {
                 viewModel.getActivePlayer()?.playWhenReady = viewModel.isPlaying && isResumed
                 viewModel.isPlayerSetUp = true
             }
-            viewModel.getActivePlayer()?.seekTo(viewModel.getCurrentVideoTime())
+            viewModel.seekToProgrammatically(viewModel.getCurrentVideoTime())
 
             viewModel.castPlayer?.setSessionAvailabilityListener(
                 object : SessionAvailabilityListener {
@@ -265,7 +265,7 @@ class VideoUnitFragment : Fragment(R.layout.fragment_video_unit) {
                         viewModel.logCastConnection(CourseAnalyticsEvent.CAST_DISCONNECTED)
                         viewModel.isCastActive = false
                         playerView.player = viewModel.exoPlayer
-                        viewModel.exoPlayer?.seekTo(viewModel.castPlayer?.currentPosition ?: 0L)
+                        viewModel.seekToProgrammatically(viewModel.castPlayer?.currentPosition ?: 0L)
                         viewModel.castPlayer?.stop()
                         viewModel.exoPlayer?.play()
                         showVideoControllerIndefinitely(false)

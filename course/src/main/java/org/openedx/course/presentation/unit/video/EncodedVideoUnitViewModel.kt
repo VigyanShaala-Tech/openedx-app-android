@@ -72,6 +72,13 @@ class EncodedVideoUnitViewModel(
 
     var isPlayerSetUp = false
 
+    var programmaticSeekCount = 0
+
+    fun seekToProgrammatically(positionMs: Long) {
+        programmaticSeekCount++
+        getActivePlayer()?.seekTo(positionMs)
+    }
+
     private val exoPlayerListener = object : Player.Listener {
         override fun onRenderedFirstFrame() {
             super.onRenderedFirstFrame()
@@ -123,15 +130,9 @@ class EncodedVideoUnitViewModel(
         ) {
             super.onPositionDiscontinuity(oldPosition, newPosition, reason)
             if (reason == Player.DISCONTINUITY_REASON_SEEK) {
-                if (!this@EncodedVideoUnitViewModel.isTrackedPlaying && this@EncodedVideoUnitViewModel.isPlaying) {
-                    this@EncodedVideoUnitViewModel.isTrackedPlaying = true
-                    logPlayPauseEvent(videoUrl, true, oldPosition.positionMs, getPlayingMedium())
-                    trackVideoEvent(
-                        eventType = "play_video",
-                        blockId = blockId,
-                        duration = duration,
-                        currentTime = oldPosition.positionMs.toDouble() / 1000.0
-                    )
+                if (programmaticSeekCount > 0) {
+                    programmaticSeekCount--
+                    return
                 }
 
                 trackVideoEvent(

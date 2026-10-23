@@ -103,7 +103,8 @@ class EncodedVideoUnitViewModel(
 
         override fun onIsPlayingChanged(newIsPlaying: Boolean) {
             super.onIsPlayingChanged(newIsPlaying)
-            if (this@EncodedVideoUnitViewModel.isPlaying != newIsPlaying) {
+            if (this@EncodedVideoUnitViewModel.isTrackedPlaying != newIsPlaying) {
+                this@EncodedVideoUnitViewModel.isTrackedPlaying = newIsPlaying
                 this@EncodedVideoUnitViewModel.isPlaying = newIsPlaying
                 logPlayPauseEvent(videoUrl, newIsPlaying, getCurrentVideoTime(), getPlayingMedium())
                 trackVideoEvent(
@@ -122,6 +123,17 @@ class EncodedVideoUnitViewModel(
         ) {
             super.onPositionDiscontinuity(oldPosition, newPosition, reason)
             if (reason == Player.DISCONTINUITY_REASON_SEEK) {
+                if (!this@EncodedVideoUnitViewModel.isTrackedPlaying && this@EncodedVideoUnitViewModel.isPlaying) {
+                    this@EncodedVideoUnitViewModel.isTrackedPlaying = true
+                    logPlayPauseEvent(videoUrl, true, oldPosition.positionMs, getPlayingMedium())
+                    trackVideoEvent(
+                        eventType = "play_video",
+                        blockId = blockId,
+                        duration = duration,
+                        currentTime = oldPosition.positionMs.toDouble() / 1000.0
+                    )
+                }
+
                 trackVideoEvent(
                     eventType = "seek_video",
                     blockId = blockId,
@@ -171,6 +183,17 @@ class EncodedVideoUnitViewModel(
 
     override fun onPause(owner: LifecycleOwner) {
         super.onPause(owner)
+        if (isTrackedPlaying) {
+            isTrackedPlaying = false
+            isPlaying = false
+            logPlayPauseEvent(videoUrl, false, getCurrentVideoTime(), getPlayingMedium())
+            trackVideoEvent(
+                eventType = "pause_video",
+                blockId = blockId,
+                duration = duration,
+                currentTime = getCurrentVideoTime().toDouble() / 1000.0
+            )
+        }
         exoPlayer?.pause()
         exoPlayer?.removeListener(exoPlayerListener)
     }

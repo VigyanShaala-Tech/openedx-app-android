@@ -126,6 +126,22 @@ class YoutubeVideoUnitFragment : Fragment(R.layout.fragment_youtube_video_unit) 
                         _youTubePlayer?.apply {
                             val newTimeMs = it.start.mseconds.toLong()
                             val oldTimeMs = viewModel.getCurrentVideoTime()
+                            if (!viewModel.isTrackedPlaying) {
+                                viewModel.isTrackedPlaying = true
+                                viewModel.isPlaying = true
+                                viewModel.logPlayPauseEvent(
+                                    viewModel.videoUrl,
+                                    true,
+                                    viewModel.getCurrentVideoTime(),
+                                    CourseAnalyticsKey.YOUTUBE.key
+                                )
+                                viewModel.trackVideoEvent(
+                                    eventType = "play_video",
+                                    blockId = blockId,
+                                    duration = viewModel.duration,
+                                    currentTime = oldTimeMs.toDouble() / 1000.0
+                                )
+                            }
                             viewModel.trackVideoEvent(
                                 eventType = "seek_video",
                                 blockId = blockId,
@@ -206,7 +222,8 @@ class YoutubeVideoUnitFragment : Fragment(R.layout.fragment_youtube_video_unit) 
                     else -> return
                 }
                 
-                if (viewModel.isPlaying != newIsPlaying) {
+                if (viewModel.isTrackedPlaying != newIsPlaying) {
+                    viewModel.isTrackedPlaying = newIsPlaying
                     viewModel.isPlaying = newIsPlaying
                     viewModel.logPlayPauseEvent(
                         viewModel.videoUrl,
@@ -280,7 +297,8 @@ class YoutubeVideoUnitFragment : Fragment(R.layout.fragment_youtube_video_unit) 
 
     override fun onPause() {
         super.onPause()
-        if (viewModel.isPlaying) {
+        if (viewModel.isTrackedPlaying) {
+            viewModel.isTrackedPlaying = false
             viewModel.isPlaying = false
             viewModel.logPlayPauseEvent(
                 viewModel.videoUrl,

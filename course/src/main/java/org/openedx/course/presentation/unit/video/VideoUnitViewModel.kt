@@ -34,6 +34,7 @@ open class VideoUnitViewModel(
 
     var transcripts = emptyMap<String, String>()
     var isPlaying = true
+    var isTrackedPlaying = false
     var transcriptLanguage = AppDataConstants.defaultLocale.language ?: "en"
         private set
 

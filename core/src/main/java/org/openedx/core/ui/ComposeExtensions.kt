@@ -1,8 +1,14 @@
 package org.openedx.core.ui
 
+import android.app.Activity
+import android.content.Context
 import android.content.res.Configuration
+import android.view.View
+import android.view.inputmethod.InputMethodManager
 import androidx.compose.foundation.ScrollState
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.gestures.awaitEachGesture
+import androidx.compose.foundation.gestures.awaitFirstDown
 import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Box
@@ -37,6 +43,7 @@ import androidx.compose.ui.graphics.Path
 import androidx.compose.ui.graphics.PathEffect
 import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.input.pointer.pointerInput
+import androidx.compose.ui.input.pointer.positionChange
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.layout.layout
 import androidx.compose.ui.platform.LocalConfiguration
@@ -44,6 +51,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.platform.LocalInspectionMode
+import androidx.compose.ui.platform.LocalView
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
@@ -125,14 +133,43 @@ inline fun Modifier.noRippleClickable(crossinline onClick: () -> Unit): Modifier
     }
 }
 
+fun hideSoftKeyboard(context: Context, view: View) {
+    val imm = context.getSystemService(Context.INPUT_METHOD_SERVICE) as? InputMethodManager
+    imm?.hideSoftInputFromWindow(view.windowToken, 0)
+    imm?.hideSoftInputFromWindow(view.applicationWindowToken, 0)
+    (context as? Activity)?.currentFocus?.windowToken?.let { token ->
+        imm?.hideSoftInputFromWindow(token, 0)
+    }
+}
+
 fun Modifier.clearFocusOnTap(): Modifier = composed {
     val focusManager = LocalFocusManager.current
+    val context = LocalContext.current
+    val view = LocalView.current
     this.pointerInput(Unit) {
         detectTapGestures(
             onTap = {
-                focusManager.clearFocus()
+                focusManager.clearFocus(force = true)
+                hideSoftKeyboard(context, view)
             }
         )
+    }
+}
+
+fun Modifier.onDragOrScroll(onDrag: () -> Unit): Modifier = this.pointerInput(Unit) {
+    awaitEachGesture {
+        val down = awaitFirstDown(requireUnconsumed = false)
+        val pointer = down.id
+        while (true) {
+            val event = awaitPointerEvent()
+            val dragEvent = event.changes.firstOrNull { it.id == pointer }
+            if (dragEvent == null || !dragEvent.pressed) {
+                break
+            }
+            if (dragEvent.positionChange() != Offset.Zero) {
+                onDrag()
+            }
+        }
     }
 }
 

@@ -483,6 +483,7 @@ private fun EditProfileScreen(
     LaunchedEffect(bottomSheetScaffoldState.isVisible) {
         if (!bottomSheetScaffoldState.isVisible) {
             focusManager.clearFocus()
+            keyboardController?.hide()
             searchValue = TextFieldValue()
         }
     }

@@ -551,7 +551,7 @@ private fun AssignmentDetails(
 //                        fontWeight = FontWeight.Bold,
                         color = MaterialTheme.appColors.textDark
                     )
-                    if (description.isNotEmpty()) {
+                    /*if (description.isNotEmpty()) {
                         Text(
                             modifier = Modifier.padding(top = 6.dp),
                             text = description,
@@ -559,7 +559,7 @@ private fun AssignmentDetails(
                             color = MaterialTheme.appColors.textDark,
                             fontWeight = FontWeight.Bold
                         )
-                    }
+                    }*/
                 }
                 Icon(
                     modifier = Modifier

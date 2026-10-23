@@ -5,6 +5,7 @@ import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.focusable
 import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -76,15 +77,20 @@ import androidx.compose.ui.focus.FocusManager
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.focus.onFocusChanged
+import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.painter.Painter
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.graphics.vector.rememberVectorPainter
+import androidx.compose.ui.input.nestedscroll.NestedScrollConnection
+import androidx.compose.ui.input.nestedscroll.NestedScrollSource
+import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.platform.LocalUriHandler
+import androidx.compose.ui.platform.LocalView
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
@@ -598,12 +604,51 @@ fun SheetContent(
     searchValueChanged: (String) -> Unit,
 ) {
     val focusManager = LocalFocusManager.current
+    val keyboardController = LocalSoftwareKeyboardController.current
+    val context = LocalContext.current
+    val view = LocalView.current
+    val dummyFocusRequester = remember { FocusRequester() }
+
+    fun hideKeyboard() {
+        try {
+            dummyFocusRequester.requestFocus()
+        } catch (_: Exception) {}
+        focusManager.clearFocus(force = true)
+        keyboardController?.hide()
+        hideSoftKeyboard(context, view)
+    }
+
+    val isScrollInProgress = listState.isScrollInProgress
+    LaunchedEffect(isScrollInProgress) {
+        if (isScrollInProgress) {
+            hideKeyboard()
+        }
+    }
+
+    val nestedScrollConnection = remember {
+        object : NestedScrollConnection {
+            override fun onPreScroll(available: Offset, source: NestedScrollSource): Offset {
+                if (available.y != 0f) {
+                    hideKeyboard()
+                }
+                return Offset.Zero
+            }
+        }
+    }
+
     Column(
         Modifier
             .height(500.dp)
             .padding(top = 16.dp)
             .background(MaterialTheme.appColors.background)
+            .clearFocusOnTap()
     ) {
+        Box(
+            modifier = Modifier
+                .size(1.dp)
+                .focusRequester(dummyFocusRequester)
+                .focusable()
+        )
         Text(
             modifier = Modifier
                 .testTag("txt_selection_title")
@@ -622,7 +667,7 @@ fun SheetContent(
                 .padding(horizontal = 16.dp),
             searchValue = searchValue.text,
             keyboardActions = {
-                focusManager.clearFocus()
+                hideKeyboard()
             },
             onValueChanged = { textField ->
                 searchValueChanged(textField)
@@ -633,7 +678,12 @@ fun SheetContent(
         )
         Spacer(Modifier.height(10.dp))
         LazyColumn(
-            modifier = Modifier.fillMaxWidth().heightIn(max = 500.dp)
+            state = listState,
+            modifier = Modifier
+                .fillMaxWidth()
+                .heightIn(max = 500.dp)
+                .onDragOrScroll { hideKeyboard() }
+                .nestedScroll(nestedScrollConnection)
         ) {
             val filteredList = expandedList.filter {
                 it.name.contains(searchValue.text, true)
@@ -645,6 +695,7 @@ fun SheetContent(
                         .fillMaxWidth()
                         .padding(horizontal = 16.dp)
                         .clickable {
+                            hideKeyboard()
                             onItemClick(item)
                         }
                         .padding(vertical = 12.dp),
@@ -664,6 +715,7 @@ fun SheetContent(
                                 .fillMaxWidth()
                                 .padding(horizontal = 16.dp)
                                 .clickable {
+                                    hideKeyboard()
                                     onItemClick(
                                         RegistrationField.Option(
                                             searchValue.text,
@@ -695,12 +747,52 @@ fun SheetContent(
     searchValueChanged: (String) -> Unit,
 ) {
     val focusManager = LocalFocusManager.current
+    val keyboardController = LocalSoftwareKeyboardController.current
+    val context = LocalContext.current
+    val view = LocalView.current
+    val listState = rememberLazyListState()
+    val dummyFocusRequester = remember { FocusRequester() }
+
+    fun hideKeyboard() {
+        try {
+            dummyFocusRequester.requestFocus()
+        } catch (_: Exception) {}
+        focusManager.clearFocus(force = true)
+        keyboardController?.hide()
+        hideSoftKeyboard(context, view)
+    }
+
+    val isScrollInProgress = listState.isScrollInProgress
+    LaunchedEffect(isScrollInProgress) {
+        if (isScrollInProgress) {
+            hideKeyboard()
+        }
+    }
+
+    val nestedScrollConnection = remember {
+        object : NestedScrollConnection {
+            override fun onPreScroll(available: Offset, source: NestedScrollSource): Offset {
+                if (available.y != 0f) {
+                    hideKeyboard()
+                }
+                return Offset.Zero
+            }
+        }
+    }
+
     Column(
         Modifier
             .height(500.dp)
             .padding(top = 16.dp)
             .background(MaterialTheme.appColors.background)
+            .clearFocusOnTap()
     ) {
+        Box(
+            modifier = Modifier
+                .size(1.dp)
+                .focusRequester(dummyFocusRequester)
+                .focusable()
+        )
         Text(
             modifier = Modifier
                 .fillMaxWidth()
@@ -717,7 +809,7 @@ fun SheetContent(
                 .padding(horizontal = 16.dp),
             searchValue = searchValue.text,
             keyboardActions = {
-                focusManager.clearFocus()
+                hideKeyboard()
             },
             onValueChanged = { textField ->
                 searchValueChanged(textField)
@@ -728,7 +820,12 @@ fun SheetContent(
         )
         Spacer(Modifier.height(10.dp))
         LazyColumn(
-            modifier = Modifier.fillMaxWidth().heightIn(max = 500.dp)
+            state = listState,
+            modifier = Modifier
+                .fillMaxWidth()
+                .heightIn(max = 500.dp)
+                .onDragOrScroll { hideKeyboard() }
+                .nestedScroll(nestedScrollConnection)
         ) {
             val filteredList = expandedList.filter {
                 it.first.contains(searchValue.text, true)
@@ -739,6 +836,8 @@ fun SheetContent(
                         .fillMaxWidth()
                         .padding(horizontal = 16.dp)
                         .clickable {
+                            focusManager.clearFocus()
+                            keyboardController?.hide()
                             onItemClick(item)
                         }
                         .padding(vertical = 12.dp),
@@ -758,7 +857,14 @@ fun SheetContent(
                                 .fillMaxWidth()
                                 .padding(horizontal = 16.dp)
                                 .clickable {
-                                    onItemClick(Pair(searchValue.text, searchValue.text))
+                                    focusManager.clearFocus()
+                                    keyboardController?.hide()
+                                    onItemClick(
+                                        Pair(
+                                            searchValue.text,
+                                            searchValue.text
+                                        )
+                                    )
                                 }
                                 .padding(vertical = 12.dp),
                             color = MaterialTheme.appColors.primary,

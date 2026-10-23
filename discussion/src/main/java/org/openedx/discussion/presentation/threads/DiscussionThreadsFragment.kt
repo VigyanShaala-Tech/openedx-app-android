@@ -57,6 +57,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.ComposeView
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalFocusManager
+import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.platform.ViewCompositionStrategy
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
@@ -234,6 +235,7 @@ private fun DiscussionThreadsScreen(
         skipHalfExpanded = true
     )
     val focusManager = LocalFocusManager.current
+    val keyboardController = LocalSoftwareKeyboardController.current
     val pullRefreshState =
         rememberPullRefreshState(refreshing = refreshing, onRefresh = { onSwipeRefresh() })
     val coroutine = rememberCoroutineScope()
@@ -291,6 +293,7 @@ private fun DiscussionThreadsScreen(
     LaunchedEffect(bottomSheetScaffoldState.isVisible) {
         if (!bottomSheetScaffoldState.isVisible) {
             focusManager.clearFocus()
+            keyboardController?.hide()
             searchValue = TextFieldValue()
         }
     }

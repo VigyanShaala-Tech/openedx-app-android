@@ -22,6 +22,8 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.platform.ComposeView
+import androidx.compose.ui.platform.LocalFocusManager
+import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.platform.ViewCompositionStrategy
 import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.unit.dp
@@ -65,6 +67,8 @@ class SelectBottomDialogFragment : BottomSheetDialogFragment() {
         setContent {
             OpenEdXTheme {
                 val listState = rememberLazyListState()
+                val focusManager = LocalFocusManager.current
+                val keyboardController = LocalSoftwareKeyboardController.current
 
                 var searchValue by rememberSaveable(stateSaver = TextFieldValue.Saver) {
                     mutableStateOf(TextFieldValue())
@@ -80,6 +84,8 @@ class SelectBottomDialogFragment : BottomSheetDialogFragment() {
                         modifier = Modifier
                             .fillMaxSize()
                             .noRippleClickable {
+                                focusManager.clearFocus()
+                                keyboardController?.hide()
                                 dismiss()
                             },
                         contentAlignment = Alignment.BottomCenter
@@ -100,6 +106,8 @@ class SelectBottomDialogFragment : BottomSheetDialogFragment() {
                                 searchValue = searchValue,
                                 expandedList = viewModel.values,
                                 onItemClick = { item ->
+                                    focusManager.clearFocus()
+                                    keyboardController?.hide()
                                     viewModel.sendCourseEventChanged(item.value)
                                     dismiss()
                                 },

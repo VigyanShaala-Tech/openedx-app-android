@@ -7,6 +7,7 @@ import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.focusable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -22,8 +23,11 @@ import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.text.KeyboardActions
+import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.Button
 import androidx.compose.material.ButtonDefaults
@@ -53,11 +57,21 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.focus.FocusRequester
+import androidx.compose.ui.focus.focusRequester
+import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.input.nestedscroll.NestedScrollConnection
+import androidx.compose.ui.input.nestedscroll.NestedScrollSource
+import androidx.compose.ui.input.nestedscroll.nestedScroll
+import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
+import androidx.compose.ui.platform.LocalView
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
@@ -71,6 +85,9 @@ import org.openedx.core.domain.model.EnrollmentRegistrationField
 import org.openedx.core.domain.model.EnrollmentRegistrationOption
 import org.openedx.core.ui.HandleUIMessage
 import org.openedx.core.ui.RenderHtmlContent
+import org.openedx.core.ui.clearFocusOnTap
+import org.openedx.core.ui.hideSoftKeyboard
+import org.openedx.core.ui.onDragOrScroll
 import org.openedx.core.ui.theme.appColors
 import org.openedx.core.ui.theme.appTypography
 import org.openedx.foundation.presentation.UIMessage
@@ -505,7 +522,40 @@ fun SelectionDialog(
 ) {
     var searchQuery by remember { mutableStateOf("") }
     val filteredOptions = options.filter { it.label.contains(searchQuery, ignoreCase = true) }
+    val focusManager = LocalFocusManager.current
+    val keyboardController = LocalSoftwareKeyboardController.current
+    val context = LocalContext.current
+    val view = LocalView.current
+    val dummyFocusRequester = remember { FocusRequester() }
+
+    fun hideKeyboard() {
+        try {
+            dummyFocusRequester.requestFocus()
+        } catch (_: Exception) {}
+        focusManager.clearFocus(force = true)
+        keyboardController?.hide()
+        hideSoftKeyboard(context, view)
+    }
     
+    val listState = rememberLazyListState()
+    val isScrollInProgress = listState.isScrollInProgress
+    LaunchedEffect(isScrollInProgress) {
+        if (isScrollInProgress) {
+            hideKeyboard()
+        }
+    }
+
+    val nestedScrollConnection = remember {
+        object : NestedScrollConnection {
+            override fun onPreScroll(available: Offset, source: NestedScrollSource): Offset {
+                if (available.y != 0f) {
+                    hideKeyboard()
+                }
+                return Offset.Zero
+            }
+        }
+    }
+
     val selectedValues = remember {
         mutableStateListOf<String>().apply {
             if (initialValue.isNotEmpty()) {
@@ -515,7 +565,10 @@ fun SelectionDialog(
     }
 
     Dialog(
-        onDismissRequest = onDismiss,
+        onDismissRequest = {
+            hideKeyboard()
+            onDismiss()
+        },
         properties = DialogProperties(usePlatformDefaultWidth = false)
     ) {
         Surface(
@@ -525,14 +578,30 @@ fun SelectionDialog(
             color = MaterialTheme.appColors.background
         ) {
             @Suppress("FoldableIf")
-            Column(modifier = Modifier.fillMaxSize().padding(16.dp)) {
+            Column(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(16.dp)
+                    .clearFocusOnTap()
+            ) {
+                Box(
+                    modifier = Modifier
+                        .size(1.dp)
+                        .focusRequester(dummyFocusRequester)
+                        .focusable()
+                )
                 Row(
                     modifier = Modifier.fillMaxWidth(),
                     verticalAlignment = Alignment.CenterVertically,
                     horizontalArrangement = Arrangement.SpaceBetween
                 ) {
                     Text(text = title, style = MaterialTheme.appTypography.titleMedium, color = MaterialTheme.appColors.textDark)
-                    IconButton(onClick = onDismiss) {
+                    IconButton(
+                        onClick = {
+                            hideKeyboard()
+                            onDismiss()
+                        }
+                    ) {
                         Icon(imageVector = Icons.Default.Close, contentDescription = "Close", tint = MaterialTheme.appColors.textDark)
                     }
                 }
@@ -555,17 +624,28 @@ fun SelectionDialog(
                             }
                         }
                     },
+                    keyboardOptions = KeyboardOptions(imeAction = ImeAction.Done),
+                    keyboardActions = KeyboardActions(onDone = {
+                        hideKeyboard()
+                    }),
                     shape = RoundedCornerShape(12.dp)
                 )
 
                 Spacer(modifier = Modifier.height(16.dp))
 
-                LazyColumn(modifier = Modifier.weight(1f)) {
+                LazyColumn(
+                    state = listState,
+                    modifier = Modifier
+                        .weight(1f)
+                        .onDragOrScroll { hideKeyboard() }
+                        .nestedScroll(nestedScrollConnection)
+                ) {
                     items(filteredOptions) { option ->
                         Row(
                             modifier = Modifier
                                 .fillMaxWidth()
                                 .clickable {
+                                    hideKeyboard()
                                     if (isMultiSelect) {
                                         if (selectedValues.contains(option.value)) {
                                             selectedValues.remove(option.value)
@@ -602,6 +682,8 @@ fun SelectionDialog(
                                 modifier = Modifier
                                     .fillMaxWidth()
                                     .clickable {
+                                        focusManager.clearFocus()
+                                        keyboardController?.hide()
                                         if (isMultiSelect) {
                                             if (selectedValues.contains("other")) {
                                                 selectedValues.remove("other")
@@ -654,7 +736,11 @@ fun SelectionDialog(
                 if (isMultiSelect) {
                     Spacer(modifier = Modifier.height(16.dp))
                     Button(
-                        onClick = { onSelect(selectedValues.joinToString("|")) },
+                        onClick = {
+                            focusManager.clearFocus()
+                            keyboardController?.hide()
+                            onSelect(selectedValues.joinToString("|"))
+                        },
                         modifier = Modifier.fillMaxWidth().height(48.dp),
                         colors = ButtonDefaults.buttonColors(backgroundColor = MaterialTheme.appColors.primary),
                         shape = RoundedCornerShape(8.dp)

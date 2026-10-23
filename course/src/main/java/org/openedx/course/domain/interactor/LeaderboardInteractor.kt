@@ -8,7 +8,7 @@ class LeaderboardInteractor(
 
     suspend fun getCourseNotifications(courseId: String) = repository.getCourseNotifications(courseId)
 
-    suspend fun getUniversities() = repository.getUniversities()
+    suspend fun getUniversities(courseId: String) = repository.getUniversities(courseId)
 
     suspend fun getRankingOptions() = repository.getRankingOptions()
 

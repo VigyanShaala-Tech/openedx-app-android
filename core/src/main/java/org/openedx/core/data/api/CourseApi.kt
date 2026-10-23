@@ -180,8 +180,10 @@ interface CourseApi {
         @Body body: Map<String, @JvmSuppressWildcards Any>
     ): RegistrationSubmitResponse
 
-    @GET("/api/v1/options/universities/")
-    suspend fun getUniversities(): ResponseBody
+    @GET("/api/v1/course/{course_id}/universities/")
+    suspend fun getUniversities(
+        @Path("course_id") courseId: String
+    ): ResponseBody
 
     @GET("/api/v1/options/rankings/")
     suspend fun getRankingOptions(): ResponseBody

@@ -353,9 +353,9 @@ class CourseRepository(
         }
     }
 
-    suspend fun getUniversities(): List<University> {
+    suspend fun getUniversities(courseId: String): List<University> {
         val responseBody = try {
-            api.getUniversities()
+            api.getUniversities(courseId)
         } catch (_: Exception) {
             return emptyList()
         }

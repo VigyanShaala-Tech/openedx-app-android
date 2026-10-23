@@ -39,7 +39,7 @@ class LeaderboardViewModel(
         viewModelScope.launch {
             try {
                 val fetchedUniversities = try {
-                    interactor.getUniversities()
+                    interactor.getUniversities(courseId)
                 } catch (e: Exception) {
                     _uiMessage.emit(UIMessage.SnackBarMessage("Failed to load colleges: ${e.message}"))
                     emptyList()

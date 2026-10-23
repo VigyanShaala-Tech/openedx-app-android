@@ -51,7 +51,7 @@ class VideoViewModelTest {
     @Test
     fun `sendTime test`() = runTest {
         val viewModel =
-            VideoViewModel("", courseRepository, notifier, preferenceManager, courseAnalytics)
+            VideoViewModel("", courseRepository, notifier, preferenceManager, courseAnalytics, mockk(relaxed = true))
         coEvery { notifier.send(CourseVideoPositionChanged("", 0, 0L, false)) } returns Unit
         viewModel.sendTime()
         advanceUntilIdle()
@@ -62,7 +62,7 @@ class VideoViewModelTest {
     @Test
     fun `markBlockCompleted exception`() = runTest {
         val viewModel =
-            VideoViewModel("", courseRepository, notifier, preferenceManager, courseAnalytics)
+            VideoViewModel("", courseRepository, notifier, preferenceManager, courseAnalytics, mockk(relaxed = true))
         coEvery {
             courseRepository.markBlocksCompletion(
                 any(),
@@ -95,7 +95,7 @@ class VideoViewModelTest {
     @Test
     fun `markBlockCompleted success`() = runTest {
         val viewModel =
-            VideoViewModel("", courseRepository, notifier, preferenceManager, courseAnalytics)
+            VideoViewModel("", courseRepository, notifier, preferenceManager, courseAnalytics, mockk(relaxed = true))
         coEvery {
             courseRepository.markBlocksCompletion(
                 any(),

@@ -1,5 +1,6 @@
 package org.openedx.course.data.repository
 
+import com.google.gson.Gson
 import com.google.gson.JsonParser
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
@@ -535,6 +536,46 @@ class CourseRepository(
     suspend fun saveUserState(courseId: String, blockId: String, savedVideoPosition: String) {
         try {
             api.saveUserState(courseId, blockId, mapOf("saved_video_position" to savedVideoPosition))
+        } catch (e: Exception) {
+            e.printStackTrace()
+        }
+    }
+
+    suspend fun trackVideoEvent(
+        eventType: String,
+        videoId: String,
+        currentTime: Double,
+        duration: Double,
+        oldTime: Double? = null,
+        newTime: Double? = null,
+        courseId: String,
+        blockUrl: String
+    ) {
+        try {
+            val eventMap = mutableMapOf<String, Any>(
+                "id" to videoId,
+                "code" to "html5",
+                "duration" to duration,
+            )
+            if (eventType == "seek_video") {
+                eventMap["old_time"] = oldTime ?: 0.0
+                eventMap["new_time"] = newTime ?: 0.0
+                eventMap["type"] = "onSlideSeek"
+            } else {
+                eventMap["currentTime"] = currentTime
+            }
+
+            val payload = mapOf(
+                "event_type" to eventType,
+                "event" to Gson().toJson(eventMap),
+                "courserun_key" to courseId,
+                "page" to blockUrl
+            )
+
+//            val csrfTokenResponse = api.getCsrfToken()
+//            val csrfToken = csrfTokenResponse.csrfToken
+
+            api.trackVideoEvent(blockUrl, payload)
         } catch (e: Exception) {
             e.printStackTrace()
         }

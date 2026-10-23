@@ -16,7 +16,8 @@ class VideoViewModel(
     private val notifier: CourseNotifier,
     private val preferencesManager: CorePreferences,
     courseAnalytics: CourseAnalytics,
-) : BaseVideoViewModel(courseId, courseAnalytics) {
+    config: org.openedx.core.config.Config,
+) : BaseVideoViewModel(courseId, courseAnalytics, courseRepository, config) {
 
     var videoUrl = ""
     var currentVideoTime = 0L

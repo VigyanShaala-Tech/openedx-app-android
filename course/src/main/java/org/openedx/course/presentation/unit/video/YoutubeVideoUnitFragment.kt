@@ -124,7 +124,17 @@ class YoutubeVideoUnitFragment : Fragment(R.layout.fragment_youtube_video_unit) 
                     currentIndex = currentIndex,
                     onTranscriptClick = {
                         _youTubePlayer?.apply {
-                            seekTo(it.start.mseconds / 1000f)
+                            val newTimeMs = it.start.mseconds.toLong()
+                            val oldTimeMs = viewModel.getCurrentVideoTime()
+                            viewModel.trackVideoEvent(
+                                eventType = "seek_video",
+                                blockId = blockId,
+                                duration = viewModel.duration,
+                                currentTime = newTimeMs.toDouble() / 1000.0,
+                                oldTime = oldTimeMs.toDouble() / 1000.0,
+                                newTime = newTimeMs.toDouble() / 1000.0
+                            )
+                            seekTo(newTimeMs / 1000f)
                             play()
                         }
                     },
@@ -180,6 +190,16 @@ class YoutubeVideoUnitFragment : Fragment(R.layout.fragment_youtube_video_unit) 
                 state: PlayerConstants.PlayerState,
             ) {
                 super.onStateChange(youTubePlayer, state)
+                if (state == PlayerConstants.PlayerState.ENDED) {
+                    viewModel.trackVideoEvent(
+                        eventType = "stop_video",
+                        blockId = blockId,
+                        duration = viewModel.duration,
+                        currentTime = viewModel.duration.toDouble() / 1000.0
+                    )
+                    viewModel.markBlockCompleted(blockId, CourseAnalyticsKey.YOUTUBE.key)
+                }
+
                 viewModel.isPlaying = when (state) {
                     PlayerConstants.PlayerState.PLAYING -> true
                     PlayerConstants.PlayerState.PAUSED -> false
@@ -190,6 +210,12 @@ class YoutubeVideoUnitFragment : Fragment(R.layout.fragment_youtube_video_unit) 
                     viewModel.isPlaying,
                     viewModel.getCurrentVideoTime(),
                     CourseAnalyticsKey.YOUTUBE.key
+                )
+                viewModel.trackVideoEvent(
+                    eventType = if (viewModel.isPlaying) "play_video" else "pause_video",
+                    blockId = blockId,
+                    duration = viewModel.duration,
+                    currentTime = viewModel.getCurrentVideoTime().toDouble() / 1000.0
                 )
             }
 

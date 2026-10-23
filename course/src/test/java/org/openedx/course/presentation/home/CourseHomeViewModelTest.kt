@@ -145,24 +145,10 @@ class CourseHomeViewModelTest {
 
     @Test
     fun `getCourseData success`() = runTest {
-        coEvery { interactor.getCourseStructureFlow(courseId, false) } returns flow {
-            emit(
-                courseStructure
-            )
-        }
-        coEvery { interactor.getCourseStatusFlow(courseId) } returns flow {
-            emit(
-                courseComponentStatus
-            )
-        }
-        coEvery { interactor.getCourseDatesFlow(courseId) } returns flow { emit(courseDatesResult) }
-        coEvery {
-            interactor.getCourseProgress(
-                courseId,
-                false,
-                true
-            )
-        } returns flow { emit(courseProgress) }
+        coEvery { interactor.getCourseStructure(courseId, false) } returns courseStructure
+        coEvery { interactor.getCourseStatus(courseId) } returns courseComponentStatus
+        coEvery { interactor.getCourseDates(courseId) } returns courseDatesResult
+        coEvery { interactor.getCourseProgress(courseId, any(), any()) } returns flow { emit(courseProgress) }
         coEvery { interactor.getLiveClasses(any(), any(), any()) } returns LiveClassResponse(
             results = emptyList(),
             pagination = Pagination(0, "", 0, "")
@@ -198,9 +184,9 @@ class CourseHomeViewModelTest {
 
         advanceUntilIdle()
 
-        coVerify { interactor.getCourseStructureFlow(courseId, false) }
-        coVerify { interactor.getCourseStatusFlow(courseId) }
-        coVerify { interactor.getCourseDatesFlow(courseId) }
+        coVerify { interactor.getCourseStructure(courseId, false) }
+        coVerify { interactor.getCourseStatus(courseId) }
+        coVerify { interactor.getCourseDates(courseId) }
         coVerify { interactor.getCourseProgress(courseId, false, true) }
 
         assertTrue(viewModel.uiState.value is CourseHomeUIState.CourseData)
@@ -212,25 +198,10 @@ class CourseHomeViewModelTest {
 
     @Test
     fun `getCourseData no internet connection error`() = runTest {
-        coEvery {
-            interactor.getCourseStructureFlow(
-                courseId,
-                false
-            )
-        } returns flow { throw UnknownHostException() }
-        coEvery { interactor.getCourseStatusFlow(courseId) } returns flow {
-            emit(
-                courseComponentStatus
-            )
-        }
-        coEvery { interactor.getCourseDatesFlow(courseId) } returns flow { emit(courseDatesResult) }
-        coEvery {
-            interactor.getCourseProgress(
-                courseId,
-                false,
-                true
-            )
-        } returns flow { emit(courseProgress) }
+        coEvery { interactor.getCourseStructure(courseId, false) } throws UnknownHostException()
+        coEvery { interactor.getCourseStatus(courseId) } returns courseComponentStatus
+        coEvery { interactor.getCourseDates(courseId) } returns courseDatesResult
+        coEvery { interactor.getCourseProgress(courseId, any(), any()) } returns flow { emit(courseProgress) }
 
         val viewModel = CourseHomeViewModel(
             courseId = courseId,
@@ -260,25 +231,10 @@ class CourseHomeViewModelTest {
     @Suppress("TooGenericExceptionThrown")
     @Test
     fun `getCourseData unknown error`() = runTest {
-        coEvery {
-            interactor.getCourseStructureFlow(
-                courseId,
-                false
-            )
-        } returns flow { throw Exception() }
-        coEvery { interactor.getCourseStatusFlow(courseId) } returns flow {
-            emit(
-                courseComponentStatus
-            )
-        }
-        coEvery { interactor.getCourseDatesFlow(courseId) } returns flow { emit(courseDatesResult) }
-        coEvery {
-            interactor.getCourseProgress(
-                courseId,
-                false,
-                true
-            )
-        } returns flow { emit(courseProgress) }
+        coEvery { interactor.getCourseStructure(courseId, false) } throws Exception()
+        coEvery { interactor.getCourseStatus(courseId) } returns courseComponentStatus
+        coEvery { interactor.getCourseDates(courseId) } returns courseDatesResult
+        coEvery { interactor.getCourseProgress(courseId, any(), any()) } returns flow { emit(courseProgress) }
 
         val viewModel = CourseHomeViewModel(
             courseId = courseId,
@@ -310,24 +266,10 @@ class CourseHomeViewModelTest {
         every { preferencesManager.videoSettings.wifiDownloadOnly } returns true
         every { networkConnection.isWifiConnected() } returns false
 
-        coEvery { interactor.getCourseStructureFlow(courseId, false) } returns flow {
-            emit(
-                courseStructure
-            )
-        }
-        coEvery { interactor.getCourseStatusFlow(courseId) } returns flow {
-            emit(
-                courseComponentStatus
-            )
-        }
-        coEvery { interactor.getCourseDatesFlow(courseId) } returns flow { emit(courseDatesResult) }
-        coEvery {
-            interactor.getCourseProgress(
-                courseId,
-                false,
-                true
-            )
-        } returns flow { emit(courseProgress) }
+        coEvery { interactor.getCourseStructure(courseId, false) } returns courseStructure
+        coEvery { interactor.getCourseStatus(courseId) } returns courseComponentStatus
+        coEvery { interactor.getCourseDates(courseId) } returns courseDatesResult
+        coEvery { interactor.getCourseProgress(courseId, any(), any()) } returns flow { emit(courseProgress) }
 
         val viewModel = CourseHomeViewModel(
             courseId = courseId,
@@ -359,24 +301,10 @@ class CourseHomeViewModelTest {
     @Test
     fun `resetCourseDatesBanner success`() = runTest {
         coEvery { interactor.resetCourseDates(courseId) } returns resetCourseDates
-        coEvery { interactor.getCourseStructureFlow(courseId, false) } returns flow {
-            emit(
-                courseStructure
-            )
-        }
-        coEvery { interactor.getCourseStatusFlow(courseId) } returns flow {
-            emit(
-                courseComponentStatus
-            )
-        }
-        coEvery { interactor.getCourseDatesFlow(courseId) } returns flow { emit(courseDatesResult) }
-        coEvery {
-            interactor.getCourseProgress(
-                courseId,
-                false,
-                true
-            )
-        } returns flow { emit(courseProgress) }
+        coEvery { interactor.getCourseStructure(courseId, false) } returns courseStructure
+        coEvery { interactor.getCourseStatus(courseId) } returns courseComponentStatus
+        coEvery { interactor.getCourseDates(courseId) } returns courseDatesResult
+        coEvery { interactor.getCourseProgress(courseId, any(), any()) } returns flow { emit(courseProgress) }
 
         val viewModel = CourseHomeViewModel(
             courseId = courseId,
@@ -416,24 +344,10 @@ class CourseHomeViewModelTest {
     @Test
     fun `resetCourseDatesBanner with internet error`() = runTest {
         coEvery { interactor.resetCourseDates(courseId) } throws UnknownHostException()
-        coEvery { interactor.getCourseStructureFlow(courseId, false) } returns flow {
-            emit(
-                courseStructure
-            )
-        }
-        coEvery { interactor.getCourseStatusFlow(courseId) } returns flow {
-            emit(
-                courseComponentStatus
-            )
-        }
-        coEvery { interactor.getCourseDatesFlow(courseId) } returns flow { emit(courseDatesResult) }
-        coEvery {
-            interactor.getCourseProgress(
-                courseId,
-                false,
-                true
-            )
-        } returns flow { emit(courseProgress) }
+        coEvery { interactor.getCourseStructure(courseId, false) } returns courseStructure
+        coEvery { interactor.getCourseStatus(courseId) } returns courseComponentStatus
+        coEvery { interactor.getCourseDates(courseId) } returns courseDatesResult
+        coEvery { interactor.getCourseProgress(courseId, any(), any()) } returns flow { emit(courseProgress) }
 
         val viewModel = CourseHomeViewModel(
             courseId = courseId,
@@ -472,24 +386,10 @@ class CourseHomeViewModelTest {
 
     @Test
     fun `logVideoClick analytics event`() = runTest {
-        coEvery { interactor.getCourseStructureFlow(courseId, false) } returns flow {
-            emit(
-                courseStructure
-            )
-        }
-        coEvery { interactor.getCourseStatusFlow(courseId) } returns flow {
-            emit(
-                courseComponentStatus
-            )
-        }
-        coEvery { interactor.getCourseDatesFlow(courseId) } returns flow { emit(courseDatesResult) }
-        coEvery {
-            interactor.getCourseProgress(
-                courseId,
-                false,
-                true
-            )
-        } returns flow { emit(courseProgress) }
+        coEvery { interactor.getCourseStructure(courseId, false) } returns courseStructure
+        coEvery { interactor.getCourseStatus(courseId) } returns courseComponentStatus
+        coEvery { interactor.getCourseDates(courseId) } returns courseDatesResult
+        coEvery { interactor.getCourseProgress(courseId, any(), any()) } returns flow { emit(courseProgress) }
 
         val viewModel = CourseHomeViewModel(
             courseId = courseId,
@@ -530,24 +430,10 @@ class CourseHomeViewModelTest {
 
     @Test
     fun `logAssignmentClick analytics event`() = runTest {
-        coEvery { interactor.getCourseStructureFlow(courseId, false) } returns flow {
-            emit(
-                courseStructure
-            )
-        }
-        coEvery { interactor.getCourseStatusFlow(courseId) } returns flow {
-            emit(
-                courseComponentStatus
-            )
-        }
-        coEvery { interactor.getCourseDatesFlow(courseId) } returns flow { emit(courseDatesResult) }
-        coEvery {
-            interactor.getCourseProgress(
-                courseId,
-                false,
-                true
-            )
-        } returns flow { emit(courseProgress) }
+        coEvery { interactor.getCourseStructure(courseId, false) } returns courseStructure
+        coEvery { interactor.getCourseStatus(courseId) } returns courseComponentStatus
+        coEvery { interactor.getCourseDates(courseId) } returns courseDatesResult
+        coEvery { interactor.getCourseProgress(courseId, any(), any()) } returns flow { emit(courseProgress) }
 
         val viewModel = CourseHomeViewModel(
             courseId = courseId,
@@ -588,24 +474,10 @@ class CourseHomeViewModelTest {
 
     @Test
     fun `viewCertificateTappedEvent analytics event`() = runTest {
-        coEvery { interactor.getCourseStructureFlow(courseId, false) } returns flow {
-            emit(
-                courseStructure
-            )
-        }
-        coEvery { interactor.getCourseStatusFlow(courseId) } returns flow {
-            emit(
-                courseComponentStatus
-            )
-        }
-        coEvery { interactor.getCourseDatesFlow(courseId) } returns flow { emit(courseDatesResult) }
-        coEvery {
-            interactor.getCourseProgress(
-                courseId,
-                false,
-                true
-            )
-        } returns flow { emit(courseProgress) }
+        coEvery { interactor.getCourseStructure(courseId, false) } returns courseStructure
+        coEvery { interactor.getCourseStatus(courseId) } returns courseComponentStatus
+        coEvery { interactor.getCourseDates(courseId) } returns courseDatesResult
+        coEvery { interactor.getCourseProgress(courseId, any(), any()) } returns flow { emit(courseProgress) }
 
         val viewModel = CourseHomeViewModel(
             courseId = courseId,
@@ -644,24 +516,10 @@ class CourseHomeViewModelTest {
 
     @Test
     fun `getCourseProgress success`() = runTest {
-        coEvery { interactor.getCourseStructureFlow(courseId, false) } returns flow {
-            emit(
-                courseStructure
-            )
-        }
-        coEvery { interactor.getCourseStatusFlow(courseId) } returns flow {
-            emit(
-                courseComponentStatus
-            )
-        }
-        coEvery { interactor.getCourseDatesFlow(courseId) } returns flow { emit(courseDatesResult) }
-        coEvery {
-            interactor.getCourseProgress(
-                courseId,
-                false,
-                true
-            )
-        } returns flow { emit(courseProgress) }
+        coEvery { interactor.getCourseStructure(courseId, false) } returns courseStructure
+        coEvery { interactor.getCourseStatus(courseId) } returns courseComponentStatus
+        coEvery { interactor.getCourseDates(courseId) } returns courseDatesResult
+        coEvery { interactor.getCourseProgress(courseId, any(), any()) } returns flow { emit(courseProgress) }
 
         val viewModel = CourseHomeViewModel(
             courseId = courseId,
@@ -692,24 +550,10 @@ class CourseHomeViewModelTest {
 
     @Test
     fun `CourseStructureUpdated notifier event`() = runTest {
-        coEvery { interactor.getCourseStructureFlow(courseId, false) } returns flow {
-            emit(
-                courseStructure
-            )
-        }
-        coEvery { interactor.getCourseStatusFlow(courseId) } returns flow {
-            emit(
-                courseComponentStatus
-            )
-        }
-        coEvery { interactor.getCourseDatesFlow(courseId) } returns flow { emit(courseDatesResult) }
-        coEvery {
-            interactor.getCourseProgress(
-                courseId,
-                false,
-                true
-            )
-        } returns flow { emit(courseProgress) }
+        coEvery { interactor.getCourseStructure(courseId, false) } returns courseStructure
+        coEvery { interactor.getCourseStatus(courseId) } returns courseComponentStatus
+        coEvery { interactor.getCourseDates(courseId) } returns courseDatesResult
+        coEvery { interactor.getCourseProgress(courseId, any(), any()) } returns flow { emit(courseProgress) }
 
         every { courseNotifier.notifier } returns flow { emit(CourseStructureUpdated(courseId)) }
 
@@ -735,29 +579,15 @@ class CourseHomeViewModelTest {
 
         advanceUntilIdle()
 
-        coVerify(atLeast = 2) { interactor.getCourseStructureFlow(courseId, false) }
+        coVerify(atLeast = 2) { interactor.getCourseStructure(courseId, false) }
     }
 
     @Test
     fun `CourseOpenBlock notifier event`() = runTest {
-        coEvery { interactor.getCourseStructureFlow(courseId, false) } returns flow {
-            emit(
-                courseStructure
-            )
-        }
-        coEvery { interactor.getCourseStatusFlow(courseId) } returns flow {
-            emit(
-                courseComponentStatus
-            )
-        }
-        coEvery { interactor.getCourseDatesFlow(courseId) } returns flow { emit(courseDatesResult) }
-        coEvery {
-            interactor.getCourseProgress(
-                courseId,
-                false,
-                true
-            )
-        } returns flow { emit(courseProgress) }
+        coEvery { interactor.getCourseStructure(courseId, false) } returns courseStructure
+        coEvery { interactor.getCourseStatus(courseId) } returns courseComponentStatus
+        coEvery { interactor.getCourseDates(courseId) } returns courseDatesResult
+        coEvery { interactor.getCourseProgress(courseId, any(), any()) } returns flow { emit(courseProgress) }
 
         every { courseNotifier.notifier } returns flow { emit(CourseOpenBlock("test-block-id")) }
 
@@ -786,24 +616,10 @@ class CourseHomeViewModelTest {
 
     @Test
     fun `CourseProgressLoaded notifier event`() = runTest {
-        coEvery { interactor.getCourseStructureFlow(courseId, false) } returns flow {
-            emit(
-                courseStructure
-            )
-        }
-        coEvery { interactor.getCourseStatusFlow(courseId) } returns flow {
-            emit(
-                courseComponentStatus
-            )
-        }
-        coEvery { interactor.getCourseDatesFlow(courseId) } returns flow { emit(courseDatesResult) }
-        coEvery {
-            interactor.getCourseProgress(
-                courseId,
-                false,
-                true
-            )
-        } returns flow { emit(courseProgress) }
+        coEvery { interactor.getCourseStructure(courseId, false) } returns courseStructure
+        coEvery { interactor.getCourseStatus(courseId) } returns courseComponentStatus
+        coEvery { interactor.getCourseDates(courseId) } returns courseDatesResult
+        coEvery { interactor.getCourseProgress(courseId, any(), any()) } returns flow { emit(courseProgress) }
 
         every { courseNotifier.notifier } returns flow { emit(CourseProgressLoaded) }
 
@@ -836,24 +652,10 @@ class CourseHomeViewModelTest {
     fun `isCourseDropdownNavigationEnabled property`() = runTest {
         every { config.getCourseUIConfig().isCourseDropdownNavigationEnabled } returns true
 
-        coEvery { interactor.getCourseStructureFlow(courseId, false) } returns flow {
-            emit(
-                courseStructure
-            )
-        }
-        coEvery { interactor.getCourseStatusFlow(courseId) } returns flow {
-            emit(
-                courseComponentStatus
-            )
-        }
-        coEvery { interactor.getCourseDatesFlow(courseId) } returns flow { emit(courseDatesResult) }
-        coEvery {
-            interactor.getCourseProgress(
-                courseId,
-                false,
-                true
-            )
-        } returns flow { emit(courseProgress) }
+        coEvery { interactor.getCourseStructure(courseId, false) } returns courseStructure
+        coEvery { interactor.getCourseStatus(courseId) } returns courseComponentStatus
+        coEvery { interactor.getCourseDates(courseId) } returns courseDatesResult
+        coEvery { interactor.getCourseProgress(courseId, any(), any()) } returns flow { emit(courseProgress) }
 
         val viewModel = CourseHomeViewModel(
             courseId = courseId,

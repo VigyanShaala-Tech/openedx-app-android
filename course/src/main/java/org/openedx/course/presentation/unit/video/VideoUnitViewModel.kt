@@ -29,7 +29,8 @@ open class VideoUnitViewModel(
     private val networkConnection: NetworkConnection,
     private val transcriptManager: TranscriptManager,
     courseAnalytics: CourseAnalytics,
-) : BaseVideoViewModel(courseId, courseAnalytics) {
+    val config: org.openedx.core.config.Config,
+) : BaseVideoViewModel(courseId, courseAnalytics, courseRepository, config) {
 
     var transcripts = emptyMap<String, String>()
     var isPlaying = true
@@ -166,6 +167,12 @@ open class VideoUnitViewModel(
         if (!isBlockAlreadyCompleted) {
             logLoadedCompletedEvent(videoUrl, false, getCurrentVideoTime(), medium)
             saveUserState(getCurrentVideoTime())
+            trackVideoEvent(
+                eventType = "complete_video",
+                blockId = blockId,
+                duration = duration,
+                currentTime = getCurrentVideoTime().toDouble() / 1000.0
+            )
             viewModelScope.launch {
                 try {
                     isBlockAlreadyCompleted = true

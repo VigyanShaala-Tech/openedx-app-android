@@ -51,6 +51,8 @@ class VideoUnitViewModelTest {
         coEvery { courseRepository.markTopicCompleted(any(), any()) } returns Unit
         coEvery { courseRepository.getVideoProgress(any()) } returns mockk(relaxed = true)
         coEvery { notifier.send(any<org.openedx.core.system.notifier.CourseCompletionSet>()) } returns Unit
+        coEvery { courseRepository.trackVideoEvent(any(), any(), any(), any(), any(), any(), any(), any()) } returns Unit
+        
     }
 
     @After
@@ -68,7 +70,8 @@ class VideoUnitViewModelTest {
             notifier,
             networkConnection,
             transcriptManager,
-            courseAnalytics
+            courseAnalytics,
+            mockk(relaxed = true)
         )
         coEvery {
             courseRepository.markBlocksCompletion(
@@ -110,6 +113,7 @@ class VideoUnitViewModelTest {
             networkConnection,
             transcriptManager,
             courseAnalytics,
+            mockk(relaxed = true)
         )
         coEvery {
             courseRepository.markBlocksCompletion(
@@ -151,6 +155,7 @@ class VideoUnitViewModelTest {
             networkConnection,
             transcriptManager,
             courseAnalytics,
+            mockk(relaxed = true)
         )
         coEvery { notifier.notifier } returns flow {
             emit(

@@ -44,6 +44,7 @@ class EncodedVideoUnitViewModel(
     networkConnection: NetworkConnection,
     transcriptManager: TranscriptManager,
     courseAnalytics: CourseAnalytics,
+    config: org.openedx.core.config.Config,
 ) : VideoUnitViewModel(
     courseId,
     videoUrl,
@@ -52,7 +53,8 @@ class EncodedVideoUnitViewModel(
     notifier,
     networkConnection,
     transcriptManager,
-    courseAnalytics
+    courseAnalytics,
+    config
 ) {
 
     private val _isVideoEnded = MutableLiveData(false)
@@ -91,12 +93,42 @@ class EncodedVideoUnitViewModel(
             if (playbackState == Player.STATE_ENDED) {
                 _isVideoEnded.value = true
                 markBlockCompleted(blockId, CourseAnalyticsKey.NATIVE.key)
+                trackVideoEvent(
+                    eventType = "stop_video",
+                    blockId = blockId,
+                    duration = duration,
+                    currentTime = duration.toDouble() / 1000.0
+                )
             }
         }
 
         override fun onIsPlayingChanged(isPlaying: Boolean) {
             super.onIsPlayingChanged(isPlaying)
             logPlayPauseEvent(videoUrl, isPlaying, getCurrentVideoTime(), getPlayingMedium())
+            trackVideoEvent(
+                eventType = if (isPlaying) "play_video" else "pause_video",
+                blockId = blockId,
+                duration = duration,
+                currentTime = getCurrentVideoTime().toDouble() / 1000.0
+            )
+        }
+
+        override fun onPositionDiscontinuity(
+            oldPosition: Player.PositionInfo,
+            newPosition: Player.PositionInfo,
+            reason: Int
+        ) {
+            super.onPositionDiscontinuity(oldPosition, newPosition, reason)
+            if (reason == Player.DISCONTINUITY_REASON_SEEK) {
+                trackVideoEvent(
+                    eventType = "seek_video",
+                    blockId = blockId,
+                    duration = duration,
+                    currentTime = newPosition.positionMs.toDouble() / 1000.0,
+                    oldTime = oldPosition.positionMs.toDouble() / 1000.0,
+                    newTime = newPosition.positionMs.toDouble() / 1000.0
+                )
+            }
         }
 
         override fun onPlaybackParametersChanged(playbackParameters: PlaybackParameters) {

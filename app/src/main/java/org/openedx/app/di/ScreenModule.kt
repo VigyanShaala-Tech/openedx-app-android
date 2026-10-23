@@ -443,13 +443,14 @@ val screenModule = module {
             get(),
         )
     }
-    viewModel { (courseId: String) -> BaseVideoViewModel(courseId, get()) }
-    viewModel { (courseId: String) -> VideoViewModel(courseId, get(), get(), get(), get()) }
+    viewModel { (courseId: String) -> BaseVideoViewModel(courseId, get(), get(), get()) }
+    viewModel { (courseId: String) -> VideoViewModel(courseId, get(), get(), get(), get(), get()) }
     viewModel { (courseId: String, videoUrl: String, blockId: String) ->
         VideoUnitViewModel(
             courseId,
             videoUrl,
             blockId,
+            get(),
             get(),
             get(),
             get(),
@@ -462,6 +463,7 @@ val screenModule = module {
             courseId,
             videoUrl,
             blockId,
+            get(),
             get(),
             get(),
             get(),

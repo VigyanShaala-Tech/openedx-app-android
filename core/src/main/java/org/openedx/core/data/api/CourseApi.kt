@@ -40,6 +40,10 @@ import retrofit2.http.Query
 
 interface CourseApi {
 
+//    @GET("/csrf/api/v1/token")
+//    suspend fun getCsrfToken(): org.openedx.core.data.model.CsrfTokenResponse
+
+
     @GET("/api/mobile/v3/users/{username}/course_enrollments/")
     suspend fun getEnrolledCourses(
         @Header("Cache-Control") cacheControlHeaderParam: String? = null,
@@ -219,5 +223,14 @@ interface CourseApi {
         @Path("course_id") courseId: String,
         @Path("block_id") blockId: String,
         @FieldMap body: Map<String, String>
+    ): ResponseBody
+
+    @FormUrlEncoded
+//    @POST("/event")
+    @POST("/api/v1/course-progress/video-events/")
+    suspend fun trackVideoEvent(
+        @Header("Referer") referer: String,
+        // @Header("X-CSRFToken") csrfToken: String,
+        @FieldMap payload: Map<String, @JvmSuppressWildcards Any>
     ): ResponseBody
 }

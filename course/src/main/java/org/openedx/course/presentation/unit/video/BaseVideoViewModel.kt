@@ -1,5 +1,9 @@
 package org.openedx.course.presentation.unit.video
 
+import androidx.lifecycle.viewModelScope
+import kotlinx.coroutines.launch
+import org.openedx.core.config.Config
+import org.openedx.course.data.repository.CourseRepository
 import org.openedx.course.presentation.CourseAnalytics
 import org.openedx.course.presentation.CourseAnalyticsEvent
 import org.openedx.course.presentation.CourseAnalyticsKey
@@ -8,7 +12,34 @@ import org.openedx.foundation.presentation.BaseViewModel
 open class BaseVideoViewModel(
     private val courseId: String,
     private val courseAnalytics: CourseAnalytics,
+    private val courseRepository: CourseRepository,
+    private val config: Config,
 ) : BaseViewModel() {
+
+    fun trackVideoEvent(
+        eventType: String,
+        blockId: String,
+        duration: Long,
+        currentTime: Double,
+        oldTime: Double? = null,
+        newTime: Double? = null,
+    ) {
+        viewModelScope.launch {
+            val videoId = blockId.substringAfterLast("block@") // unique video id
+            val blockUrl = "${config.getApiHostURL()}/xblock/$blockId?exam_access=&preview=0&recheck_access=1&show_bookmark=0&show_title=0&view=student_view"
+
+            courseRepository.trackVideoEvent(
+                eventType = eventType,
+                videoId = videoId,
+                currentTime = currentTime,
+                duration = duration.toDouble() / 1000.0,
+                oldTime = oldTime,
+                newTime = newTime,
+                courseId = courseId,
+                blockUrl = blockUrl
+            )
+        }
+    }
 
     fun logVideoSpeedEvent(videoUrl: String, speed: Float, currentVideoTime: Long, medium: String) {
         logVideoEvent(

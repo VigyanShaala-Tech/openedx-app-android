@@ -449,6 +449,23 @@ private fun AssignmentDetails(
     val label = assignment.assignmentProgress?.label ?: assignment.displayName ?: groupType
     val description = when {
         assignment.isCompleted() -> {
+            "$label Complete"
+        }
+
+        isDuePast -> {
+            if (dueDate.isNotEmpty()) "$label $dueDate" else "$label Past Due"
+        }
+
+        progress < 1f && assignment.due == null -> {
+            "$label In Progress"
+        }
+
+        else -> {
+            if (dueDate.isNotEmpty()) "$label $dueDate" else label
+        }
+    }
+    /*val descriptionWithPoints = when {
+        assignment.isCompleted() -> {
             "$label " + stringResource(
                 R.string.course_complete_points,
                 assignment.assignmentProgress?.toPointString() ?: ""
@@ -473,7 +490,7 @@ private fun AssignmentDetails(
             val name = assignment.displayName?.takeIf { it.isNotEmpty() } ?: label
             if (dueDate.isNotEmpty()) "$name $dueDate" else name
         }
-    }
+    }*/
     val displayNameText = assignment.displayName ?: ""
     val annotatedDisplayName = remember(displayNameText) {
         val deadlineKeywords = listOf("Deadline", "Due in", "Due ")
@@ -551,7 +568,7 @@ private fun AssignmentDetails(
 //                        fontWeight = FontWeight.Bold,
                         color = MaterialTheme.appColors.textDark
                     )
-                    /*if (description.isNotEmpty()) {
+                    if (description.isNotEmpty()) {
                         Text(
                             modifier = Modifier.padding(top = 6.dp),
                             text = description,
@@ -559,7 +576,7 @@ private fun AssignmentDetails(
                             color = MaterialTheme.appColors.textDark,
                             fontWeight = FontWeight.Bold
                         )
-                    }*/
+                    }
                 }
                 Icon(
                     modifier = Modifier

@@ -176,7 +176,7 @@ data class EncodedVideos(
             ?: desktopMp4?.url
             ?: mobileHigh?.url
             ?: mobileLow?.url
-            ?:vimeoVideo?.url
+            ?: vimeoVideo?.url
             ?: ""
 
     val hasVideoUrl: Boolean

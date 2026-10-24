@@ -8,7 +8,7 @@ data class VideoSettings(
     val videoDownloadQuality: VideoQuality,
 ) {
     companion object {
-        val default = VideoSettings(true, VideoQuality.AUTO, VideoQuality.AUTO)
+        val default = VideoSettings(false, VideoQuality.AUTO, VideoQuality.AUTO)
     }
 }
 

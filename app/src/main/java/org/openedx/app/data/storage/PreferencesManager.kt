@@ -139,7 +139,7 @@ class PreferencesManager(context: Context, private val gson: Gson) :
             saveString(VIDEO_SETTINGS_DOWNLOAD_QUALITY, value.videoDownloadQuality.name)
         }
         get() {
-            val wifiDownloadOnly = getBoolean(VIDEO_SETTINGS_WIFI_DOWNLOAD_ONLY, defValue = true)
+            val wifiDownloadOnly = getBoolean(VIDEO_SETTINGS_WIFI_DOWNLOAD_ONLY, defValue = false)
             val streamingQualityString =
                 getString(VIDEO_SETTINGS_STREAMING_QUALITY, defValue = VideoQuality.AUTO.name)
             val downloadQualityString =

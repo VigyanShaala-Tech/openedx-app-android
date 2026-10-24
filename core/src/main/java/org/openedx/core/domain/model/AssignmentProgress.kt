@@ -22,6 +22,6 @@ data class AssignmentProgress(
 
     @IgnoredOnParcel
     val label = shortLabel
-        .replace(" ", "")
-        .replaceFirst(Regex("^(\\D+)(0*)(\\d+)$"), "$1$3")
+//        .replace(" ", "")
+//        .replaceFirst(Regex("^(\\D+)(0*)(\\d+)$"), "$1$3")
 }

@@ -17,14 +17,36 @@ class AppCookieManager(private val config: Config, private val api: CookiesApi) 
     private var authSessionCookieExpiration: Long = -1
     private var response: Response<RequestBody>? = null
 
-    suspend fun tryToRefreshSessionCookie() {
+    suspend fun tryToRefreshSessionCookie(targetUrl: String? = null) {
         try {
             response = api.userCookies()
-            clearWebViewCookie()
             val cookieManager = CookieManager.getInstance()
-            for (cookie in Cookie.parseAll(response!!.raw().request.url, response!!.headers())) {
-                cookieManager.setCookie(config.getApiHostURL(), cookie.toString())
+            cookieManager.setAcceptCookie(true)
+            val parsedCookies = Cookie.parseAll(response!!.raw().request.url, response!!.headers())
+
+            val hostsToSet = mutableSetOf<String>()
+            val apiHost = config.getApiHostURL().removeSuffix("/")
+            hostsToSet.add(apiHost)
+
+            if (!apiHost.contains("://apps.")) {
+                hostsToSet.add(apiHost.replace("://", "://apps."))
             }
+
+            targetUrl?.let { url ->
+                try {
+                    val uri = java.net.URI(url)
+                    if (uri.scheme != null && uri.host != null) {
+                        hostsToSet.add("${uri.scheme}://${uri.host}")
+                    }
+                } catch (_: Exception) {}
+            }
+
+            for (host in hostsToSet) {
+                for (cookie in parsedCookies) {
+                    cookieManager.setCookie(host, cookie.toString())
+                }
+            }
+            cookieManager.flush()
             authSessionCookieExpiration = System.currentTimeMillis() + FRESHNESS_INTERVAL
         } catch (e: Exception) {
             e.printStackTrace()

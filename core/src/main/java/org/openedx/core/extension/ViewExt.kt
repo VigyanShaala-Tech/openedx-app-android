@@ -53,12 +53,8 @@ fun WebView.applyFullAccessSettings(url: String): Boolean {
 
 fun WebView.loadUrl(url: String, scope: CoroutineScope, cookieManager: AppCookieManager) {
     val mobileUrl = url.addMobileQueryParam()
-    if (cookieManager.isSessionCookieMissingOrExpired()) {
-        scope.launch {
-            cookieManager.tryToRefreshSessionCookie()
-            loadUrl(mobileUrl)
-        }
-    } else {
+    scope.launch {
+        cookieManager.tryToRefreshSessionCookie(url)
         loadUrl(mobileUrl)
     }
 }

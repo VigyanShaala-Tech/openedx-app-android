@@ -180,7 +180,7 @@ private fun LeaderboardUI(
                                 )
                                 Spacer(modifier = Modifier.width(4.dp))
                                 Text(
-                                    text = "points",
+                                    text = "score",
                                     style = MaterialTheme.appTypography.bodyMedium,
                                     color = MaterialTheme.appColors.textSecondary
                                 )
@@ -281,7 +281,7 @@ private fun LeaderboardHeader() {
         Text(text = "Rank", modifier = Modifier.width(60.dp), style = MaterialTheme.appTypography.labelLarge, color = MaterialTheme.appColors.textSecondary)
         Text(text = "User", modifier = Modifier.weight(1f), style = MaterialTheme.appTypography.labelLarge, color = MaterialTheme.appColors.textSecondary)
         Text(text = "College", modifier = Modifier.weight(1f), style = MaterialTheme.appTypography.labelLarge, color = MaterialTheme.appColors.textSecondary)
-        Text(text = "Points", modifier = Modifier.width(60.dp), textAlign = TextAlign.End, style = MaterialTheme.appTypography.labelLarge, color = MaterialTheme.appColors.textSecondary)
+        Text(text = "Score", modifier = Modifier.width(60.dp), textAlign = TextAlign.End, style = MaterialTheme.appTypography.labelLarge, color = MaterialTheme.appColors.textSecondary)
     }
 }
 

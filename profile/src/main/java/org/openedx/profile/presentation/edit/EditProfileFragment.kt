@@ -5,7 +5,6 @@ package org.openedx.profile.presentation.edit
 import android.content.res.Configuration
 import android.content.res.Configuration.UI_MODE_NIGHT_YES
 import android.graphics.Bitmap
-import android.graphics.Matrix
 import android.net.Uri
 import android.os.Bundle
 import android.view.LayoutInflater
@@ -154,9 +153,9 @@ class EditProfileFragment : Fragment() {
     private val registerForActivityResult =
         registerForActivityResult(ActivityResultContracts.GetContent()) { uri ->
             uri?.let {
-                val croppedUri = cropImage(it)
-                if (croppedUri != null) {
-                    viewModel.setImageUri(croppedUri)
+                val imageUri = createTempFileFromUri(it)
+                if (imageUri != null) {
+                    viewModel.setImageUri(imageUri)
                 }
             }
         }
@@ -279,93 +278,34 @@ class EditProfileFragment : Fragment() {
         return Uri.fromFile(newFile)
     }
 
-    private fun cropImage(uri: Uri): Uri? {
+    private fun createTempFileFromUri(uri: Uri): Uri? {
         return try {
             val contentResolver = requireContext().contentResolver
-
-            val orientation = try {
-                contentResolver.openInputStream(uri)?.use { stream ->
-                    val exif = android.media.ExifInterface(stream)
-                    exif.getAttributeInt(
-                        android.media.ExifInterface.TAG_ORIENTATION,
-                        android.media.ExifInterface.ORIENTATION_NORMAL
-                    )
-                } ?: android.media.ExifInterface.ORIENTATION_NORMAL
-            } catch (e: Exception) {
-                android.media.ExifInterface.ORIENTATION_NORMAL
-            }
-
-            val options = android.graphics.BitmapFactory.Options().apply {
-                inJustDecodeBounds = true
-            }
-            contentResolver.openInputStream(uri)?.use { stream ->
-                android.graphics.BitmapFactory.decodeStream(stream, null, options)
-            }
-
-            options.inJustDecodeBounds = false
-            if (options.outWidth > TARGET_IMAGE_WIDTH * 2) {
-                options.inSampleSize = options.outWidth / TARGET_IMAGE_WIDTH
-            }
-
-            val originalBitmap = contentResolver.openInputStream(uri)?.use { stream ->
-                android.graphics.BitmapFactory.decodeStream(stream, null, options)
-            } ?: return null
-
-            val rotatedBitmap = when (orientation) {
-                android.media.ExifInterface.ORIENTATION_ROTATE_90 -> rotateBitmap(originalBitmap, 90f)
-                android.media.ExifInterface.ORIENTATION_ROTATE_180 -> rotateBitmap(originalBitmap, 180f)
-                android.media.ExifInterface.ORIENTATION_ROTATE_270 -> rotateBitmap(originalBitmap, 270f)
-                else -> originalBitmap
-            }
-
-            val finalBitmap = if (rotatedBitmap.width > TARGET_IMAGE_WIDTH) {
-                val ratio: Float = rotatedBitmap.width.toFloat() / TARGET_IMAGE_WIDTH
-                Bitmap.createScaledBitmap(
-                    rotatedBitmap,
-                    TARGET_IMAGE_WIDTH,
-                    (rotatedBitmap.height.toFloat() / ratio).toInt().coerceAtLeast(1),
-                    true
-                )
-            } else {
-                rotatedBitmap
-            }
-
-            val newFile = File.createTempFile(
-                "Image_${System.currentTimeMillis()}",
+            val tempFile = File.createTempFile(
+                "Profile_${System.currentTimeMillis()}",
                 ".jpg",
                 requireContext().cacheDir
             )
-
-            FileOutputStream(newFile).use { fos ->
-                finalBitmap.compress(Bitmap.CompressFormat.JPEG, IMAGE_QUALITY, fos)
-                fos.flush()
+            contentResolver.openInputStream(uri)?.use { input ->
+                FileOutputStream(tempFile).use { output ->
+                    input.copyTo(output)
+                }
             }
-
-            if (originalBitmap != rotatedBitmap && !originalBitmap.isRecycled) {
-                originalBitmap.recycle()
+            if (tempFile.exists() && tempFile.length() > 0) {
+                Uri.fromFile(tempFile)
+            } else {
+                null
             }
-            if (rotatedBitmap != finalBitmap && !rotatedBitmap.isRecycled) {
-                rotatedBitmap.recycle()
-            }
-
-            Uri.fromFile(newFile)
         } catch (e: Exception) {
             e.printStackTrace()
             null
         }
     }
 
-    private fun rotateBitmap(source: Bitmap, angle: Float): Bitmap {
-        val matrix = Matrix()
-        matrix.postRotate(angle)
-        return Bitmap.createBitmap(source, 0, 0, source.width, source.height, matrix, true)
-    }
-
     companion object {
         private const val ARG_ACCOUNT = "argAccount"
         const val LEAVE_PROFILE_WIDTH_FACTOR = 0.7f
         private const val IMAGE_QUALITY = 90
-        private const val TARGET_IMAGE_WIDTH = 500
 
         fun newInstance(account: Account): EditProfileFragment {
             val fragment = EditProfileFragment()

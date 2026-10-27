@@ -45,7 +45,7 @@ import org.openedx.core.ui.theme.appTypography
 import org.openedx.core.utils.TimeUtils
 import org.openedx.course.R
 import java.text.SimpleDateFormat
-import java.util.Calendar
+import java.util.Date
 import java.util.Locale
 
 @Composable
@@ -140,8 +140,16 @@ fun OngoingSessionItem(
                     color = MaterialTheme.appColors.textDark,
                     fontWeight = FontWeight.Bold
                 )
+                val startedDate = parseLiveSessionDate(session.started)
+                val formattedStartedText = if (startedDate != null) {
+                    val dateFormatter = SimpleDateFormat("MMM dd, yyyy", Locale.getDefault())
+                    val timeFormatter = SimpleDateFormat("hh:mm a", Locale.getDefault())
+                    "${dateFormatter.format(startedDate)} • ${timeFormatter.format(startedDate)}"
+                } else {
+                    session.started ?: ""
+                }
                 Text(
-                    text = session.started ?: "",
+                    text = formattedStartedText,
                     style = MaterialTheme.appTypography.labelSmall,
                     color = MaterialTheme.appColors.textSecondary
                 )
@@ -278,15 +286,53 @@ fun LiveTabButton(
     }
 }
 
+private fun parseLiveSessionDate(dateStr: String?): Date? {
+    if (dateStr.isNullOrBlank()) return null
+
+    val isoDate = TimeUtils.iso8601ToDate(dateStr)
+    if (isoDate != null) return isoDate
+
+    val patterns = listOf(
+        "yyyy-MM-dd'T'HH:mm:ss.SSSSSS'Z'",
+        "yyyy-MM-dd'T'HH:mm:ss.SSS'Z'",
+        "yyyy-MM-dd'T'HH:mm:ss'Z'",
+        "yyyy-MM-dd'T'HH:mm:ss.SSSSSSXXX",
+        "yyyy-MM-dd'T'HH:mm:ss.SSSXXX",
+        "yyyy-MM-dd'T'HH:mm:ssXXX",
+        "yyyy-MM-dd'T'HH:mm:ss",
+        "yyyy-MM-dd HH:mm:ss.SSSSSS",
+        "yyyy-MM-dd HH:mm:ss.SSS",
+        "yyyy-MM-dd HH:mm:ss",
+        "yyyy-MM-dd"
+    )
+
+    for (pattern in patterns) {
+        try {
+            val sdf = SimpleDateFormat(pattern, Locale.US)
+            if (pattern.contains("'Z'") || pattern.contains("XXX")) {
+                sdf.timeZone = java.util.TimeZone.getTimeZone("UTC")
+            }
+            val parsed = sdf.parse(dateStr)
+            if (parsed != null) return parsed
+        } catch (_: Exception) {}
+    }
+    return null
+}
+
 @Composable
 fun LiveSessionItem(
     session: LiveClassModel,
     isClickable: Boolean = true,
     onJoinClick: () -> Unit
 ) {
-    val date = TimeUtils.iso8601ToDate(session.startTime) ?: Calendar.getInstance().time
-    val dateFormatter = SimpleDateFormat("MMM dd, yyyy", Locale.getDefault())
-    val timeFormatter = SimpleDateFormat("hh:mm a", Locale.getDefault())
+    val parsedDate = parseLiveSessionDate(session.startTime)
+    val formattedDateText = if (parsedDate != null) {
+        val dateFormatter = SimpleDateFormat("MMM dd, yyyy", Locale.getDefault())
+        val timeFormatter = SimpleDateFormat("hh:mm a", Locale.getDefault())
+        "${dateFormatter.format(parsedDate)} • ${timeFormatter.format(parsedDate)}"
+    } else {
+        session.startTime ?: ""
+    }
 
     val clickableModifier = if (isClickable) {
         Modifier.clickable(onClick = onJoinClick)
@@ -324,7 +370,7 @@ fun LiveSessionItem(
                 fontWeight = FontWeight.Bold
             )
             Text(
-                text = "${dateFormatter.format(date)} • ${timeFormatter.format(date)}",
+                text = formattedDateText,
                 style = MaterialTheme.appTypography.labelSmall,
                 color = MaterialTheme.appColors.textSecondary
             )

@@ -59,7 +59,6 @@ class DownloadWorker(
     override suspend fun doWork(): Result {
         updateProgress()
 
-        setForeground(createForegroundInfo())
         newDownload()
         fileDownloader.progressListener = null
         return Result.success()

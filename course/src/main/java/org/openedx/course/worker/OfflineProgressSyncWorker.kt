@@ -30,7 +30,6 @@ class OfflineProgressSyncWorker(
 
     override suspend fun doWork(): Result {
         return try {
-            setForeground(createForegroundInfo())
             tryToSyncProgress()
             Result.success()
         } catch (e: Exception) {

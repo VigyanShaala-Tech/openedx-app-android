@@ -46,7 +46,6 @@ class CalendarSyncWorker(
 
     override suspend fun doWork(): Result {
         return try {
-            setForeground(createForegroundInfo())
             val courseId = inputData.getString(ARG_COURSE_ID)
             tryToSyncCalendar(courseId)
             Result.success()

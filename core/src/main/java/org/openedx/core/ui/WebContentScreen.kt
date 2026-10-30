@@ -1,17 +1,23 @@
 package org.openedx.core.ui
 
 import android.annotation.SuppressLint
+import android.app.DownloadManager
+import android.content.Context
 import android.content.Intent
 import android.net.Uri
+import android.os.Environment
 import android.view.ViewGroup
+import android.webkit.CookieManager
 import android.webkit.JsPromptResult
 import android.webkit.JsResult
 import android.webkit.PermissionRequest
+import android.webkit.URLUtil
 import android.webkit.WebChromeClient
 import android.webkit.WebResourceRequest
 import android.webkit.WebView
 import android.webkit.WebViewClient
 import android.widget.FrameLayout
+import android.widget.Toast
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -63,6 +69,7 @@ fun WebContentScreen(
     apiHostUrl: String? = null,
     cookieManager: org.openedx.core.system.AppCookieManager? = null,
     title: String?,
+    shareText: String? = null,
     onBackClick: () -> Unit,
     htmlBody: String? = null,
     contentUrl: String? = null,
@@ -114,10 +121,27 @@ fun WebContentScreen(
                             .zIndex(1f),
                         contentAlignment = Alignment.CenterStart
                     ) {
+                        val context = LocalContext.current
                         Toolbar(
                             label = title ?: "",
                             canShowBackBtn = canShowBackBtn,
-                            onBackClick = onBackClick
+                            canShowShareIcon = !contentUrl.isNullOrEmpty(),
+                            onBackClick = onBackClick,
+                            onShareClick = {
+                                contentUrl?.let { url ->
+                                    val textToShare = if (!shareText.isNullOrBlank()) {
+                                        shareText
+                                    } else {
+                                        url
+                                    }
+                                    val shareIntent = Intent(Intent.ACTION_SEND).apply {
+                                        type = "text/plain"
+                                        putExtra(Intent.EXTRA_SUBJECT, title ?: "")
+                                        putExtra(Intent.EXTRA_TEXT, textToShare)
+                                    }
+                                    context.startActivity(Intent.createChooser(shareIntent, context.getString(org.openedx.core.R.string.core_share)))
+                                }
+                            }
                         )
                     }
                 }
@@ -178,6 +202,42 @@ private fun WebViewContent(
                     val clickUrl = request?.url?.toString() ?: ""
                     if (clickUrl.isEmpty()) return false
 
+                    // Handle social media and custom share intents (WhatsApp, Twitter, LinkedIn, Facebook, mailto, tel, intent)
+                    if (clickUrl.startsWith("whatsapp://") ||
+                        clickUrl.startsWith("intent://") ||
+                        clickUrl.startsWith("tel:") ||
+                        clickUrl.startsWith("mailto:") ||
+                        clickUrl.contains("facebook.com/sharer") ||
+                        clickUrl.contains("twitter.com/intent") ||
+                        clickUrl.contains("linkedin.com/sharing")
+                    ) {
+                        try {
+                            val intent = if (clickUrl.startsWith("mailto:")) {
+                                Intent(Intent.ACTION_SENDTO, Uri.parse(clickUrl))
+                            } else if (clickUrl.startsWith("intent://")) {
+                                Intent.parseUri(clickUrl, Intent.URI_INTENT_SCHEME)
+                            } else {
+                                Intent(Intent.ACTION_VIEW, Uri.parse(clickUrl))
+                            }
+                            context.startActivity(intent)
+                            return true
+                        } catch (e: Exception) {
+                            e.printStackTrace()
+                            return false
+                        }
+                    }
+
+                    // Direct PDF / download link clicks
+                    val isDownloadOrPdf = clickUrl.endsWith(".pdf", ignoreCase = true) ||
+                            clickUrl.endsWith(".png", ignoreCase = true) ||
+                            clickUrl.endsWith(".jpg", ignoreCase = true) ||
+                            clickUrl.contains("/download/", ignoreCase = true)
+
+                    if (isDownloadOrPdf) {
+                        triggerDownload(view, context, clickUrl)
+                        return true
+                    }
+
                     // Don't override Zoom URLs or internal app URLs, let them load in the WebView
                     val isZoomUrl = AppDataConstants.ZOOM_URL_PATTERNS.any { clickUrl.contains(it) }
                     val isInternalUrl = apiHostUrl?.let { clickUrl.startsWith(it) } ?: false
@@ -193,18 +253,21 @@ private fun WebViewContent(
                         } catch (e: Exception) {
                             false
                         }
-                    } else if (clickUrl.startsWith("mailto:")) {
-                        val email = clickUrl.replace("mailto:", "")
-                        if (email.isEmailValid()) {
-                            org.openedx.core.utils.EmailUtil.sendEmailIntent(context, email, "", "")
-                            true
-                        } else {
-                            false
-                        }
                     } else {
                         false
                     }
                 }
+            }
+            addJavascriptInterface(BlobDownloadInterface(context), "AndroidBlobDownloader")
+            setDownloadListener { downloadUrl, userAgent, contentDisposition, mimeType, _ ->
+                triggerDownload(
+                    webView = this,
+                    context = context,
+                    downloadUrl = downloadUrl,
+                    userAgent = userAgent,
+                    contentDisposition = contentDisposition,
+                    mimeType = mimeType
+                )
             }
             webChromeClient = object : WebChromeClient() {
                 override fun onPermissionRequest(request: PermissionRequest?) {
@@ -225,11 +288,7 @@ private fun WebViewContent(
                     isUserGesture: Boolean,
                     resultMsg: android.os.Message?
                 ): Boolean {
-                    // Force popups to open in the same window for React consistency
-                    val transport = resultMsg?.obj as? WebView.WebViewTransport
-                    transport?.webView = view
-                    resultMsg?.sendToTarget()
-                    return true
+                    return false
                 }
 
                 override fun onJsAlert(view: WebView?, url: String?, message: String?, result: JsResult?): Boolean {
@@ -322,4 +381,145 @@ private fun WebViewContent(
             it.destroy()
         }
     )
+}
+
+private class BlobDownloadInterface(private val context: Context) {
+    @android.webkit.JavascriptInterface
+    fun getBase64FromBlobData(base64Data: String, mimeType: String, fileName: String?) {
+        try {
+            val cleanBase64 = if (base64Data.contains(",")) {
+                base64Data.substring(base64Data.indexOf(",") + 1)
+            } else {
+                base64Data
+            }
+            val fileBytes = android.util.Base64.decode(cleanBase64, android.util.Base64.DEFAULT)
+            val type = if (mimeType.isNotBlank()) mimeType else "application/pdf"
+            val name = if (!fileName.isNullOrBlank()) fileName else "Certificate_${System.currentTimeMillis()}.pdf"
+
+            val downloadsDir = context.getExternalFilesDir(Environment.DIRECTORY_DOWNLOADS) ?: context.cacheDir
+            if (!downloadsDir.exists()) {
+                downloadsDir.mkdirs()
+            }
+            val file = java.io.File(downloadsDir, name)
+            java.io.FileOutputStream(file).use { out ->
+                out.write(fileBytes)
+            }
+
+            try {
+                val publicDir = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS)
+                if (publicDir.exists() || publicDir.mkdirs()) {
+                    val publicFile = java.io.File(publicDir, name)
+                    java.io.FileOutputStream(publicFile).use { out ->
+                        out.write(fileBytes)
+                    }
+                    android.media.MediaScannerConnection.scanFile(
+                        context,
+                        arrayOf(publicFile.absolutePath),
+                        arrayOf(type),
+                        null
+                    )
+                }
+            } catch (_: Exception) {}
+
+            android.os.Handler(android.os.Looper.getMainLooper()).post {
+                Toast.makeText(
+                    context,
+                    "Certificate downloaded to Downloads folder",
+                    Toast.LENGTH_LONG
+                ).show()
+
+                try {
+                    val contentUri = androidx.core.content.FileProvider.getUriForFile(
+                        context,
+                        "${context.packageName}.fileprovider",
+                        file
+                    )
+                    val openIntent = Intent(Intent.ACTION_VIEW).apply {
+                        setDataAndType(contentUri, type)
+                        addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
+                        addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+                    }
+                    context.startActivity(openIntent)
+                } catch (e: Exception) {
+                    e.printStackTrace()
+                }
+            }
+        } catch (e: Exception) {
+            e.printStackTrace()
+        }
+    }
+}
+
+private fun triggerDownload(
+    webView: WebView? = null,
+    context: Context,
+    downloadUrl: String,
+    userAgent: String? = null,
+    contentDisposition: String? = null,
+    mimeType: String? = null
+) {
+    try {
+        if (downloadUrl.startsWith("blob:")) {
+            val js = """
+                javascript:(function() {
+                    var xhr = new XMLHttpRequest();
+                    xhr.open('GET', '$downloadUrl', true);
+                    xhr.responseType = 'blob';
+                    xhr.onload = function(e) {
+                        if (this.status == 200) {
+                            var blob = this.response;
+                            var reader = new FileReader();
+                            reader.readAsDataURL(blob);
+                            reader.onloadend = function() {
+                                var base64data = reader.result;
+                                AndroidBlobDownloader.getBase64FromBlobData(base64data, blob.type || 'application/pdf', 'Certificate.pdf');
+                            }
+                        }
+                    };
+                    xhr.send();
+                })();
+            """.trimIndent()
+            webView?.evaluateJavascript(js, null)
+            return
+        }
+
+        if (downloadUrl.startsWith("data:")) {
+            val base64Data = if (downloadUrl.contains(",")) {
+                downloadUrl.substring(downloadUrl.indexOf(",") + 1)
+            } else {
+                downloadUrl
+            }
+            val blobInterface = BlobDownloadInterface(context)
+            blobInterface.getBase64FromBlobData(base64Data, mimeType ?: "application/pdf", "Certificate.pdf")
+            return
+        }
+
+        val request = DownloadManager.Request(Uri.parse(downloadUrl)).apply {
+            val type = if (!mimeType.isNullOrEmpty()) mimeType else "application/pdf"
+            setMimeType(type)
+            if (!userAgent.isNullOrEmpty()) {
+                addRequestHeader("User-Agent", userAgent)
+            }
+            val cookie = CookieManager.getInstance().getCookie(downloadUrl)
+            if (!cookie.isNullOrEmpty()) {
+                addRequestHeader("Cookie", cookie)
+            }
+            val fileName = URLUtil.guessFileName(downloadUrl, contentDisposition, type)
+            setTitle(fileName)
+            setNotificationVisibility(DownloadManager.Request.VISIBILITY_VISIBLE_NOTIFY_COMPLETED)
+            setDestinationInExternalPublicDir(
+                Environment.DIRECTORY_DOWNLOADS,
+                fileName
+            )
+        }
+        val dm = context.getSystemService(Context.DOWNLOAD_SERVICE) as DownloadManager
+        dm.enqueue(request)
+        Toast.makeText(context, org.openedx.core.R.string.core_downloading, Toast.LENGTH_SHORT).show()
+    } catch (e: Exception) {
+        e.printStackTrace()
+        try {
+            val intent = Intent(Intent.ACTION_VIEW, Uri.parse(downloadUrl))
+            context.startActivity(intent)
+        } catch (_: Exception) {}
+    }
 }

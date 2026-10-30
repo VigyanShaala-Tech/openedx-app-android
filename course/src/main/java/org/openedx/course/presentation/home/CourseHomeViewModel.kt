@@ -55,7 +55,7 @@ import org.openedx.course.R as courseR
 class CourseHomeViewModel(
     val courseId: String,
     private val courseTitle: String,
-    private val config: Config,
+    val config: Config,
     private val interactor: CourseInteractor,
     private val resourceManager: ResourceManager,
     private val courseNotifier: CourseNotifier,
@@ -88,6 +88,10 @@ class CourseHomeViewModel(
         get() = _uiMessage.asSharedFlow()
 
     var savedLiveSessionsTab: String = "today"
+    private var todayPage = 1
+    private var upcomingPage = 1
+    private var pastPage = 1
+    private var isLoadingMoreLiveSessions = false
 
     private val _resumeBlockId = MutableSharedFlow<String>()
     val resumeBlockId: SharedFlow<String>
@@ -240,8 +244,15 @@ class CourseHomeViewModel(
 
                     launch {
                         try {
-                            val liveToday = interactor.getLiveClasses(courseId, "today", 1).results
-                            updateUiData { it.copy(liveClassesToday = liveToday) }
+                            val response = interactor.getLiveClasses(courseId, "today", 1)
+                            val numPages = response.pagination.numPages ?: 1
+                            todayPage = 1
+                            updateUiData { 
+                                it.copy(
+                                    liveClassesToday = response.results,
+                                    liveClassesTodayHasMore = 1 < numPages
+                                ) 
+                            }
                         } catch (e: Exception) {
                             Log.e("CourseHomeViewModel", "Error fetching live today", e)
                         }
@@ -249,8 +260,15 @@ class CourseHomeViewModel(
 
                     launch {
                         try {
-                            val liveUpcoming = interactor.getLiveClasses(courseId, "upcoming", 1).results
-                            updateUiData { it.copy(liveClassesUpcoming = liveUpcoming) }
+                            val response = interactor.getLiveClasses(courseId, "upcoming", 1)
+                            val numPages = response.pagination.numPages ?: 1
+                            upcomingPage = 1
+                            updateUiData { 
+                                it.copy(
+                                    liveClassesUpcoming = response.results,
+                                    liveClassesUpcomingHasMore = 1 < numPages
+                                ) 
+                            }
                         } catch (e: Exception) {
                             Log.e("CourseHomeViewModel", "Error fetching live upcoming", e)
                         }
@@ -258,8 +276,15 @@ class CourseHomeViewModel(
 
                     launch {
                         try {
-                            val livePast = interactor.getLiveClasses(courseId, "past", 1).results
-                            updateUiData { it.copy(liveClassesPast = livePast) }
+                            val response = interactor.getLiveClasses(courseId, "past", 1)
+                            val numPages = response.pagination.numPages ?: 1
+                            pastPage = 1
+                            updateUiData { 
+                                it.copy(
+                                    liveClassesPast = response.results,
+                                    liveClassesPastHasMore = 1 < numPages
+                                ) 
+                            }
                         } catch (e: Exception) {
                             Log.e("CourseHomeViewModel", "Error fetching live past", e)
                         }
@@ -277,6 +302,71 @@ class CourseHomeViewModel(
             } catch (e: Exception) {
                 Log.e("CourseHomeViewModel", "Error fetching essential course data", e)
                 handleCourseDataError(e)
+            }
+        }
+    }
+
+    fun loadMoreLiveSessions(tab: String) {
+        if (isLoadingMoreLiveSessions) return
+        val currentCourseData = _uiState.value as? CourseHomeUIState.CourseData ?: return
+
+        val (currentPage, hasMore) = when (tab) {
+            "today" -> Pair(todayPage, currentCourseData.liveClassesTodayHasMore)
+            "upcoming" -> Pair(upcomingPage, currentCourseData.liveClassesUpcomingHasMore)
+            "past" -> Pair(pastPage, currentCourseData.liveClassesPastHasMore)
+            else -> Pair(1, false)
+        }
+
+        if (!hasMore) return
+
+        isLoadingMoreLiveSessions = true
+        updateUiData { it.copy(isLoadingMoreLiveSessions = true) }
+
+        viewModelScope.launch {
+            try {
+                val nextPage = currentPage + 1
+                val response = interactor.getLiveClasses(courseId, tab, nextPage)
+                val newSessions = response.results
+                val numPages = response.pagination.numPages ?: 1
+                val stillHasMore = nextPage < numPages
+
+                when (tab) {
+                    "today" -> {
+                        todayPage = nextPage
+                        updateUiData {
+                            it.copy(
+                                liveClassesToday = it.liveClassesToday + newSessions,
+                                liveClassesTodayHasMore = stillHasMore,
+                                isLoadingMoreLiveSessions = false
+                            )
+                        }
+                    }
+                    "upcoming" -> {
+                        upcomingPage = nextPage
+                        updateUiData {
+                            it.copy(
+                                liveClassesUpcoming = it.liveClassesUpcoming + newSessions,
+                                liveClassesUpcomingHasMore = stillHasMore,
+                                isLoadingMoreLiveSessions = false
+                            )
+                        }
+                    }
+                    "past" -> {
+                        pastPage = nextPage
+                        updateUiData {
+                            it.copy(
+                                liveClassesPast = it.liveClassesPast + newSessions,
+                                liveClassesPastHasMore = stillHasMore,
+                                isLoadingMoreLiveSessions = false
+                            )
+                        }
+                    }
+                }
+            } catch (e: Exception) {
+                Log.e("CourseHomeViewModel", "Error loading more live sessions for $tab", e)
+                updateUiData { it.copy(isLoadingMoreLiveSessions = false) }
+            } finally {
+                isLoadingMoreLiveSessions = false
             }
         }
     }
@@ -895,7 +985,7 @@ class CourseHomeViewModel(
 
             val joinUrl = meetingUrl
 
-            courseRouter.navigateToWebContent(fragmentManager, topic, joinUrl)
+            courseRouter.navigateToWebContent(fragmentManager, topic, joinUrl, "")
         } catch (e: Exception) {
             e.printStackTrace()
         }

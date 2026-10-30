@@ -26,7 +26,7 @@ fun WebView.applyFullAccessSettings(url: String): Boolean {
         setSupportZoom(true)
         loadsImagesAutomatically = true
         javaScriptCanOpenWindowsAutomatically = true
-        setSupportMultipleWindows(true)
+        setSupportMultipleWindows(false)
         allowFileAccess = true
         allowContentAccess = true
         
@@ -40,7 +40,7 @@ fun WebView.applyFullAccessSettings(url: String): Boolean {
 
         if (url.contains("zoom.us") || url.contains("zoom.com") || url.contains("/meeting/") || url.contains("/join/")) {
             isSpecializedUA = true
-            setSupportMultipleWindows(true)
+            setSupportMultipleWindows(false)
             // Use a clean, modern Chrome UA with explicit device info to unlock all Zoom features
             userAgentString = AppDataConstants.DESKTOP_USER_AGENT
         } else if (url.contains("google-calendar")) {

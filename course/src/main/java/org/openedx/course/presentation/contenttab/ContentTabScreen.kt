@@ -145,6 +145,9 @@ fun ContentTabScreen(
                                 onTabChanged = { tab ->
                                     homeViewModel.savedLiveSessionsTab = tab
                                 },
+                                onLoadMore = { tab ->
+                                    homeViewModel.loadMoreLiveSessions(tab)
+                                },
                                 onJoinClick = { session ->
                                     val isPastSession = uiState.liveClassesPast.contains(session)
                                     if (isPastSession) {

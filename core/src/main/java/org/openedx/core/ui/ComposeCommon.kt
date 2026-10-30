@@ -58,6 +58,7 @@ import androidx.compose.material.icons.filled.AccountCircle
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.Info
 import androidx.compose.material.icons.filled.ManageAccounts
+import androidx.compose.material.icons.filled.Share
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -195,10 +196,12 @@ fun Toolbar(
     label: String?,
     canShowBackBtn: Boolean = false,
     canShowSettingsIcon: Boolean = false,
+    canShowShareIcon: Boolean = false,
     labelTint: Color = MaterialTheme.appColors.textPrimary,
     iconTint: Color = MaterialTheme.appColors.textPrimary,
     onBackClick: () -> Unit = {},
     onSettingsClick: () -> Unit = {},
+    onShareClick: () -> Unit = {},
 ) {
     Box(
         modifier = modifier
@@ -237,6 +240,19 @@ fun Toolbar(
                     imageVector = Icons.Default.ManageAccounts,
                     tint = MaterialTheme.appColors.textAccent,
                     contentDescription = stringResource(id = R.string.core_accessibility_settings)
+                )
+            }
+        } else if (canShowShareIcon) {
+            IconButton(
+                modifier = Modifier
+                    .align(Alignment.CenterEnd)
+                    .padding(end = 12.dp),
+                onClick = { onShareClick() }
+            ) {
+                Icon(
+                    imageVector = Icons.Default.Share,
+                    tint = iconTint,
+                    contentDescription = stringResource(id = R.string.core_share)
                 )
             }
         }

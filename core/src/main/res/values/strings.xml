@@ -69,6 +69,8 @@
     <string name="core_feedback_dialog_description">We’re sorry to hear your learning experience has had some issues. We appreciate all feedback.</string>
     <string name="core_feedback_dialog_textfield_hint">What could have been better?</string>
     <string name="core_share_feedback">Share Feedback</string>
+    <string name="core_share">Share</string>
+    <string name="course_certificate_share_message">Check out my %1$s certificate on %2$s\n\n%3$s</string>
     <string name="core_thank_you">Thank You</string>
     <string name="core_rate_us">Rate Us</string>
     <string name="core_thank_you_dialog_positive_description">Thank you for sharing your feedback with us. Would you like to share your review of this app with other users on the app store?</string>

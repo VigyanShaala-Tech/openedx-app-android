@@ -160,15 +160,16 @@ private fun LeaderboardUI(
                                 style = MaterialTheme.appTypography.bodySmall,
                                 color = MaterialTheme.appColors.textSecondary
                             )
+                            Spacer(modifier = Modifier.height(4.dp))
+                            Text(
+                                text = "Rank #${uiState.userRanking?.rank ?: 0}",
+                                style = MaterialTheme.appTypography.titleLarge.copy(fontWeight = FontWeight.Bold),
+                                color = MaterialTheme.appColors.textDark
+                            )
+                            Spacer(modifier = Modifier.height(2.dp))
                             Row(verticalAlignment = Alignment.CenterVertically) {
                                 Text(
-                                    text = "Rank #${uiState.userRanking?.rank ?: 0}",
-                                    style = MaterialTheme.appTypography.titleLarge.copy(fontWeight = FontWeight.Bold),
-                                    color = MaterialTheme.appColors.textDark
-                                )
-                                Spacer(modifier = Modifier.width(8.dp))
-                                Text(
-                                    text = "with",
+                                    text = "Score:",
                                     style = MaterialTheme.appTypography.bodyMedium,
                                     color = MaterialTheme.appColors.textSecondary
                                 )
@@ -177,12 +178,6 @@ private fun LeaderboardUI(
                                     text = "${uiState.userRanking?.points ?: 0}",
                                     style = MaterialTheme.appTypography.bodyMedium.copy(fontWeight = FontWeight.Bold),
                                     color = MaterialTheme.appColors.primary
-                                )
-                                Spacer(modifier = Modifier.width(4.dp))
-                                Text(
-                                    text = "score",
-                                    style = MaterialTheme.appTypography.bodyMedium,
-                                    color = MaterialTheme.appColors.textSecondary
                                 )
                             }
                         }

@@ -132,6 +132,7 @@ class SettingsViewModel(
             fm = fragmentManager,
             title = resourceManager.getString(R.string.core_privacy_policy),
             url = configuration.agreementUrls.privacyPolicyUrl,
+            shareText = ""
         )
         logProfileEvent(ProfileAnalyticsEvent.PRIVACY_POLICY_CLICKED)
     }
@@ -141,6 +142,7 @@ class SettingsViewModel(
             fm = fragmentManager,
             title = resourceManager.getString(R.string.core_cookie_policy),
             url = configuration.agreementUrls.cookiePolicyUrl,
+            shareText = ""
         )
         logProfileEvent(ProfileAnalyticsEvent.COOKIE_POLICY_CLICKED)
     }
@@ -150,6 +152,7 @@ class SettingsViewModel(
             fm = fragmentManager,
             title = resourceManager.getString(R.string.core_data_sell),
             url = configuration.agreementUrls.dataSellConsentUrl,
+            shareText = ""
         )
         logProfileEvent(ProfileAnalyticsEvent.DATA_SELL_CLICKED)
     }
@@ -159,6 +162,7 @@ class SettingsViewModel(
             fm = fragmentManager,
             title = resourceManager.getString(org.openedx.profile.R.string.profile_faqs),
             url = configuration.faqUrl,
+            shareText = ""
         )
         logProfileEvent(ProfileAnalyticsEvent.FAQ_CLICKED)
     }
@@ -169,6 +173,7 @@ class SettingsViewModel(
                 fm = fragmentManager,
                 title = resourceManager.getString(org.openedx.profile.R.string.profile_contact_us),
                 url = configuration.contactUsUrl,
+                shareText = ""
             )
         }
         logProfileEvent(ProfileAnalyticsEvent.CONTACT_SUPPORT_CLICKED)
@@ -179,6 +184,7 @@ class SettingsViewModel(
             fm = fragmentManager,
             title = resourceManager.getString(R.string.core_terms_of_use),
             url = configuration.agreementUrls.tosUrl,
+            shareText = ""
         )
         logProfileEvent(ProfileAnalyticsEvent.TERMS_OF_USE_CLICKED)
     }

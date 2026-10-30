@@ -25,7 +25,6 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.platform.AndroidUriHandler
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.pluralStringResource
@@ -40,7 +39,9 @@ import org.openedx.core.Mock
 import org.openedx.core.domain.model.Block
 import org.openedx.core.domain.model.CourseDatesBannerInfo
 import org.openedx.core.domain.model.Progress
+import org.openedx.core.extension.addMobileQueryParam
 import org.openedx.core.extension.getChapterBlocks
+import org.openedx.core.R as coreR
 import org.openedx.core.ui.CircularProgress
 import org.openedx.core.ui.HandleUIMessage
 import org.openedx.core.ui.displayCutoutForLandscape
@@ -134,10 +135,25 @@ fun CourseContentAllScreen(
         onResetDatesClick = {
             viewModel.resetCourseDatesBanner()
         },
-        onCertificateClick = {
+        onCertificateClick = { url ->
             viewModel.viewCertificateTappedEvent()
-            it.takeIfNotEmpty()
-                ?.let { url -> AndroidUriHandler(context).openUri(url) }
+            url.takeIfNotEmpty()?.let { certUrl ->
+                val platformName = viewModel.config.getPlatformName()
+                val courseName = (uiState as? CourseContentAllUIState.CourseData)?.courseStructure?.name ?: ""
+                val fullCertUrl = certUrl.addMobileQueryParam()
+                val shareText = context.getString(
+                    coreR.string.course_certificate_share_message,
+                    courseName,
+                    platformName,
+                    fullCertUrl
+                )
+                viewModel.courseRouter.navigateToWebContent(
+                    fm = fragmentManager,
+                    title = context.getString(R.string.course_view_certificate),
+                    url = fullCertUrl,
+                    shareText = shareText
+                )
+            }
         }
     )
 }

@@ -18,9 +18,11 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.Button
 import androidx.compose.material.ButtonDefaults
+import androidx.compose.material.CircularProgressIndicator
 import androidx.compose.material.Icon
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Text
+import androidx.compose.material.TextButton
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Sensors
 import androidx.compose.material.icons.filled.Videocam
@@ -56,6 +58,7 @@ fun LiveSessionsCardContent(
     uiState: CourseHomeUIState.CourseData,
     initialTab: String = "today",
     onTabChanged: (String) -> Unit = {},
+    onLoadMore: (String) -> Unit = {},
     onJoinClick: (LiveClassModel) -> Unit,
     onJoinOngoingClick: (OngoingSessionModel) -> Unit,
     onViewAllLiveSessionsClick: () -> Unit
@@ -94,6 +97,7 @@ fun LiveSessionsCardContent(
             uiState = uiState,
             initialTab = initialTab,
             onTabChanged = onTabChanged,
+            onLoadMore = onLoadMore,
             onJoinClick = onJoinClick,
             onJoinOngoingClick = onJoinOngoingClick,
             onViewAllLiveSessionsClick = onViewAllLiveSessionsClick
@@ -177,6 +181,7 @@ fun TabbedLiveSessions(
     uiState: CourseHomeUIState.CourseData,
     initialTab: String,
     onTabChanged: (String) -> Unit,
+    onLoadMore: (String) -> Unit = {},
     onJoinClick: (LiveClassModel) -> Unit,
     onJoinOngoingClick: (OngoingSessionModel) -> Unit,
     onViewAllLiveSessionsClick: () -> Unit
@@ -249,13 +254,43 @@ fun TabbedLiveSessions(
                 modifier = Modifier.padding(vertical = 24.dp)
             )
         } else {
-            sessions.take(5).forEach { session ->
+            sessions.forEach { session ->
                 LiveSessionItem(
                     session = session,
                     isClickable = selectedTab == "today" || selectedTab == "past",
                     onJoinClick = { onJoinClick(session) }
                 )
                 Spacer(modifier = Modifier.height(8.dp))
+            }
+
+            val hasMoreForSelectedTab = when (selectedTab) {
+                "today" -> uiState.liveClassesTodayHasMore
+                "upcoming" -> uiState.liveClassesUpcomingHasMore
+                "past" -> uiState.liveClassesPastHasMore
+                else -> false
+            }
+
+            if (hasMoreForSelectedTab) {
+                Spacer(modifier = Modifier.height(8.dp))
+                if (uiState.isLoadingMoreLiveSessions) {
+                    CircularProgressIndicator(
+                        modifier = Modifier.size(24.dp),
+                        color = MaterialTheme.appColors.primary,
+                        strokeWidth = 2.dp
+                    )
+                } else {
+                    TextButton(
+                        onClick = { onLoadMore(selectedTab) },
+                        modifier = Modifier.fillMaxWidth()
+                    ) {
+                        Text(
+                            text = "Load More",
+                            style = MaterialTheme.appTypography.labelLarge,
+                            color = MaterialTheme.appColors.primary,
+                            fontWeight = FontWeight.Bold
+                        )
+                    }
+                }
             }
         }
     }

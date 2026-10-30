@@ -133,6 +133,7 @@ class WebContentFragment : Fragment() {
                     cookieManager = cookieManager,
                     title = requireArguments().getString(ARG_TITLE, ""),
                     contentUrl = requireArguments().getString(ARG_URL, ""),
+                    shareText = requireArguments().getString(ARG_SHARE_TEXT, ""),
                     onBackClick = {
                         requireActivity().onBackPressedDispatcher.onBackPressed()
                     }
@@ -152,12 +153,14 @@ class WebContentFragment : Fragment() {
     companion object {
         private const val ARG_TITLE = "argTitle"
         private const val ARG_URL = "argUrl"
+        private const val ARG_SHARE_TEXT = "argShareText"
 
-        fun newInstance(title: String, url: String): WebContentFragment {
+        fun newInstance(title: String, url: String, shareText: String = ""): WebContentFragment {
             val fragment = WebContentFragment()
             fragment.arguments = bundleOf(
                 ARG_TITLE to title,
                 ARG_URL to url,
+                ARG_SHARE_TEXT to shareText,
             )
             return fragment
         }

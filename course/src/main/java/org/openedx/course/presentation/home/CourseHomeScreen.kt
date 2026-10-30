@@ -43,7 +43,6 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.painter.Painter
-import androidx.compose.ui.platform.AndroidUriHandler
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
@@ -80,6 +79,7 @@ import org.openedx.foundation.presentation.WindowSize
 import org.openedx.foundation.presentation.WindowType
 import org.openedx.foundation.presentation.windowSizeValue
 import us.zoom.sdkhelper.ZoomMeetingHelper
+import org.openedx.core.extension.addMobileQueryParam
 import org.openedx.core.R as coreR
 
 @Composable
@@ -109,6 +109,9 @@ fun CourseHomeScreen(
         initialLiveSessionsTab = viewModel.savedLiveSessionsTab,
         onLiveSessionsTabChanged = { tab ->
             viewModel.savedLiveSessionsTab = tab
+        },
+        onLoadMoreLiveSessions = { tab ->
+            viewModel.loadMoreLiveSessions(tab)
         },
         onSubSectionClick = { subSectionBlock ->
             // Log section/subsection click event
@@ -153,10 +156,25 @@ fun CourseHomeScreen(
                 }
             )
         },
-        onCertificateClick = {
+        onCertificateClick = { url ->
             viewModel.viewCertificateTappedEvent()
-            it.takeIfNotEmpty()
-                ?.let { url -> AndroidUriHandler(context).openUri(url) }
+            url.takeIfNotEmpty()?.let { certUrl ->
+                val platformName = viewModel.config.getPlatformName()
+                val courseName = (uiState as? CourseHomeUIState.CourseData)?.courseStructure?.name ?: ""
+                val fullCertUrl = certUrl.addMobileQueryParam()
+                val shareText = context.getString(
+                    coreR.string.course_certificate_share_message,
+                    courseName,
+                    platformName,
+                    fullCertUrl
+                )
+                viewModel.courseRouter.navigateToWebContent(
+                    fm = fragmentManager,
+                    title = context.getString(R.string.course_view_certificate),
+                    url = fullCertUrl,
+                    shareText = shareText
+                )
+            }
         },
         onVideoClick = { videoBlock ->
             viewModel.courseRouter.navigateToCourseContainer(
@@ -275,6 +293,7 @@ private fun CourseHomeUI(
     onViewAllLiveSessionsClick: () -> Unit,
     initialLiveSessionsTab: String,
     onLiveSessionsTabChanged: (String) -> Unit,
+    onLoadMoreLiveSessions: (String) -> Unit = {},
     onRetry: () -> Unit,
 ) {
     val scaffoldState = rememberScaffoldState()
@@ -370,6 +389,7 @@ private fun CourseHomeUI(
                                         uiState = uiState,
                                         initialTab = initialLiveSessionsTab,
                                         onTabChanged = onLiveSessionsTabChanged,
+                                        onLoadMore = onLoadMoreLiveSessions,
                                         onJoinClick = onJoinClick,
                                         onJoinOngoingClick = onJoinOngoingClick,
                                         onViewAllLiveSessionsClick = onViewAllLiveSessionsClick

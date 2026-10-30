@@ -22,7 +22,7 @@ interface ProfileRouter {
 
     fun navigateToVideoQuality(fm: FragmentManager, videoQualityType: VideoQualityType)
 
-    fun navigateToWebContent(fm: FragmentManager, title: String, url: String)
+    fun navigateToWebContent(fm: FragmentManager, title: String, url: String, shareText: String)
 
     fun navigateToManageAccount(fm: FragmentManager)
 

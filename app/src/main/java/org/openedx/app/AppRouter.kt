@@ -505,10 +505,10 @@ class AppRouter :
             .commit()
     }
 
-    override fun navigateToWebContent(fm: FragmentManager, title: String, url: String) {
+    override fun navigateToWebContent(fm: FragmentManager, title: String, url: String, shareText: String) {
         replaceFragmentWithBackStack(
             fm,
-            WebContentFragment.newInstance(title = title, url = url)
+            WebContentFragment.newInstance(title = title, url = url, shareText = shareText)
         )
     }
 

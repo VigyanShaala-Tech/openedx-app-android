@@ -269,7 +269,7 @@ class DeepLinkRouter(
                             val joinUrl = Uri.parse(meeting.joinUrl).buildUpon()
                                 .appendQueryParameter("isMobile", "true")
                                 .build().toString()
-                            appRouter.navigateToWebContent(fm, meeting.topic, joinUrl)
+                            appRouter.navigateToWebContent(fm, meeting.topic, joinUrl, "")
                         }
                     }
                 } else {

@@ -30,6 +30,10 @@ sealed class CourseHomeUIState {
         val liveClassesToday: List<LiveClassModel> = emptyList(),
         val liveClassesUpcoming: List<LiveClassModel> = emptyList(),
         val liveClassesPast: List<LiveClassModel> = emptyList(),
+        val liveClassesTodayHasMore: Boolean = false,
+        val liveClassesUpcomingHasMore: Boolean = false,
+        val liveClassesPastHasMore: Boolean = false,
+        val isLoadingMoreLiveSessions: Boolean = false,
         val ongoingSession: OngoingSessionModel? = null,
     ) : CourseHomeUIState()
 

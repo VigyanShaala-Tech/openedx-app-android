@@ -145,7 +145,8 @@ class VsProfileFragment : Fragment() {
                         router.navigateToWebContent(
                             requireActivity().supportFragmentManager,
                             getString(R.string.profile_faqs),
-                            config.getFaqUrl()
+                            config.getFaqUrl(),
+                            ""
                         )
                     },
                     onChatWithCurieClick = {

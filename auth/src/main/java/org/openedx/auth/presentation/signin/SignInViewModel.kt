@@ -350,7 +350,7 @@ class SignInViewModel(
     fun openLink(fragmentManager: FragmentManager, links: Map<String, String>, link: String) {
         links.forEach { (key, value) ->
             if (value == link) {
-                router.navigateToWebContent(fragmentManager, key, value)
+                router.navigateToWebContent(fragmentManager, key, value, "")
                 return
             }
         }

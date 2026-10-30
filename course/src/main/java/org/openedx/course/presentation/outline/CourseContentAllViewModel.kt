@@ -51,7 +51,7 @@ import org.openedx.course.R as courseR
 class CourseContentAllViewModel(
     val courseId: String,
     private val courseTitle: String,
-    private val config: Config,
+    val config: Config,
     private val interactor: CourseInteractor,
     private val resourceManager: ResourceManager,
     private val courseNotifier: CourseNotifier,

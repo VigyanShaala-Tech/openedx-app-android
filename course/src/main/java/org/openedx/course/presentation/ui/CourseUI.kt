@@ -353,7 +353,7 @@ fun NavigationUnitsButtons(
     val subModifier =
         if (LocalConfiguration.current.orientation == Configuration.ORIENTATION_PORTRAIT) {
             Modifier
-                .height(72.dp)
+                .padding(vertical = 12.dp)
                 .fillMaxWidth()
         } else {
             Modifier

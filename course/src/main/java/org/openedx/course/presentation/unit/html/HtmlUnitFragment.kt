@@ -30,7 +30,6 @@ import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.widthIn
 import androidx.compose.material.CircularProgressIndicator
 import androidx.compose.material.MaterialTheme
@@ -65,7 +64,6 @@ import org.openedx.core.extension.applyFullAccessSettings
 import org.openedx.core.extension.loadUrl
 import org.openedx.core.system.AppCookieManager
 import org.openedx.core.ui.FullScreenErrorView
-import org.openedx.core.ui.navigationBarsInset
 import org.openedx.core.ui.theme.OpenEdXTheme
 import org.openedx.core.ui.theme.appColors
 import org.openedx.foundation.extension.applyDarkModeIfEnabled
@@ -278,14 +276,6 @@ fun HtmlUnitView(
 
         val configuration = LocalConfiguration.current
         val isMeetingUrl = false
-        val bottomPadding =
-            if (configuration.orientation == Configuration.ORIENTATION_PORTRAIT && !isMeetingUrl) {
-                50.dp
-            } else {
-                0.dp
-            }
-
-        val isLandscapeMeeting = isMeetingUrl && configuration.orientation == Configuration.ORIENTATION_LANDSCAPE
         val screenWidth by remember(key1 = windowSize, key2 = isMeetingUrl, key3 = configuration.orientation) {
             mutableStateOf(
                 if (isMeetingUrl && configuration.orientation == Configuration.ORIENTATION_LANDSCAPE) {
@@ -300,15 +290,11 @@ fun HtmlUnitView(
         }
 
         Surface(
-            modifier = Modifier
-                .fillMaxSize()
-                .then(if (isLandscapeMeeting) Modifier else Modifier.navigationBarsInset()),
+            modifier = Modifier.fillMaxSize(),
             color = MaterialTheme.appColors.background
         ) {
             Box(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .padding(bottom = bottomPadding),
+                modifier = Modifier.fillMaxSize(),
                 contentAlignment = Alignment.TopCenter
             ) {
                 if (uiState is HtmlUnitUIState.Initialization) return@Box

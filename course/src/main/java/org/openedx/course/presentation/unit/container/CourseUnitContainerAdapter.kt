@@ -173,10 +173,11 @@ class CourseUnitContainerAdapter(
     }
 
     private fun createPdfUnitFragment(block: Block): Fragment {
+        val pdfUrl = if (!block.pdfWebUrl.isNullOrEmpty()) block.pdfWebUrl else block.studentViewUrl
         return PdfUnitFragment.newInstance(
             block.id,
             viewModel.courseId,
-            block.pdfWebUrl ?: "",
+            pdfUrl.orEmpty(),
             block.displayName
         )
     }

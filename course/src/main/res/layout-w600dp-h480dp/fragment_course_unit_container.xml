@@ -71,6 +71,7 @@
             android:layout_height="wrap_content"
             android:layout_marginBottom="16dp"
             android:elevation="4dp"
+        android:background="@color/white"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent" />
@@ -80,6 +81,7 @@
             android:layout_width="24dp"
             android:layout_height="match_parent"
             android:elevation="4dp"
+        android:background="@color/white"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintTop_toTopOf="parent" />

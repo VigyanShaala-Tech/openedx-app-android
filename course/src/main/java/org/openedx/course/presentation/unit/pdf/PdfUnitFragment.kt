@@ -1,15 +1,14 @@
 package org.openedx.course.presentation.unit.pdf
 
+import android.content.res.Configuration
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.ViewGroup
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.padding
 import androidx.compose.material.CircularProgressIndicator
 import androidx.compose.material.MaterialTheme
-import androidx.compose.material.Scaffold
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -22,6 +21,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.ComposeView
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.ViewCompositionStrategy
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.viewinterop.AndroidView
 import androidx.core.os.bundleOf
 import androidx.fragment.app.Fragment
@@ -30,6 +30,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import org.koin.androidx.viewmodel.ext.android.viewModel
 import org.koin.core.parameter.parametersOf
+import org.openedx.core.ui.isPreview
 import org.openedx.core.ui.theme.OpenEdXTheme
 import org.openedx.core.ui.theme.appColors
 import org.openedx.core.ui.theme.appTypography
@@ -106,22 +107,16 @@ fun PdfUnitScreen(
     pdfUrl: String,
     onDownloadComplete: () -> Unit
 ) {
-    Scaffold(
-        modifier = Modifier.fillMaxSize(),
-        backgroundColor = MaterialTheme.appColors.background
-    ) { paddingValues ->
-        Box(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(paddingValues)
-                .background(MaterialTheme.appColors.background),
-            contentAlignment = Alignment.Center
-        ) {
-            PdfViewer(
-                url = pdfUrl,
-                onDownloadComplete = onDownloadComplete
-            )
-        }
+    Box(
+        modifier = Modifier
+            .fillMaxSize()
+            .background(MaterialTheme.appColors.background),
+        contentAlignment = Alignment.Center
+    ) {
+        PdfViewer(
+            url = pdfUrl,
+            onDownloadComplete = onDownloadComplete
+        )
     }
 }
 
@@ -130,6 +125,20 @@ fun PdfViewer(
     url: String,
     onDownloadComplete: () -> Unit
 ) {
+    if (isPreview) {
+        Box(
+            modifier = Modifier.fillMaxSize(),
+            contentAlignment = Alignment.Center
+        ) {
+            Text(
+                text = "PDF Viewer Preview",
+                style = MaterialTheme.appTypography.bodyMedium,
+                color = MaterialTheme.appColors.textPrimary
+            )
+        }
+        return
+    }
+
     val context = LocalContext.current
     var pdfFile by remember { mutableStateOf<File?>(null) }
     var isLoading by remember { mutableStateOf(true) }
@@ -138,20 +147,39 @@ fun PdfViewer(
     LaunchedEffect(url) {
         isLoading = true
         error = null
+        if (url.isEmpty()) {
+            error = "Invalid PDF URL"
+            isLoading = false
+            return@LaunchedEffect
+        }
         try {
             withContext(Dispatchers.IO) {
-                val connection = URL(url).openConnection()
-                connection.connect()
-                val inputStream = connection.getInputStream()
-                val tempFile = File.createTempFile("textbook", ".pdf", context.cacheDir)
-                FileOutputStream(tempFile).use { output ->
-                    inputStream.use { input -> input.copyTo(output) }
+                val connection = (URL(url).openConnection() as java.net.HttpURLConnection).apply {
+                    val cookies = android.webkit.CookieManager.getInstance().getCookie(url)
+                    if (!cookies.isNullOrEmpty()) {
+                        setRequestProperty("Cookie", cookies)
+                    }
+                    setRequestProperty("User-Agent", "Mozilla/5.0 (Linux; Android)")
+                    instanceFollowRedirects = true
+                    connectTimeout = 15000
+                    readTimeout = 15000
                 }
-                pdfFile = tempFile
+                connection.connect()
+                val responseCode = connection.responseCode
+                if (responseCode in 200..299) {
+                    val inputStream = connection.inputStream
+                    val tempFile = File.createTempFile("textbook", ".pdf", context.cacheDir)
+                    FileOutputStream(tempFile).use { output ->
+                        inputStream.use { input -> input.copyTo(output) }
+                    }
+                    pdfFile = tempFile
+                } else {
+                    throw Exception("HTTP $responseCode ${connection.responseMessage}")
+                }
             }
             onDownloadComplete()
         } catch (e: Exception) {
-            error = e.message
+            error = e.message ?: "Error downloading PDF"
         } finally {
             isLoading = false
         }
@@ -180,6 +208,9 @@ fun PdfViewer(
                                 .swipeHorizontal(false)
                                 .enableDoubleTap(true)
                                 .defaultPage(0)
+                                .spacing(0)
+                                .fitEachPage(true)
+                                .autoSpacing(false)
                                 .load()
                         }
                     },
@@ -187,5 +218,17 @@ fun PdfViewer(
                 )
             }
         }
+    }
+}
+
+@Preview(uiMode = Configuration.UI_MODE_NIGHT_NO)
+@Preview(uiMode = Configuration.UI_MODE_NIGHT_YES)
+@Composable
+private fun PdfUnitScreenPreview() {
+    OpenEdXTheme {
+        PdfUnitScreen(
+            pdfUrl = "",
+            onDownloadComplete = {}
+        )
     }
 }

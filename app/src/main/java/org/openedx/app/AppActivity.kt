@@ -283,6 +283,7 @@ class AppActivity : AppCompatActivity(), InsetHolder, WindowSizeHolder {
                     WindowInsetsControllerCompat.BEHAVIOR_SHOW_TRANSIENT_BARS_BY_SWIPE
             } else {
                 window.statusBarColor = android.graphics.Color.TRANSPARENT
+                window.navigationBarColor = android.graphics.Color.TRANSPARENT
             }
         }
     }
